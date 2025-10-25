@@ -32,10 +32,10 @@ const hasChildren = computed(() => (props.category.children?.length ?? 0) > 0);
     <NuxtLink
       :to="routeTo"
       class="group flex items-center justify-between gap-2 px-2 py-1.5 rounded-md transition outline-none
-             hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary/30"
+             hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-primary/30"
       :class="isActive
         ? 'bg-primary/5 text-primary font-semibold'
-        : 'text-gray-800 dark:text-gray-200'"
+        : 'text-gray-800'"
       :aria-current="isActive ? 'page' : undefined"
     >
       <span class="truncate">{{ props.category.name }}</span>
@@ -50,7 +50,7 @@ const hasChildren = computed(() => (props.category.children?.length ?? 0) > 0);
 
     <div
       v-if="hasChildren"
-      class="pl-3 mt-1 space-y-1 border-l border-gray-200 dark:border-gray-700"
+      class="pl-3 mt-1 space-y-1 border-l border-gray-200"
     >
       <SidebarCategory
         v-for="child in props.category.children"

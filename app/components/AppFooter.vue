@@ -1,13 +1,17 @@
 <script setup lang="ts">
 const { t, locale, locales } = useI18n();
-const localeRoute = useLocaleRoute();
 const switchLocalePath = useSwitchLocalePath();
 
-const colorMode = useColorMode();
 
-const toggleTheme = () => {
-  colorMode.preference = colorMode.preference === 'dark' ? 'light' : 'dark';
-};
+const localeRoute = useLocaleRoute();
+
+const items = computed(() => [{
+  label: t('footer.delivery'),
+  to: localeRoute({ name: 'delivery' }),
+}, {
+  label: t('footer.contacts'),
+  to: localeRoute({ name: 'contacts' }),
+}]);
 </script>
 
 <i18n lang="json">
@@ -30,65 +34,31 @@ const toggleTheme = () => {
 </i18n>
 
 <template>
-  <footer class="border-t text-sm">
-    <div class="container mx-auto px-3 py-6">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <nav class="flex gap-4">
-          <NuxtLink
-            :to="localeRoute({ name: 'delivery' })"
-            class="hover:underline"
-          >
-            {{ t('footer.delivery') }}
-          </NuxtLink>
+  <UFooter>
+    <template #left>
+      <p class="text-muted text-sm">
+        Copyright © {{ new Date().getFullYear() }}
+      </p>
+    </template>
 
-          <NuxtLink
-            :to="localeRoute({ name: 'contacts' })"
-            class="hover:underline"
-          >
-            {{ t('footer.contacts') }}
-          </NuxtLink>
-        </nav>
+    <UNavigationMenu
+      :items="items"
+      variant="link"
+    />
 
-        <div class="flex items-center gap-2">
-          <template
-            v-for="lang in locales"
-            :key="lang.code"
-          >
-            <UButton
-              :to="switchLocalePath(lang.code)"
-              :variant="locale === lang.code ? 'solid' : 'outline'"
-              size="xs"
-              class="flex items-center gap-1"
-            >
-              <span>{{ lang.flag }}</span>
+    <template #right>
+      <UButton
+        v-for="lang in locales"
+        :key="lang.code"
+        :to="switchLocalePath(lang.code)"
+        size="xs"
+        :variant="locale === lang.code ? 'solid' : 'outline'"
+        class="flex items-center gap-1"
+      >
+        <span>{{ lang.flag }}</span>
 
-              <span class="hidden sm:inline">{{ lang.name }}</span>
-            </UButton>
-          </template>
-        </div>
-      </div>
-
-      <div class="mt-4 flex items-center justify-between">
-        <p class="text-xs">
-          &copy; {{ new Date().getFullYear() }} Amoda. {{ t('footer.rights') }}
-        </p>
-
-        <UButton
-          variant="ghost"
-          size="xs"
-          class="flex items-center gap-1 cursor-pointer"
-          @click="toggleTheme"
-        >
-          <UIcon
-            :name="colorMode.preference === 'dark' ? 'i-heroicons-sun' : 'i-heroicons-moon'"
-            class="w-4 h-4"
-          />
-
-          <span class="hidden sm:inline">
-            {{ colorMode.preference === 'dark' ? 'Light' : 'Dark' }}
-          </span>
-        </UButton>
-      </div>
-    </div>
-  </footer>
+        <span class="hidden sm:inline">{{ lang.name }}</span>
+      </UButton>
+    </template>
+  </UFooter>
 </template>

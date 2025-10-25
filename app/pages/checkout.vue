@@ -14,11 +14,13 @@ useHead(() => ({
 }));
 
 const { items, totalAOA, clear } = useCart();
+
+
 const localeRoute = useLocaleRoute();
 
 const redirectIfEmpty = () => {
   if (!items.value.length) {
-    return navigateTo(localeRoute({ name: 'cart' }));
+    navigateTo(localeRoute({ name: 'cart' }));
   }
 };
 
@@ -51,6 +53,7 @@ const submit = async () => {
     });
 
     clear();
+
     await navigateTo(localeRoute({ name: 'order-number', params: { number } }));
   } catch (error: any) {
     message.value = error?.data?.message || t('checkout.errors.common');
@@ -58,6 +61,8 @@ const submit = async () => {
     pending.value = false;
   }
 };
+
+const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 </script>
 
 <i18n lang="json">
@@ -78,6 +83,11 @@ const submit = async () => {
       "meta": {
         "title": "Finalização | Amoda",
         "description": "Preencha os seus dados de contacto para concluir a compra."
+      },
+      "summary": {
+        "title": "Resumo do pedido",
+        "items": "Itens",
+        "total": "Total"
       }
     }
   },
@@ -97,6 +107,11 @@ const submit = async () => {
       "meta": {
         "title": "Checkout | Amoda",
         "description": "Enter your contact details to complete your purchase."
+      },
+      "summary": {
+        "title": "Order summary",
+        "items": "Items",
+        "total": "Total"
       }
     }
   }
@@ -104,67 +119,88 @@ const submit = async () => {
 </i18n>
 
 <template>
-  <section class="container mx-auto px-3 py-6 max-w-2xl">
-    <h1 class="text-2xl font-semibold mb-2">
-      {{ t('checkout.title') }}
-    </h1>
+  <UPage>
+    <UPageHeader
+      :title="t('checkout.title')"
+      :description="t('checkout.subtitle')"
+    />
 
-    <p class="text-gray-600 mb-6">
-      {{ t('checkout.subtitle') }}
-    </p>
+    <UPageBody class="max-w-3xl mx-auto">
+      <UAlert
+        :description="t('checkout.hint')"
+        icon="i-heroicons-information-circle"
+        color="primary"
+        variant="soft"
+        class="mb-4 text-sm"
+      />
 
-    <form
-      class="space-y-5"
-      @submit.prevent="submit"
-    >
-      <p class="text-sm text-gray-500">
-        {{ t('checkout.hint') }}
-      </p>
-
-      <div>
-        <label class="block mb-1 text-sm font-medium">{{ t('checkout.name') }}</label>
-
-        <UInput
-          v-model="form.name"
-          class="w-full"
-        />
-      </div>
-
-      <div>
-        <label class="block mb-1 text-sm font-medium">{{ t('checkout.phone') }}</label>
-
-        <UInput
-          v-model="form.phone"
-          class="w-full"
-          placeholder="+244 ..."
-        />
-      </div>
-
-      <div>
-        <label class="block mb-1 text-sm font-medium">{{ t('checkout.email') }}</label>
-
-        <UInput
-          v-model="form.email"
-          class="w-full"
-        />
-      </div>
-
-      <UButton
-        :loading="pending"
-        :disabled="!items.length"
-        type="submit"
-        size="lg"
-        class="w-full"
+      <UForm
+        class="space-y-5"
+        @submit.prevent="submit"
       >
-        {{ t('checkout.submit') }}
-      </UButton>
+        <UFormField :label="t('checkout.name')">
+          <UInput
+            v-model="form.name"
+            required
+            name="name"
+            class="block w-full"
+          />
+        </UFormField>
 
-      <p
-        v-if="message"
-        class="text-red-600 text-sm"
-      >
-        {{ message }}
-      </p>
-    </form>
-  </section>
+        <UFormField :label="t('checkout.phone')">
+          <UInput
+            v-model="form.phone"
+            required
+            name="phone"
+            placeholder="+244 ..."
+            type="tel"
+            class="block w-full"
+          />
+        </UFormField>
+
+        <UFormField :label="t('checkout.email')">
+          <UInput
+            v-model="form.email"
+            required
+            name="email"
+            type="email"
+            class="block w-full"
+          />
+        </UFormField>
+
+        <div class="flex items-center justify-between border-t pt-4 text-sm">
+          <span class="text-gray-500">
+            {{ t('checkout.summary.items') }}:
+            {{ items.length }}
+          </span>
+
+          <span class="font-semibold">
+            {{ t('checkout.summary.total' ) }}:
+            {{ fmtAOA(totalAOA) }}
+          </span>
+        </div>
+
+        <UButton
+          :loading="pending"
+          :disabled="!items.length"
+          size="xl"
+          color="primary"
+          type="submit"
+          class="w-full py-4 text-lg font-semibold tracking-wide uppercase justify-center"
+        >
+          {{ t('checkout.submit') }}
+        </UButton>
+
+        <UAlert
+          v-if="message"
+          color="error"
+          variant="subtle"
+          class="text-sm"
+          icon="i-heroicons-exclamation-triangle"
+        >
+          {{ message }}
+        </UAlert>
+      </UForm>
+    </UPageBody>
+  </UPage>
 </template>

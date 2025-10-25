@@ -2,26 +2,19 @@
 definePageMeta({ name: 'order-number' });
 
 const { t } = useI18n();
-const currentRoute = useRoute();
-const localeRoute = useLocaleRoute();
+const route = useRoute();
 
-const {
-  data: orderResponse,
-  error: fetchError,
-  pending: isLoading,
-} = await useFetch('/api/orders/get', {
-  query: { number: currentRoute.params.number },
+const { data, error, pending } = await useFetch('/api/orders/get', {
+  query: { number: route.params.number },
 });
 
-const orderData = computed(() => orderResponse.value);
-const formatPrice = (value?: number) => `${((value ?? 0) / 100).toFixed(2)} AOA`;
+const order = computed(() => data.value);
 
-const pageTitle = computed(() =>
-  `${t('order.title')} №${currentRoute.params.number} | Amoda`,
-);
-const pageDescription = computed(() =>
-  t('order.meta.description', { number: String(currentRoute.params.number) }),
-);
+const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
+
+
+const pageTitle = computed(() => `${t('order.title')} №${route.params.number} | Amoda`);
+const pageDescription = computed(() => t('order.meta.description', { number: String(route.params.number) }));
 
 useHead(() => ({
   title: pageTitle.value,
@@ -29,12 +22,11 @@ useHead(() => ({
     { name: 'description', content: pageDescription.value },
     { property: 'og:title', content: pageTitle.value },
     { property: 'og:description', content: pageDescription.value },
-    { property: 'og:type', content: 'website' },
-    { property: 'twitter:title', content: pageTitle.value },
-    { property: 'twitter:description', content: pageDescription.value },
     { name: 'robots', content: 'noindex, nofollow' },
   ],
 }));
+
+const localeRoute = useLocaleRoute();
 </script>
 
 <i18n lang="json">
@@ -44,13 +36,15 @@ useHead(() => ({
       "title": "Encomenda",
       "loading": "A carregar...",
       "notFound": "Encomenda não encontrada",
+      "summary": "Resumo da encomenda",
+      "contact": "Contacto",
+      "saveNotice": "Guarde o número da sua encomenda para acompanhar o levantamento no ponto de entrega.",
       "colItem": "Artigo",
       "colPrice": "Preço",
       "colQty": "Qtd.",
       "colSum": "Total",
-      "subtotal": "Subtotal",
-      "discount": "Desconto",
-      "delivery": "Entrega",
+      "size": "Tamanho",
+      "color": "Cor",
       "total": "Total",
       "meta": {
         "description": "Detalhes da encomenda n.º {number}."
@@ -62,13 +56,15 @@ useHead(() => ({
       "title": "Order",
       "loading": "Loading...",
       "notFound": "Order not found",
+      "summary": "Order summary",
+      "contact": "Contact",
+      "saveNotice": "Please save your order number to track and collect your purchase at the pickup point.",
       "colItem": "Item",
       "colPrice": "Price",
       "colQty": "Qty",
-      "colSum": "Amount",
-      "subtotal": "Subtotal",
-      "discount": "Discount",
-      "delivery": "Delivery",
+      "colSum": "Total",
+      "size": "Size",
+      "color": "Color",
       "total": "Total",
       "meta": {
         "description": "Order details No. {number}."
@@ -79,129 +75,99 @@ useHead(() => ({
 </i18n>
 
 <template>
-  <section class="container mx-auto px-3 py-6 max-w-4xl">
-    <h1 class="text-2xl font-semibold mb-6">
-      {{ t('order.title') }} №{{ currentRoute.params.number }}
-    </h1>
+  <UPage>
+    <UPageHeader
+      :title="`${t('order.title')} №${route.params.number}`"
+    />
 
-    <div v-if="isLoading">
-      {{ t('order.loading') }}
-    </div>
+    <UPageBody class="max-w-4xl mx-auto">
+      <UCard
+        v-if="pending"
+        class="p-6 text-center text-gray-500"
+      >
+        {{ t('order.loading') }}
+      </UCard>
 
-    <div v-else-if="fetchError">
-      {{ t('order.notFound') }}
-    </div>
+      <UAlert
+        v-else-if="error || !order"
+        color="error"
+        variant="soft"
+        :description="t('order.notFound')"
+        icon="i-heroicons-exclamation-triangle"
+      />
 
-    <div v-else-if="orderData">
-      <!-- Таблица покупок -->
-      <div class="overflow-x-auto rounded border border-gray-200 dark:border-gray-800">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-          <thead class="bg-gray-50 dark:bg-gray-900/50">
-            <tr>
-              <th class="px-4 py-3 text-left text-sm font-medium">
-                {{ t('order.colItem') }}
-              </th>
+      <template v-else>
+        <UAlert
+          :description="t('order.saveNotice')"
+          color="primary"
+          variant="subtle"
+          icon="i-heroicons-information-circle"
+          class="mb-4"
+        />
 
-              <th class="px-4 py-3 text-right text-sm font-medium">
-                {{ t('order.colPrice') }}
-              </th>
+        <UCard class="mb-6">
+          <p class="text-sm text-gray-500">
+            {{ t('order.contact') }}
+          </p>
 
-              <th class="px-4 py-3 text-right text-sm font-medium">
-                {{ t('order.colQty') }}
-              </th>
+          <p class="font-semibold">
+            {{ order.guest_contact?.name }}
+          </p>
 
-              <th class="px-4 py-3 text-right text-sm font-medium">
-                {{ t('order.colSum') }}
-              </th>
-            </tr>
-          </thead>
+          <p class="text-sm text-gray-500">
+            {{ order.guest_contact?.phone }} · {{ order.guest_contact?.email }}
+          </p>
+        </UCard>
 
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900">
-            <tr
-              v-for="orderRow in orderData.items"
-              :key="orderRow.id"
+        <UCard>
+          <h2 class="text-lg font-semibold mb-4">
+            {{ t('order.summary') }}
+          </h2>
+
+          <div class="divide-y divide-gray-200">
+            <div
+              v-for="item in order.items"
+              :key="item.id"
+              class="flex items-center justify-between py-3 gap-3"
             >
-              <!-- Товар -->
-              <td class="px-4 py-3 text-left">
-                <div class="flex items-center gap-3">
-                  <img
-                    :src="orderRow.image"
-                    alt=""
-                    class="w-14 h-14 object-cover rounded border"
+              <div class="flex items-center gap-3 min-w-0">
+                <NuxtImg
+                  :src="item.image"
+                  class="w-16 h-16 rounded border object-cover"
+                />
+
+                <div class="min-w-0">
+                  <NuxtLink
+                    class="font-medium hover:underline line-clamp-2"
+                    :to="localeRoute({ name: 'product-slug', params: { slug: item.slug } })"
                   >
+                    {{ item.title }}
+                  </NuxtLink>
 
-                  <div>
-                    <NuxtLink
-                      class="font-medium hover:underline"
-                      :to="localeRoute({ name: 'product-slug', params: { slug: orderRow.slug } })"
-                    >
-                      {{ orderRow.title }}
-                    </NuxtLink>
-
-                    <div class="text-xs text-gray-500">
-                      <span v-if="orderRow.variant?.size">Size: {{ orderRow.variant.size }}</span>
-
-                      <span v-if="orderRow.variant?.color">
-                        <span v-if="orderRow.variant?.size"> · </span>Color: {{ orderRow.variant.color }}
-                      </span>
-
-                      <span v-if="orderRow.variant?.sku">
-                        <span v-if="orderRow.variant?.size || orderRow.variant?.color"> · </span>SKU: {{ orderRow.variant.sku }}
-                      </span>
-                    </div>
+                  <div class="text-xs text-gray-500">
+                    {{ t('order.size') }}: {{ item.variant?.size }} ·
+                    {{ t('order.color') }}: {{ item.variant?.color }}
                   </div>
                 </div>
-              </td>
+              </div>
 
-              <!-- Цена / Количество / Сумма -->
-              <td class="px-4 py-3 text-sm text-right">
-                {{ formatPrice(orderRow.unit_price) }}
-              </td>
+              <div class="text-right shrink-0">
+                <div class="text-sm text-gray-600">
+                  {{ item.qty }} × {{ fmtAOA(item.unit_price) }}
+                </div>
 
-              <td class="px-4 py-3 text-sm text-right">
-                {{ orderRow.qty }}
-              </td>
+                <div class="font-semibold">
+                  {{ fmtAOA(item.total_price) }}
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <td class="px-4 py-3 font-semibold text-right">
-                {{ formatPrice(orderRow.total_price) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Итоги -->
-      <div class="mt-6 max-w-sm ml-auto space-y-2">
-        <div class="flex items-center justify-between text-sm">
-          <span class="text-gray-600 dark:text-gray-300">{{ t('order.subtotal') }}</span>
-
-          <span class="text-right">{{ formatPrice(orderData.totals?.subtotal ?? orderData.totals?.total) }}</span>
-        </div>
-
-        <div
-          v-if="orderData.totals?.discount"
-          class="flex items-center justify-between text-sm"
-        >
-          <span class="text-gray-600 dark:text-gray-300">{{ t('order.discount') }}</span>
-
-          <span class="text-right">-{{ formatPrice(orderData.totals.discount) }}</span>
-        </div>
-
-        <div
-          v-if="orderData.totals?.delivery"
-          class="flex items-center justify-between text-sm"
-        >
-          <span class="text-gray-600 dark:text-gray-300">{{ t('order.delivery') }}</span>
-
-          <span class="text-right">{{ formatPrice(orderData.totals.delivery) }}</span>
-        </div>
-
-        <div class="flex items-center justify-between text-lg font-semibold border-t pt-3">
-          <span>{{ t('order.total') }}</span>
-
-          <span class="text-right">{{ formatPrice(orderData.totals?.total) }}</span>
-        </div>
-      </div>
-    </div>
-  </section>
+          <div class="border-t mt-4 pt-3 text-right text-lg font-semibold">
+            {{ t('order.total') }}: {{ fmtAOA(order.totals.total) }}
+          </div>
+        </UCard>
+      </template>
+    </UPageBody>
+  </UPage>
 </template>

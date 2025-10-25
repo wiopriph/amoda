@@ -4,6 +4,10 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
+  ui: {
+    colorMode: false,
+  },
+
   i18n: {
     locales: [
       {

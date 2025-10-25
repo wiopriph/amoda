@@ -2,13 +2,12 @@
 definePageMeta({ name: 'product-slug' });
 
 const { t } = useI18n();
-const currentRoute = useRoute();
-const localeRoute = useLocaleRoute();
+const route = useRoute();
 const requestURL = useRequestURL();
 
-// ===== ДАННЫЕ ТОВАРА =====
 const { data, error } = await useFetch('/api/catalog/item', {
-  query: { slug: currentRoute.params.slug },
+  query: { slug: route.params.slug },
+  watch: [() => route.fullPath],
 });
 
 if (error.value || !data.value) {
@@ -16,19 +15,64 @@ if (error.value || !data.value) {
 }
 
 const product = computed(() => data.value?.product);
-const breadcrumbItems = computed(() =>
-  (data.value?.breadcrumbs || []).map((breadcrumb: any) => ({
-    label: breadcrumb.label,
-    to: localeRoute(breadcrumb.to),
+
+const localeRoute = useLocaleRoute();
+const breadcrumbsUi = computed(() =>
+  (data.value?.breadcrumbs || []).map(b => ({
+    label: b.label,
+    to: localeRoute(b.to),
   })),
 );
 
-// ===== SEO (всё реактивно) =====
+const selectedVariantId = ref<number | null>(null);
+const selectedSizeId = ref<number | null>(null);
+const variants = computed(() => product.value?.variants || []);
+const variantOptions = computed(() => variants.value.map(variant => ({ id: variant.id, label: variant.color || '—' })));
+const currentVariant = computed(() => variants.value.find(variant => variant.id === selectedVariantId.value) || variants.value[0] || null);
+const sizeOptions = computed(() => (currentVariant.value?.sizes || []).map(size => ({ id: size.id, label: size.size })));
+
+watch(product, (p) => {
+  if (!p?.variants?.length) {
+    return;
+  }
+
+  selectedVariantId.value = p.variants[0].id;
+  selectedSizeId.value = p.variants[0].sizes?.[0]?.id ?? null;
+}, { immediate: true });
+
+watch(selectedVariantId, () => {
+  selectedSizeId.value = currentVariant.value?.sizes?.[0]?.id ?? null;
+});
+
+const galleryImages = computed(() => {
+  const vImgs = currentVariant.value?.images || [];
+  const pImgs = product.value?.images || [];
+
+  return [...(vImgs.length ? vImgs : pImgs)].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
+});
+
+const hasImages = computed(() => (galleryImages.value?.length || 0) > 0);
+const activeImageIndex = ref(0);
+const setActiveImage = (i: number) => (activeImageIndex.value = i);
+const currentPriceAOA = computed(() => new Intl.NumberFormat('pt-AO').format(currentVariant.value?.price ?? product.value?.price ?? 0));
+
+// ===== Cart =====
+const { add: addToCart } = useCart();
+
+const addCurrentToCart = () => {
+  const p = product.value;
+  const v = currentVariant.value;
+  const size = v?.sizes?.find(s => s.id === selectedSizeId.value);
+
+  if (!p || !v || !size) { return; }
+
+  addToCart(p, v, size, 1);
+};
+
+// ===== SEO =====
 const seoTitle = computed(() => `${product.value?.title || ''} - Amoda`);
-const seoDescription = computed(
-  () => product.value?.description || t('product.meta.description'),
-);
-const seoImage = computed(() => product.value?.images?.[0]?.url || '');
+const seoDescription = computed(() => product.value?.description || t('product.meta.description'));
+const seoImage = computed(() => galleryImages.value?.[0]?.url || '/placeholder.png');
 
 const productUrl = computed(() => {
   const localized = localeRoute({
@@ -43,7 +87,7 @@ const productUrl = computed(() => {
 const breadcrumbJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
-  itemListElement: breadcrumbItems.value.map((item, index) => ({
+  itemListElement: breadcrumbsUi.value.map((item, index) => ({
     '@type': 'ListItem',
     position: index + 1,
     name: item.label,
@@ -55,7 +99,7 @@ const productJsonLd = computed(() => ({
   '@context': 'https://schema.org/',
   '@type': 'Product',
   name: product.value?.title,
-  image: (product.value?.images || []).map((img: any) => img.url),
+  image: galleryImages.value.map(i => i.url),
   description: product.value?.description || '',
   sku: product.value?.variants?.[0]?.sku || product.value?.id,
   brand: { '@type': 'Brand', name: product.value?.brand_name || '' },
@@ -81,95 +125,10 @@ useHead(() => ({
     { property: 'twitter:image', content: seoImage.value },
   ],
   script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify(productJsonLd.value),
-    },
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify(breadcrumbJsonLd.value),
-    },
+    { type: 'application/ld+json', innerHTML: JSON.stringify(productJsonLd.value) },
+    { type: 'application/ld+json', innerHTML: JSON.stringify(breadcrumbJsonLd.value) },
   ],
 }));
-
-// ===== ГАЛЕРЕЯ =====
-const galleryImages = computed(() => product.value?.images || []);
-const activeImageIndex = ref(0);
-
-watch(galleryImages, () => {
-  activeImageIndex.value = 0;
-});
-
-const setActiveImage = (index: number) => {
-  activeImageIndex.value = index;
-};
-
-// ===== ВАРИАНТЫ =====
-const selectedSize = ref<string | null>(null);
-const selectedColor = ref<string | null>(null);
-
-const availableSizes = computed(() => {
-  const uniqueSizes = new Set<string>();
-
-  product.value?.variants?.forEach((variant: any) => variant.size && uniqueSizes.add(variant.size));
-
-  return [...uniqueSizes];
-});
-
-const availableColors = computed(() => {
-  const uniqueColors = new Set<string>()
-
-  ;(product.value?.variants || [])
-    .filter((variant: any) => !selectedSize.value || variant.size === selectedSize.value)
-    .forEach((variant: any) => variant.color && uniqueColors.add(variant.color));
-
-  return [...uniqueColors];
-});
-
-const selectedVariant = computed(() => {
-  const variants: any[] = product.value?.variants || [];
-
-  if (!variants.length) {
-    return null;
-  }
-
-  let filtered = variants;
-
-  if (selectedSize.value) {
-    filtered = filtered.filter(v => v.size === selectedSize.value);
-  }
-
-  if (selectedColor.value) {
-    filtered = filtered.filter(v => v.color === selectedColor.value);
-  }
-
-  return filtered[0] || variants[0];
-});
-
-watch(product, (newProduct) => {
-  if (!newProduct?.variants?.length) {
-    return;
-  }
-
-  selectedSize.value = newProduct.variants[0]?.size ?? null;
-
-  const firstForChosenSize = newProduct.variants.find(
-    (variant: any) => !selectedSize.value || variant.size === selectedSize.value,
-  );
-
-  selectedColor.value = firstForChosenSize?.color ?? null;
-}, { immediate: true });
-
-// ===== КОРЗИНА =====
-const { add: addToCartComposable, count: cartItemsCount } = useCart();
-
-const addCurrentVariantToCart = () => {
-  if (!product.value || !selectedVariant.value) {
-    return;
-  }
-
-  addToCartComposable(product.value, selectedVariant.value, 1);
-};
 </script>
 
 <i18n lang="json">
@@ -180,9 +139,8 @@ const addCurrentVariantToCart = () => {
       "size": "Size",
       "color": "Color",
       "add": "Add to cart",
-      "sku": "SKU",
       "description": "Description",
-      "brand": "About the brand",
+      "brand": "Brand",
       "meta": {
         "description": "Shop at Amoda. Wide selection, easy ordering and fast delivery."
       }
@@ -194,9 +152,8 @@ const addCurrentVariantToCart = () => {
       "size": "Tamanho",
       "color": "Cor",
       "add": "Adicionar ao carrinho",
-      "sku": "Código",
       "description": "Descrição",
-      "brand": "Sobre a marca",
+      "brand": "Marca",
       "meta": {
         "description": "Compre na Amoda. Grande variedade, encomenda fácil e entrega rápida."
       }
@@ -205,162 +162,149 @@ const addCurrentVariantToCart = () => {
 }
 </i18n>
 
-<template>
-  <section
-    v-if="product"
-    class="container mx-auto px-3 py-4 md:py-6"
-  >
-    <!-- Хлебные крошки (скрыты на мобилке) -->
-    <UBreadcrumb
-      :items="breadcrumbItems"
-      class="mb-3 md:mb-4 hidden md:block"
-    />
 
-    <div class="grid md:grid-cols-12 gap-6">
-      <!-- Левая колонка: галерея -->
-      <div class="md:col-span-7">
-        <div class="mb-4">
-          <!-- Вьюпорт -->
-          <div class="relative h-[280px] md:h-[480px] flex items-center justify-center overflow-hidden rounded">
-            <!-- Размытый фон -->
-            <div
-              v-if="galleryImages[activeImageIndex]"
-              class="absolute inset-0 bg-center bg-cover blur-xl scale-110"
-              :style="{ backgroundImage: `url(${galleryImages[activeImageIndex].url})` }"
-            />
-            <!-- Главное изображение -->
-            <NuxtImg
-              :key="galleryImages[activeImageIndex]?.url"
-              :src="galleryImages[activeImageIndex]?.url"
-              class="relative z-10 max-h-full max-w-full object-contain"
-            />
+<template>
+  <UPage>
+    <UPageHeader :title="product?.title">
+      <template #headline>
+        <UBreadcrumb
+          :items="breadcrumbsUi"
+          class="mb-4 hidden md:block"
+        />
+      </template>
+    </UPageHeader>
+
+    <UPageBody>
+      <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Галерея -->
+        <div class="flex flex-col lg:flex-row gap-4">
+          <!-- Миниатюры -->
+          <div
+            class="order-2 lg:order-1
+                   w-full lg:w-20 shrink-0
+                   flex lg:flex-col gap-2
+                   overflow-x-auto lg:overflow-visible
+                   pb-2 lg:pb-0"
+          >
+            <template v-if="hasImages">
+              <button
+                v-for="(img, i) in galleryImages"
+                :key="i"
+                type="button"
+                class="relative overflow-hidden rounded-md border transition
+                       w-16 h-16 flex-none"
+                :class="i === activeImageIndex ? 'border-primary ring-1 ring-primary' : 'border-gray-200 hover:border-gray-400'"
+                @click="setActiveImage(i)"
+              >
+                <NuxtImg
+                  :src="img.url"
+                  class="w-full h-full object-cover"
+                />
+              </button>
+            </template>
+
+            <template v-else>
+              <div
+                v-for="i in 4"
+                :key="i"
+                class="w-16 h-16 flex-none bg-gray-100 rounded-md border border-gray-200"
+              />
+            </template>
           </div>
 
-          <!-- Миниатюры -->
-          <div class="mt-3 grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
-            <button
-              v-for="(image, index) in galleryImages"
-              :key="index"
-              type="button"
-              class="relative overflow-hidden focus:outline-none"
-              :class="index === activeImageIndex ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'"
-              @click="setActiveImage(index)"
-            >
+          <!-- Главное фото -->
+          <div class="flex-1 order-1 lg:order-2">
+            <div class="relative w-full aspect-[4/5] overflow-hidden rounded-lg bg-gray-50 flex items-center justify-center">
               <NuxtImg
-                :src="image.url"
-                class="w-full aspect-square object-cover"
+                :src="galleryImages[activeImageIndex]?.url || '/placeholder.png'"
+                class="object-contain max-h-full max-w-full"
               />
-            </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Инфо -->
+        <div class="flex flex-col gap-6">
+          <!-- Цена -->
+          <div>
+            <div class="text-xs uppercase text-gray-500">
+              {{ t('product.price') }}
+            </div>
+
+            <div class="text-3xl font-bold text-primary">
+              {{ currentPriceAOA }} AOA
+            </div>
+          </div>
+
+          <!-- Цвет -->
+          <div v-if="variantOptions.length">
+            <div class="text-sm font-medium mb-2">
+              {{ t('product.color') }}
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <UBadge
+                v-for="opt in variantOptions"
+                :key="opt.id"
+                :label="opt.label"
+                size="lg"
+                class="cursor-pointer"
+                :variant="selectedVariantId === opt.id ? 'solid' : 'outline'"
+                @click="selectedVariantId = opt.id"
+              />
+            </div>
+          </div>
+
+          <!-- Размер -->
+          <div v-if="sizeOptions.length">
+            <div class="text-sm font-medium mb-2">
+              {{ t('product.size') }}
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <UBadge
+                v-for="s in sizeOptions"
+                :key="s.id"
+                :label="s.label"
+                size="lg"
+                class="cursor-pointer"
+                :variant="selectedSizeId === s.id ? 'solid' : 'outline'"
+                @click="selectedSizeId = s.id"
+              />
+            </div>
+          </div>
+
+          <UButton
+            size="xl"
+            color="primary"
+            class="w-full py-4 text-lg font-semibold tracking-wide uppercase justify-center"
+            :disabled="!selectedSizeId"
+            @click="addCurrentToCart"
+          >
+            {{ t('product.add') }}
+          </UButton>
+
+          <div>
+            <h2 class="text-lg font-semibold mb-2">
+              {{ t('product.description') }}
+            </h2>
+
+            <p class="text-sm text-gray-700 leading-relaxed">
+              {{ product?.description || '—' }}
+            </p>
+          </div>
+
+          <div>
+            <h2 class="text-lg font-semibold mb-2">
+              {{ t('product.brand') }}
+            </h2>
+
+            <p class="text-sm font-medium">
+              {{ product?.brand_name || '—' }}
+            </p>
           </div>
         </div>
       </div>
-
-      <!-- Правая колонка: инфо и действия -->
-      <aside class="md:col-span-5 space-y-4">
-        <h1 class="text-2xl font-semibold">
-          {{ product.title }}
-        </h1>
-
-        <p class="text-gray-500">
-          {{ product.brand_name }}
-        </p>
-
-        <div>
-          <div class="text-xs uppercase text-gray-500">
-            {{ t('product.price') }}
-          </div>
-
-          <div class="text-2xl font-bold">
-            {{ ((selectedVariant?.price ?? 0) / 100).toFixed(2) }} AOA
-          </div>
-        </div>
-
-        <!-- Размер -->
-        <div v-if="availableSizes.length">
-          <div class="text-sm mb-1">
-            {{ t('product.size') }}
-          </div>
-
-          <div class="flex flex-wrap gap-2">
-            <UButton
-              v-for="size in availableSizes"
-              :key="size"
-              size="xs"
-              :variant="selectedSize === size ? 'solid' : 'outline'"
-              @click="selectedSize = size; selectedColor = null"
-            >
-              {{ size }}
-            </UButton>
-          </div>
-        </div>
-
-        <!-- Цвет -->
-        <div v-if="availableColors.length">
-          <div class="text-sm mb-1">
-            {{ t('product.color') }}
-          </div>
-
-          <div class="flex flex-wrap gap-2">
-            <UButton
-              v-for="color in availableColors"
-              :key="color"
-              size="xs"
-              :variant="selectedColor === color ? 'solid' : 'outline'"
-              @click="selectedColor = color"
-            >
-              {{ color }}
-            </UButton>
-          </div>
-        </div>
-
-        <UButton
-          :disabled="!selectedVariant"
-          size="lg"
-          class="w-full"
-          @click="addCurrentVariantToCart"
-        >
-          {{ t('product.add') }} ({{ cartItemsCount }})
-        </UButton>
-
-        <div
-          v-if="selectedVariant?.sku"
-          class="text-xs text-gray-500"
-        >
-          {{ t('product.sku') }}: {{ selectedVariant.sku }}
-        </div>
-
-        <!-- Описание -->
-        <div class="mt-6">
-          <h2 class="text-lg font-semibold mb-2">
-            {{ t('product.description') }}
-          </h2>
-
-          <p
-            v-if="product.description"
-            class="text-sm"
-          >
-            {{ product.description }}
-          </p>
-
-          <p
-            v-else
-            class="text-sm text-gray-500"
-          >
-            —
-          </p>
-        </div>
-
-        <!-- Бренд -->
-        <div class="mt-4">
-          <h2 class="text-lg font-semibold mb-2">
-            {{ t('product.brand') }}
-          </h2>
-
-          <p class="text-sm">
-            <span class="font-medium">{{ product.brand_name || '—' }}</span>
-          </p>
-        </div>
-      </aside>
-    </div>
-  </section>
+    </UPageBody>
+  </UPage>
 </template>

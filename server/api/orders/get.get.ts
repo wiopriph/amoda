@@ -3,25 +3,50 @@ import { serverSupabaseServiceRole } from '#supabase/server';
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseServiceRole(event);
-  const { number } = getQuery(event);
+  const { number } = getQuery(event) as { number?: string };
 
   if (!number) {
     throw createError({ statusCode: 400, statusMessage: 'Order number required' });
   }
 
-  // 1) грузим заказ + вложенные позиции с джойнами к variant → product → images
+  // ВАЖНО: указываем имена FK после "!"
   const { data, error } = await client
     .from('orders')
     .select(`
-      id, number, status, payment_status, totals, guest_contact, created_at,
+      id,
+      number,
+      status,
+      payment_status,
+      totals,
+      guest_contact,
+      created_at,
       items:order_items(
-        id, qty, unit_price, total_price,
-        variant:product_variants(
-          id, sku, size, color, price,
-          product:products(
-            id, slug, title,
-            images:product_images(url, sort)
+        id,
+        product_id,
+        product_variant_id,
+        product_variant_size_id,
+        unit_price,
+        qty,
+        total_price,
+
+        product:products!order_items_product_id_fkey(
+          slug,
+          title
+        ),
+
+        variant:product_variants!order_items_product_variant_id_fkey(
+          id,
+          color,
+          price,
+          images:product_variant_images!product_variant_images_variant_id_fkey(
+            url,
+            position
           )
+        ),
+
+        size:product_variant_sizes!order_items_product_variant_size_id_fkey(
+          id,
+          size
         )
       )
     `)
@@ -36,30 +61,33 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Order not found' });
   }
 
-  // 2) нормализуем позиции: плоская структура на фронт
+  // Нормализация под текущую вёрстку
   const items = (data.items || []).map((row: any) => {
-    const variant = row.variant || {};
-    const product = variant.product || {};
-    const images = Array.isArray(product.images) ? product.images : (product.images ? [product.images] : []);
-    const image = images.sort((a: any, b: any) => (a?.sort ?? 0) - (b?.sort ?? 0))[0]?.url || null;
+    const title = row.product?.title ?? '';
+    const slug = row.product?.slug ?? '';
+
+    let image: string | null = null;
+
+    if (Array.isArray(row.variant?.images) && row.variant.images.length) {
+      const sorted = [...row.variant.images].sort(
+        (a: any, b: any) => (a?.position ?? 0) - (b?.position ?? 0),
+      );
+
+      image = sorted[0]?.url ?? null;
+    }
 
     return {
       id: row.id,
       qty: row.qty,
       unit_price: row.unit_price,
       total_price: row.total_price,
-
-      // данные товара
-      title: product.title ?? '',
-      slug: product.slug ?? '',
+      title,
+      slug,
       image,
-
-      // данные варианта
       variant: {
-        id: variant.id ?? null,
-        sku: variant.sku ?? null,
-        size: variant.size ?? null,
-        color: variant.color ?? null,
+        id: row.variant?.id ?? null,
+        color: row.variant?.color ?? null,
+        size: row.size?.size ?? null,
       },
     };
   });

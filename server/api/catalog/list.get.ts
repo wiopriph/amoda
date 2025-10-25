@@ -4,7 +4,8 @@ import { serverSupabaseClient } from '#supabase/server';
 type QueryParams = {
   q?: string
   gender?: string
-  slug?: string // категория или подкатегория
+  slug?: string
+  primary_category_id?: number
   brand_id?: string | number
   brand_slug?: string
   size?: string
@@ -30,7 +31,6 @@ export default defineEventHandler(async (event) => {
   const rangeFrom = (page - 1) * limit;
   const rangeTo = rangeFrom + limit - 1;
 
-  // === 0) gender_id (если задан gender)
   let genderId: number | null = null;
 
   if (query.gender) {
@@ -51,7 +51,6 @@ export default defineEventHandler(async (event) => {
     genderId = genderRow.id;
   }
 
-  // === 1) category (если задан slug)
   let categoryId: number | null = null;
   let categoryGenderId: number | null = null;
   let currentCategory:
@@ -82,8 +81,7 @@ export default defineEventHandler(async (event) => {
     categoryGenderId = categoryRow.gender_id;
   }
 
-  // === 2) хлебные крошки (именованные маршруты для localeRoute)
-  const breadcrumbs: Breadcrumb[] = [];
+  const breadcrumbs: Breadcrumb[] = [{ label: 'home', to: { name: 'index', params: {} } }];
 
   if (query.gender) {
     breadcrumbs.push({
@@ -130,7 +128,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // === 3) базовый SELECT по товарам
   let productsQuery = supabase
     .from('products')
     .select(`
@@ -138,62 +135,63 @@ export default defineEventHandler(async (event) => {
       title,
       slug,
       brand_id,
+      primary_category_id,
       brand:brands(name),
-      variants:product_variants(id, price, size, color),
-      images:product_images(url, sort)
-    `, { count: 'exact' })
+      variants:product_variants(
+        id,
+        color,
+        price,
+        product_variant_images(url, position)
+      )
+    `,
+    { count: 'exact' },
+    )
     .eq('active', true);
 
-  // фильтр по категории (с потомками) / гендеру
+
   if (categoryId) {
-    // соберём self + всех потомков категории (любой глубины) в рамках того же gender_id
-    const { data: allCategories, error: allCategoriesError } = await supabase
+    const { data: allCategories, error: allCatError } = await supabase
       .from('categories')
       .select('id, parent_id')
-      .eq('gender_id', categoryGenderId as number);
+      .eq('gender_id', categoryGenderId!);
 
-    if (allCategoriesError) {
-      throw createError({ statusCode: 500, statusMessage: allCategoriesError.message });
+    if (allCatError) {
+      throw createError({ statusCode: 500, statusMessage: allCatError.message });
     }
 
-    const childrenByParent = new Map<number | 'root', number[]>();
+    const map = new Map<number | 'root', number[]>();
 
     for (const cat of allCategories || []) {
       const key = (cat.parent_id ?? 'root') as number | 'root';
 
-      if (!childrenByParent.has(key)) {
-        childrenByParent.set(key, []);
+      if (!map.has(key)) {
+        map.set(key, []);
       }
 
-      childrenByParent.get(key)!.push(cat.id);
+      map.get(key)?.push(cat.id);
     }
 
-    const collectedIds = new Set<number>([categoryId]);
-    const queue: number[] = [categoryId];
+    const collected = new Set<number>([categoryId]);
+    const queue = [categoryId];
 
     while (queue.length) {
-      const current = queue.shift()!;
-      const children = childrenByParent.get(current) || [];
+      const current = queue.shift();
+      const children = map.get(current) || [];
 
-      for (const childId of children) {
-        if (!collectedIds.has(childId)) {
-          collectedIds.add(childId);
-          queue.push(childId);
+      for (const child of children) {
+        if (!collected.has(child)) {
+          collected.add(child);
+          queue.push(child);
         }
       }
     }
 
-    productsQuery = productsQuery.in('primary_category_id', Array.from(collectedIds));
+    productsQuery = productsQuery.in('primary_category_id', Array.from(collected));
   } else if (genderId) {
-    // все категории данного гендера
-    const { data: genderCategories, error: genderCategoriesError } = await supabase
+    const { data: genderCategories } = await supabase
       .from('categories')
       .select('id')
       .eq('gender_id', genderId);
-
-    if (genderCategoriesError) {
-      throw createError({ statusCode: 500, statusMessage: genderCategoriesError.message });
-    }
 
     const genderCategoryIds = (genderCategories || []).map(c => c.id);
 
@@ -204,12 +202,10 @@ export default defineEventHandler(async (event) => {
     productsQuery = productsQuery.in('primary_category_id', genderCategoryIds);
   }
 
-  // === 4) текстовый поиск
   if (query.q) {
     productsQuery = productsQuery.ilike('title', `%${query.q}%`);
   }
 
-  // === 5) бренд
   if (query.brand_id) {
     productsQuery = productsQuery.eq('brand_id', query.brand_id);
   } else if (query.brand_slug) {
@@ -224,11 +220,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // === 6) фильтры по вариантам
-  if (query.size) {
-    productsQuery = productsQuery.eq('product_variants.size', query.size);
-  }
-
   if (query.color) {
     productsQuery = productsQuery.eq('product_variants.color', query.color);
   }
@@ -241,7 +232,6 @@ export default defineEventHandler(async (event) => {
     productsQuery = productsQuery.lte('product_variants.price', Number(query.max_price));
   }
 
-  // === 7) сортировка
   switch (query.sort) {
     case 'price_asc':
       productsQuery = productsQuery.order('product_variants.price', { ascending: true });
@@ -257,7 +247,6 @@ export default defineEventHandler(async (event) => {
       break;
   }
 
-  // === 8) пагинация
   productsQuery = productsQuery.range(rangeFrom, rangeTo);
 
   const { data: productRows, count: totalCount, error: listError } = await productsQuery;
@@ -266,20 +255,20 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: listError.message });
   }
 
-  // === 9) нормализация результата под единый формат items
   const items = (productRows || []).map((product: any) => {
     const firstVariant = Array.isArray(product.variants) ? product.variants[0] : null;
-    const imagesArray = Array.isArray(product.images) ? product.images : (product.images ? [product.images] : []);
-    const sortedImages = imagesArray.sort((a: any, b: any) => (a?.sort ?? 0) - (b?.sort ?? 0));
+    const sortedImages = Array.isArray(firstVariant?.product_variant_images) ?
+      firstVariant.product_variant_images.sort((a, b) => (a?.position ?? 0) - (b?.position ?? 0)) :
+      [];
 
     return {
       id: product.id,
       slug: product.slug,
       title: product.title,
+      primary_category_id: product.primary_category_id,
       brand_name: product.brand?.name ?? null,
-      price: firstVariant?.price ?? 0, // integer AOA
-      variant_id: firstVariant?.id ?? null, // для корзины/заказа
-      size: firstVariant?.size ?? null,
+      price: firstVariant?.price ?? 0,
+      variant_id: firstVariant?.id ?? null,
       color: firstVariant?.color ?? null,
       images: sortedImages,
     };

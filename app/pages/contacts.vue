@@ -39,13 +39,11 @@ useHead(() => ({
 </i18n>
 
 <template>
-  <section class="container mx-auto px-3 py-6 max-w-3xl">
-    <h1 class="text-xl font-semibold mb-4">
-      {{ t('contacts.title') }}
-    </h1>
+  <UPage>
+    <UPageHeader :title="t('contacts.title')" />
 
-    <p class="text-gray-600 dark:text-gray-300">
+    <UPageBody>
       {{ t('contacts.text') }}
-    </p>
-  </section>
+    </UPageBody>
+  </UPage>
 </template>

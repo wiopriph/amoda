@@ -3,28 +3,57 @@ import { serverSupabaseServiceRole } from '#supabase/server';
 
 
 type CartItem = {
-  id: string // ожидаем формат "productId:variantId" (например "12:345")
+  // "productId:variantId" или "productId:variantId:sizeId"
+  id: string
   title: string
-  price: number // AOA в целых (integer)
+  price: number // integer AOA
   qty: number
+  slug?: string // опционально — если хочешь писать в order_items
+  image?: string // опционально
 }
 
 type Totals = { total: number; currency: string }
-type Contact = { name: string; phone: string; email: string }
+type Contact = { name: string; phone: string; email?: string | null }
+
+// Если нет триггера на номер — сгенерим здесь
+function generateOrderNumber() {
+  const ymd = new Date().toISOString()
+    .slice(2, 10)
+    .replace(/-/g, '');
+  const rnd = Math.floor(Math.random() * 100000)
+    .toString()
+    .padStart(5, '0');
+
+  return `${ymd}-${rnd}`;
+}
 
 export default defineEventHandler(async (event) => {
-  const supa = await serverSupabaseServiceRole(event);
+  const supabase = await serverSupabaseServiceRole(event);
   const body = await readBody<{ items: CartItem[]; totals: Totals; contact: Contact }>(event);
 
   if (!body?.items?.length) {
     throw createError({ statusCode: 400, statusMessage: 'Cart is empty' });
   }
 
-  // 1) Создаём заказ (номер выставит триггер)
-  const { data: order, error: orderErr } = await supa
+  if (!body.contact?.name || !body.contact?.phone) {
+    throw createError({ statusCode: 400, statusMessage: 'Name and phone are required' });
+  }
+
+  if (!Number.isInteger(body.totals?.total) || body.totals.total < 0) {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid totals.total' });
+  }
+
+  if (body.totals?.currency && body.totals.currency !== 'AOA') {
+    throw createError({ statusCode: 400, statusMessage: 'Unsupported currency' });
+  }
+
+  // --- создаём заказ (в нашей схеме: number, name, phone, email, totals, status)
+  const orderNumber = generateOrderNumber();
+
+  const { data: orderRow, error: orderErr } = await supabase
     .from('orders')
     .insert({
-      user_id: null,
+      number: orderNumber,
       guest_contact: body.contact,
       status: 'PLACED',
       payment_status: 'UNPAID',
@@ -33,48 +62,62 @@ export default defineEventHandler(async (event) => {
     .select('id, number')
     .single();
 
-  if (orderErr) {
-    throw createError({ statusCode: 500, statusMessage: orderErr.message });
+  if (orderErr || !orderRow) {
+    throw createError({ statusCode: 500, statusMessage: orderErr?.message || 'Failed to create order' });
   }
 
-  // 2) Готовим строки order_items
-  const itemsRows = body.items.map((it) => {
-    // ждём id вида "productId:variantId"
-    const parts = String(it.id).split(':');
-    const variantId = Number(parts[1]); // вторая часть — variantId
+  // --- подготавливаем позиции заказа
+  const itemRows = body.items.map((item) => {
+    const [productStr, variantStr, sizeStr] = String(item.id)
+      .split(':');
+    const productId = Number(productStr);
+    const variantId = Number(variantStr);
+    const sizeId = sizeStr ? Number(sizeStr) : null;
 
-    if (!Number.isInteger(variantId) || variantId <= 0) {
-      throw createError({ statusCode: 400, statusMessage: 'Variant is required for each item' });
+    if (!Number.isInteger(productId) || productId <= 0) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid product id' });
     }
 
-    if (!Number.isInteger(it.qty) || it.qty <= 0) {
+    if (!Number.isInteger(variantId) || variantId <= 0) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid variant id' });
+    }
+
+    if (sizeId !== null && (!Number.isInteger(sizeId) || sizeId <= 0)) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid size id' });
+    }
+
+    if (!Number.isInteger(item.qty) || item.qty <= 0) {
       throw createError({ statusCode: 400, statusMessage: 'Invalid qty' });
     }
 
-    if (!Number.isInteger(it.price) || it.price < 0) {
+    if (!Number.isInteger(item.price) || item.price < 0) {
       throw createError({ statusCode: 400, statusMessage: 'Invalid price' });
     }
 
     return {
-      order_id: order.id,
-      variant_id: variantId,
-      qty: it.qty,
-      unit_price: it.price,
-      total_price: it.price * it.qty,
+      order_id: orderRow.id,
+      product_id: productId,
+      product_variant_id: variantId,
+      product_variant_size_id: sizeId, // может быть null
+      unit_price: item.price,
+      qty: item.qty,
+      // total_price у нас STORED (генерируется в БД), поэтому не передаём
     };
   });
 
-  // 3) Пишем позиции. Если ошибка — удаляем заказ (грубый откат для MVP).
-  const { error: itemsErr } = await supa.from('order_items').insert(itemsRows);
+  // --- вставляем позиции; при ошибке удаляем заказ (простой откат для MVP)
+  const { error: itemsErr } = await supabase.from('order_items')
+    .insert(itemRows);
 
   if (itemsErr) {
-    await supa.from('orders').delete()
-      .eq('id', order.id);
+    await supabase.from('orders')
+      .delete()
+      .eq('id', orderRow.id);
 
     throw createError({ statusCode: 500, statusMessage: itemsErr.message });
   }
 
   setResponseStatus(event, 201);
 
-  return { number: order.number };
+  return { number: orderRow.number };
 });

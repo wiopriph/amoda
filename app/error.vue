@@ -1,9 +1,11 @@
 <script setup lang="ts">
 const props = defineProps<{ error: { statusCode?: number; message?: string } }>();
-const { t } = useI18n();
-const router = useRouter();
 
-const is404 = computed(() => (props.error?.statusCode ?? 500) === 404);
+const { t } = useI18n();
+
+const statusCode = computed(() => props.error?.statusCode ?? 500);
+
+const is404 = computed(() => statusCode.value === 404);
 const title = computed(() => (is404.value ? t('error.404.title') : t('error.generic.title')));
 const description = computed(() => (is404.value ? t('error.404.text') : props.error?.message || t('error.generic.description')));
 
@@ -17,8 +19,8 @@ useHead(() => ({
   ],
 }));
 
-const goHome = () => router.push('/');
-const goBack = () => router.back();
+const localeRoute = useLocaleRoute();
+const homePage = computed(() => localeRoute({ name: 'index' }));
 </script>
 
 <i18n lang="json">
@@ -59,44 +61,12 @@ const goBack = () => router.back();
 </i18n>
 
 <template>
-  <div class="min-h-screen flex flex-col">
-    <AppHeader />
-
-    <main class="flex-1 container mx-auto">
-      <section class="container mx-auto px-3 py-16 max-w-2xl text-center">
-        <h1 class="text-3xl font-bold mb-3">
-          {{ title }}
-        </h1>
-
-        <p
-          v-if="is404"
-          class="text-gray-500 mb-6"
-        >
-          {{ t('error.404.text') }}
-        </p>
-
-        <p
-          v-else
-          class="text-gray-500 mb-6"
-        >
-          {{ description }}
-        </p>
-
-        <div class="flex items-center justify-center gap-3">
-          <UButton
-            variant="outline"
-            @click="goBack"
-          >
-            {{ t('error.actions.back') }}
-          </UButton>
-
-          <UButton @click="goHome">
-            {{ t('error.actions.home') }}
-          </UButton>
-        </div>
-      </section>
-    </main>
-
-    <AppFooter />
-  </div>
+  <UError
+    :redirect="homePage.fullPath"
+    :error="{
+      statusCode: statusCode,
+      statusMessage: title,
+      message: description
+    }"
+  />
 </template>

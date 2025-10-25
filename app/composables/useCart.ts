@@ -1,95 +1,159 @@
 type CartItem = {
-  id: string // "productId:variantId"
+  id: string // "productId:variantId" или "productId:variantId:sizeId"
   slug: string
   title: string
-  image?: string
-  price: number
+  image?: string | null
+  price: number // integer AOA
   qty: number
 }
 
+type ProductLike = {
+  id: number | string
+  slug: string
+  title: string
+  images?: { url: string }[] // на случай если где-то ещё остались product.images
+}
+
+type VariantLike = {
+  id: number | string
+  color?: string | null
+  price: number
+  images?: { url: string; position?: number | null }[]
+  sizes?: { id: number | string; size: string; }[]
+}
+
+type SizeLike = {
+  id: number | string
+  size: string
+}
+
 const STORAGE_KEY = 'amoda:cart';
+const isClient = typeof window !== 'undefined';
 
 export function useCart() {
   const state = useState<CartItem[]>('cart:items', () => []);
 
+  // ---- storage I/O ----
   const loadFromStorage = () => {
-    try {
-      const rawData = localStorage.getItem(STORAGE_KEY);
+    if (!isClient) {
+      return;
+    }
 
-      state.value = rawData ? (JSON.parse(rawData) as CartItem[]) : [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+
+      state.value = raw ? (JSON.parse(raw) as CartItem[]) : [];
     } catch {
       state.value = [];
     }
   };
 
   const persist = () => {
+    if (!isClient) {
+      return;
+    }
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state.value));
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   };
 
-  if (process.client) {
-    onMounted(loadFromStorage); // инициализация на клиенте
+  if (isClient) {
+    onMounted(loadFromStorage);
     watch(state, persist, { deep: true });
   }
 
   const items = computed(() => state.value);
-  const count = computed(() =>
-    state.value.reduce((totalQty, cartItem) => totalQty + cartItem.qty, 0),
-  );
-  const totalAOA = computed(() =>
-    state.value.reduce((total, cartItem) => total + cartItem.price * cartItem.qty, 0),
-  );
+  const count = computed(() => state.value.reduce((acc, item) => acc + item.qty, 0));
+  const totalAOA = computed(() => state.value.reduce((sum, item) => sum + item.price * item.qty, 0));
   const isEmpty = computed(() => state.value.length === 0);
 
-  const add = (product: any, variant: any, qty = 1) => {
+  const pickPrimaryImage = (product?: ProductLike, variant?: VariantLike): string | null => {
+    const variantImg = variant?.images && variant.images.length ?
+      variant.images.slice()
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))[0]?.url :
+      null;
+    const productImg = product?.images && product.images.length ? product.images[0]?.url : null;
+
+    return variantImg || productImg || null;
+  };
+
+  /** Собрать ID формата productId:variantId(:sizeId) */
+  const makeCartId = (productId: number | string, variantId: number | string, sizeId?: number | string | null) =>
+    sizeId ? `${productId}:${variantId}:${sizeId}` : `${productId}:${variantId}`;
+
+  /**
+   * Добавить товар в корзину (только из карточки товара).
+   * @param product — товар
+   * @param variant — вариант (цвет)
+   * @param size — размер (если выбран)
+   * @param qty — количество (>=1)
+   */
+  const add = (product: ProductLike, variant: VariantLike, size?: SizeLike | null, qty = 1) => {
     if (!product?.id || !variant?.id) {
       throw new Error('product/variant missing');
     }
 
-    const cartItemId = `${product.id}:${variant.id}`;
-    const existingItem = state.value.find(cartItem => cartItem.id === cartItemId);
+    const safeQty = Math.max(1, Math.floor(qty));
 
-    if (existingItem) {
-      existingItem.qty += qty;
+    const cartId = makeCartId(product.id, variant.id, size?.id);
+    const existing = state.value.find(i => i.id === cartId);
+
+    if (existing) {
+      existing.qty += safeQty;
 
       return;
     }
 
+    const titleWithAttrs =
+      `${product.title}${
+        variant.color ? ` / ${variant.color}` : ''
+      }${size?.size ? ` / ${size.size}` : ''}`;
+
     state.value.push({
-      id: cartItemId,
+      id: cartId,
       slug: product.slug,
-      title: `${product.title}${variant.size ? ` / ${variant.size}` : ''}${variant.color ? ` / ${variant.color}` : ''}`,
-      image: product.images?.[0]?.url,
+      title: titleWithAttrs,
+      image: pickPrimaryImage(product, variant),
       price: variant.price,
-      qty,
+      qty: safeQty,
     });
   };
 
   const setQty = (cartItemId: string, qty: number) => {
-    const targetItem = state.value.find(cartItem => cartItem.id === cartItemId);
+    const target = state.value.find(i => i.id === cartItemId);
 
-    if (!targetItem) {
+    if (!target) {
       return;
     }
 
-    targetItem.qty = Math.max(1, Math.floor(qty));
+    target.qty = Math.max(1, Math.floor(qty));
   };
 
   const increment = (cartItemId: string) => {
-    const targetItem = state.value.find(cartItem => cartItem.id === cartItemId);
+    const target = state.value.find(i => i.id === cartItemId);
 
-    setQty(cartItemId, (targetItem?.qty ?? 0) + 1);
+    if (!target) {
+      return;
+    }
+
+    setQty(cartItemId, target.qty + 1);
   };
 
   const decrement = (cartItemId: string) => {
-    const targetItem = state.value.find(cartItem => cartItem.id === cartItemId);
+    const target = state.value.find(i => i.id === cartItemId);
 
-    setQty(cartItemId, Math.max(1, (targetItem?.qty ?? 1) - 1));
+    if (!target) {
+      return;
+    }
+
+    setQty(cartItemId, Math.max(1, target.qty - 1));
   };
 
   const remove = (cartItemId: string) => {
-    state.value = state.value.filter(cartItem => cartItem.id !== cartItemId);
+    state.value = state.value.filter(i => i.id !== cartItemId);
   };
 
   const clear = () => {

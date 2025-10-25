@@ -9,18 +9,16 @@ type CategoryRow = {
   gender?: { code: string }
 }
 
-type ProductVariantRow = {
-  id: number
-  sku: string | null
-  size: string | null
-  color: string | null
-  price: number
-  active: boolean | null
+type VariantImageRow = {
+  url: string;
+  position: number | null;
+  alt: string | null
 }
 
-type ProductImageRow = {
-  url: string
-  sort: number | null
+type VariantSizeRow = {
+  id: number;
+  size: string;
+  stock: number | null
 }
 
 export default defineEventHandler(async (event) => {
@@ -31,18 +29,20 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Missing slug' });
   }
 
-  // 1) Грузим товар + бренд + варианты + изображения + primary_category с гендером
   const { data: productRow, error: productError } = await supabase
     .from('products')
     .select(`
       *,
       brand:brands ( id, name, slug ),
-      variants:product_variants ( id, sku, size, color, price, active ),
       primary_category:categories!products_primary_category_id_fkey (
         id, name, slug, parent_id,
         gender:genders ( code )
       ),
-      images:product_images ( url, sort )
+      variants:product_variants (
+        id, color, price, active,
+        images:product_variant_images!product_variant_images_variant_id_fkey ( url, position, alt ),
+        sizes:product_variant_sizes!product_variant_sizes_variant_id_fkey ( id, size, stock )
+      )
     `)
     .eq('slug', slug)
     .eq('active', true)
@@ -56,16 +56,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Not found' });
   }
 
-  // 2) Соберём цепочку родителей для primary_category (для крошек)
-  const ancestorChain: CategoryRow[] = [];
+  const parentChain: CategoryRow[] = [];
 
-  let cursorCategory = productRow.primary_category as CategoryRow | null;
+  let cursor: CategoryRow | null = productRow.primary_category as CategoryRow | null;
 
-  while (cursorCategory?.parent_id) {
+  while (cursor?.parent_id) {
     const { data: parentCategory, error: parentError } = await supabase
       .from('categories')
       .select('id, name, slug, parent_id')
-      .eq('id', cursorCategory.parent_id)
+      .eq('id', cursor.parent_id)
       .maybeSingle();
 
     if (parentError) {
@@ -76,69 +75,87 @@ export default defineEventHandler(async (event) => {
       break;
     }
 
-    ancestorChain.unshift(parentCategory as CategoryRow);
-    cursorCategory = parentCategory as CategoryRow;
+    parentChain.unshift(parentCategory as CategoryRow);
+    cursor = parentCategory as CategoryRow;
   }
 
-  // 3) Финальная «тропинка» категорий: [родители..., текущая primary]
-  const categoryTrail: CategoryRow[] = [];
+  const trail: CategoryRow[] = [];
 
   if (productRow.primary_category) {
-    categoryTrail.push({
+    trail.push({
       id: productRow.primary_category.id,
       name: productRow.primary_category.name,
       slug: productRow.primary_category.slug,
       parent_id: productRow.primary_category.parent_id,
-      gender: productRow.primary_category.gender, // { code }
+      gender: productRow.primary_category.gender,
     });
   }
 
-  const categoriesTrail = [...ancestorChain, ...categoryTrail];
+  const categoriesTrail = [...parentChain, ...trail];
 
-  // 4) Нормализуем изображения и варианты
-  const imagesRaw = Array.isArray(productRow.images) ?
-    (productRow.images as ProductImageRow[]) :
-    (productRow.images ?
-      [productRow.images as ProductImageRow] :
-      []);
+  const normalizedVariants = (productRow.variants || [])
+    .filter((v: any) => v.active !== false)
+    .map((v: {
+      id: number
+      color: string | null
+      price: number
+      images?: VariantImageRow[] | null
+      sizes?: VariantSizeRow[] | null
+    }) => {
+      const imagesSorted = Array.isArray(v.images) ?
+        [...v.images].sort((a, b) => (a?.position ?? 0) - (b?.position ?? 0)) :
+        [];
+      const sizesSorted = Array.isArray(v.sizes) ?
+        [...v.sizes].sort((a, b) => String(a.size)
+          .localeCompare(String(b.size))) :
+        [];
 
-  const imagesSorted = imagesRaw.sort(
-    (a, b) => (a?.sort ?? 0) - (b?.sort ?? 0),
-  );
+      return {
+        id: v.id,
+        color: v.color,
+        price: v.price,
+        images: imagesSorted,
+        sizes: sizesSorted,
+      };
+    });
 
-  const variantsFiltered = (productRow.variants as ProductVariantRow[] | null | undefined)?.filter(
-    v => v.active !== false,
-  ) ?? [];
-
-  // 5) Хлебные крошки (именованные роуты → удобно для localeRoute)
   const genderCode = (productRow.primary_category as CategoryRow | null)?.gender?.code || 'women';
-
   const breadcrumbs = [
     {
       label: genderCode,
-      to: { name: 'gender', params: { gender: genderCode } },
+      to: {
+        name: 'gender',
+        params: { gender: genderCode },
+      },
     },
-    ...categoriesTrail.map(category => ({
-      label: category.name,
+    ...categoriesTrail.map(c => ({
+      label: c.name,
       to: {
         name: 'gender-category',
-        params: { gender: genderCode, category: category.slug },
+        params: { gender: genderCode, category: c.slug },
       },
     })),
     {
       label: productRow.title,
-      to: { name: 'product-slug', params: { slug: productRow.slug } },
+      to: {
+        name: 'product-slug',
+        params: { slug: productRow.slug },
+      },
     },
   ];
 
-  // 6) Ответ
   return {
     product: {
-      ...productRow,
-      brand_name: productRow.brand?.name ?? null,
+      id: productRow.id,
+      title: productRow.title,
+      slug: productRow.slug,
+      description: productRow.description,
+      active: productRow.active,
       brand_id: productRow.brand?.id ?? null,
-      images: imagesSorted,
-      variants: variantsFiltered,
+      brand_name: productRow.brand?.name ?? null,
+      primary_category_id: productRow.primary_category?.id ?? null,
+      variants: normalizedVariants,
+      created_at: productRow.created_at,
     },
     breadcrumbs,
   };

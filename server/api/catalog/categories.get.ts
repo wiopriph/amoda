@@ -1,15 +1,22 @@
 import { serverSupabaseClient } from '#supabase/server';
 
 
+type CategoryRow = {
+  id: number
+  name: string
+  slug: string
+  parent_id: number | null
+  gender_id: number
+}
+
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseClient(event);
   const { gender } = getQuery(event) as { gender?: string };
 
   if (!gender) {
-    return []; // можно кинуть 400, но для MVP вернём пусто
+    throw createError({ statusCode: 400, statusMessage: 'gender is required' });
   }
 
-  // 1) Найти gender_id по коду (women|men|kids)
   const { data: genderRow, error: genderError } = await supabase
     .from('genders')
     .select('id, code')
@@ -21,10 +28,9 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!genderRow?.id) {
-    return [];
+    throw createError({ statusCode: 404, statusMessage: 'Gender not found' });
   }
 
-  // 2) Вытащить категории этого гендера
   const { data: categoryRows, error: categoriesError } = await supabase
     .from('categories')
     .select('id, name, slug, parent_id, gender_id')
@@ -39,21 +45,20 @@ export default defineEventHandler(async (event) => {
     return [];
   }
 
-  // 3) Построить дерево
-  const childrenByParent: Record<string | number, any[]> = {};
+  const childrenByParent = new Map<number | 'root', CategoryRow[]>();
 
-  for (const category of categoryRows) {
-    const key = category.parent_id ?? 'root';
+  for (const category of categoryRows as CategoryRow[]) {
+    const parentKey = (category.parent_id ?? 'root') as number | 'root';
 
-    if (!childrenByParent[key]) {
-      childrenByParent[key] = [];
+    if (!childrenByParent.has(parentKey)) {
+      childrenByParent.set(parentKey, []);
     }
 
-    childrenByParent[key].push(category);
+    childrenByParent.get(parentKey)?.push(category);
   }
 
   const buildTree = (parentKey: number | 'root' = 'root') =>
-    (childrenByParent[parentKey] || []).map(node => ({
+    (childrenByParent.get(parentKey) || []).map(node => ({
       id: node.id,
       name: node.name,
       slug: node.slug,
