@@ -6,19 +6,15 @@ export default defineEventHandler(async (event) => {
   await assertAdmin(event);
 
   const client = await serverSupabaseServiceRole(event);
-  const body = await readBody<{ id: number }>(event);
 
-  if (!body.id) {
-    throw createError({ statusCode: 400, statusMessage: 'ID required' });
-  }
-
-  const { error } = await client.from('brands')
-    .delete()
-    .eq('id', body.id);
+  const { data, error } = await client
+    .from('genders')
+    .select('id, name, code')
+    .order('id', { ascending: true });
 
   if (error) {
     throw createError({ statusCode: 500, statusMessage: error.message });
   }
 
-  return { deleted: true };
+  return data;
 });

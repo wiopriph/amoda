@@ -87,6 +87,8 @@ const openEditModal = (brand: Brand) => {
   isModalOpen.value = true;
 };
 
+const toast = useToast();
+
 const save = async () => {
   if (!brandForm.name.trim()) {
     return;
@@ -94,14 +96,33 @@ const save = async () => {
 
   isSaving.value = true;
 
-  await $fetch('/api/admin/brands/save', {
-    method: 'POST',
-    body: { id: brandForm.id, name: brandForm.name, active: brandForm.active },
-  });
+  try {
+    await $fetch('/api/admin/brands/save', {
+      method: 'POST',
+      body: { id: brandForm.id, name: brandForm.name, active: brandForm.active },
+    });
 
-  isSaving.value = false;
-  isModalOpen.value = false;
-  await refresh();
+    toast.add({
+      title: t('admin.brands.success'),
+      description: brandForm.id ? t('admin.brands.updated') : t('admin.brands.created'),
+      color: 'success',
+    });
+
+    isModalOpen.value = false;
+    await refresh();
+  } catch (error: any) {
+    const message = error?.data?.statusMessage || error?.message || '';
+
+    let text = t('admin.brands.errorDefault');
+
+    if (message.includes('Slug already exists')) {
+      text = t('admin.brands.errorSlug');
+    }
+
+    toast.add({ title: t('admin.brands.error'), description: text, color: 'error' });
+  } finally {
+    isSaving.value = false;
+  }
 };
 
 const openRemoveModal = (brand: Brand) => {
@@ -114,13 +135,24 @@ const remove = async () => {
     return;
   }
 
-  await $fetch('/api/admin/brands/remove', {
-    method: 'POST',
-    body: { id: selectedBrand.value.id },
-  });
+  try {
+    await $fetch('/api/admin/brands/remove', { method: 'POST', body: { id: selectedBrand.value.id } });
 
-  isRemoveModalOpen.value = false;
-  await refresh();
+    toast.add({
+      title: t('admin.brands.success'),
+      description: t('admin.brands.deleted'),
+      color: 'success',
+    });
+  } catch {
+    toast.add({
+      title: t('admin.brands.error'),
+      description: t('admin.brands.errorDefault'),
+      color: 'error',
+    });
+  } finally {
+    isRemoveModalOpen.value = false;
+    await refresh();
+  }
 };
 </script>
 
@@ -141,7 +173,14 @@ const remove = async () => {
         "namePlaceholder": "e.g. Zara, Nike",
         "activeLabel": "Brand is active",
         "slugInfo": "Slug will be generated automatically based on brand name.",
-        "confirmDelete": "Are you sure you want to delete {name}?"
+        "confirmDelete": "Are you sure you want to delete {name}?",
+        "success": "Success",
+        "created": "Brand created successfully.",
+        "updated": "Brand updated successfully.",
+        "deleted": "Brand deleted successfully.",
+        "error": "Error",
+        "errorSlug": "A brand with this name already exists.",
+        "errorDefault": "Failed to save brand. Please try again."
       }
     },
     "common": {
@@ -170,7 +209,14 @@ const remove = async () => {
         "namePlaceholder": "ex.: Zara, Nike",
         "activeLabel": "A marca está ativa",
         "slugInfo": "O slug será gerado automaticamente com base no nome.",
-        "confirmDelete": "Tem a certeza que deseja eliminar {name}?"
+        "confirmDelete": "Tem a certeza que deseja eliminar {name}?",
+        "success": "Sucesso",
+        "created": "Marca criada com sucesso.",
+        "updated": "Marca atualizada com sucesso.",
+        "deleted": "Marca eliminada com sucesso.",
+        "error": "Erro",
+        "errorSlug": "Já existe uma marca com este nome.",
+        "errorDefault": "Falha ao guardar marca. Tente novamente."
       }
     },
     "common": {

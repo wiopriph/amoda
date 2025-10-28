@@ -6,13 +6,9 @@ export default defineEventHandler(async (event) => {
   await assertAdmin(event);
 
   const client = await serverSupabaseServiceRole(event);
-  const body = await readBody<{ id: number }>(event);
+  const body = await readBody(event);
 
-  if (!body.id) {
-    throw createError({ statusCode: 400, statusMessage: 'ID required' });
-  }
-
-  const { error } = await client.from('brands')
+  const { error } = await client.from('categories')
     .delete()
     .eq('id', body.id);
 
@@ -20,5 +16,5 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: error.message });
   }
 
-  return { deleted: true };
+  return { success: true };
 });
