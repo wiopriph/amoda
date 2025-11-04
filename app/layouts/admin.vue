@@ -1,6 +1,4 @@
 <script setup lang="ts">
-definePageMeta({ middleware: 'admin' });
-
 const { t } = useI18n();
 const localeRoute = useLocaleRoute();
 

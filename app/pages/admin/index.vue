@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ name: 'admin', layout: 'admin' });
+definePageMeta({ name: 'admin', layout: 'admin', middleware: 'admin' });
 </script>
 
 <template>

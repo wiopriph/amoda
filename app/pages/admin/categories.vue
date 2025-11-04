@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ name: 'admin-categories', layout: 'admin' });
+definePageMeta({ name: 'admin-categories', layout: 'admin', middleware: 'admin' });
 
 const { t } = useI18n();
 const toast = useToast();
@@ -16,7 +16,7 @@ type Category = {
   children?: Category[]
 }
 
-const { data: categories, refresh } = await useFetch('/api/admin/categories/list');
+const { data: categories, refresh } = await useFetch('/api/admin/categories/tree');
 const { data: genders } = await useFetch<Gender[]>('/api/admin/categories/genders');
 
 const gendersOptions = computed(() => genders.value?.map(({ name, id }) => ({ label: name, value: id })) ?? []);

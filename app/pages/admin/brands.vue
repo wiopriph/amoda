@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui';
 
 
-definePageMeta({ name: 'admin-brands', layout: 'admin' });
+definePageMeta({ name: 'admin-brands', layout: 'admin', middleware: 'admin' });
 
 const { t } = useI18n();
 

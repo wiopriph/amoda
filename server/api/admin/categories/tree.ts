@@ -32,7 +32,12 @@ export default defineEventHandler(async (event) => {
     .from('categories')
     .select(`
       id,
-      name
+      name,
+      slug,
+      active,
+      parent_id,
+      gender_id,
+      genders ( id, name, code )
     `)
     .order('id', { ascending: true });
 
@@ -44,5 +49,32 @@ export default defineEventHandler(async (event) => {
     return [];
   }
 
-  return data;
+  const map = new Map<number, Category>();
+  const roots: Category[] = [];
+
+  for (const c of data as CategoryRow[]) {
+    map.set(c.id, {
+      ...c,
+      gender: c.genders ?? null,
+      children: [],
+    });
+  }
+
+  for (const c of data as CategoryRow[]) {
+    const category = map.get(c.id)!;
+
+    if (c.parent_id) {
+      const parent = map.get(c.parent_id);
+
+      if (parent) {
+        parent.children.push(category);
+      } else {
+        roots.push(category);
+      }
+    } else {
+      roots.push(category);
+    }
+  }
+
+  return roots;
 });
