@@ -7,19 +7,19 @@ type CategoryRow = {
   slug: string
   parent_id: number | null
   gender?: { code: string }
-}
+};
 
 type VariantImageRow = {
   url: string;
   position: number | null;
   alt: string | null
-}
+};
 
 type VariantSizeRow = {
   id: number;
   size: string;
   stock: number | null
-}
+};
 
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseClient(event);

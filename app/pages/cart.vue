@@ -13,7 +13,15 @@ useHead(() => ({
   ],
 }));
 
-const { items, totalAOA, increment, decrement, setQty, remove } = useCart();
+
+const {
+  items,
+  totalAOA,
+  increment,
+  decrement,
+  setQty,
+  remove,
+} = useCart();
 
 const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
@@ -88,12 +96,12 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
 
         <div class="flex justify-center gap-2">
           <UButton
-            v-for="(gender, key) in [
+            v-for="gender in [
               { key: 'women', val: 'women' },
-              { key: 'men', val: 'men' },
+              { key:'men', val: 'men' },
               { key: 'kids', val: 'kids' }
             ]"
-            :key="key.key"
+            :key="gender.key"
             :to="localeRoute({ name: 'gender', params: { gender: gender.val } })"
             variant="soft"
           >
@@ -118,7 +126,7 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
               class="shrink-0"
             >
               <NuxtImg
-                :src="cartItem.image"
+                :src="cartItem.image || ''"
                 :alt="cartItem.title"
                 width="80"
                 height="80"

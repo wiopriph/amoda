@@ -14,7 +14,7 @@ type Brand = {
   name: string
   slug?: string
   active: boolean
-}
+};
 
 const { data: brands, refresh } = await useFetch('/api/admin/brands/list');
 

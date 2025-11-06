@@ -2,7 +2,7 @@
 import type { PropType } from 'vue';
 
 
-type Gender = { id: number; name: string; code?: string }
+type Gender = { id: number; name: string; code?: string };
 
 export interface Category {
   id: number;

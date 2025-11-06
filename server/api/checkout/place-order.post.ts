@@ -10,10 +10,10 @@ type CartItem = {
   qty: number
   slug?: string // опционально — если хочешь писать в order_items
   image?: string // опционально
-}
+};
 
-type Totals = { total: number; currency: string }
-type Contact = { name: string; phone: string; email?: string | null }
+type Totals = { total: number; currency: string };
+type Contact = { name: string; phone: string; email?: string | null };
 
 // Если нет триггера на номер — сгенерим здесь
 function generateOrderNumber() {

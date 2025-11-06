@@ -8,7 +8,7 @@ type SaveBody = {
   gender_id?: number | null
   parent_id?: number | null
   active?: boolean
-}
+};
 
 type CategoryPayload = {
   name: string
@@ -16,7 +16,7 @@ type CategoryPayload = {
   gender_id: number | null
   parent_id: number | null
   active: boolean
-}
+};
 
 function slugify(str: string) {
   return str

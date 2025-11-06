@@ -1,23 +1,24 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t } = useI18n();
 const props = defineProps({
   modelValue: { type: Object, required: true },
   open: { type: Boolean, default: false },
   productId: { type: Number, required: true },
-})
-const emit = defineEmits(['update:open', 'save'])
+});
+const emit = defineEmits(['update:open', 'save']);
 
-const variant = reactive({ ...props.modelValue })
-watch(() => props.modelValue, v => Object.assign(variant, v))
+const variant = reactive({ ...props.modelValue });
 
-const isSaving = ref(false)
+watch(() => props.modelValue, v => Object.assign(variant, v));
+
+const isSaving = ref(false);
 
 const handleSave = async () => {
-  isSaving.value = true
-  await emit('save', variant)
-  isSaving.value = false
-  emit('update:open', false)
-}
+  isSaving.value = true;
+  await emit('save', variant);
+  isSaving.value = false;
+  emit('update:open', false);
+};
 </script>
 
 <i18n lang="json">
@@ -52,27 +53,46 @@ const handleSave = async () => {
 </i18n>
 
 <template>
-  <UModal v-model:open="props.open" :title="variant.id ? t('variant.edit') : t('variant.add')">
+  <UModal
+    v-model:open="props.open"
+    :title="variant.id ? t('variant.edit') : t('variant.add')"
+  >
     <template #body>
       <UForm class="space-y-4">
         <UFormField :label="t('variant.color')">
           <UInput v-model="variant.color" />
         </UFormField>
 
-        <UFormField :label="t('variant.price')" required>
-          <UInput v-model="variant.price" type="number" />
+        <UFormField
+          :label="t('variant.price')"
+          required
+        >
+          <UInput
+            v-model="variant.price"
+            type="number"
+          />
         </UFormField>
 
         <UFormField :label="t('variant.active')">
-          <UCheckbox v-model="variant.active" :label="t('variant.active')" />
+          <UCheckbox
+            v-model="variant.active"
+            :label="t('variant.active')"
+          />
         </UFormField>
 
         <div class="flex justify-end gap-2">
-          <UButton variant="ghost" @click="emit('update:open', false)">
+          <UButton
+            variant="ghost"
+            @click="emit('update:open', false)"
+          >
             {{ t('common.cancel') }}
           </UButton>
 
-          <UButton color="primary" :loading="isSaving" @click="handleSave">
+          <UButton
+            color="primary"
+            :loading="isSaving"
+            @click="handleSave"
+          >
             {{ t('common.save') }}
           </UButton>
         </div>

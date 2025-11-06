@@ -1,15 +1,19 @@
-import { serverSupabaseServiceRole } from '#supabase/server'
-import { assertAdmin } from '~~/server/utils/assertAdmin'
+import { serverSupabaseServiceRole } from '#supabase/server';
+import { assertAdmin } from '~~/server/utils/assertAdmin';
+
 
 export default defineEventHandler(async (event) => {
-    await assertAdmin(event)
-    const client = await serverSupabaseServiceRole(event)
-    const body = await readBody(event)
+  await assertAdmin(event);
 
-    if (!body.id) throw createError({ statusCode: 400, statusMessage: 'Size ID required' })
+  const client = await serverSupabaseServiceRole(event);
+  const body = await readBody(event);
 
-    const { error } = await client.from('product_variant_sizes').delete().eq('id', body.id)
-    if (error) throw createError({ statusCode: 500, statusMessage: error.message })
+  if (!body.id) throw createError({ statusCode: 400, statusMessage: 'Size ID required' });
 
-    return { deleted: true }
-})
+  const { error } = await client.from('product_variant_sizes').delete()
+    .eq('id', body.id);
+
+  if (error) throw createError({ statusCode: 500, statusMessage: error.message });
+
+  return { deleted: true };
+});

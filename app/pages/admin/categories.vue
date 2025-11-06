@@ -4,7 +4,12 @@ definePageMeta({ name: 'admin-categories', layout: 'admin', middleware: 'admin' 
 const { t } = useI18n();
 const toast = useToast();
 
-type Gender = { id: number; name: string; code: string }
+type Gender = {
+  id: number
+  name: string
+  code: string
+};
+
 type Category = {
   id: number
   name: string
@@ -14,7 +19,7 @@ type Category = {
   gender_id: number | null
   gender?: Gender
   children?: Category[]
-}
+};
 
 const { data: categories, refresh } = await useFetch('/api/admin/categories/tree');
 const { data: genders } = await useFetch<Gender[]>('/api/admin/categories/genders');

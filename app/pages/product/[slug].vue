@@ -64,7 +64,9 @@ const addCurrentToCart = () => {
   const v = currentVariant.value;
   const size = v?.sizes?.find(s => s.id === selectedSizeId.value);
 
-  if (!p || !v || !size) { return; }
+  if (!p || !v || !size) {
+    return;
+  }
 
   addToCart(p, v, size, 1);
 };
@@ -214,7 +216,9 @@ useHead(() => ({
 
           <!-- Главное фото -->
           <div class="flex-1 order-1 lg:order-2">
-            <div class="relative w-full aspect-[4/5] overflow-hidden rounded-lg bg-gray-50 flex items-center justify-center">
+            <div
+              class="relative w-full aspect-[4/5] overflow-hidden rounded-lg bg-gray-50 flex items-center justify-center"
+            >
               <NuxtImg
                 :src="galleryImages[activeImageIndex]?.url || '/placeholder.png'"
                 class="object-contain max-h-full max-w-full"

@@ -5,14 +5,14 @@ type CartItem = {
   image?: string | null
   price: number // integer AOA
   qty: number
-}
+};
 
 type ProductLike = {
   id: number | string
   slug: string
   title: string
   images?: { url: string }[] // на случай если где-то ещё остались product.images
-}
+};
 
 type VariantLike = {
   id: number | string
@@ -20,12 +20,12 @@ type VariantLike = {
   price: number
   images?: { url: string; position?: number | null }[]
   sizes?: { id: number | string; size: string; }[]
-}
+};
 
 type SizeLike = {
   id: number | string
   size: string
-}
+};
 
 const STORAGE_KEY = 'amoda:cart';
 const isClient = typeof window !== 'undefined';

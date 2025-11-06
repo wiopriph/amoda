@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
 
   const client = await serverSupabaseServiceRole(event);
 
+
   const { data, error } = await client.from('brands')
     .select('id, name, slug, active')
     .order('name', { ascending: true });
@@ -17,3 +18,4 @@ export default defineEventHandler(async (event) => {
 
   return data;
 });
+

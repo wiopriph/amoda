@@ -1,19 +1,20 @@
-import { serverSupabaseServiceRole } from '#supabase/server'
-import { assertAdmin } from '~~/server/utils/assertAdmin'
+import { serverSupabaseServiceRole } from '#supabase/server';
+import { assertAdmin } from '~~/server/utils/assertAdmin';
+
 
 export default defineEventHandler(async (event) => {
-    await assertAdmin(event)
+  await assertAdmin(event);
 
-    const client = await serverSupabaseServiceRole(event)
-    const id = Number(getRouterParam(event, 'id'))
+  const client = await serverSupabaseServiceRole(event);
+  const id = Number(getRouterParam(event, 'id'));
 
-    if (!id) {
-        throw createError({ statusCode: 400, statusMessage: 'Product ID required' })
-    }
+  if (!id) {
+    throw createError({ statusCode: 400, statusMessage: 'Product ID required' });
+  }
 
-    const { data, error } = await client
-        .from('products')
-        .select(`
+  const { data, error } = await client
+    .from('products')
+    .select(`
       id,
       title,
       slug,
@@ -32,35 +33,35 @@ export default defineEventHandler(async (event) => {
         sizes:product_variant_sizes!product_variant_sizes_variant_id_fkey ( id, size, stock )
       )
     `)
-        .eq('id', id)
-        .maybeSingle()
+    .eq('id', id)
+    .maybeSingle();
 
-    if (error) {
-        throw createError({ statusCode: 500, statusMessage: error.message })
-    }
+  if (error) {
+    throw createError({ statusCode: 500, statusMessage: error.message });
+  }
 
-    if (!data) {
-        throw createError({ statusCode: 404, statusMessage: 'Product not found' })
-    }
+  if (!data) {
+    throw createError({ statusCode: 404, statusMessage: 'Product not found' });
+  }
 
-    // нормализуем структуру
-    return {
-        id: data.id,
-        title: data.title,
-        slug: data.slug,
-        description: data.description,
-        active: data.active,
-        brand_id: data.brand_id,
-        primary_category_id: data.primary_category_id,
-        brand: data.brands || null,
-        category: data.categories || null,
-        variants: data.product_variants?.map((v: any) => ({
-            id: v.id,
-            color: v.color,
-            price: v.price,
-            active: v.active,
-            images: v.images || [],
-            sizes: v.sizes || [],
-        })) || [],
-    }
-})
+  // нормализуем структуру
+  return {
+    id: data.id,
+    title: data.title,
+    slug: data.slug,
+    description: data.description,
+    active: data.active,
+    brand_id: data.brand_id,
+    primary_category_id: data.primary_category_id,
+    brand: data.brands || null,
+    category: data.categories || null,
+    variants: data.product_variants?.map((v: any) => ({
+      id: v.id,
+      color: v.color,
+      price: v.price,
+      active: v.active,
+      images: v.images || [],
+      sizes: v.sizes || [],
+    })) || [],
+  };
+});

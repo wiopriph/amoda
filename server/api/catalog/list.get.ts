@@ -15,12 +15,12 @@ type QueryParams = {
   page?: string | number
   limit?: string | number
   sort?: 'price_asc' | 'price_desc' | 'new'
-}
+};
 
 type Breadcrumb = {
   label: string
   to: { name: string; params: Record<string, string> }
-}
+};
 
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseClient(event);

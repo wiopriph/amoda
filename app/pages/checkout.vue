@@ -175,7 +175,7 @@ const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} A
           </span>
 
           <span class="font-semibold">
-            {{ t('checkout.summary.total' ) }}:
+            {{ t('checkout.summary.total') }}:
             {{ fmtAOA(totalAOA) }}
           </span>
         </div>

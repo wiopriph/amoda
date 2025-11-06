@@ -7,7 +7,7 @@ type CategoryRow = {
   slug: string
   parent_id: number | null
   gender_id: number
-}
+};
 
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseClient(event);

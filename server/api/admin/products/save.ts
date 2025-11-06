@@ -1,14 +1,17 @@
-import { serverSupabaseServiceRole } from '#supabase/server'
-import { assertAdmin } from '~~/server/utils/assertAdmin'
+import { serverSupabaseServiceRole } from '#supabase/server';
+import { assertAdmin } from '~~/server/utils/assertAdmin';
+
 
 export default defineEventHandler(async (event) => {
-  await assertAdmin(event)
-  const client = await serverSupabaseServiceRole(event)
-  const body = await readBody(event)
+  await assertAdmin(event);
 
-  if (!body.title) throw createError({ statusCode: 400, statusMessage: 'Title required' })
+  const client = await serverSupabaseServiceRole(event);
+  const body = await readBody(event);
 
-  const slug = body.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  if (!body.title) throw createError({ statusCode: 400, statusMessage: 'Title required' });
+
+  const slug = body.title.toLowerCase().replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
 
   const payload = {
     title: body.title,
@@ -17,12 +20,18 @@ export default defineEventHandler(async (event) => {
     primary_category_id: body.primary_category_id || null,
     description: body.description || null,
     active: body.active ?? true,
-  }
+  };
 
-  const { data, error } = body.id
-    ? await client.from('products').update(payload).eq('id', body.id).select().single()
-    : await client.from('products').insert(payload).select().single()
+  const { data, error } = body.id ?
+    await client.from('products').update(payload)
+      .eq('id', body.id)
+      .select()
+      .single() :
+    await client.from('products').insert(payload)
+      .select()
+      .single();
 
-  if (error) throw createError({ statusCode: 500, statusMessage: error.message })
-  return data
-})
+  if (error) throw createError({ statusCode: 500, statusMessage: error.message });
+
+  return data;
+});

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-definePageMeta({ name: 'admin-products-new', layout: 'admin', middleware: 'admin' })
+definePageMeta({ name: 'admin-products-new', layout: 'admin', middleware: 'admin' });
 
-const { t } = useI18n()
-const router = useRouter()
-const { data: brands } = await useFetch('/api/admin/brands/list')
-const { data: categories } = await useFetch('/api/admin/categories/list')
+const { t } = useI18n();
+const router = useRouter();
+const { data: brands } = await useFetch('/api/admin/brands/list');
+const { data: categories } = await useFetch('/api/admin/categories/list');
 
 const form = reactive({
   title: '',
@@ -12,15 +12,16 @@ const form = reactive({
   primary_category_id: null,
   description: '',
   active: true,
-})
+});
 
 const saveProduct = async (product: any) => {
   const res = await $fetch('/api/admin/products/save', {
     method: 'POST',
     body: product,
-  })
-  router.push(`/admin/products/${res.id}`)
-}
+  });
+
+  router.push(`/admin/products/${res.id}`);
+};
 </script>
 
 <i18n lang="json">
@@ -43,17 +44,17 @@ const saveProduct = async (product: any) => {
 <template>
   <UPage>
     <UPageHeader
-        :title="t('productNew.title')"
-        :description="t('productNew.description')"
+      :title="t('productNew.title')"
+      :description="t('productNew.description')"
     />
 
     <UPageBody>
       <UCard>
         <AdminProductForm
-            v-model="form"
-            :brands="brands || []"
-            :categories="categories || []"
-            @save="saveProduct"
+          v-model="form"
+          :brands="brands || []"
+          :categories="categories || []"
+          @save="saveProduct"
         />
       </UCard>
     </UPageBody>
