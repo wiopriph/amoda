@@ -53,8 +53,6 @@ export default defineEventHandler(async (event) => {
     active: data.active,
     brand_id: data.brand_id,
     primary_category_id: data.primary_category_id,
-    brand: data.brands || null,
-    category: data.categories || null,
     variants: data.product_variants?.map((v: any) => ({
       id: v.id,
       color: v.color,

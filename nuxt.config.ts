@@ -34,6 +34,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxtjs/i18n',
     '@nuxtjs/supabase',
+    '@nuxtjs/sitemap',
   ],
 
   runtimeConfig: {
@@ -50,5 +51,30 @@ export default defineNuxtConfig({
 
   supabase: {
     redirect: false,
+  },
+
+  sitemap: {
+    xsl: false,
+    cacheMaxAgeSeconds: 86400,
+    sitemapName: 'sitemap.xml',
+
+    exclude: ['/admin/**', '/auth', '/cart', '/checkout', '/order/**'],
+
+    sitemaps: {
+      pages: {
+        includeAppSources: true,
+        include: ['/', '/contacts', '/delivery'],
+      },
+
+      categories: {
+        includeAppSources: false,
+        sources: ['/sitemap/categories'],
+      },
+
+      products: {
+        includeAppSources: false,
+        sources: ['/sitemap/products'],
+      },
+    },
   },
 });
