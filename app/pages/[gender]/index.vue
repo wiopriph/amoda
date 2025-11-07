@@ -33,10 +33,7 @@ const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)));
 const setPage = (next: number) =>
   navigateTo({ query: { ...route.query, page: next } });
 
-const genderHuman = computed(() =>
-  String(route.params.gender)
-    .replaceAll('-', ' '),
-);
+const genderHuman = computed(() => t(route.params.gender as string));
 
 const pageTitle = computed(() => `${t('gender.seoTitle', { gender: genderHuman.value })} | Amoda`);
 const pageDescription = computed(() =>
@@ -81,6 +78,9 @@ useHead(() => ({
 <i18n lang="json">
 {
   "pt": {
+    "women": "Mulheres",
+    "men": "Homens",
+    "kids": "Crianças",
     "gender": {
       "searchPlaceholder": "Pesquisar produtos...",
       "empty": "Não há produtos nesta seleção ainda.",
@@ -90,6 +90,9 @@ useHead(() => ({
     }
   },
   "en": {
+    "women": "Women",
+    "men": "Men",
+    "kids": "Kids",
     "gender": {
       "searchPlaceholder": "Search products...",
       "empty": "No products found here yet.",
@@ -128,7 +131,7 @@ useHead(() => ({
 
       <UBlogPosts
         v-else
-        :ui="{ grid: 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6' }"
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4"
       >
         <UBlogPost
           v-for="product in items"
