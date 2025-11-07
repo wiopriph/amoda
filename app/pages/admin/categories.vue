@@ -143,7 +143,7 @@ const deleteCategory = async () => {
       "errorDefault": "Failed to save category. Please try again."
     }
   },
-  "pt-AO": {
+  "pt": {
     "categories": {
       "title": "Categorias",
       "description": "Gerir categorias e hierarquias de produtos",

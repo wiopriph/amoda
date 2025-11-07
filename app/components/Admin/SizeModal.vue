@@ -1,24 +1,29 @@
 <script setup lang="ts">
-const { t } = useI18n();
 const props = defineProps({
   open: Boolean,
-  variantId: Number,
-  modelValue: Object,
+  modelValue: { type: Object, required: true },
 });
-const emit = defineEmits(['update:open', 'save']);
-
 const size = reactive({ ...props.modelValue });
 
 watch(() => props.modelValue, v => Object.assign(size, v));
 
 const isSaving = ref(false);
 
-const handleSave = async () => {
+
+const emit = defineEmits(['update:open', 'save']);
+const closeModal = () => emit('update:open', false);
+
+
+const handleSave = () => {
   isSaving.value = true;
-  await emit('save', size);
-  isSaving.value = false;
-  emit('update:open', false);
+
+  emit('save', size);
+
+  isSaving.value = false; //
+  closeModal(); //
 };
+
+const { t } = useI18n();
 </script>
 
 <i18n lang="json">
@@ -32,10 +37,11 @@ const handleSave = async () => {
     },
     "common": {
       "cancel": "Cancel",
+      "add": "Add",
       "save": "Save"
     }
   },
-  "pt-AO": {
+  "pt": {
     "size": {
       "add": "Adicionar tamanho",
       "edit": "Editar tamanho",
@@ -44,6 +50,7 @@ const handleSave = async () => {
     },
     "common": {
       "cancel": "Cancelar",
+      "add": "Adicionar",
       "save": "Guardar"
     }
   }
@@ -52,29 +59,38 @@ const handleSave = async () => {
 
 <template>
   <UModal
-    v-model:open="props.open"
+    :open="props.open"
     :title="size.id ? t('size.edit') : t('size.add')"
+    @update:open="closeModal"
   >
     <template #body>
       <UForm class="space-y-4">
         <UFormField
           :label="t('size.name')"
           required
+          class="w-full"
         >
-          <UInput v-model="size.size" />
+          <UInput
+            v-model="size.size"
+            class="w-full"
+          />
         </UFormField>
 
-        <UFormField :label="t('size.stock')">
+        <UFormField
+          :label="t('size.stock')"
+          class="w-full"
+        >
           <UInput
             v-model="size.stock"
             type="number"
+            class="w-full"
           />
         </UFormField>
 
         <div class="flex justify-end gap-2">
           <UButton
             variant="ghost"
-            @click="emit('update:open', false)"
+            @click="closeModal"
           >
             {{ t('common.cancel') }}
           </UButton>
@@ -84,7 +100,7 @@ const handleSave = async () => {
             :loading="isSaving"
             @click="handleSave"
           >
-            {{ t('common.save') }}
+            {{ size.id ? t('common.save') : t('common.add') }}
           </UButton>
         </div>
       </UForm>

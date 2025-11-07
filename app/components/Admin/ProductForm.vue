@@ -47,7 +47,7 @@ const handleSave = async () => {
       "save": "Save changes"
     }
   },
-  "pt-AO": {
+  "pt": {
     "productForm": {
       "title": "Título",
       "brand": "Marca",
@@ -66,41 +66,58 @@ const handleSave = async () => {
     <UFormField
       :label="t('productForm.title')"
       required
+      class="w-full"
     >
       <UInput
         v-model="product.title"
         :placeholder="t('productForm.title')"
+        class="w-full"
         @input="handleInput('title', $event)"
       />
     </UFormField>
 
-    <UFormField :label="t('productForm.brand')">
-      <USelect
-        v-model="product.brand_id"
-        :items="brands.map(b => ({ label: b.name, value: b.id }))"
-        :placeholder="t('productForm.brand')"
-        @update:model-value="handleInput('brand_id', $event)"
-      />
-    </UFormField>
-
-    <UFormField :label="t('productForm.category')">
+    <UFormField
+      :label="t('productForm.category')"
+      class="w-full"
+    >
       <USelect
         v-model="product.primary_category_id"
         :items="categories.map(c => ({ label: c.name, value: c.id }))"
         :placeholder="t('productForm.category')"
+        class="w-full"
         @update:model-value="handleInput('primary_category_id', $event)"
       />
     </UFormField>
 
-    <UFormField :label="t('productForm.description')">
+    <UFormField
+      :label="t('productForm.brand')"
+      class="w-full"
+    >
+      <USelect
+        v-model="product.brand_id"
+        :items="brands.map(b => ({ label: b.name, value: b.id }))"
+        :placeholder="t('productForm.brand')"
+        class="w-full"
+        @update:model-value="handleInput('brand_id', $event)"
+      />
+    </UFormField>
+
+    <UFormField
+      :label="t('productForm.description')"
+      class="w-full"
+    >
       <UTextarea
         v-model="product.description"
-        rows="4"
+        :rows="6"
+        class="w-full"
         @input="handleInput('description', $event)"
       />
     </UFormField>
 
-    <UFormField :label="t('productForm.active')">
+    <UFormField
+      :label="t('productForm.active')"
+      class="w-full"
+    >
       <UCheckbox
         v-model="product.active"
         :label="t('productForm.active')"
@@ -110,8 +127,8 @@ const handleSave = async () => {
 
     <div class="flex justify-end gap-2 pt-4">
       <UButton
-        color="primary"
         :loading="isSaving"
+        color="primary"
         @click="handleSave"
       >
         {{ props.isEdit ? t('productForm.save') : t('productForm.create') }}

@@ -11,17 +11,20 @@ export default defineNuxtConfig({
   i18n: {
     locales: [
       {
-        code: 'pt-AO',
+        code: 'pt',
+        language: 'pt-AO',
         name: 'Português',
         flag: '🇦🇴',
       },
       {
         code: 'en',
+        language: 'en',
         name: 'English',
         flag: '🇬🇧',
       },
     ],
-    defaultLocale: 'pt-AO',
+    baseUrl: 'https://moda.ao',
+    defaultLocale: 'pt',
     strategy: 'prefix_except_default',
     detectBrowserLanguage: false,
   },

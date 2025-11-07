@@ -32,11 +32,12 @@ export default defineEventHandler(async (event) => {
   const rangeTo = rangeFrom + limit - 1;
 
   let genderId: number | null = null;
+  let genderName: string = '';
 
   if (query.gender) {
     const { data: genderRow, error: genderError } = await supabase
       .from('genders')
-      .select('id, code')
+      .select('id, code, name')
       .eq('code', String(query.gender))
       .maybeSingle();
 
@@ -49,6 +50,7 @@ export default defineEventHandler(async (event) => {
     }
 
     genderId = genderRow.id;
+    genderName = genderRow.name;
   }
 
   let categoryId: number | null = null;
@@ -81,11 +83,11 @@ export default defineEventHandler(async (event) => {
     categoryGenderId = categoryRow.gender_id;
   }
 
-  const breadcrumbs: Breadcrumb[] = [{ label: 'home', to: { name: 'index', params: {} } }];
+  const breadcrumbs: Breadcrumb[] = [{ label: 'Página inicial', to: { name: 'index', params: {} } }];
 
   if (query.gender) {
     breadcrumbs.push({
-      label: String(query.gender),
+      label: genderName,
       to: { name: 'gender', params: { gender: String(query.gender) } },
     });
   }

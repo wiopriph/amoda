@@ -80,7 +80,7 @@ useHead(() => ({
 
 <i18n lang="json">
 {
-  "pt-AO": {
+  "pt": {
     "gender": {
       "searchPlaceholder": "Pesquisar produtos...",
       "empty": "Não há produtos nesta seleção ainda.",

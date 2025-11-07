@@ -30,7 +30,7 @@ type Product = {
 
 /** query/pagination */
 const route = useRoute();
-const limit = 3;
+const limit = 20;
 const page = ref(Math.max(1, Number(route.query.page || 1)));
 const search = ref(String(route.query.q || ''));
 
@@ -148,6 +148,9 @@ const tableData = computed(() =>
 );
 
 const fmtPrice = (value?: number | null) => value ? `${new Intl.NumberFormat('pt-AO').format(value)} AOA` : '—';
+
+
+const paginationTo = (page: number)  => ({ query: { page } });
 </script>
 
 <i18n lang="json">
@@ -178,7 +181,7 @@ const fmtPrice = (value?: number | null) => value ? `${new Intl.NumberFormat('pt
       "edit": "Edit"
     }
   },
-  "pt-AO": {
+  "pt": {
     "products": {
       "title": "Produtos",
       "description": "Navegue, pesquise e visualize variantes",
@@ -351,6 +354,7 @@ const fmtPrice = (value?: number | null) => value ? `${new Intl.NumberFormat('pt
           v-model:page="page"
           :itemsPerPage="limit"
           :total="total"
+          :to="paginationTo"
         />
       </div>
     </UPageBody>

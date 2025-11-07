@@ -68,7 +68,7 @@ const onMagic = async () => {
       "magicSent": "Magic link sent to your email"
     }
   },
-  "pt-AO": {
+  "pt": {
     "auth": {
       "title": "Entrar ou Criar conta",
       "login": "Entrar",

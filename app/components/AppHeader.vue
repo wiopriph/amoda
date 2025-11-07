@@ -6,7 +6,7 @@ const { count } = useCart();
 
 <i18n lang="json">
 {
-  "pt-AO": {
+  "pt": {
     "header": {
       "cart": "Carrinho",
       "cartCount": "Itens no carrinho: {count}"

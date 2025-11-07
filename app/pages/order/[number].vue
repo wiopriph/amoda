@@ -31,7 +31,7 @@ const localeRoute = useLocaleRoute();
 
 <i18n lang="json">
 {
-  "pt-AO": {
+  "pt": {
     "order": {
       "title": "Encomenda",
       "loading": "A carregar...",

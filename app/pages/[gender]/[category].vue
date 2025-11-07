@@ -31,8 +31,6 @@ const items = computed(() => data.value?.items || []);
 const total = computed(() => data.value?.total || 0);
 const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)));
 
-const setPage = (p: number) => navigateTo({ query: { ...route.query, page: p } });
-
 const titleText = computed(() => String(route.params.category).replaceAll('-', ' '));
 
 const pageTitle = computed(() => `${titleText.value} | Amoda`);
@@ -57,11 +55,13 @@ useHead(() => ({
     { property: 'twitter:description', content: pageDescription.value },
   ],
 }));
+
+const paginationTo = (page: number)  => ({ query: { page } });
 </script>
 
 <i18n lang="json">
 {
-  "pt-AO": {
+  "pt": {
     "genderCategory": {
       "empty": "Não há produtos nesta categoria ainda.",
       "metaDescription": "Descubra os melhores produtos na categoria {category} em Amoda."
@@ -127,8 +127,9 @@ useHead(() => ({
       >
         <UPagination
           v-model="page"
-          :pageCount="pages"
-          @update:model-value="setPage"
+          :itemsPerPage="limit"
+          :total="total"
+          :to="paginationTo"
         />
       </div>
     </UPageBody>

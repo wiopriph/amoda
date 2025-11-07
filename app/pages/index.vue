@@ -28,7 +28,7 @@ const steps = computed(() =>
 
 <i18n lang="json">
 {
-  "pt-AO": {
+  "pt": {
     "home": {
       "title": "Amoda — Loja online",
       "desc": "Compre roupas, sapatos e acessórios online.",

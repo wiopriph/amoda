@@ -128,7 +128,7 @@ const fmtPrice = (val?: number | null) => (val ? `${new Intl.NumberFormat('pt-AO
       "upload": "Upload"
     }
   },
-  "pt-AO": {
+  "pt": {
     "productEdit": {
       "title": "Editar produto",
       "description": "Editar detalhes do produto",
@@ -291,7 +291,6 @@ const fmtPrice = (val?: number | null) => (val ? `${new Intl.NumberFormat('pt-AO
     <AdminVariantModal
       v-model:open="isVariantModalOpen"
       :modelValue="currentVariant"
-      :productId="product.id"
       @save="saveVariant"
     />
 

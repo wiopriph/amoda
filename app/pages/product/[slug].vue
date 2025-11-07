@@ -71,6 +71,16 @@ const addCurrentToCart = () => {
   addToCart(p, v, size, 1);
 };
 
+
+const variantThumbs = computed(() =>
+  variants.value.map(v => ({
+    id: v.id,
+    url: v.images?.[0]?.url || product.value?.images?.[0]?.url || '/placeholder.png',
+    label: v.color || '—',
+  })),
+);
+
+
 // ===== SEO =====
 const seoTitle = computed(() => `${product.value?.title || ''} - Amoda`);
 const seoDescription = computed(() => product.value?.description || t('product.meta.description'));
@@ -103,13 +113,13 @@ const productJsonLd = computed(() => ({
   name: product.value?.title,
   image: galleryImages.value.map(i => i.url),
   description: product.value?.description || '',
-  sku: product.value?.variants?.[0]?.sku || product.value?.id,
+  sku: product.value?.variants?.[0]?.id || product.value?.id,
   brand: { '@type': 'Brand', name: product.value?.brand_name || '' },
   offers: {
     '@type': 'Offer',
     url: productUrl.value,
     priceCurrency: 'AOA',
-    price: (product.value?.variants?.[0]?.price ?? product.value?.price ?? 0) / 100,
+    price: product.value?.variants?.[0]?.price || 0,
     availability: 'https://schema.org/InStock',
     itemCondition: 'https://schema.org/NewCondition',
   },
@@ -148,7 +158,7 @@ useHead(() => ({
       }
     }
   },
-  "pt-AO": {
+  "pt": {
     "product": {
       "price": "Preço",
       "size": "Tamanho",
@@ -167,11 +177,24 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageHeader :title="product?.title">
+    <UPageHeader
+      :title="product?.title"
+      :ui="{
+        root: 'py-3',
+        title: 'text-xl md:text-2xl',
+      }"
+    >
       <template #headline>
         <UBreadcrumb
           :items="breadcrumbsUi"
-          class="mb-4 hidden md:block"
+          :ui="{
+            root: 'mb-4 hidden md:block',
+            list: 'flex items-center gap-1 min-w-0',
+            item: 'shrink-0 last:flex-1 last:min-w-0',
+            link: 'text-xs md:text-sm hover:text-primary-600 aria-[current=page]:pointer-events-none',
+            linkLabel: 'block whitespace-nowrap overflow-hidden text-ellipsis truncate aria-[current=page]:font-medium',
+            separator: 'mx-1 text-gray-400'
+          }"
         />
       </template>
     </UPageHeader>
@@ -240,22 +263,32 @@ useHead(() => ({
             </div>
           </div>
 
-          <!-- Цвет -->
-          <div v-if="variantOptions.length">
+          <div v-if="variantThumbs.length">
             <div class="text-sm font-medium mb-2">
               {{ t('product.color') }}
             </div>
 
             <div class="flex flex-wrap gap-2">
-              <UBadge
-                v-for="opt in variantOptions"
+              <button
+                v-for="opt in variantThumbs"
                 :key="opt.id"
-                :label="opt.label"
-                size="lg"
-                class="cursor-pointer"
-                :variant="selectedVariantId === opt.id ? 'solid' : 'outline'"
+                type="button"
+                class="relative overflow-hidden rounded-md border transition w-12 h-12 md:w-14 md:h-14"
+                :class="selectedVariantId === opt.id
+                  ? 'border-primary ring-1 ring-primary'
+                  : 'border-gray-200 hover:border-gray-400'"
+                :aria-pressed="selectedVariantId === opt.id"
+                :title="opt.label"
                 @click="selectedVariantId = opt.id"
-              />
+              >
+                <NuxtImg
+                  :src="opt.url"
+                  alt=""
+                  class="w-full h-full object-cover"
+                />
+
+                <span class="sr-only">{{ opt.label }}</span>
+              </button>
             </div>
           </div>
 
@@ -281,7 +314,7 @@ useHead(() => ({
           <UButton
             size="xl"
             color="primary"
-            class="w-full py-4 text-lg font-semibold tracking-wide uppercase justify-center"
+            class="w-full uppercase justify-center"
             :disabled="!selectedSizeId"
             @click="addCurrentToCart"
           >

@@ -67,7 +67,7 @@ const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} A
 
 <i18n lang="json">
 {
-  "pt-AO": {
+  "pt": {
     "checkout": {
       "title": "Finalização",
       "subtitle": "Preencha os dados para receber o seu pedido",

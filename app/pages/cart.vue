@@ -59,7 +59,7 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
       }
     }
   },
-  "pt-AO": {
+  "pt": {
     "cart": {
       "title": "Carrinho",
       "empty": "O seu carrinho está vazio. Explore as nossas categorias e adicione produtos ao carrinho para começar!",

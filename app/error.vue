@@ -41,7 +41,7 @@ const homePage = computed(() => localeRoute({ name: 'index' }));
       }
     }
   },
-  "pt-AO": {
+  "pt": {
     "error": {
       "404": {
         "title": "Página não encontrada",

@@ -16,7 +16,7 @@ const items = computed(() => [{
 
 <i18n lang="json">
 {
-  "pt-AO": {
+  "pt": {
     "footer": {
       "delivery": "Entrega",
       "contacts": "Contactos",

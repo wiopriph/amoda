@@ -194,7 +194,7 @@ const remove = async () => {
       "edit": "Edit"
     }
   },
-  "pt-AO": {
+  "pt": {
     "admin": {
       "brands": {
         "title": "Marcas",

@@ -1,24 +1,30 @@
 <script setup lang="ts">
-const { t } = useI18n();
 const props = defineProps({
   modelValue: { type: Object, required: true },
   open: { type: Boolean, default: false },
-  productId: { type: Number, required: true },
 });
-const emit = defineEmits(['update:open', 'save']);
 
 const variant = reactive({ ...props.modelValue });
 
 watch(() => props.modelValue, v => Object.assign(variant, v));
 
+
+const emit = defineEmits(['update:open', 'save']);
+
+
 const isSaving = ref(false);
 
-const handleSave = async () => {
+watch(() => props.open, () => isSaving.value = false);
+
+const handleSave = () => {
   isSaving.value = true;
-  await emit('save', variant);
-  isSaving.value = false;
-  emit('update:open', false);
+
+  emit('save', variant);
 };
+
+const closeModal = () => emit('update:open', false);
+
+const { t } = useI18n();
 </script>
 
 <i18n lang="json">
@@ -33,10 +39,11 @@ const handleSave = async () => {
     },
     "common": {
       "cancel": "Cancel",
+      "add": "Add",
       "save": "Save"
     }
   },
-  "pt-AO": {
+  "pt": {
     "variant": {
       "add": "Adicionar variante",
       "edit": "Editar variante",
@@ -46,6 +53,7 @@ const handleSave = async () => {
     },
     "common": {
       "cancel": "Cancelar",
+      "add": "Adicionar",
       "save": "Guardar"
     }
   }
@@ -54,36 +62,49 @@ const handleSave = async () => {
 
 <template>
   <UModal
-    v-model:open="props.open"
+    :open="props.open"
     :title="variant.id ? t('variant.edit') : t('variant.add')"
+    @update:open="closeModal"
   >
     <template #body>
       <UForm class="space-y-4">
-        <UFormField :label="t('variant.color')">
-          <UInput v-model="variant.color" />
+        <UFormField
+          :label="t('variant.color')"
+          class="w-full"
+        >
+          <UInput
+            v-model="variant.color"
+            class="w-full"
+          />
         </UFormField>
 
         <UFormField
           :label="t('variant.price')"
           required
+          class="w-full"
         >
           <UInput
             v-model="variant.price"
             type="number"
+            class="w-full"
           />
         </UFormField>
 
-        <UFormField :label="t('variant.active')">
+        <UFormField
+          :label="t('variant.active')"
+          class="w-full"
+        >
           <UCheckbox
             v-model="variant.active"
             :label="t('variant.active')"
+            class="w-full"
           />
         </UFormField>
 
         <div class="flex justify-end gap-2">
           <UButton
             variant="ghost"
-            @click="emit('update:open', false)"
+            @click="closeModal"
           >
             {{ t('common.cancel') }}
           </UButton>
@@ -93,7 +114,7 @@ const handleSave = async () => {
             :loading="isSaving"
             @click="handleSave"
           >
-            {{ t('common.save') }}
+            {{ variant.id ? t('common.save') : t('common.add') }}
           </UButton>
         </div>
       </UForm>

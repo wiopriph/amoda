@@ -2,23 +2,26 @@ import { serverSupabaseClient } from '#supabase/server';
 
 
 type CategoryRow = {
-  id: number
-  name: string
-  slug: string
-  parent_id: number | null
-  gender?: { code: string }
+  id: number;
+  name: string;
+  slug: string;
+  parent_id: number | null;
+  gender?: {
+    code: string;
+    name: string;
+  }
 };
 
 type VariantImageRow = {
   url: string;
   position: number | null;
-  alt: string | null
+  alt: string | null;
 };
 
 type VariantSizeRow = {
   id: number;
   size: string;
-  stock: number | null
+  stock: number | null;
 };
 
 export default defineEventHandler(async (event) => {
@@ -36,7 +39,7 @@ export default defineEventHandler(async (event) => {
       brand:brands ( id, name, slug ),
       primary_category:categories!products_primary_category_id_fkey (
         id, name, slug, parent_id,
-        gender:genders ( code )
+        gender:genders ( code, name )
       ),
       variants:product_variants (
         id, color, price, active,
@@ -119,10 +122,14 @@ export default defineEventHandler(async (event) => {
       };
     });
 
-  const genderCode = (productRow.primary_category as CategoryRow | null)?.gender?.code || 'women';
+  const currentGender = (productRow.primary_category as CategoryRow | null)?.gender;
+
+  const genderCode = currentGender?.code || 'women';
+  const genderName = currentGender?.name || 'women';
+
   const breadcrumbs = [
     {
-      label: genderCode,
+      label: genderName,
       to: {
         name: 'gender',
         params: { gender: genderCode },

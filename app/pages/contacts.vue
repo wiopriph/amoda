@@ -15,7 +15,7 @@ useHead(() => ({
 
 <i18n lang="json">
 {
-  "pt-AO": {
+  "pt": {
     "contacts": {
       "title": "Contactos",
       "text": "Em breve aqui serão apresentadas todas as formas de entrar em contacto connosco: telefone, email, redes sociais e outros meios.",

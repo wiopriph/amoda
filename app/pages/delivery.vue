@@ -15,7 +15,7 @@ useHead(() => ({
 
 <i18n lang="json">
 {
-  "pt-AO": {
+  "pt": {
     "delivery": {
       "title": "Entrega",
       "text": "Em breve aqui estarão descritas as condições de entrega, bem como listados todos os nossos pontos de recolha de encomendas, que estarão disponíveis em todas as principais cidades de Angola.",

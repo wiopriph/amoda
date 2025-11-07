@@ -39,7 +39,7 @@ const { signOut } = useAuth();
       "logout": "Logout"
     }
   },
-  "pt-AO": {
+  "pt": {
     "admin": {
       "dashboard": "Dashboard",
       "brands": "Brands",

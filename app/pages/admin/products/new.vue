@@ -32,7 +32,7 @@ const saveProduct = async (product: any) => {
       "description": "Add new product details"
     }
   },
-  "pt-AO": {
+  "pt": {
     "productNew": {
       "title": "Criar produto",
       "description": "Adicionar detalhes do novo produto"

@@ -36,7 +36,7 @@ const { t } = useI18n();
       "remove": "Delete {name}"
     }
   },
-  "pt-AO": {
+  "pt": {
     "categoryTree": {
       "inactive": "inativa",
       "edit": "Editar {name}",
