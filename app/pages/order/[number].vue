@@ -3,18 +3,21 @@ definePageMeta({ name: 'order-number' });
 
 const { t } = useI18n();
 const route = useRoute();
+const localeRoute = useLocaleRoute();
 
-const { data, error, pending } = await useFetch('/api/orders/get', {
+/* === Fetch Order Data === */
+const { data: orderData, error: orderError, pending: isPending } = await useFetch('/api/orders/get', {
   query: { number: route.params.number },
 });
 
-const order = computed(() => data.value);
+const order = computed(() => orderData.value);
+const formatAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
-const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
-
-
+/* === Meta & SEO === */
 const pageTitle = computed(() => `${t('order.title')} №${route.params.number} | Amoda`);
-const pageDescription = computed(() => t('order.meta.description', { number: String(route.params.number) }));
+const pageDescription = computed(() =>
+  t('order.meta.description', { number: String(route.params.number) }),
+);
 
 useHead(() => ({
   title: pageTitle.value,
@@ -25,8 +28,6 @@ useHead(() => ({
     { name: 'robots', content: 'noindex, nofollow' },
   ],
 }));
-
-const localeRoute = useLocaleRoute();
 </script>
 
 <i18n lang="json">
@@ -38,7 +39,7 @@ const localeRoute = useLocaleRoute();
       "notFound": "Encomenda não encontrada",
       "summary": "Resumo da encomenda",
       "contact": "Contacto",
-      "saveNotice": "Guarde o número da sua encomenda para acompanhar o levantamento no ponto de entrega.",
+      "saveNotice": "Guarde o número da sua encomenda para acompanhar o levantamento no ponto de entrega. A Amoda irá notificá-lo quando estiver pronta para recolha.",
       "colItem": "Artigo",
       "colPrice": "Preço",
       "colQty": "Qtd.",
@@ -47,7 +48,10 @@ const localeRoute = useLocaleRoute();
       "color": "Cor",
       "total": "Total",
       "meta": {
-        "description": "Detalhes da encomenda n.º {number}."
+        "description": "Veja os detalhes e o estado da sua encomenda nº {number} — contacto, artigos e total. A Amoda Angola simplifica as suas compras online."
+      },
+      "seo": {
+        "h1": "Detalhes da sua encomenda nº {number}"
       }
     }
   },
@@ -58,7 +62,7 @@ const localeRoute = useLocaleRoute();
       "notFound": "Order not found",
       "summary": "Order summary",
       "contact": "Contact",
-      "saveNotice": "Please save your order number to track and collect your purchase at the pickup point.",
+      "saveNotice": "Save your order number to track pickup status. Amoda will contact you once your order is ready.",
       "colItem": "Item",
       "colPrice": "Price",
       "colQty": "Qty",
@@ -67,7 +71,10 @@ const localeRoute = useLocaleRoute();
       "color": "Color",
       "total": "Total",
       "meta": {
-        "description": "Order details No. {number}."
+        "description": "View details and status of your order No. {number} — contact info, items and total. Amoda Angola makes online shopping simple."
+      },
+      "seo": {
+        "h1": "Order details No. {number}"
       }
     }
   }
@@ -77,19 +84,20 @@ const localeRoute = useLocaleRoute();
 <template>
   <UPage>
     <UPageHeader
-      :title="`${t('order.title')} №${route.params.number}`"
+      :title="t('order.seo.h1', { number: route.params.number })"
+      :ui="{ root: 'py-4', title: 'text-lg font-semibold md:text-xl' }"
     />
 
     <UPageBody class="max-w-4xl mx-auto">
       <UCard
-        v-if="pending"
+        v-if="isPending"
         class="p-6 text-center text-gray-500"
       >
         {{ t('order.loading') }}
       </UCard>
 
       <UAlert
-        v-else-if="error || !order"
+        v-else-if="orderError || !order"
         color="error"
         variant="soft"
         :description="t('order.notFound')"
@@ -153,18 +161,18 @@ const localeRoute = useLocaleRoute();
 
               <div class="text-right shrink-0">
                 <div class="text-sm text-gray-600">
-                  {{ item.qty }} × {{ fmtAOA(item.unit_price) }}
+                  {{ item.qty }} × {{ formatAOA(item.unit_price) }}
                 </div>
 
                 <div class="font-semibold">
-                  {{ fmtAOA(item.total_price) }}
+                  {{ formatAOA(item.total_price) }}
                 </div>
               </div>
             </div>
           </div>
 
           <div class="border-t mt-4 pt-3 text-right text-lg font-semibold">
-            {{ t('order.total') }}: {{ fmtAOA(order.totals.total) }}
+            {{ t('order.total') }}: {{ formatAOA(order.totals.total) }}
           </div>
         </UCard>
       </template>

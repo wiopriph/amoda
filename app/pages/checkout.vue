@@ -69,49 +69,51 @@ const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} A
 {
   "pt": {
     "checkout": {
-      "title": "Finalização",
-      "subtitle": "Preencha os dados para receber o seu pedido",
-      "hint": "Estas informações são necessárias para levantar o pedido no ponto de entrega. Indique contactos reais para que possamos comunicar consigo.",
+      "title": "Finalizar pedido",
+      "subtitle": "Preencha os seus dados para concluir a encomenda",
+      "hint": "Estas informações são necessárias para **entrega gratuita e recolha no ponto**. Indique o seu nome e contacto reais — enviaremos confirmação quando o pedido estiver pronto para recolha.",
       "name": "Nome completo",
-      "phone": "Telefone",
+      "phone": "Telefone (WhatsApp recomendado)",
       "email": "E-mail",
       "submit": "Confirmar pedido",
+      "note": "📦 A entrega é gratuita. Entraremos em contacto assim que o seu pedido estiver pronto para recolha.",
       "errors": {
         "empty": "O carrinho está vazio.",
-        "common": "Ocorreu um erro. Tente novamente."
+        "common": "Ocorreu um erro ao enviar o pedido. Tente novamente em alguns instantes."
       },
       "meta": {
-        "title": "Finalização | Amoda",
-        "description": "Preencha os seus dados de contacto para concluir a compra."
+        "title": "Finalizar pedido | Amoda Angola",
+        "description": "Preencha os seus dados de contacto para concluir a compra online na Amoda e receber a entrega gratuita em Luanda."
       },
       "summary": {
         "title": "Resumo do pedido",
-        "items": "Itens",
-        "total": "Total"
+        "items": "Itens no carrinho",
+        "total": "Valor total"
       }
     }
   },
   "en": {
     "checkout": {
-      "title": "Checkout",
-      "subtitle": "Fill in your details to receive your order",
-      "hint": "This information is required to pick up your order at a collection point. Please provide real contact details so we can reach you.",
+      "title": "Complete your order",
+      "subtitle": "Enter your contact details to finish checkout",
+      "hint": "We need this information for **free delivery and pickup**. Please provide your real name and phone (WhatsApp preferred) — we’ll contact you when your order arrives at the pickup point.",
       "name": "Full Name",
-      "phone": "Phone",
+      "phone": "Phone (WhatsApp preferred)",
       "email": "E-mail",
       "submit": "Confirm Order",
+      "note": "📦 Delivery is free. We’ll contact you as soon as your order is ready for pickup.",
       "errors": {
         "empty": "Your cart is empty.",
-        "common": "Something went wrong. Please try again."
+        "common": "Something went wrong while placing the order. Please try again shortly."
       },
       "meta": {
-        "title": "Checkout | Amoda",
-        "description": "Enter your contact details to complete your purchase."
+        "title": "Checkout | Amoda Angola",
+        "description": "Enter your contact details to finish your online order at Amoda and get free delivery in Luanda."
       },
       "summary": {
         "title": "Order summary",
-        "items": "Items",
-        "total": "Total"
+        "items": "Cart items",
+        "total": "Total amount"
       }
     }
   }
@@ -199,6 +201,15 @@ const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} A
           icon="i-heroicons-exclamation-triangle"
         >
           {{ message }}
+        </UAlert>
+
+        <UAlert
+          color="success"
+          variant="subtle"
+          icon="i-heroicons-check-circle"
+          class="mt-4 text-sm leading-relaxed"
+        >
+          {{ t('checkout.note') }}
         </UAlert>
       </UForm>
     </UPageBody>

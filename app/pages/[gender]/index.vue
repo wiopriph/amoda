@@ -4,14 +4,15 @@ definePageMeta({ name: 'gender' });
 const { t } = useI18n();
 const route = useRoute();
 const localeRoute = useLocaleRoute();
+const requestURL = useRequestURL();
 
 const limit = 24;
-const page = computed(() => Math.max(1, Number(route.query.page || 1)));
+const page = ref(Math.max(1, Number(route.query.page || 1)));
 
 const { data, error } = await useFetch('/api/catalog/list', {
   query: {
     gender: route.params.gender,
-    page: page.value,
+    page,
     limit,
     q: route.query.q,
     brand_id: route.query.brand_id,
@@ -26,19 +27,15 @@ if (error.value || !data.value) {
   throw createError({ statusCode: 404 });
 }
 
-const items = computed(() => data.value?.items || []);
+const products = computed(() => data.value?.items || []);
 const total = computed(() => data.value?.total || 0);
 const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)));
+const makePaginationTo = (pageNum: number) => ({ query: { page: pageNum } });
 
-const setPage = (next: number) =>
-  navigateTo({ query: { ...route.query, page: next } });
+const humanGender = computed(() => t(route.params.gender as string));
 
-const genderHuman = computed(() => t(route.params.gender as string));
-
-const pageTitle = computed(() => `${t('gender.seoTitle', { gender: genderHuman.value })} | Amoda`);
-const pageDescription = computed(() =>
-  t('gender.seoDescription', { gender: genderHuman.value }),
-);
+const pageTitle = computed(() => `${t('gender.seoTitle', { gender: humanGender.value })} | Amoda`);
+const pageDescription = computed(() => t('gender.seoDescription', { gender: humanGender.value }));
 
 const breadcrumbsUi = computed(() =>
   (data.value?.breadcrumbs || []).map(b => ({
@@ -47,7 +44,6 @@ const breadcrumbsUi = computed(() =>
   })),
 );
 
-const requestURL = useRequestURL();
 const breadcrumbJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -59,6 +55,36 @@ const breadcrumbJsonLd = computed(() => ({
   })),
 }));
 
+const itemListJsonLd = computed(() => {
+  const baseUrl = requestURL.origin;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: pageTitle.value,
+    itemListOrder: 'http://schema.org/ItemListOrderAscending',
+    numberOfItems: products.value.length,
+    itemListElement: products.value.map((p: any, index: number) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: new URL(localeRoute({ name: 'product-slug', params: { slug: p.slug } })?.fullPath || '/', baseUrl).href,
+      item: {
+        '@type': 'Product',
+        name: p.title,
+        image: p.images?.[0]?.url || 'https://moda.ao/placeholder.png',
+        brand: p.brand_name || undefined,
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'AOA',
+          price: p.price || 0,
+          availability: 'https://schema.org/InStock',
+          url: new URL(localeRoute({ name: 'product-slug', params: { slug: p.slug } })?.fullPath || '/', baseUrl).href,
+        },
+      },
+    })),
+  };
+});
+
 useHead(() => ({
   title: pageTitle.value,
   meta: [
@@ -67,10 +93,8 @@ useHead(() => ({
     { property: 'og:description', content: pageDescription.value },
   ],
   script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify(breadcrumbJsonLd.value),
-    },
+    { type: 'application/ld+json', innerHTML: JSON.stringify(breadcrumbJsonLd.value) },
+    { type: 'application/ld+json', innerHTML: JSON.stringify(itemListJsonLd.value) },
   ],
 }));
 </script>
@@ -82,10 +106,10 @@ useHead(() => ({
     "men": "Homens",
     "kids": "Crianças",
     "gender": {
-      "searchPlaceholder": "Pesquisar produtos...",
+      "searchPlaceholder": "Pesquisar roupas, sapatos e acessórios…",
       "empty": "Não há produtos nesta seleção ainda.",
-      "seoTitle": "{gender}",
-      "seoDescription": "Explore a seleção de {gender} na Amoda: roupas, calçado e acessórios com entrega rápida.",
+      "seoTitle": "Moda {gender} em Angola — comprar online com entrega gratuita",
+      "seoDescription": "Explore {gender} na Amoda: roupas, calçado e acessórios com entrega gratuita em Luanda. Encomende online, experimente no ponto e pague apenas se gostar.",
       "filters": "Filtros"
     }
   },
@@ -94,10 +118,10 @@ useHead(() => ({
     "men": "Men",
     "kids": "Kids",
     "gender": {
-      "searchPlaceholder": "Search products...",
+      "searchPlaceholder": "Search clothes, shoes and accessories…",
       "empty": "No products found here yet.",
-      "seoTitle": "{gender}",
-      "seoDescription": "Explore {gender} selection on Amoda: apparel, shoes and accessories with fast delivery.",
+      "seoTitle": "{gender} fashion in Angola — buy online with free delivery",
+      "seoDescription": "Shop {gender} at Amoda: apparel, shoes and accessories with free delivery in Luanda. Order online, try at pickup and pay only if you love it.",
       "filters": "Filters"
     }
   }
@@ -113,8 +137,9 @@ useHead(() => ({
     </template>
 
     <UPageHeader
-      :title="genderHuman"
-      :description="t('gender.seoDescription', { gender: genderHuman })"
+      :title="humanGender"
+      :description="t('gender.seoDescription', { gender: humanGender })"
+      :ui="{ title: 'text-xl md:text-2xl font-semibold' }"
     >
       <template #headline>
         <UBreadcrumb :items="breadcrumbsUi" />
@@ -123,7 +148,7 @@ useHead(() => ({
 
     <UPageBody>
       <div
-        v-if="!items.length"
+        v-if="!products.length"
         class="text-gray-500 text-sm"
       >
         {{ t('gender.empty') }}
@@ -134,7 +159,7 @@ useHead(() => ({
         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4"
       >
         <UBlogPost
-          v-for="product in items"
+          v-for="product in products"
           :key="product.id"
           :title="product.title"
           :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
@@ -154,9 +179,10 @@ useHead(() => ({
         class="mt-6 flex justify-center"
       >
         <UPagination
-          v-model="page"
-          :pageCount="pages"
-          @update:model-value="setPage"
+          v-model:page="page"
+          :itemsPerPage="limit"
+          :total="total"
+          :to="makePaginationTo"
         />
       </div>
     </UPageBody>

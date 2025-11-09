@@ -110,7 +110,7 @@ const handleSave = async () => {
         v-model="product.description"
         :rows="6"
         class="w-full"
-        @input="handleInput('description', $event)"
+        @update:model-value="handleInput('description', $event)"
       />
     </UFormField>
 
@@ -121,7 +121,7 @@ const handleSave = async () => {
       <UCheckbox
         v-model="product.active"
         :label="t('productForm.active')"
-        @change="handleInput('active', $event)"
+        @update:model-value="handleInput('active', $event)"
       />
     </UFormField>
 

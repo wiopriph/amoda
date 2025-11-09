@@ -7,7 +7,18 @@ definePageMeta({ name: 'admin-products', layout: 'admin', middleware: 'admin' })
 const { t } = useI18n();
 const localeRoute = useLocaleRoute();
 
-/** types */
+useHead(() => ({
+  title: `${t('products.title')} | Amoda Admin`,
+  meta: [
+    { name: 'description', content: t('products.description') },
+    { property: 'og:title', content: `${t('products.title')} | Amoda Admin` },
+    { property: 'og:description', content: t('products.description') },
+    { property: 'twitter:title', content: `${t('products.title')} | Amoda Admin` },
+    { property: 'twitter:description', content: t('products.description') },
+    { name: 'robots', content: 'noindex, nofollow' },
+  ],
+}));
+
 type VariantImage = { url: string };
 type VariantSize = { id: number; size: string; stock?: number | null };
 type Variant = {
@@ -28,13 +39,11 @@ type Product = {
   variants: Variant[]
 };
 
-/** query/pagination */
 const route = useRoute();
 const limit = 20;
 const page = ref(Math.max(1, Number(route.query.page || 1)));
 const search = ref(String(route.query.q || ''));
 
-/** simple debounce util */
 function debounce<T extends(...args: any[]) => void>(fn: T, delay = 400) {
   let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -47,14 +56,12 @@ function debounce<T extends(...args: any[]) => void>(fn: T, delay = 400) {
   };
 }
 
-/** debounce search */
 const handleSearch = debounce(() => {
   navigateTo(localeRoute({ query: { ...route.query, page: 1, q: search.value || undefined } }));
 }, 400);
 
 watch(search, handleSearch);
 
-/** fetch */
 const { data, error } = await useFetch('/api/admin/products/list', {
   query: { page, limit, q: search },
   watch: [page],
@@ -68,7 +75,6 @@ const expanded = ref<Record<string, boolean>>({});
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
 
-/** table columns */
 const columns: TableColumn<Product & { variantsCount: number; brandName: string }>[] = [
   {
     id: 'expand',
@@ -275,7 +281,6 @@ const paginationTo = (page: number)  => ({ query: { page } });
                   :key="variant.id"
                   class="flex items-start gap-4 rounded-lg border border-gray-200 bg-gray-50 p-3"
                 >
-                  <!-- images -->
                   <div class="shrink-0">
                     <p class="text-[11px] text-gray-500 mb-1">
                       {{ t('products.images') }}
@@ -298,7 +303,6 @@ const paginationTo = (page: number)  => ({ query: { page } });
                     </div>
                   </div>
 
-                  <!-- info -->
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
                       <span class="font-medium">{{ `#${variant.id}` }} — {{ variant.color || '—' }}</span>

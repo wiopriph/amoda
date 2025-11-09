@@ -22,6 +22,14 @@ type Breadcrumb = {
   to: { name: string; params: Record<string, string> }
 };
 
+type Category = {
+  id: number
+  name: string
+  slug: string
+  parent_id: number | null
+  gender_id: number
+};
+
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseClient(event);
   const query = getQuery(event) as QueryParams;
@@ -55,9 +63,7 @@ export default defineEventHandler(async (event) => {
 
   let categoryId: number | null = null;
   let categoryGenderId: number | null = null;
-  let currentCategory:
-    | { id: number; name: string; slug: string; parent_id: number | null; gender_id: number }
-    | null = null;
+  let currentCategory: Category | null = null;
 
   if (query.slug) {
     const { data: categoryRow, error: categoryError } = await supabase
@@ -277,10 +283,11 @@ export default defineEventHandler(async (event) => {
   });
 
   return {
+    breadcrumbs,
+    category: currentCategory,
     items,
     total: totalCount || 0,
     page,
     limit,
-    breadcrumbs,
   };
 });

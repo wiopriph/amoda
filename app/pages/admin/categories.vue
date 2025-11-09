@@ -4,6 +4,18 @@ definePageMeta({ name: 'admin-categories', layout: 'admin', middleware: 'admin' 
 const { t } = useI18n();
 const toast = useToast();
 
+useHead(() => ({
+  title: `${t('categories.title')} | Amoda Admin`,
+  meta: [
+    { name: 'description', content: t('categories.description') },
+    { property: 'og:title', content: `${t('categories.title')} | Amoda Admin` },
+    { property: 'og:description', content: t('categories.description') },
+    { property: 'twitter:title', content: `${t('categories.title')} | Amoda Admin` },
+    { property: 'twitter:description', content: t('categories.description') },
+    { name: 'robots', content: 'noindex, nofollow' },
+  ],
+}));
+
 type Gender = {
   id: number
   name: string

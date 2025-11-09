@@ -24,17 +24,19 @@ const steps = computed(() =>
     description: rt(s.desc),
   })),
 );
+
+const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
 </script>
 
 <i18n lang="json">
 {
   "pt": {
     "home": {
-      "title": "Amoda — Loja online",
-      "desc": "Compre roupas, sapatos e acessórios online.",
-      "heroTitle": "Moda fácil e segura para todos os dias",
-      "heroSubtitle": "Encomende online, experimente no ponto de entrega e pague apenas se gostar.",
-      "heroButton": "Comece agora",
+      "title": "Moda Angola — Comprar roupas online com entrega gratuita | Amoda",
+      "desc": "Loja de roupas online em Angola. Compre roupas femininas, masculinas e infantis com entrega gratuita em Luanda. Moda acessível, rápida e segura — experimente antes de pagar.",
+      "heroTitle": "Moda online fácil e segura",
+      "heroSubtitle": "Compre roupas online em Angola, receba no ponto de entrega e pague apenas se gostar.",
+      "heroButton": "Comprar agora",
       "women": "Mulheres",
       "men": "Homens",
       "kids": "Crianças",
@@ -43,46 +45,54 @@ const steps = computed(() =>
       "features": {
         "delivery": {
           "title": "Entrega gratuita",
-          "desc": "Levante o seu pedido no ponto de entrega sem custos adicionais."
+          "desc": "Recolha o seu pedido em Luanda sem custos adicionais."
         },
         "secure": {
           "title": "Compra segura",
-          "desc": "Pague apenas depois de verificar o produto pessoalmente."
+          "desc": "Pague apenas depois de experimentar e confirmar o produto."
         },
         "cheap": {
-          "title": "Melhores preços",
-          "desc": "Moda acessível com a melhor relação qualidade-preço."
+          "title": "Preços acessíveis",
+          "desc": "As melhores ofertas em roupas e moda online em Angola."
         }
       },
-      "chooseGender": "Explore por categoria",
+      "chooseGender": "Compre por categoria",
       "how": {
         "title": "Como funciona?",
         "steps": [
           {
             "icon": "i-lucide-search",
-            "title": "Escolha os produtos online",
-            "desc": "Encontre o que gosta na Amoda e adicione ao carrinho."
+            "title": "Escolha online",
+            "desc": "Veja roupas, sapatos e acessórios e adicione ao carrinho."
           },
           {
             "icon": "i-lucide-truck",
-            "title": "Envie para o ponto de entrega",
+            "title": "Entrega no ponto",
             "desc": "Encomende gratuitamente para o ponto de entrega mais próximo."
           },
           {
             "icon": "i-lucide-shopping-bag",
             "title": "Experimente e pague",
-            "desc": "Veja, experimente e pague apenas se quiser ficar com o produto."
+            "desc": "Experimente no local e pague apenas se quiser ficar com o produto."
           }
+        ]
+      },
+      "seo": {
+        "h1": "Roupas online em Angola com entrega gratuita — Amoda",
+        "text": [
+          "A Amoda é a loja de moda online nº1 em Angola. Aqui pode comprar roupas femininas, masculinas e infantis com entrega gratuita em Luanda.",
+          "Faça as suas compras online, levante no ponto de entrega e pague apenas se gostar — simples, rápido e seguro.",
+          "Descubra as últimas tendências em moda Angola, com qualidade, estilo e os melhores preços. Comprar roupas online nunca foi tão fácil."
         ]
       }
     }
   },
   "en": {
     "home": {
-      "title": "Amoda — Online store",
-      "desc": "Shop clothes, shoes and accessories online.",
-      "heroTitle": "Simple, safe, everyday fashion",
-      "heroSubtitle": "Order online, try at pickup point and pay only if you love it.",
+      "title": "Fashion Angola — Buy clothes online with free delivery | Amoda",
+      "desc": "Online clothing store in Angola. Shop women’s, men’s and kids’ fashion with free delivery in Luanda. Affordable, safe and easy — try before you pay.",
+      "heroTitle": "Easy and safe online fashion",
+      "heroSubtitle": "Buy clothes online in Angola, get free delivery and pay only if you love it.",
       "heroButton": "Shop now",
       "women": "Women",
       "men": "Men",
@@ -91,37 +101,45 @@ const steps = computed(() =>
       "featuresTitle": "Why choose Amoda?",
       "features": {
         "delivery": {
-          "title": "Free pickup delivery",
-          "desc": "Collect your order at a pickup point with no extra cost."
+          "title": "Free delivery",
+          "desc": "Collect your order in Luanda with no extra fees."
         },
         "secure": {
-          "title": "Safe shopping",
-          "desc": "Pay only after checking your product in person."
+          "title": "Secure shopping",
+          "desc": "Try on first — pay only if you decide to keep it."
         },
         "cheap": {
-          "title": "Affordable prices",
-          "desc": "Quality fashion at fair prices."
+          "title": "Best prices",
+          "desc": "Affordable fashion and clothing online in Angola."
         }
       },
-      "chooseGender": "Explore by category",
+      "chooseGender": "Shop by category",
       "how": {
-        "title": "How it works?",
+        "title": "How it works",
         "steps": [
           {
             "icon": "i-lucide-search",
-            "title": "Choose products online",
-            "desc": "Find what you love on Amoda and add it to your cart."
+            "title": "Choose online",
+            "desc": "Browse clothes, shoes and accessories and add to your cart."
           },
           {
             "icon": "i-lucide-truck",
-            "title": "Send to pickup point",
-            "desc": "Order for free to the nearest pickup location."
+            "title": "Free pickup delivery",
+            "desc": "Order to the nearest pickup point in Luanda for free."
           },
           {
             "icon": "i-lucide-shopping-bag",
             "title": "Try and pay later",
-            "desc": "Inspect, try on, and pay only if you want to keep it."
+            "desc": "Try on your order and pay only if you love it."
           }
+        ]
+      },
+      "seo": {
+        "h1": "Online clothing in Angola — Free delivery with Amoda",
+        "text": [
+          "Amoda is Angola’s leading online fashion store where you can buy women’s, men’s and kids’ clothes with free delivery in Luanda.",
+          "Shop online, pick up your order locally, and pay only for what you keep — fast, safe and convenient.",
+          "Find the latest Angola fashion trends, stylish outfits and great prices. Online clothes shopping made simple."
         ]
       }
     }
@@ -129,12 +147,12 @@ const steps = computed(() =>
 }
 </i18n>
 
+
 <template>
   <UPage>
     <UPageHeader :title="t('home.title')" />
 
     <UPageBody>
-      <!-- Hero -->
       <UPageCTA
         :title="t('home.heroTitle')"
         :description="t('home.heroSubtitle')"
@@ -155,7 +173,6 @@ const steps = computed(() =>
         />
       </UPageCTA>
 
-      <!-- Преимущества -->
       <UPageSection
         :title="t('home.featuresTitle')"
         :features="[
@@ -180,7 +197,6 @@ const steps = computed(() =>
         }"
       />
 
-      <!-- Как работает -->
       <UPageSection
         :title="t('home.how.title')"
         :ui="{
@@ -194,7 +210,6 @@ const steps = computed(() =>
         />
       </UPageSection>
 
-      <!-- Категории -->
       <UPageSection
         :title="t('home.chooseGender')"
         :ui="{
@@ -225,7 +240,6 @@ const steps = computed(() =>
         </div>
       </UPageSection>
 
-      <!-- Витрина -->
       <UPageSection
         :title="t('home.showcase')"
         :ui="{
@@ -258,6 +272,22 @@ const steps = computed(() =>
             variant="outline"
           />
         </UBlogPosts>
+      </UPageSection>
+
+      <UPageSection
+        :title="t('home.seo.h1')"
+        :ui="{
+          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col py-8 sm:py-10 lg:py-12 gap-4 sm:gap-5',
+          title: 'text-md font-semibold'
+        }"
+      >
+        <div class="prose prose-sm sm:prose-base max-w-none">
+          <p
+            v-for="(p, i) in seoParagraphs"
+            :key="i"
+            v-text="rt(p)"
+          />
+        </div>
       </UPageSection>
     </UPageBody>
   </UPage>

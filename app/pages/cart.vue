@@ -41,39 +41,39 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
 
 <i18n lang="json">
 {
-  "en": {
-    "cart": {
-      "title": "Cart",
-      "empty": "Your cart is empty. Browse our categories and add items to start shopping!",
-      "women": "Women",
-      "men": "Men",
-      "kids": "Kids",
-      "priceEach": "Price each",
-      "remove": "Remove",
-      "total": "Total",
-      "checkout": "Checkout Now",
-      "delivery": "Free delivery on all orders today! 🚚",
-      "meta": {
-        "title": "Cart | Amoda",
-        "description": "Review your selected items before checkout."
-      }
-    }
-  },
   "pt": {
     "cart": {
-      "title": "Carrinho",
-      "empty": "O seu carrinho está vazio. Explore as nossas categorias e adicione produtos ao carrinho para começar!",
+      "title": "Carrinho de compras",
+      "empty": "O seu carrinho está vazio. Explore as categorias e adicione roupas, sapatos ou acessórios para continuar a sua compra online.",
       "women": "Mulheres",
       "men": "Homens",
       "kids": "Crianças",
       "priceEach": "Preço por unidade",
       "remove": "Remover",
       "total": "Total",
-      "checkout": "Finalizar agora",
-      "delivery": "Entrega gratuita em todas as encomendas de hoje! 🚚",
+      "checkout": "Finalizar compra",
+      "delivery": "🚚 Entrega gratuita em Luanda — sem pagamento antecipado. Encomende online e pague só ao levantar.",
       "meta": {
-        "title": "Carrinho | Amoda",
-        "description": "Revise os produtos selecionados antes de finalizar a compra."
+        "title": "Carrinho | Amoda Angola",
+        "description": "Revise os seus produtos selecionados antes de concluir a compra online. Entrega gratuita e compra segura em Luanda."
+      }
+    }
+  },
+  "en": {
+    "cart": {
+      "title": "Shopping Cart",
+      "empty": "Your cart is empty. Browse categories and add clothes, shoes or accessories to start your online shopping.",
+      "women": "Women",
+      "men": "Men",
+      "kids": "Kids",
+      "priceEach": "Price per item",
+      "remove": "Remove",
+      "total": "Total",
+      "checkout": "Proceed to checkout",
+      "delivery": "🚚 Free delivery in Luanda — no prepayment. Order online and pay only when you pick up.",
+      "meta": {
+        "title": "Cart | Amoda Angola",
+        "description": "Review your selected products before completing your online order. Free delivery and secure checkout in Luanda."
       }
     }
   }
@@ -85,7 +85,6 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
     <UPageHeader :title="t('cart.title')" />
 
     <UPageBody class="max-w-3xl mx-auto">
-      <!-- Пустая корзина -->
       <div
         v-if="!items.length"
         class="text-center py-16 text-gray-600 space-y-4"
@@ -110,7 +109,6 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
         </div>
       </div>
 
-      <!-- Содержимое корзины -->
       <div
         v-else
         class="space-y-4"

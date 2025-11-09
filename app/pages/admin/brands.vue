@@ -6,6 +6,18 @@ definePageMeta({ name: 'admin-brands', layout: 'admin', middleware: 'admin' });
 
 const { t } = useI18n();
 
+useHead(() => ({
+  title: `${t('admin.brands.title')} | Amoda Admin`,
+  meta: [
+    { name: 'description', content: t('admin.brands.description') },
+    { property: 'og:title', content: `${t('admin.brands.title')} | Amoda Admin` },
+    { property: 'og:description', content: t('admin.brands.description') },
+    { property: 'twitter:title', content: `${t('admin.brands.title')} | Amoda Admin` },
+    { property: 'twitter:description', content: t('admin.brands.description') },
+    { name: 'robots', content: 'noindex, nofollow' },
+  ],
+}));
+
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
 

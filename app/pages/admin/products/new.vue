@@ -2,17 +2,31 @@
 definePageMeta({ name: 'admin-products-new', layout: 'admin', middleware: 'admin' });
 
 const { t } = useI18n();
-const router = useRouter();
+
+useHead(() => ({
+  title: `${t('productNew.title')} | Amoda Admin`,
+  meta: [
+    { name: 'description', content: t('productNew.description') },
+    { property: 'og:title', content: `${t('productNew.title')} | Amoda Admin` },
+    { property: 'og:description', content: t('productNew.description') },
+    { property: 'twitter:title', content: `${t('productNew.title')} | Amoda Admin` },
+    { property: 'twitter:description', content: t('productNew.description') },
+    { name: 'robots', content: 'noindex, nofollow' },
+  ],
+}));
+
 const { data: brands } = await useFetch('/api/admin/brands/list');
 const { data: categories } = await useFetch('/api/admin/categories/list');
 
 const form = reactive({
   title: '',
-  brand_id: null,
-  primary_category_id: null,
+  brand_id: null as number | null,
+  primary_category_id: null as number | null,
   description: '',
   active: true,
 });
+
+const localeRoute = useLocaleRoute();
 
 const saveProduct = async (product: any) => {
   const res = await $fetch('/api/admin/products/save', {
@@ -20,7 +34,10 @@ const saveProduct = async (product: any) => {
     body: product,
   });
 
-  router.push(`/admin/products/${res.id}`);
+  navigateTo(localeRoute({
+    name: 'admin-products-edit',
+    params: { id: res.id },
+  }));
 };
 </script>
 

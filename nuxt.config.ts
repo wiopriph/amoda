@@ -4,10 +4,6 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
-  ui: {
-    colorMode: false,
-  },
-
   i18n: {
     locales: [
       {
@@ -49,10 +45,6 @@ export default defineNuxtConfig({
     },
   },
 
-  supabase: {
-    redirect: false,
-  },
-
   sitemap: {
     xsl: false,
     cacheMaxAgeSeconds: 86400,
@@ -76,5 +68,13 @@ export default defineNuxtConfig({
         sources: ['/sitemap/products'],
       },
     },
+  },
+
+  supabase: {
+    redirect: false,
+  },
+
+  ui: {
+    colorMode: false,
   },
 });
