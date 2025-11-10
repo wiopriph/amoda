@@ -45,9 +45,6 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
     "cart": {
       "title": "Carrinho de compras",
       "empty": "O seu carrinho está vazio. Explore as categorias e adicione roupas, sapatos ou acessórios para continuar a sua compra online.",
-      "women": "Mulheres",
-      "men": "Homens",
-      "kids": "Crianças",
       "priceEach": "Preço por unidade",
       "remove": "Remover",
       "total": "Total",
@@ -63,9 +60,6 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
     "cart": {
       "title": "Shopping Cart",
       "empty": "Your cart is empty. Browse categories and add clothes, shoes or accessories to start your online shopping.",
-      "women": "Women",
-      "men": "Men",
-      "kids": "Kids",
       "priceEach": "Price per item",
       "remove": "Remove",
       "total": "Total",
@@ -92,21 +86,6 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
         <p class="text-base">
           {{ t('cart.empty') }}
         </p>
-
-        <div class="flex justify-center gap-2">
-          <UButton
-            v-for="gender in [
-              { key: 'women', val: 'women' },
-              { key:'men', val: 'men' },
-              { key: 'kids', val: 'kids' }
-            ]"
-            :key="gender.key"
-            :to="localeRoute({ name: 'gender', params: { gender: gender.val } })"
-            variant="soft"
-          >
-            {{ t(`cart.${gender.key}`) }}
-          </UButton>
-        </div>
       </div>
 
       <div

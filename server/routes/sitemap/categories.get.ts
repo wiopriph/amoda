@@ -2,56 +2,35 @@ import { defineSitemapEventHandler } from '#imports';
 import { serverSupabaseClient } from '#supabase/server';
 
 
-type GenderRow = { id: number; code: string };
-type CategoryRow = { id: number; slug: string; gender_id: number };
+type CategoryRow = { id: number; slug: string };
 
 export default defineSitemapEventHandler(async (event) => {
   const db = await serverSupabaseClient(event);
 
-  const [gendersRes, categoriesRes] = await Promise.all([
-    db.from('genders').select('id, code'),
-    db.from('categories').select('id, slug, gender_id')
-      .order('slug', { ascending: true }),
-  ]);
+  const { data: categories, error } = await db
+    .from('categories')
+    .select('id, slug')
+    .order('slug', { ascending: true });
 
-  if (gendersRes.error) {
-    throw createError({ statusCode: 500, statusMessage: gendersRes.error.message });
+  if (error) {
+    throw createError({ statusCode: 500, statusMessage: error.message });
   }
 
-  if (categoriesRes.error) {
-    throw createError({ statusCode: 500, statusMessage: categoriesRes.error.message });
-  }
-
-  const genders = (gendersRes.data || []) as GenderRow[];
-  const categories = (categoriesRes.data || []) as CategoryRow[];
-
-  if (!genders.length || !categories.length) {
-    return [];
-  }
-
-  const genderCodeById = new Map<number, string>(genders.map(g => [g.id, g.code]));
+  if (!categories?.length) return [];
 
   const locales: string[] = ['', 'en'];
-  const CHANGEFREQ = 'weekly';
-  const PRIORITY = 0.6;
+  const CHANGEFREQ = 'weekly' as const;
+  const PRIORITY = 0.6 as const;
 
-  const urls: { loc: string; changefreq: typeof CHANGEFREQ; priority: typeof PRIORITY }[] = [];
-
-  for (const category of categories) {
-    const genderCode = genderCodeById.get(category.gender_id);
-
-    if (!genderCode) continue;
-
-    for (const locale of locales) {
+  return categories.flatMap((category) =>
+    locales.map((locale) => {
       const prefix = locale ? `/${locale}` : '';
 
-      urls.push({
-        loc: `${prefix}/${genderCode}/${category.slug}`,
+      return {
+        loc: `${prefix}/category/${category.slug}`,
         changefreq: CHANGEFREQ,
         priority: PRIORITY,
-      });
-    }
-  }
-
-  return urls;
+      };
+    }),
+  );
 });

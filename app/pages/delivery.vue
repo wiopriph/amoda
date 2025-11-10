@@ -369,7 +369,7 @@ const faqs = computed(() => tm('delivery.faq.items').map((faq: any) => ({
             {
               label: t('delivery.cta.button'),
               color: 'primary',
-              to: localeRoute({ name: 'gender', params: { gender: 'women' } })
+              to: localeRoute({ name: 'index' })
             }
           ]"
           orientation="horizontal"

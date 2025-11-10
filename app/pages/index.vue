@@ -33,13 +33,10 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
   "pt": {
     "home": {
       "title": "Moda Angola — Comprar roupas online com entrega gratuita | Amoda",
-      "desc": "Loja de roupas online em Angola. Compre roupas femininas, masculinas e infantis com entrega gratuita em Luanda. Moda acessível, rápida e segura — experimente antes de pagar.",
+      "desc": "Loja de roupas online em Angola. Compre roupas com entrega gratuita em Luanda. Moda acessível, rápida e segura — experimente antes de pagar.",
       "heroTitle": "Moda online fácil e segura",
       "heroSubtitle": "Compre roupas online em Angola, receba no ponto de entrega e pague apenas se gostar.",
       "heroButton": "Comprar agora",
-      "women": "Mulheres",
-      "men": "Homens",
-      "kids": "Crianças",
       "showcase": "Em destaque",
       "featuresTitle": "Por que escolher a Amoda?",
       "features": {
@@ -56,7 +53,6 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           "desc": "As melhores ofertas em roupas e moda online em Angola."
         }
       },
-      "chooseGender": "Compre por categoria",
       "how": {
         "title": "Como funciona?",
         "steps": [
@@ -80,9 +76,9 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
       "seo": {
         "h1": "Roupas online em Angola com entrega gratuita — Amoda",
         "text": [
-          "A Amoda é a loja de moda online nº1 em Angola. Aqui pode comprar roupas femininas, masculinas e infantis com entrega gratuita em Luanda.",
+          "A Amoda é a loja de moda online nº1 em Angola.",
           "Faça as suas compras online, levante no ponto de entrega e pague apenas se gostar — simples, rápido e seguro.",
-          "Descubra as últimas tendências em moda Angola, com qualidade, estilo e os melhores preços. Comprar roupas online nunca foi tão fácil."
+          "Descubra as últimas tendências em moda Angola, com qualidade, estilo e os melhores preços."
         ]
       }
     }
@@ -90,13 +86,10 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
   "en": {
     "home": {
       "title": "Fashion Angola — Buy clothes online with free delivery | Amoda",
-      "desc": "Online clothing store in Angola. Shop women’s, men’s and kids’ fashion with free delivery in Luanda. Affordable, safe and easy — try before you pay.",
+      "desc": "Online clothing store in Angola. Free delivery in Luanda. Affordable, safe and easy — try before you pay.",
       "heroTitle": "Easy and safe online fashion",
       "heroSubtitle": "Buy clothes online in Angola, get free delivery and pay only if you love it.",
       "heroButton": "Shop now",
-      "women": "Women",
-      "men": "Men",
-      "kids": "Kids",
       "showcase": "Featured",
       "featuresTitle": "Why choose Amoda?",
       "features": {
@@ -113,7 +106,6 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           "desc": "Affordable fashion and clothing online in Angola."
         }
       },
-      "chooseGender": "Shop by category",
       "how": {
         "title": "How it works",
         "steps": [
@@ -137,16 +129,15 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
       "seo": {
         "h1": "Online clothing in Angola — Free delivery with Amoda",
         "text": [
-          "Amoda is Angola’s leading online fashion store where you can buy women’s, men’s and kids’ clothes with free delivery in Luanda.",
+          "Amoda is Angola’s leading online fashion store.",
           "Shop online, pick up your order locally, and pay only for what you keep — fast, safe and convenient.",
-          "Find the latest Angola fashion trends, stylish outfits and great prices. Online clothes shopping made simple."
+          "Find the latest Angola fashion trends, stylish outfits and great prices."
         ]
       }
     }
   }
 }
 </i18n>
-
 
 <template>
   <UPage>
@@ -160,7 +151,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           {
             label: t('home.heroButton'),
             color: 'primary',
-            to: localeRoute({ name: 'gender', params: { gender: 'women' } })
+            to: localeRoute({ name: 'index' })
           }
         ]"
         orientation="horizontal"
@@ -208,36 +199,6 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           :items="steps"
           color="primary"
         />
-      </UPageSection>
-
-      <UPageSection
-        :title="t('home.chooseGender')"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      >
-        <div class="grid grid-cols-3 gap-2 sm:gap-3">
-          <NuxtLink
-            class="p-4 rounded bg-gray-50 hover:bg-primary/5 text-center font-medium transition"
-            :to="localeRoute({ name: 'gender', params: { gender: 'women' } })"
-          >
-            {{ t('home.women') }}
-          </NuxtLink>
-
-          <NuxtLink
-            class="p-4 rounded bg-gray-50 hover:bg-primary/5 text-center font-medium transition"
-            :to="localeRoute({ name: 'gender', params: { gender: 'men' } })"
-          >
-            {{ t('home.men') }}
-          </NuxtLink>
-
-          <NuxtLink
-            class="p-4 rounded bg-gray-50 hover:bg-primary/5 text-center font-medium transition"
-            :to="localeRoute({ name: 'gender', params: { gender: 'kids' } })"
-          >
-            {{ t('home.kids') }}
-          </NuxtLink>
-        </div>
       </UPageSection>
 
       <UPageSection

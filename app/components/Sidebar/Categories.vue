@@ -1,10 +1,7 @@
 <script setup lang="ts">
-const props = defineProps<{ gender: string }>();
-
 const route = useRoute();
 
 const { data: categories } = await useFetch('/api/catalog/categories', {
-  query: { gender: props.gender },
   watch: [() => route.fullPath],
 });
 </script>
@@ -16,7 +13,6 @@ const { data: categories } = await useFetch('/api/catalog/categories', {
         v-for="cat in categories"
         :key="cat.id"
         :category="cat"
-        :gender="props.gender"
       />
     </nav>
   </aside>

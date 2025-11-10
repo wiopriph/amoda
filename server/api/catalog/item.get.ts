@@ -2,26 +2,22 @@ import { serverSupabaseClient } from '#supabase/server';
 
 
 type CategoryRow = {
-  id: number;
-  name: string;
-  slug: string;
-  parent_id: number | null;
-  gender?: {
-    code: string;
-    name: string;
-  }
+  id: number
+  name: string
+  slug: string
+  parent_id: number | null
 };
 
 type VariantImageRow = {
-  url: string;
-  position: number | null;
-  alt: string | null;
+  url: string
+  position: number | null
+  alt: string | null
 };
 
 type VariantSizeRow = {
-  id: number;
-  size: string;
-  stock: number | null;
+  id: number
+  size: string
+  stock: number | null
 };
 
 export default defineEventHandler(async (event) => {
@@ -38,8 +34,7 @@ export default defineEventHandler(async (event) => {
       *,
       brand:brands ( id, name, slug ),
       primary_category:categories!products_primary_category_id_fkey (
-        id, name, slug, parent_id,
-        gender:genders ( code, name )
+        id, name, slug, parent_id
       ),
       variants:product_variants (
         id, color, price, active,
@@ -61,7 +56,7 @@ export default defineEventHandler(async (event) => {
 
   const parentChain: CategoryRow[] = [];
 
-  let cursor: CategoryRow | null = productRow.primary_category as CategoryRow | null;
+  let cursor: CategoryRow | null = (productRow.primary_category as CategoryRow) ?? null;
 
   while (cursor?.parent_id) {
     const { data: parentCategory, error: parentError } = await supabase
@@ -90,7 +85,6 @@ export default defineEventHandler(async (event) => {
       name: productRow.primary_category.name,
       slug: productRow.primary_category.slug,
       parent_id: productRow.primary_category.parent_id,
-      gender: productRow.primary_category.gender,
     });
   }
 
@@ -109,8 +103,7 @@ export default defineEventHandler(async (event) => {
         [...v.images].sort((a, b) => (a?.position ?? 0) - (b?.position ?? 0)) :
         [];
       const sizesSorted = Array.isArray(v.sizes) ?
-        [...v.sizes].sort((a, b) => String(a.size)
-          .localeCompare(String(b.size))) :
+        [...v.sizes].sort((a, b) => String(a.size).localeCompare(String(b.size))) :
         [];
 
       return {
@@ -122,32 +115,18 @@ export default defineEventHandler(async (event) => {
       };
     });
 
-  const currentGender = (productRow.primary_category as CategoryRow | null)?.gender;
-
-  const genderCode = currentGender?.code || 'women';
-  const genderName = currentGender?.name || 'women';
-
   const breadcrumbs = [
     {
-      label: genderName,
-      to: {
-        name: 'gender',
-        params: { gender: genderCode },
-      },
+      label: 'Página inicial',
+      to: { name: 'index', params: {} },
     },
-    ...categoriesTrail.map(c => ({
+    ...categoriesTrail.map((c) => ({
       label: c.name,
-      to: {
-        name: 'gender-category',
-        params: { gender: genderCode, category: c.slug },
-      },
+      to: { name: 'category-slug', params: { slug: c.slug } },
     })),
     {
       label: productRow.title,
-      to: {
-        name: 'product-slug',
-        params: { slug: productRow.slug },
-      },
+      to: { name: 'product-slug', params: { slug: productRow.slug } },
     },
   ];
 

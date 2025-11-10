@@ -23,10 +23,7 @@ export default defineEventHandler(async (event) => {
       description,
       active,
       brand:brands ( id, name, slug ),
-      primary_category:categories!products_primary_category_id_fkey (
-        id, name, slug, parent_id,
-        gender:genders ( code )
-      ),
+      primary_category:categories!products_primary_category_id_fkey ( id, name, slug, parent_id ),
       product_variants:product_variants (
         id, color, price, active,
         images:product_variant_images!product_variant_images_variant_id_fkey ( url, position, alt ),
@@ -44,7 +41,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Product not found' });
   }
 
-  // нормализуем структуру
   return {
     id: data.id,
     title: data.title,

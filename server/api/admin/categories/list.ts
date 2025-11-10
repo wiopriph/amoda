@@ -2,27 +2,6 @@ import { serverSupabaseServiceRole } from '#supabase/server';
 import { assertAdmin } from '~~/server/utils/assertAdmin';
 
 
-interface Gender {
-  id: number;
-  name: string;
-  code: string;
-}
-
-interface CategoryRow {
-  id: number;
-  name: string;
-  slug: string;
-  active: boolean;
-  parent_id: number | null;
-  gender_id: number | null;
-  genders?: Gender | null;
-}
-
-interface Category extends Omit<CategoryRow, 'genders'> {
-  gender?: Gender | null;
-  children: Category[];
-}
-
 export default defineEventHandler(async (event) => {
   await assertAdmin(event);
 

@@ -2,25 +2,16 @@ import { serverSupabaseServiceRole } from '#supabase/server';
 import { assertAdmin } from '~~/server/utils/assertAdmin';
 
 
-interface Gender {
-  id: number;
-  name: string;
-  code: string;
-}
-
 interface CategoryRow {
-  id: number;
-  name: string;
-  slug: string;
-  active: boolean;
-  parent_id: number | null;
-  gender_id: number | null;
-  genders?: Gender | null;
+  id: number
+  name: string
+  slug: string
+  active: boolean
+  parent_id: number | null
 }
 
-interface Category extends Omit<CategoryRow, 'genders'> {
-  gender?: Gender | null;
-  children: Category[];
+interface Category extends CategoryRow {
+  children: Category[]
 }
 
 export default defineEventHandler(async (event) => {
@@ -30,15 +21,7 @@ export default defineEventHandler(async (event) => {
 
   const { data, error } = await client
     .from('categories')
-    .select(`
-      id,
-      name,
-      slug,
-      active,
-      parent_id,
-      gender_id,
-      genders ( id, name, code )
-    `)
+    .select('id, name, slug, active, parent_id')
     .order('id', { ascending: true });
 
   if (error) {
@@ -53,26 +36,22 @@ export default defineEventHandler(async (event) => {
   const roots: Category[] = [];
 
   for (const c of data as CategoryRow[]) {
-    map.set(c.id, {
-      ...c,
-      gender: c.genders ?? null,
-      children: [],
-    });
+    map.set(c.id, { ...c, children: [] });
   }
 
   for (const c of data as CategoryRow[]) {
-    const category = map.get(c.id)!;
+    const node = map.get(c.id)!;
 
     if (c.parent_id) {
       const parent = map.get(c.parent_id);
 
       if (parent) {
-        parent.children.push(category);
+        parent.children.push(node);
       } else {
-        roots.push(category);
+        roots.push(node);
       }
     } else {
-      roots.push(category);
+      roots.push(node);
     }
   }
 

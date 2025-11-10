@@ -3,7 +3,6 @@ import { serverSupabaseClient } from '#supabase/server';
 
 type QueryParams = {
   q?: string
-  gender?: string
   slug?: string
   primary_category_id?: number
   brand_id?: string | number
@@ -27,7 +26,6 @@ type Category = {
   name: string
   slug: string
   parent_id: number | null
-  gender_id: number
 };
 
 export default defineEventHandler(async (event) => {
@@ -39,36 +37,13 @@ export default defineEventHandler(async (event) => {
   const rangeFrom = (page - 1) * limit;
   const rangeTo = rangeFrom + limit - 1;
 
-  let genderId: number | null = null;
-  let genderName: string = '';
-
-  if (query.gender) {
-    const { data: genderRow, error: genderError } = await supabase
-      .from('genders')
-      .select('id, code, name')
-      .eq('code', String(query.gender))
-      .maybeSingle();
-
-    if (genderError) {
-      throw createError({ statusCode: 500, statusMessage: genderError.message });
-    }
-
-    if (!genderRow) {
-      throw createError({ statusCode: 404, statusMessage: 'Gender not found' });
-    }
-
-    genderId = genderRow.id;
-    genderName = genderRow.name;
-  }
-
   let categoryId: number | null = null;
-  let categoryGenderId: number | null = null;
   let currentCategory: Category | null = null;
 
   if (query.slug) {
     const { data: categoryRow, error: categoryError } = await supabase
       .from('categories')
-      .select('id, name, slug, parent_id, gender_id')
+      .select('id, name, slug, parent_id')
       .eq('slug', String(query.slug))
       .maybeSingle();
 
@@ -80,59 +55,42 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 404, statusMessage: 'Category not found' });
     }
 
-    if (genderId && categoryRow.gender_id !== genderId) {
-      throw createError({ statusCode: 404, statusMessage: 'Category does not belong to this gender' });
-    }
-
-    currentCategory = categoryRow;
+    currentCategory = categoryRow as Category;
     categoryId = categoryRow.id;
-    categoryGenderId = categoryRow.gender_id;
   }
 
-  const breadcrumbs: Breadcrumb[] = [{ label: 'Página inicial', to: { name: 'index', params: {} } }];
-
-  if (query.gender) {
-    breadcrumbs.push({
-      label: genderName,
-      to: { name: 'gender', params: { gender: String(query.gender) } },
-    });
-  }
+  const breadcrumbs: Breadcrumb[] = [
+    { label: 'Página inicial', to: { name: 'index', params: {} } },
+  ];
 
   if (currentCategory) {
-    // поднимаемся до родителя и «дедушки» (при необходимости)
-    if (currentCategory.parent_id) {
-      const { data: parentCategory } = await supabase
+    const chain: Category[] = [];
+
+    let cursor: Category | null = currentCategory;
+
+    while (cursor?.parent_id) {
+      const { data: parent } = await supabase
         .from('categories')
-        .select('name, slug, parent_id')
-        .eq('id', currentCategory.parent_id)
+        .select('id,name,slug,parent_id')
+        .eq('id', cursor.parent_id)
         .maybeSingle();
 
-      if (parentCategory?.parent_id) {
-        const { data: grandCategory } = await supabase
-          .from('categories')
-          .select('name, slug')
-          .eq('id', parentCategory.parent_id)
-          .maybeSingle();
+      if (!parent) break;
 
-        if (grandCategory) {
-          breadcrumbs.push({
-            label: grandCategory.name,
-            to: { name: 'gender-category', params: { gender: String(query.gender), category: grandCategory.slug } },
-          });
-        }
-      }
-
-      if (parentCategory) {
-        breadcrumbs.push({
-          label: parentCategory.name,
-          to: { name: 'gender-category', params: { gender: String(query.gender), category: parentCategory.slug } },
-        });
-      }
+      chain.push(parent as Category);
+      cursor = parent as Category;
     }
+
+    chain.reverse().forEach((c) => {
+      breadcrumbs.push({
+        label: c.name,
+        to: { name: 'category-slug', params: { slug: c.slug } },
+      });
+    });
 
     breadcrumbs.push({
       label: currentCategory.name,
-      to: { name: 'gender-category', params: { gender: String(query.gender), category: currentCategory.slug } },
+      to: { name: 'category-slug', params: { slug: currentCategory.slug } },
     });
   }
 
@@ -156,12 +114,10 @@ export default defineEventHandler(async (event) => {
     )
     .eq('active', true);
 
-
   if (categoryId) {
     const { data: allCategories, error: allCatError } = await supabase
       .from('categories')
-      .select('id, parent_id')
-      .eq('gender_id', categoryGenderId!);
+      .select('id, parent_id');
 
     if (allCatError) {
       throw createError({ statusCode: 500, statusMessage: allCatError.message });
@@ -195,19 +151,8 @@ export default defineEventHandler(async (event) => {
     }
 
     productsQuery = productsQuery.in('primary_category_id', Array.from(collected));
-  } else if (genderId) {
-    const { data: genderCategories } = await supabase
-      .from('categories')
-      .select('id')
-      .eq('gender_id', genderId);
-
-    const genderCategoryIds = (genderCategories || []).map(c => c.id);
-
-    if (!genderCategoryIds.length) {
-      return { items: [], total: 0, page, limit, breadcrumbs };
-    }
-
-    productsQuery = productsQuery.in('primary_category_id', genderCategoryIds);
+  } else if (query.primary_category_id) {
+    productsQuery = productsQuery.eq('primary_category_id', Number(query.primary_category_id));
   }
 
   if (query.q) {
@@ -228,17 +173,11 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if (query.color) {
-    productsQuery = productsQuery.eq('product_variants.color', query.color);
-  }
+  if (query.color) productsQuery = productsQuery.eq('product_variants.color', query.color);
 
-  if (query.min_price) {
-    productsQuery = productsQuery.gte('product_variants.price', Number(query.min_price));
-  }
+  if (query.min_price) productsQuery = productsQuery.gte('product_variants.price', Number(query.min_price));
 
-  if (query.max_price) {
-    productsQuery = productsQuery.lte('product_variants.price', Number(query.max_price));
-  }
+  if (query.max_price) productsQuery = productsQuery.lte('product_variants.price', Number(query.max_price));
 
   switch (query.sort) {
     case 'price_asc':

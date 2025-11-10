@@ -5,7 +5,6 @@ import { assertAdmin } from '~~/server/utils/assertAdmin';
 type SaveBody = {
   id?: number | null
   name: string
-  gender_id?: number | null
   parent_id?: number | null
   active?: boolean
 };
@@ -13,7 +12,6 @@ type SaveBody = {
 type CategoryPayload = {
   name: string
   slug: string
-  gender_id: number | null
   parent_id: number | null
   active: boolean
 };
@@ -40,27 +38,18 @@ export default defineEventHandler(async (event) => {
   const payload: CategoryPayload = {
     name: body.name.trim(),
     slug: slugify(body.name),
-    gender_id: body.gender_id ?? null,
     parent_id: body.parent_id ?? null,
     active: body.active ?? true,
   };
 
-  let res;
-
-  if (body.id) {
-    res = await client
-      .from('categories')
-      .update(payload)
+  const res = body.id ?
+    await client.from('categories').update(payload)
       .eq('id', body.id)
       .select()
-      .single();
-  } else {
-    res = await client
-      .from('categories')
-      .insert(payload)
+      .single() :
+    await client.from('categories').insert(payload)
       .select()
       .single();
-  }
 
   const { data, error } = res;
 

@@ -16,27 +16,16 @@ useHead(() => ({
   ],
 }));
 
-type Gender = {
-  id: number
-  name: string
-  code: string
-};
-
 type Category = {
   id: number
   name: string
   slug: string
   parent_id: number | null
   active: boolean
-  gender_id: number | null
-  gender?: Gender
   children?: Category[]
 };
 
 const { data: categories, refresh } = await useFetch('/api/admin/categories/tree');
-const { data: genders } = await useFetch<Gender[]>('/api/admin/categories/genders');
-
-const gendersOptions = computed(() => genders.value?.map(({ name, id }) => ({ label: name, value: id })) ?? []);
 
 const isModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
@@ -46,7 +35,6 @@ const form = reactive({
   id: null as number | null,
   name: '',
   parent_id: null as number | null,
-  gender_id: null as number | null,
   active: true,
 });
 
@@ -55,7 +43,6 @@ const openCreateModal = (parent: Category | null = null) => {
     id: null,
     name: '',
     parent_id: parent?.id ?? null,
-    gender_id: parent?.gender_id ?? null,
     active: true,
   });
 
@@ -64,7 +51,13 @@ const openCreateModal = (parent: Category | null = null) => {
 };
 
 const openEditModal = (cat: Category) => {
-  Object.assign(form, cat);
+  Object.assign(form, {
+    id: cat.id,
+    name: cat.name,
+    parent_id: cat.parent_id,
+    active: cat.active,
+  });
+
   selectedCategory.value = cat;
   isModalOpen.value = true;
 };
@@ -82,18 +75,11 @@ const saveCategory = async () => {
     });
   } catch (error: any) {
     const message = error?.data?.statusMessage || error?.message || 'Unknown error';
+    const errorText = message.includes('Slug already exists') ?
+      t('categories.errorSlug') :
+      t('categories.errorDefault');
 
-    let errorText = t('categories.errorDefault');
-
-    if (message.includes('Slug already exists')) {
-      errorText = t('categories.errorSlug');
-    }
-
-    toast.add({
-      title: t('categories.error'),
-      description: errorText,
-      color: 'error',
-    });
+    toast.add({ title: t('categories.error'), description: errorText, color: 'error' });
   }
 };
 
@@ -136,7 +122,6 @@ const deleteCategory = async () => {
       "add": "Add category",
       "edit": "Edit category",
       "name": "Category name",
-      "gender": "Gender",
       "active": "Category active",
       "cancel": "Cancel",
       "save": "Save changes",
@@ -145,7 +130,6 @@ const deleteCategory = async () => {
       "deleteTitle": "Delete category?",
       "deleteConfirm": "Delete {name} and its subcategories?",
       "loading": "Loading...",
-      "selectGender": "Select gender",
       "success": "Success",
       "created": "Category created successfully.",
       "updated": "Category updated successfully.",
@@ -162,7 +146,6 @@ const deleteCategory = async () => {
       "add": "Adicionar categoria",
       "edit": "Editar categoria",
       "name": "Nome da categoria",
-      "gender": "Género",
       "active": "Categoria ativa",
       "cancel": "Cancelar",
       "save": "Guardar alterações",
@@ -171,7 +154,6 @@ const deleteCategory = async () => {
       "deleteTitle": "Eliminar categoria?",
       "deleteConfirm": "Eliminar {name} e as suas subcategorias?",
       "loading": "A carregar...",
-      "selectGender": "Selecionar género",
       "success": "Sucesso",
       "created": "Categoria criada com sucesso.",
       "updated": "Categoria atualizada com sucesso.",
@@ -232,17 +214,6 @@ const deleteCategory = async () => {
             required
           >
             <UInput v-model="form.name" />
-          </UFormField>
-
-          <UFormField
-            :label="t('categories.gender')"
-            required
-          >
-            <USelect
-              v-model="form.gender_id"
-              :items="gendersOptions"
-              :placeholder="t('categories.selectGender')"
-            />
           </UFormField>
 
           <UFormField :label="t('categories.active')">

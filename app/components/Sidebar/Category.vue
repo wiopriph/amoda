@@ -6,20 +6,11 @@ const props = defineProps<{
     slug: string;
     children?: any[]
   }
-  gender: string
 }>();
 
 const localeRoute = useLocaleRoute();
 
-const routeTo = computed(() =>
-  localeRoute({
-    name: 'gender-category',
-    params: {
-      gender: props.gender,
-      category: props.category.slug,
-    },
-  }),
-);
+const routeTo = computed(() => localeRoute({ name: 'category-slug', params: { slug: props.category.slug } }));
 
 const route = useRoute();
 const isActive = computed(() => route.params.category === props.category.slug);
@@ -56,7 +47,6 @@ const hasChildren = computed(() => (props.category.children?.length ?? 0) > 0);
         v-for="child in props.category.children"
         :key="child.id"
         :category="child"
-        :gender="props.gender"
       />
     </div>
   </div>

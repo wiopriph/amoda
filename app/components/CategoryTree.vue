@@ -2,16 +2,13 @@
 import type { PropType } from 'vue';
 
 
-type Gender = { id: number; name: string; code?: string };
-
 export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  active: boolean;
-  gender?: Gender;
-  parent_id?: number | null;
-  children?: Category[];
+  id: number
+  name: string
+  slug: string
+  active: boolean
+  parent_id?: number | null
+  children?: Category[]
 }
 
 const props = defineProps({
@@ -22,7 +19,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['edit', 'add', 'remove']);
-
 const { t } = useI18n();
 </script>
 
@@ -54,19 +50,14 @@ const { t } = useI18n();
       :key="item.id"
       class="pl-4 border-l border-gray-200"
     >
-      <div
-        class="flex items-center justify-between py-1.5 hover:bg-gray-50 rounded-md transition-colors"
-      >
+      <div class="flex items-center justify-between py-1.5 hover:bg-gray-50 rounded-md transition-colors">
         <div class="flex items-center gap-2">
           <span class="font-medium text-gray-800">
             {{ item.name }}
           </span>
 
-          <span
-            v-if="item.gender"
-            class="text-xs text-gray-500"
-          >
-            ({{ item.gender.name }} / {{ item.slug }} / #{{ item.id }})
+          <span class="text-xs text-gray-500">
+            (#{{ item.id }} / {{ item.slug }})
           </span>
 
           <UBadge

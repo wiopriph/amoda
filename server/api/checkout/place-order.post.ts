@@ -98,10 +98,9 @@ export default defineEventHandler(async (event) => {
       order_id: orderRow.id,
       product_id: productId,
       product_variant_id: variantId,
-      product_variant_size_id: sizeId, // может быть null
+      product_variant_size_id: sizeId,
       unit_price: item.price,
       qty: item.qty,
-      // total_price у нас STORED (генерируется в БД), поэтому не передаём
     };
   });
 

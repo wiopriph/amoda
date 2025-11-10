@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ name: 'gender-category' });
+definePageMeta({ name: 'category-slug' });
 
 const { t } = useI18n();
 const route = useRoute();
@@ -11,8 +11,7 @@ const page = ref(Math.max(1, Number(route.query.page || 1)));
 
 const { data, error } = await useFetch('/api/catalog/list', {
   query: {
-    gender: route.params.gender,
-    slug: route.params.category,
+    slug: route.params.slug,
     page,
     limit,
     q: route.query.q,
@@ -42,17 +41,9 @@ const breadcrumbItems = computed(() => (data.value!.breadcrumbs || []).map((c) =
   to: localeRoute(c.to),
 })));
 
-const genderHuman = computed(() => t(route.params.gender as string));
-
 /** SEO */
-const pageTitle = computed(() => t('genderCategory.seoTitle', {
-  category: categoryTitle.value,
-  gender: genderHuman.value,
-}));
-const pageDescription = computed(() => t('genderCategory.seoDescription', {
-  category: categoryTitle.value,
-  gender: genderHuman.value,
-}));
+const pageTitle = computed(() => t('category.seoTitle', { category: categoryTitle.value }));
+const pageDescription = computed(() => t('category.seoDescription', { category: categoryTitle.value }));
 
 useHead(() => ({
   title: `${pageTitle.value} | Amoda`,
@@ -69,12 +60,17 @@ useHead(() => ({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
-        itemListElement: (data.value!.breadcrumbs || []).map((bc: any, i: number) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: bc.label,
-          item: new URL(localeRoute(bc.to)?.fullPath || '/', requestURL.origin).href,
-        })),
+        itemListElement: (data.value!.breadcrumbs || []).map(
+          (bc: any, i: number) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: bc.label,
+            item: new URL(
+              localeRoute(bc.to)?.fullPath || '/',
+              requestURL.origin,
+            ).href,
+          }),
+        ),
       }),
     },
     {
@@ -87,7 +83,8 @@ useHead(() => ({
         itemListOrder: 'http://schema.org/ItemListOrderAscending',
         itemListElement: products.value.map((p: any, i: number) => {
           const url = new URL(
-            localeRoute({ name: 'product-slug', params: { slug: p.slug } })?.fullPath || '/',
+            localeRoute({ name: 'product-slug', params: { slug: p.slug } })
+              ?.fullPath || '/',
             requestURL.origin,
           ).href;
 
@@ -116,27 +113,20 @@ useHead(() => ({
 }));
 </script>
 
-
 <i18n lang="json">
 {
   "pt": {
-    "women": "Mulheres",
-    "men": "Homens",
-    "kids": "Crianças",
-    "genderCategory": {
+    "category": {
       "empty": "Não há produtos nesta categoria ainda.",
-      "seoTitle": "{category} — {gender} | Moda online em Angola",
-      "seoDescription": "Compre {category} para {gender} na Amoda: roupas, calçado e acessórios com entrega gratuita em Luanda. Encomende online, experimente no ponto e pague apenas se gostar."
+      "seoTitle": "{category} | Moda online em Angola",
+      "seoDescription": "Compre {category} na Amoda: roupas, calçado e acessórios com entrega gratuita em Luanda. Encomende online, experimente no ponto e pague apenas se gostar."
     }
   },
   "en": {
-    "women": "Women",
-    "men": "Men",
-    "kids": "Kids",
-    "genderCategory": {
+    "category": {
       "empty": "No products found in this category yet.",
-      "seoTitle": "{category} — {gender} | Online fashion in Angola",
-      "seoDescription": "Shop {category} for {gender} at Amoda: apparel, shoes and accessories with free delivery in Luanda. Order online, try at pickup and pay only if you love it."
+      "seoTitle": "{category} | Online fashion in Angola",
+      "seoDescription": "Shop {category} at Amoda: apparel, shoes and accessories with free delivery in Luanda. Order online, try at pickup and pay only if you love it."
     }
   }
 }
@@ -146,13 +136,13 @@ useHead(() => ({
   <UPage>
     <template #left>
       <UPageAside>
-        <SidebarCategories :gender="route.params.gender as string" />
+        <SidebarCategories />
       </UPageAside>
     </template>
 
     <UPageHeader
       :title="categoryTitle"
-      :description="t('genderCategory.seoDescription', { category: categoryTitle, gender: genderHuman })"
+      :description="pageDescription"
       :ui="{ title: 'text-xl md:text-2xl font-semibold' }"
     >
       <template #headline>
@@ -165,7 +155,7 @@ useHead(() => ({
         v-if="!products.length"
         class="text-gray-500 text-sm"
       >
-        {{ t('genderCategory.empty') }}
+        {{ t('category.empty') }}
       </div>
 
       <UBlogPosts
