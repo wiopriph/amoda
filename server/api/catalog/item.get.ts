@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
     .select(`
       *,
       brand:brands ( id, name, slug ),
-      primary_category:categories!products_primary_category_id_fkey (
+      category:categories!products_primary_category_id_fkey (
         id, name, slug, parent_id
       ),
       variants:product_variants (
@@ -54,39 +54,34 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Not found' });
   }
 
-  const parentChain: CategoryRow[] = [];
+  let parentChain: CategoryRow[] = [];
 
-  let cursor: CategoryRow | null = (productRow.primary_category as CategoryRow) ?? null;
+  const currentCat = (productRow.category as CategoryRow | null) ?? null;
 
-  while (cursor?.parent_id) {
-    const { data: parentCategory, error: parentError } = await supabase
-      .from('categories')
-      .select('id, name, slug, parent_id')
-      .eq('id', cursor.parent_id)
-      .maybeSingle();
+  if (currentCat) {
+    const { data: ancestors, error: ancErr } = await supabase
+      .from('category_closure')
+      .select('depth, categories:ancestor_id ( id, name, slug, parent_id )')
+      .eq('descendant_id', currentCat.id)
+      .order('depth', { ascending: false });
 
-    if (parentError) {
-      throw createError({ statusCode: 500, statusMessage: parentError.message });
+    if (ancErr) {
+      throw createError({ statusCode: 500, statusMessage: ancErr.message });
     }
 
-    if (!parentCategory) {
-      break;
-    }
-
-    parentChain.unshift(parentCategory as CategoryRow);
-    cursor = parentCategory as CategoryRow;
+    parentChain = (ancestors || [])
+      .filter((r: any) => r.depth > 0)
+      .map((r: any) => r.categories as CategoryRow);
   }
 
-  const trail: CategoryRow[] = [];
-
-  if (productRow.primary_category) {
-    trail.push({
-      id: productRow.primary_category.id,
-      name: productRow.primary_category.name,
-      slug: productRow.primary_category.slug,
-      parent_id: productRow.primary_category.parent_id,
-    });
-  }
+  const trail: CategoryRow[] = currentCat ?
+    [{
+      id: currentCat.id,
+      name: currentCat.name,
+      slug: currentCat.slug,
+      parent_id: currentCat.parent_id,
+    }] :
+    [];
 
   const categoriesTrail = [...parentChain, ...trail];
 
@@ -139,7 +134,7 @@ export default defineEventHandler(async (event) => {
       active: productRow.active,
       brand_id: productRow.brand?.id ?? null,
       brand_name: productRow.brand?.name ?? null,
-      primary_category_id: productRow.primary_category?.id ?? null,
+      category_id: currentCat?.id ?? null,
       variants: normalizedVariants,
       created_at: productRow.created_at,
     },

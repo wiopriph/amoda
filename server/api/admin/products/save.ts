@@ -8,7 +8,9 @@ export default defineEventHandler(async (event) => {
   const client = await serverSupabaseServiceRole(event);
   const body = await readBody(event);
 
-  if (!body.title) throw createError({ statusCode: 400, statusMessage: 'Title required' });
+  if (!body.title) {
+    throw createError({ statusCode: 400, statusMessage: 'Title required' });
+  }
 
   const slug = body.title.toLowerCase().replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '');
@@ -31,7 +33,9 @@ export default defineEventHandler(async (event) => {
       .select()
       .single();
 
-  if (error) throw createError({ statusCode: 500, statusMessage: error.message });
+  if (error) {
+    throw createError({ statusCode: 500, statusMessage: error.message });
+  }
 
   return data;
 });

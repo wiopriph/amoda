@@ -4,7 +4,6 @@ import { serverSupabaseClient } from '#supabase/server';
 type QueryParams = {
   q?: string
   slug?: string
-  primary_category_id?: number
   brand_id?: string | number
   brand_slug?: string
   size?: string
@@ -37,26 +36,36 @@ export default defineEventHandler(async (event) => {
   const rangeFrom = (page - 1) * limit;
   const rangeTo = rangeFrom + limit - 1;
 
-  let categoryId: number | null = null;
   let currentCategory: Category | null = null;
+  let descendantIds: number[] = [];
 
   if (query.slug) {
-    const { data: categoryRow, error: categoryError } = await supabase
+    const { data: category, error: catErr } = await supabase
       .from('categories')
       .select('id, name, slug, parent_id')
       .eq('slug', String(query.slug))
       .maybeSingle();
 
-    if (categoryError) {
-      throw createError({ statusCode: 500, statusMessage: categoryError.message });
+    if (catErr) {
+      throw createError({ statusCode: 500, statusMessage: catErr.message });
     }
 
-    if (!categoryRow) {
+    if (!category) {
       throw createError({ statusCode: 404, statusMessage: 'Category not found' });
     }
 
-    currentCategory = categoryRow as Category;
-    categoryId = categoryRow.id;
+    currentCategory = category as Category;
+
+    const { data: closureRows, error: closureErr } = await supabase
+      .from('category_closure')
+      .select('descendant_id')
+      .eq('ancestor_id', category.id);
+
+    if (closureErr) {
+      throw createError({ statusCode: 500, statusMessage: closureErr.message });
+    }
+
+    descendantIds = (closureRows || []).map((r: any) => r.descendant_id);
   }
 
   const breadcrumbs: Breadcrumb[] = [
@@ -64,29 +73,27 @@ export default defineEventHandler(async (event) => {
   ];
 
   if (currentCategory) {
-    const chain: Category[] = [];
+    const { data: ancestors, error: ancErr } = await supabase
+      .from('category_closure')
+      .select('depth, categories:ancestor_id ( id, name, slug )')
+      .eq('descendant_id', currentCategory.id)
+      .order('depth', { ascending: true });
 
-    let cursor: Category | null = currentCategory;
-
-    while (cursor?.parent_id) {
-      const { data: parent } = await supabase
-        .from('categories')
-        .select('id,name,slug,parent_id')
-        .eq('id', cursor.parent_id)
-        .maybeSingle();
-
-      if (!parent) break;
-
-      chain.push(parent as Category);
-      cursor = parent as Category;
+    if (ancErr) {
+      throw createError({ statusCode: 500, statusMessage: ancErr.message });
     }
 
-    chain.reverse().forEach((c) => {
+    const chain = (ancestors || [])
+      .filter((x: any) => x.depth > 0)
+      .map((r: any) => r.categories as Category)
+      .reverse();
+
+    for (const c of chain) {
       breadcrumbs.push({
         label: c.name,
         to: { name: 'category-slug', params: { slug: c.slug } },
       });
-    });
+    }
 
     breadcrumbs.push({
       label: currentCategory.name,
@@ -114,45 +121,8 @@ export default defineEventHandler(async (event) => {
     )
     .eq('active', true);
 
-  if (categoryId) {
-    const { data: allCategories, error: allCatError } = await supabase
-      .from('categories')
-      .select('id, parent_id');
-
-    if (allCatError) {
-      throw createError({ statusCode: 500, statusMessage: allCatError.message });
-    }
-
-    const map = new Map<number | 'root', number[]>();
-
-    for (const cat of allCategories || []) {
-      const key = (cat.parent_id ?? 'root') as number | 'root';
-
-      if (!map.has(key)) {
-        map.set(key, []);
-      }
-
-      map.get(key)?.push(cat.id);
-    }
-
-    const collected = new Set<number>([categoryId]);
-    const queue = [categoryId];
-
-    while (queue.length) {
-      const current = queue.shift();
-      const children = map.get(current) || [];
-
-      for (const child of children) {
-        if (!collected.has(child)) {
-          collected.add(child);
-          queue.push(child);
-        }
-      }
-    }
-
-    productsQuery = productsQuery.in('primary_category_id', Array.from(collected));
-  } else if (query.primary_category_id) {
-    productsQuery = productsQuery.eq('primary_category_id', Number(query.primary_category_id));
+  if (descendantIds.length > 0) {
+    productsQuery = productsQuery.in('primary_category_id', descendantIds);
   }
 
   if (query.q) {
@@ -168,16 +138,22 @@ export default defineEventHandler(async (event) => {
       .eq('slug', String(query.brand_slug))
       .maybeSingle();
 
-    if (brandRow?.id) {
+    if (brandRow && brandRow.id) {
       productsQuery = productsQuery.eq('brand_id', brandRow.id);
     }
   }
 
-  if (query.color) productsQuery = productsQuery.eq('product_variants.color', query.color);
+  if (query.color) {
+    productsQuery = productsQuery.eq('product_variants.color', query.color);
+  }
 
-  if (query.min_price) productsQuery = productsQuery.gte('product_variants.price', Number(query.min_price));
+  if (query.min_price) {
+    productsQuery = productsQuery.gte('product_variants.price', Number(query.min_price));
+  }
 
-  if (query.max_price) productsQuery = productsQuery.lte('product_variants.price', Number(query.max_price));
+  if (query.max_price) {
+    productsQuery = productsQuery.lte('product_variants.price', Number(query.max_price));
+  }
 
   switch (query.sort) {
     case 'price_asc':

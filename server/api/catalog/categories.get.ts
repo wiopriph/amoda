@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
   const { data: categoryRows, error } = await supabase
     .from('categories')
     .select('id, name, slug, parent_id')
+    .eq('active', true)
     .order('name', { ascending: true });
 
   if (error) {

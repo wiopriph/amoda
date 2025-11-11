@@ -2,14 +2,13 @@ import { defineSitemapEventHandler } from '#imports';
 import { serverSupabaseClient } from '#supabase/server';
 
 
-type CategoryRow = { id: number; slug: string };
-
 export default defineSitemapEventHandler(async (event) => {
   const db = await serverSupabaseClient(event);
 
   const { data: categories, error } = await db
     .from('categories')
     .select('id, slug')
+    .eq('active', true)
     .order('slug', { ascending: true });
 
   if (error) {

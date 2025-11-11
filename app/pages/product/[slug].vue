@@ -24,6 +24,13 @@ const breadcrumbs = computed(() =>
   })),
 );
 
+const { data: recResponse } = await useFetch('/api/catalog/recommendations', {
+  query: { slug: route.params.slug },
+  watch: [() => route.fullPath],
+});
+
+const recItems = computed(() => recResponse.value?.items || []);
+
 const productVariants = computed(() => productData.value?.variants || []);
 const variantOptions = computed(() =>
   productVariants.value.map(variant => ({
@@ -37,8 +44,10 @@ const selectedVariantId = ref<number | null>(null);
 const selectedSizeId = ref<number | null>(null);
 
 const currentVariant = computed(
-  () => productVariants.value.find(v => v.id === selectedVariantId.value) || productVariants.value[0] || null,
+  () => productVariants.value.find(variant => variant.id === selectedVariantId.value) || productVariants.value[0] || null,
 );
+
+const selectedVariantLabel = computed(() => currentVariant.value?.color || '—');
 
 const sizeOptions = computed(() =>
   (currentVariant.value?.sizes || []).map(size => ({
@@ -86,19 +95,15 @@ const addProductToCart = () => {
   const variant = currentVariant.value;
   const selectedSize = variant?.sizes?.find(size => size.id === selectedSizeId.value);
 
-  if (!product || !variant || !selectedSize) return;
+  if (!product || !variant || !selectedSize) {
+    return;
+  }
 
   addToCart(product, variant, selectedSize, 1);
 };
 
-const seoTitle = computed(() =>
-  `${productData.value?.title || ''} | ${t('product.meta.titleSuffix')}`,
-);
-const seoDescription = computed(
-  () =>
-    productData.value?.description ||
-    t('product.meta.description'),
-);
+const seoTitle = computed(() => `${productData.value?.title || ''} | ${t('product.meta.titleSuffix')}`);
+const seoDescription = computed(() => productData.value?.description || t('product.meta.description'));
 const seoImage = computed(() => galleryImages.value?.[0]?.url || '/placeholder.png');
 
 const productFullUrl = computed(() => {
@@ -174,6 +179,10 @@ useHead(() => ({
       },
       "seo": {
         "h1": "Compre {title} online em Angola — entrega gratuita e compra segura"
+      },
+      "reco": {
+        "title": "Talvez você também goste",
+        "cta": "Ver produto"
       }
     }
   },
@@ -191,12 +200,15 @@ useHead(() => ({
       },
       "seo": {
         "h1": "Buy {title} online in Angola — free delivery and safe shopping"
+      },
+      "reco": {
+        "title": "You may also like",
+        "cta": "View product"
       }
     }
   }
 }
 </i18n>
-
 
 <template>
   <UPage>
@@ -272,8 +284,10 @@ useHead(() => ({
           </div>
 
           <div v-if="variantOptions.length">
-            <div class="text-sm font-medium mb-2">
-              {{ t('product.color') }}
+            <div class="text-sm font-medium mb-2 flex items-center gap-2">
+              <span>{{ t('product.color') }}:</span>
+
+              <span class="text-gray-600">{{ selectedVariantLabel }}</span>
             </div>
 
             <div class="flex flex-wrap gap-2">
@@ -282,9 +296,7 @@ useHead(() => ({
                 :key="variantOption.id"
                 type="button"
                 class="relative overflow-hidden rounded-md border transition w-12 h-12 md:w-14 md:h-14"
-                :class="selectedVariantId === variantOption.id
-                  ? 'border-primary ring-1 ring-primary'
-                  : 'border-gray-200 hover:border-gray-400'"
+                :class="selectedVariantId === variantOption.id ? 'border-primary ring-1 ring-primary' : 'border-gray-200 hover:border-gray-400'"
                 @click="selectedVariantId = variantOption.id"
               >
                 <NuxtImg
@@ -345,6 +357,32 @@ useHead(() => ({
           </div>
         </div>
       </div>
+
+      <UPageSection
+        v-if="recItems.length"
+        :title="t('product.reco.title')"
+        :ui="{
+          title: 'text-md font-semibold'
+        }"
+        class="mt-10"
+      >
+        <UBlogPosts class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <UBlogPost
+            v-for="item in recItems"
+            :key="item.id"
+            :title="item.title"
+            :description="`${new Intl.NumberFormat('pt-AO').format(item.price)} AOA`"
+            :image="item.images?.[0]?.url || '/placeholder.png'"
+            :to="localeRoute({ name: 'product-slug', params: { slug: item.slug } })"
+            :ui="{
+              header: 'aspect-[4/5] object-cover',
+              body: 'sm:p-3',
+              title: 'line-clamp-2 overflow-hidden'
+            }"
+            variant="outline"
+          />
+        </UBlogPosts>
+      </UPageSection>
     </UPageBody>
   </UPage>
 </template>
