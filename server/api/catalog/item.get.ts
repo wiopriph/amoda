@@ -125,6 +125,86 @@ export default defineEventHandler(async (event) => {
     },
   ];
 
+  let recommendations: any[] = [];
+
+  if (currentCat?.id) {
+    const { data: desc, error: descErr } = await supabase
+      .from('category_closure')
+      .select('descendant_id')
+      .eq('ancestor_id', currentCat.id);
+
+    if (descErr) {
+      throw createError({ statusCode: 500, statusMessage: descErr.message });
+    }
+
+    const ids = (desc || []).map((r) => r.descendant_id);
+
+    const { data: recsA, error: recErrA } = await supabase
+      .from('products')
+      .select(`
+        id, slug, title, primary_category_id,
+        brand:brands(name),
+        variants:product_variants(
+          id, color, price,
+          product_variant_images(url, position)
+        )
+      `)
+      .in('primary_category_id', ids)
+      .neq('id', productRow.id)
+      .eq('active', true)
+      .limit(10);
+
+    if (recErrA) {
+      throw createError({ statusCode: 500, statusMessage: recErrA.message });
+    }
+
+    let recs = recsA || [];
+
+    if (!recs.length && currentCat.parent_id) {
+      const { data: recsB, error: recErrB } = await supabase
+        .from('products')
+        .select(`
+          id, slug, title, primary_category_id,
+          brand:brands(name),
+          variants:product_variants(
+            id, color, price,
+            product_variant_images(url, position)
+          )
+        `)
+        .eq('primary_category_id', currentCat.parent_id)
+        .neq('id', productRow.id)
+        .eq('active', true)
+        .limit(10);
+
+      if (recErrB) {
+        throw createError({ statusCode: 500, statusMessage: recErrB.message });
+      }
+
+      recs = recsB || [];
+    }
+
+    recommendations = (recs || []).map((p: any) => {
+      const v = Array.isArray(p.variants) ? p.variants[0] : null;
+      const imgs = Array.isArray(v?.product_variant_images) ?
+        [...v.product_variant_images].sort(
+          (a, b) => (a?.position ?? 0) - (b?.position ?? 0),
+        ) :
+        [];
+
+      return {
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        primary_category_id: p.primary_category_id,
+        brand_name: p.brand?.name ?? null,
+        price: v?.price ?? 0,
+        variant_id: v?.id ?? null,
+        color: v?.color ?? null,
+        images: imgs,
+      };
+    });
+  }
+
   return {
     product: {
       id: productRow.id,
@@ -134,10 +214,11 @@ export default defineEventHandler(async (event) => {
       active: productRow.active,
       brand_id: productRow.brand?.id ?? null,
       brand_name: productRow.brand?.name ?? null,
-      category_id: currentCat?.id ?? null,
+      primary_category_id: currentCat?.id ?? null,
       variants: normalizedVariants,
       created_at: productRow.created_at,
     },
     breadcrumbs,
+    recommendations,
   };
 });

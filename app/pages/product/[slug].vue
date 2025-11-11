@@ -24,12 +24,7 @@ const breadcrumbs = computed(() =>
   })),
 );
 
-const { data: recResponse } = await useFetch('/api/catalog/recommendations', {
-  query: { slug: route.params.slug },
-  watch: [() => route.fullPath],
-});
-
-const recItems = computed(() => recResponse.value?.items || []);
+const recItems = computed(() => productResponse.value?.recommendations || []);
 
 const productVariants = computed(() => productData.value?.variants || []);
 const variantOptions = computed(() =>
