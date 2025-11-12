@@ -38,6 +38,9 @@ export default defineNuxtConfig({
       serviceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
     },
     public: {
+      gtmId: '',
+      gtmEnabled: false,
+
       supabase: {
         url: process.env.SUPABASE_URL,
         key: process.env.SUPABASE_KEY,
