@@ -1,21 +1,18 @@
-// server/api/checkout/place-order.post.ts
 import { serverSupabaseServiceRole } from '#supabase/server';
 
 
 type CartItem = {
-  // "productId:variantId" или "productId:variantId:sizeId"
   id: string
   title: string
-  price: number // integer AOA
+  price: number
   qty: number
-  slug?: string // опционально — если хочешь писать в order_items
-  image?: string // опционально
+  slug?: string
+  image?: string
 };
 
 type Totals = { total: number; currency: string };
 type Contact = { name: string; phone: string; email?: string | null };
 
-// Если нет триггера на номер — сгенерим здесь
 function generateOrderNumber() {
   const ymd = new Date().toISOString()
     .slice(2, 10)
@@ -29,7 +26,12 @@ function generateOrderNumber() {
 
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseServiceRole(event);
-  const body = await readBody<{ items: CartItem[]; totals: Totals; contact: Contact }>(event);
+  const body = await readBody<{
+    items: CartItem[]
+    totals: Totals
+    contact: Contact
+    pickupOfficeId?: number | null
+  }>(event);
 
   if (!body?.items?.length) {
     throw createError({ statusCode: 400, statusMessage: 'Cart is empty' });
@@ -47,7 +49,32 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Unsupported currency' });
   }
 
-  // --- создаём заказ (в нашей схеме: number, name, phone, email, totals, status)
+  let pickupOfficeId: number | null = null;
+
+  if (body.pickupOfficeId != null) {
+    const id = Number(body.pickupOfficeId);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid pickupOfficeId' });
+    }
+
+    const { data: office, error: officeErr } = await supabase
+      .from('offices')
+      .select('id, active')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (officeErr) {
+      throw createError({ statusCode: 500, statusMessage: officeErr.message });
+    }
+
+    if (!office || office.active === false) {
+      throw createError({ statusCode: 400, statusMessage: 'Pickup office not found or inactive' });
+    }
+
+    pickupOfficeId = id;
+  }
+
   const orderNumber = generateOrderNumber();
 
   const { data: orderRow, error: orderErr } = await supabase
@@ -58,6 +85,7 @@ export default defineEventHandler(async (event) => {
       status: 'PLACED',
       payment_status: 'UNPAID',
       totals: body.totals,
+      pickup_office_id: pickupOfficeId,
     })
     .select('id, number')
     .single();
@@ -66,10 +94,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: orderErr?.message || 'Failed to create order' });
   }
 
-  // --- подготавливаем позиции заказа
   const itemRows = body.items.map((item) => {
-    const [productStr, variantStr, sizeStr] = String(item.id)
-      .split(':');
+    const [productStr, variantStr, sizeStr] = String(item.id).split(':');
     const productId = Number(productStr);
     const variantId = Number(variantStr);
     const sizeId = sizeStr ? Number(sizeStr) : null;

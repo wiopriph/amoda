@@ -5,19 +5,16 @@ const { t } = useI18n();
 const route = useRoute();
 const localeRoute = useLocaleRoute();
 
-/* === Fetch Order Data === */
 const { data: orderData, error: orderError, pending: isPending } = await useFetch('/api/orders/get', {
   query: { number: route.params.number },
 });
 
-const order = computed(() => orderData.value);
+const order = computed(() => orderData.value as any || null);
 const formatAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
-/* === Meta & SEO === */
 const pageTitle = computed(() => `${t('order.title')} №${route.params.number} | Amoda`);
-const pageDescription = computed(() =>
-  t('order.meta.description', { number: String(route.params.number) }),
-);
+
+const pageDescription = computed(() => t('order.meta.description', { number: String(route.params.number) }));
 
 useHead(() => ({
   title: pageTitle.value,
@@ -39,6 +36,10 @@ useHead(() => ({
       "notFound": "Encomenda não encontrada",
       "summary": "Resumo da encomenda",
       "contact": "Contacto",
+      "pickup": {
+        "title": "Ponto de levantamento",
+        "notSelected": "O ponto de levantamento não foi selecionado."
+      },
       "saveNotice": "Guarde o número da sua encomenda para acompanhar o levantamento no ponto de entrega. A Amoda irá notificá-lo quando estiver pronta para recolha.",
       "colItem": "Artigo",
       "colPrice": "Preço",
@@ -62,6 +63,10 @@ useHead(() => ({
       "notFound": "Order not found",
       "summary": "Order summary",
       "contact": "Contact",
+      "pickup": {
+        "title": "Pickup point",
+        "notSelected": "Pickup point was not selected."
+      },
       "saveNotice": "Save your order number to track pickup status. Amoda will contact you once your order is ready.",
       "colItem": "Item",
       "colPrice": "Price",
@@ -114,17 +119,59 @@ useHead(() => ({
         />
 
         <UCard class="mb-6">
-          <p class="text-sm text-gray-500">
-            {{ t('order.contact') }}
-          </p>
+          <div class="grid gap-6 md:grid-cols-2">
+            <div class="space-y-1">
+              <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                {{ t('order.contact') }}
+              </p>
 
-          <p class="font-semibold">
-            {{ order.guest_contact?.name }}
-          </p>
+              <p class="font-semibold">
+                {{ order.guestContact?.name }}
+              </p>
 
-          <p class="text-sm text-gray-500">
-            {{ order.guest_contact?.phone }} · {{ order.guest_contact?.email }}
-          </p>
+              <p
+                v-if="order.guestContact?.email"
+                class="text-sm text-gray-500 break-all"
+              >
+                {{ order.guestContact.email }}
+              </p>
+
+              <p class="text-sm text-gray-500">
+                {{ order.guestContact?.phone }}
+              </p>
+            </div>
+
+            <div class="space-y-1">
+              <p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                {{ t('order.pickup.title') }}
+              </p>
+
+              <template v-if="order.pickupOffice">
+                <p class="font-semibold">
+                  {{ order.pickupOffice.name }}
+                </p>
+
+                <p class="text-sm text-gray-500">
+                  {{ order.pickupOffice.address }}
+                </p>
+
+                <p class="text-sm mt-1">
+                  <a
+                    :href="`tel:${order.pickupOffice.phone}`"
+                    class="text-primary underline underline-offset-2"
+                  >
+                    {{ order.pickupOffice.phone }}
+                  </a>
+                </p>
+              </template>
+
+              <template v-else>
+                <p class="text-sm text-gray-500 italic">
+                  {{ t('order.pickup.notSelected') }}
+                </p>
+              </template>
+            </div>
+          </div>
         </UCard>
 
         <UCard>
@@ -136,12 +183,12 @@ useHead(() => ({
             <div
               v-for="item in order.items"
               :key="item.id"
-              class="flex items-center justify-between py-3 gap-3"
+              class="flex flex-col gap-3 py-3 md:flex-row md:items-center md:justify-between"
             >
               <div class="flex items-center gap-3 min-w-0">
                 <NuxtImg
                   :src="item.image"
-                  class="w-16 h-16 rounded border object-cover"
+                  class="w-16 h-16 rounded border object-cover flex-none"
                 />
 
                 <div class="min-w-0">
@@ -152,20 +199,24 @@ useHead(() => ({
                     {{ item.title }}
                   </NuxtLink>
 
-                  <div class="text-xs text-gray-500">
+                  <div class="mt-1 text-xs text-gray-500">
                     {{ t('order.size') }}: {{ item.variant?.size }} ·
                     {{ t('order.color') }}: {{ item.variant?.color }}
                   </div>
                 </div>
               </div>
 
-              <div class="text-right shrink-0">
+              <div class="text-right md:min-w-[140px]">
+                <div class="text-xs uppercase tracking-wide text-gray-400 mb-0.5">
+                  {{ t('order.colQty') }} / {{ t('order.colPrice') }}
+                </div>
+
                 <div class="text-sm text-gray-600">
-                  {{ item.qty }} × {{ formatAOA(item.unit_price) }}
+                  {{ item.qty }} × {{ formatAOA(item.unitPrice) }}
                 </div>
 
                 <div class="font-semibold">
-                  {{ formatAOA(item.total_price) }}
+                  {{ formatAOA(item.totalPrice) }}
                 </div>
               </div>
             </div>

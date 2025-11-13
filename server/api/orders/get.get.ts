@@ -9,7 +9,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Order number required' });
   }
 
-  // ВАЖНО: указываем имена FK после "!"
   const { data, error } = await client
     .from('orders')
     .select(`
@@ -19,7 +18,17 @@ export default defineEventHandler(async (event) => {
       payment_status,
       totals,
       guest_contact,
+      pickup_office_id,
       created_at,
+
+      pickup_office:offices!orders_pickup_office_id_fkey (
+        id,
+        name,
+        address,
+        phone,
+        opening_hours
+      ),
+
       items:order_items(
         id,
         product_id,
@@ -61,7 +70,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Order not found' });
   }
 
-  // Нормализация под текущую вёрстку
   const items = (data.items || []).map((row: any) => {
     const title = row.product?.title ?? '';
     const slug = row.product?.slug ?? '';
@@ -70,7 +78,7 @@ export default defineEventHandler(async (event) => {
 
     if (Array.isArray(row.variant?.images) && row.variant.images.length) {
       const sorted = [...row.variant.images].sort(
-        (a: any, b: any) => (a?.position ?? 0) - (b?.position ?? 0),
+        (a, b) => (a?.position ?? 0) - (b?.position ?? 0),
       );
 
       image = sorted[0]?.url ?? null;
@@ -79,8 +87,8 @@ export default defineEventHandler(async (event) => {
     return {
       id: row.id,
       qty: row.qty,
-      unit_price: row.unit_price,
-      total_price: row.total_price,
+      unitPrice: row.unit_price,
+      totalPrice: row.total_price,
       title,
       slug,
       image,
@@ -92,14 +100,25 @@ export default defineEventHandler(async (event) => {
     };
   });
 
+  const pickupOffice = data.pickup_office ?
+    {
+      id: data.pickup_office.id,
+      name: data.pickup_office.name,
+      address: data.pickup_office.address,
+      phone: data.pickup_office.phone,
+      openingHours: data.pickup_office.opening_hours,
+    } :
+    null;
+
   return {
     id: data.id,
     number: data.number,
     status: data.status,
-    payment_status: data.payment_status,
+    paymentStatus: data.payment_status,
     totals: data.totals,
-    guest_contact: data.guest_contact,
-    created_at: data.created_at,
+    guestContact: data.guest_contact,
+    createdAt: data.created_at,
+    pickupOffice,
     items,
   };
 });

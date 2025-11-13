@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { SelectMenuItem } from '@nuxt/ui';
+
+
 definePageMeta({ name: 'checkout' });
 
 const { t } = useI18n();
@@ -29,9 +32,28 @@ if (process.client) {
   watch(items, redirectIfEmpty, { deep: true });
 }
 
-const form = reactive({ name: '', phone: '', email: '' });
+const { data: officesData } = await useFetch('/api/offices/list');
+const offices = computed(() => officesData.value?.items || []);
+
+const officeItems = computed<SelectMenuItem[]>(() =>
+  offices.value.map(o => ({
+    label: o.name,
+    value: o.id,
+    address: o.address,
+  })),
+);
+
+const form = reactive({
+  name: '',
+  phone: '',
+  email: '',
+  pickupOfficeId: null as number | null,
+});
+
 const pending = ref(false);
 const message = ref<string | null>(null);
+
+const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
 const submit = async () => {
   if (!items.value.length) {
@@ -40,7 +62,14 @@ const submit = async () => {
     return;
   }
 
+  if (!form.pickupOfficeId) {
+    message.value = t('checkout.errors.pickupRequired');
+
+    return;
+  }
+
   pending.value = true;
+  message.value = null;
 
   try {
     const { number } = await $fetch('/api/checkout/place-order', {
@@ -48,21 +77,24 @@ const submit = async () => {
       body: {
         items: unref(items),
         totals: { total: unref(totalAOA), currency: 'AOA' },
-        contact: toRaw(form),
+        contact: {
+          name: form.name,
+          phone: form.phone,
+          email: form.email || null,
+        },
+        pickupOfficeId: form.pickupOfficeId,
       },
     });
 
-    clear();
-
     await navigateTo(localeRoute({ name: 'order-number', params: { number } }));
+
+    clear();
   } catch (error: any) {
     message.value = error?.data?.message || t('checkout.errors.common');
   } finally {
     pending.value = false;
   }
 };
-
-const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 </script>
 
 <i18n lang="json">
@@ -71,15 +103,21 @@ const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} A
     "checkout": {
       "title": "Finalizar pedido",
       "subtitle": "Preencha os seus dados para concluir a encomenda",
-      "hint": "Estas informações são necessárias para **entrega gratuita e recolha no ponto**. Indique o seu nome e contacto reais — enviaremos confirmação quando o pedido estiver pronto para recolha.",
+      "hint": "Estas informações são necessárias para entrega gratuita e recolha no ponto. Indique o seu nome e contacto reais — enviaremos confirmação quando o pedido estiver pronto para recolha.",
       "name": "Nome completo",
       "phone": "Telefone (WhatsApp recomendado)",
       "email": "E-mail",
+      "pickup": {
+        "label": "Escolha o ponto de levantamento",
+        "placeholder": "Selecione o ponto de levantamento",
+        "help": "Escolha o ponto onde pretende levantar a sua encomenda."
+      },
       "submit": "Confirmar pedido",
       "note": "📦 A entrega é gratuita. Entraremos em contacto assim que o seu pedido estiver pronto para recolha.",
       "errors": {
         "empty": "O carrinho está vazio.",
-        "common": "Ocorreu um erro ao enviar o pedido. Tente novamente em alguns instantes."
+        "common": "Ocorreu um erro ao enviar o pedido. Tente novamente em alguns instantes.",
+        "pickupRequired": "Selecione o ponto de levantamento."
       },
       "meta": {
         "title": "Finalizar pedido | Amoda Angola",
@@ -96,15 +134,21 @@ const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} A
     "checkout": {
       "title": "Complete your order",
       "subtitle": "Enter your contact details to finish checkout",
-      "hint": "We need this information for **free delivery and pickup**. Please provide your real name and phone (WhatsApp preferred) — we’ll contact you when your order arrives at the pickup point.",
+      "hint": "We need this information for free delivery and pickup. Please provide your real name and phone (WhatsApp preferred) — we’ll contact you when your order arrives at the pickup point.",
       "name": "Full Name",
       "phone": "Phone (WhatsApp preferred)",
       "email": "E-mail",
+      "pickup": {
+        "label": "Choose pickup point",
+        "placeholder": "Select a pickup point",
+        "help": "Select the location where you want to collect your order."
+      },
       "submit": "Confirm Order",
       "note": "📦 Delivery is free. We’ll contact you as soon as your order is ready for pickup.",
       "errors": {
         "empty": "Your cart is empty.",
-        "common": "Something went wrong while placing the order. Please try again shortly."
+        "common": "Something went wrong while placing the order. Please try again shortly.",
+        "pickupRequired": "Please select a pickup point."
       },
       "meta": {
         "title": "Checkout | Amoda Angola",
@@ -170,6 +214,32 @@ const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} A
           />
         </UFormField>
 
+        <UFormField :label="t('checkout.pickup.label')">
+          <USelectMenu
+            v-model="form.pickupOfficeId"
+            :items="officeItems"
+            valueKey="value"
+            :placeholder="t('checkout.pickup.placeholder')"
+            class="w-full"
+          >
+            <template #item-label="{ item }">
+              <div class="flex flex-col">
+                <span class="font-medium">
+                  {{ item.label }}
+                </span>
+
+                <span class="text-xs text-gray-500">
+                  {{ item.address }}
+                </span>
+              </div>
+            </template>
+          </USelectMenu>
+
+          <p class="mt-1 text-xs text-gray-500">
+            {{ t('checkout.pickup.help') }}
+          </p>
+        </UFormField>
+
         <div class="flex items-center justify-between border-t pt-4 text-sm">
           <span class="text-gray-500">
             {{ t('checkout.summary.items') }}:
@@ -204,13 +274,12 @@ const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} A
         </UAlert>
 
         <UAlert
+          :description="t('checkout.note')"
           color="success"
           variant="subtle"
           icon="i-heroicons-check-circle"
           class="mt-4 text-sm leading-relaxed"
-        >
-          {{ t('checkout.note') }}
-        </UAlert>
+        />
       </UForm>
     </UPageBody>
   </UPage>
