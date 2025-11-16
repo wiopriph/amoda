@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+
+
 definePageMeta({ name: 'product-slug' });
 
 /* === Imports & Setup === */
@@ -6,6 +9,7 @@ const { t } = useI18n();
 const route = useRoute();
 const requestURL = useRequestURL();
 const localeRoute = useLocaleRoute();
+const { trackViewItem, trackSelectItem } = useAnalyticsEvent();
 
 const { data: productResponse, error: productError } = await useFetch('/api/catalog/item', {
   query: { slug: route.params.slug },
@@ -95,6 +99,37 @@ const addProductToCart = () => {
   }
 
   addToCart(product, variant, selectedSize, 1);
+};
+
+
+watch(
+  () => productData.value?.id,
+  (id) => {
+    if (!import.meta.client) {
+      return;
+    }
+
+    if (!id || !productData.value) {
+      return;
+    }
+
+    trackViewItem({
+      itemId: productData.value.id,
+      itemName: productData.value?.title || '',
+      price: currentVariant.value?.price ?? 0,
+      categoryId: productData.value.primary_category_id,
+    });
+  },
+  { immediate: true },
+);
+
+const sendSelectProductEvent = (product: any) => {
+  trackSelectItem({
+    itemId: product.id,
+    itemName: product.title,
+    price: product.price,
+    categoryId: product.primary_category_id,
+  });
 };
 
 const seoTitle = computed(() => `${productData.value?.title || ''} | ${t('product.meta.titleSuffix')}`);
@@ -375,6 +410,7 @@ useHead(() => ({
               title: 'line-clamp-2 overflow-hidden'
             }"
             variant="outline"
+            @click="sendSelectProductEvent(item)"
           />
         </UBlogPosts>
       </UPageSection>

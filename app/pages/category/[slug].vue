@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+import type { AnalyticsProduct } from '~/composables/useAnalyticsEvent';
+
+
 definePageMeta({ name: 'category-slug' });
 
-const { t } = useI18n();
 const route = useRoute();
 const localeRoute = useLocaleRoute();
-const requestURL = useRequestURL();
 
 const limit = 24;
 const page = ref(Math.max(1, Number(route.query.page || 1)));
@@ -32,7 +34,7 @@ const total = computed(() => data.value!.total || 0);
 const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)));
 const makePaginationTo = (pageNum: number) => ({ query: { page: pageNum } });
 
-/** Категория всегда есть на этой странице */
+
 const category = computed(() => data.value!.category);
 const categoryTitle = computed(() => category.value?.name || '');
 
@@ -41,7 +43,51 @@ const breadcrumbItems = computed(() => (data.value!.breadcrumbs || []).map((c) =
   to: localeRoute(c.to),
 })));
 
+
+/** АНАЛИТИКА */
+const { trackViewItemList, trackSelectItem } = useAnalyticsEvent();
+
+
+if (import.meta.client) {
+  watch(
+    () => route.fullPath,
+    () => {
+      if (!import.meta.client) {
+        return;
+      }
+
+      const items = products.value.map((p: any): AnalyticsProduct => ({
+        id: p.id,
+        name: p.title,
+        price: p.price,
+        brand: p.brand_name,
+        categoryId: p.primary_category_id,
+      }));
+
+      trackViewItemList({
+        categoryId: category.value?.id,
+        categoryName: categoryTitle.value,
+        items,
+        itemsCount: items.length,
+      });
+    },
+    { immediate: true },
+  );
+}
+
+const sendSelectProductEvent = (product: any) => {
+  trackSelectItem({
+    itemId: product.id,
+    itemName: product.title,
+    price: product.price,
+    categoryId: product.primary_category_id,
+  });
+};
+
 /** SEO */
+const { t } = useI18n();
+const requestURL = useRequestURL();
+
 const pageTitle = computed(() => t('category.seoTitle', { category: categoryTitle.value }));
 const pageDescription = computed(() => t('category.seoDescription', { category: categoryTitle.value }));
 
@@ -175,6 +221,7 @@ useHead(() => ({
             title: 'line-clamp-2 overflow-hidden'
           }"
           variant="outline"
+          @click="sendSelectProductEvent(product)"
         />
       </UBlogPosts>
 

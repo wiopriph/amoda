@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+
+
 definePageMeta({ name: 'cart' });
 
 const { t } = useI18n();
@@ -27,10 +30,26 @@ const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} A
 
 
 const localeRoute = useLocaleRoute();
+const { trackBeginCheckout } = useAnalyticsEvent();
 
 const goCheckout = () => {
   if (!items.value.length) {
     return;
+  }
+
+  if (import.meta.client) {
+    const mappedItems = items.value.map((i): AnalyticsCartItem => ({
+      id: i.id, // составной id типа productId:variantId:sizeId
+      name: i.title,
+      price: i.price,
+      quantity: i.qty,
+    }));
+
+    trackBeginCheckout({
+      total: totalAOA.value,
+      items: mappedItems,
+      itemsCount: totalCount.value,
+    });
   }
 
   navigateTo(localeRoute({ name: 'checkout' }));

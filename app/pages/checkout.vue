@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SelectMenuItem } from '@nuxt/ui';
+import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 
 
 definePageMeta({ name: 'checkout' });
@@ -17,7 +18,7 @@ useHead(() => ({
 }));
 
 const { items, totalAOA, clear } = useCart();
-
+const { trackPurchase } = useAnalyticsEvent();
 
 const localeRoute = useLocaleRoute();
 
@@ -29,7 +30,6 @@ const redirectIfEmpty = () => {
 
 if (process.client) {
   onMounted(redirectIfEmpty);
-  watch(items, redirectIfEmpty, { deep: true });
 }
 
 const { data: officesData } = await useFetch('/api/offices/list');
@@ -85,6 +85,19 @@ const submit = async () => {
         pickupOfficeId: form.pickupOfficeId,
       },
     });
+
+    if (import.meta.client) {
+      trackPurchase({
+        transactionId: String(number),
+        total: totalAOA.value,
+        items: items.value.map((item) => ({
+          id: item.id, // составной id типа productId:variantId:sizeId
+          name: item.title,
+          price: item.price,
+          quantity: item.qty,
+        })),
+      });
+    }
 
     await navigateTo(localeRoute({ name: 'order-number', params: { number } }));
 

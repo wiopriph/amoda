@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+
+
 definePageMeta({ name: 'index' });
 
 const { t, tm, rt } = useI18n();
@@ -16,6 +19,17 @@ const { data, error } = await useFetch('/api/catalog/list', {
 });
 
 const items = computed(() => data.value?.items || []);
+
+const { trackSelectItem } = useAnalyticsEvent();
+
+const sendSelectProductEvent = (product: any) => {
+  trackSelectItem({
+    itemId: product.id,
+    itemName: product.title,
+    price: product.price,
+    categoryId: product.primary_category_id,
+  });
+};
 
 const steps = computed(() =>
   tm('home.how.steps').map((s: any) => ({
@@ -231,6 +245,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
               title: 'line-clamp-2 overflow-hidden'
             }"
             variant="outline"
+            @click="sendSelectProductEvent(product)"
           />
         </UBlogPosts>
       </UPageSection>

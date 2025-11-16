@@ -1,3 +1,6 @@
+import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+
+
 type CartItem = {
   id: string // "productId:variantId" или "productId:variantId:sizeId"
   slug: string
@@ -8,14 +11,14 @@ type CartItem = {
 };
 
 type ProductLike = {
-  id: number | string
+  id: number
   slug: string
   title: string
   images?: { url: string }[] // на случай если где-то ещё остались product.images
 };
 
 type VariantLike = {
-  id: number | string
+  id: number
   color?: string | null
   price: number
   images?: { url: string; position?: number | null }[]
@@ -23,7 +26,7 @@ type VariantLike = {
 };
 
 type SizeLike = {
-  id: number | string
+  id: number
   size: string
 };
 
@@ -84,6 +87,9 @@ export function useCart() {
   const makeCartId = (productId: number | string, variantId: number | string, sizeId?: number | string | null) =>
     sizeId ? `${productId}:${variantId}:${sizeId}` : `${productId}:${variantId}`;
 
+
+  const { trackAddToCart, trackRemoveFromCart } = useAnalyticsEvent();
+
   /**
    * Добавить товар в корзину (только из карточки товара).
    * @param product — товар
@@ -107,10 +113,7 @@ export function useCart() {
       return;
     }
 
-    const titleWithAttrs =
-      `${product.title}${
-        variant.color ? ` / ${variant.color}` : ''
-      }${size?.size ? ` / ${size.size}` : ''}`;
+    const titleWithAttrs = `${product.title}${variant.color ? ` / ${variant.color}` : ''}${size?.size ? ` / ${size.size}` : ''}`;
 
     state.value.push({
       id: cartId,
@@ -120,6 +123,17 @@ export function useCart() {
       price: variant.price,
       qty: safeQty,
     });
+
+    if (import.meta.client) {
+      trackAddToCart({
+        itemId: cartId,
+        itemName: product.title,
+        price: variant.price,
+        quantity: safeQty,
+        size: size?.size,
+        variantId: variant?.id,
+      });
+    }
   };
 
   const setQty = (cartItemId: string, qty: number) => {
@@ -149,10 +163,30 @@ export function useCart() {
       return;
     }
 
+    if (import.meta.client) {
+      trackRemoveFromCart({
+        itemId: target.id,
+        quantity: 1,
+      });
+    }
+
     setQty(cartItemId, Math.max(1, target.qty - 1));
   };
 
   const remove = (cartItemId: string) => {
+    const target = state.value.find(i => i.id === cartItemId);
+
+    if (!target) {
+      return;
+    }
+
+    if (import.meta.client) {
+      trackRemoveFromCart({
+        itemId: target.id,
+        quantity: target.qty,
+      });
+    }
+
     state.value = state.value.filter(i => i.id !== cartItemId);
   };
 
