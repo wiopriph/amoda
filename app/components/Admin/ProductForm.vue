@@ -3,7 +3,6 @@ const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: any
-  isEdit?: boolean
   brands: { id: number; name: string }[]
   categories: { id: number; name: string }[]
 }>();
@@ -17,6 +16,8 @@ watch(
   v => Object.assign(product.value, v),
   { deep: true },
 );
+
+const isEdit = computed(() => !!product.value.id);
 
 const handleInput = (key: string, val: any) => {
   product.value[key] = val;
@@ -32,6 +33,37 @@ const handleSave = async () => {
 
   isSaving.value = false;
 };
+
+const slugTouched = ref(false);
+
+const slugify = (value: string) => value
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .substring(0, 120);
+
+watch(
+  () => product.value.title,
+  (title) => {
+    if (isEdit.value) return;
+
+    if (slugTouched.value) return;
+
+    const nextSlug = title ? slugify(title) : '';
+
+    product.value.slug = nextSlug;
+    emit('update:modelValue', product.value);
+  },
+);
+
+const onSlugInput = (val: string) => {
+  if (isEdit.value) return;
+
+  slugTouched.value = true;
+  handleInput('slug', val);
+};
 </script>
 
 <i18n lang="json">
@@ -39,6 +71,7 @@ const handleSave = async () => {
   "en": {
     "productForm": {
       "title": "Title",
+      "slug": "Slug",
       "brand": "Brand",
       "category": "Category",
       "description": "Description",
@@ -50,6 +83,7 @@ const handleSave = async () => {
   "pt": {
     "productForm": {
       "title": "Título",
+      "slug": "Slug",
       "brand": "Marca",
       "category": "Categoria",
       "description": "Descrição",
@@ -73,6 +107,19 @@ const handleSave = async () => {
         :placeholder="t('productForm.title')"
         class="w-full"
         @input="handleInput('title', $event)"
+      />
+    </UFormField>
+
+    <UFormField
+      :label="t('productForm.slug')"
+      class="w-full"
+    >
+      <UInput
+        v-model="product.slug"
+        :placeholder="t('productForm.slug')"
+        class="w-full"
+        :disabled="isEdit"
+        @input="onSlugInput($event)"
       />
     </UFormField>
 
@@ -131,7 +178,7 @@ const handleSave = async () => {
         color="primary"
         @click="handleSave"
       >
-        {{ props.isEdit ? t('productForm.save') : t('productForm.create') }}
+        {{ isEdit ? t('productForm.save') : t('productForm.create') }}
       </UButton>
     </div>
   </UForm>
