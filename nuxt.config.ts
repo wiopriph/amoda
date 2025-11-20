@@ -2,9 +2,14 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   css: ['~/assets/css/main.css'],
 
-  devtools: { enabled: true },
+  devtools: {
+    enabled: process.env.NODE_ENV !== 'production',
+  },
 
   i18n: {
+    baseUrl: 'https://moda.ao',
+    defaultLocale: 'pt',
+    detectBrowserLanguage: false,
     locales: [
       {
         code: 'pt',
@@ -19,10 +24,7 @@ export default defineNuxtConfig({
         flag: '🇬🇧',
       },
     ],
-    baseUrl: 'https://moda.ao',
-    defaultLocale: 'pt',
     strategy: 'prefix_except_default',
-    detectBrowserLanguage: false,
   },
 
   modules: [
@@ -49,11 +51,9 @@ export default defineNuxtConfig({
   },
 
   sitemap: {
-    xsl: false,
     cacheMaxAgeSeconds: 86400,
-    sitemapName: 'sitemap.xml',
-
     exclude: ['/admin/**', '/auth', '/cart', '/checkout', '/order/**'],
+    sitemapName: 'sitemap.xml',
 
     sitemaps: {
       pages: {
@@ -71,6 +71,8 @@ export default defineNuxtConfig({
         sources: ['/sitemap/products'],
       },
     },
+
+    xsl: false,
   },
 
   supabase: {
