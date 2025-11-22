@@ -20,6 +20,11 @@ const { data, error } = await useFetch('/api/catalog/list', {
 
 const items = computed(() => data.value?.items || []);
 
+const { data: categories } = await useFetch('/api/categories/list', {
+  query: { limit: 15 },
+  watch: [() => route.fullPath],
+});
+
 const { trackSelectItem } = useAnalyticsEvent();
 
 const sendSelectProductEvent = (product: any) => {
@@ -51,6 +56,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
       "heroTitle": "Moda online fácil e segura",
       "heroSubtitle": "Compre roupas online em Angola, receba no ponto de entrega e pague apenas se gostar.",
       "heroButton": "Comprar agora",
+      "categoriesTitle": "Categorias",
       "showcase": "Em destaque",
       "featuresTitle": "Por que escolher a Amoda?",
       "features": {
@@ -104,6 +110,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
       "heroTitle": "Easy and safe online fashion",
       "heroSubtitle": "Buy clothes online in Angola, get free delivery and pay only if you love it.",
       "heroButton": "Shop now",
+      "categoriesTitle": "Categories",
       "showcase": "Featured",
       "featuresTitle": "Why choose Amoda?",
       "features": {
@@ -144,7 +151,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         "h1": "Online clothing in Angola — Free delivery with Amoda",
         "text": [
           "Amoda is Angola’s leading online fashion store.",
-          "Shop online, pick up your order locally, and pay only for what you keep — fast, safe and convenient.",
+          "Shop online, pick up your order locally and pay only for what you keep — fast, safe and convenient.",
           "Find the latest Angola fashion trends, stylish outfits and great prices."
         ]
       }
@@ -214,6 +221,11 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           color="primary"
         />
       </UPageSection>
+
+      <CategoriesPills
+        v-if="categories.length"
+        :list="categories"
+      />
 
       <UPageSection
         :title="t('home.showcase')"

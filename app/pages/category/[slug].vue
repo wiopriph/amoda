@@ -11,19 +11,26 @@ const localeRoute = useLocaleRoute();
 const limit = 24;
 const page = ref(Math.max(1, Number(route.query.page || 1)));
 
-const { data, error } = await useFetch('/api/catalog/list', {
-  query: {
-    slug: route.params.slug,
-    page,
-    limit,
-    q: route.query.q,
-    brand_id: route.query.brand_id,
-    size: route.query.size,
-    color: route.query.color,
-    sort: route.query.sort,
-  },
-  watch: [() => route.fullPath],
-});
+const [
+  { data, error },
+  { data: navigation },
+] = await Promise.all([
+  useFetch('/api/catalog/list', {
+    query: {
+      slug: route.params.slug,
+      page,
+      q: route.query.q,
+      sort: route.query.sort,
+    },
+    watch:  [() => route.fullPath],
+  }),
+  useFetch('/api/catalog/category-navigation', {
+    query: {
+      slug: route.params.slug,
+    },
+    watch:  [() => route.fullPath],
+  }),
+]);
 
 if (error.value || !data.value) {
   throw createError({ statusCode: 404 });
@@ -192,7 +199,14 @@ useHead(() => ({
       :ui="{ title: 'text-xl md:text-2xl font-semibold' }"
     >
       <template #headline>
-        <UBreadcrumb :items="breadcrumbItems" />
+        <div class="space-y-5">
+          <UBreadcrumb
+            :items="breadcrumbItems"
+            class="hidden md:block"
+          />
+
+          <CategoriesPills :list="navigation" />
+        </div>
       </template>
     </UPageHeader>
 
