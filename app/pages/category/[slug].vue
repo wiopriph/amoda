@@ -141,7 +141,7 @@ useHead(() => ({
             item: {
               '@type': 'Product',
               name: p.title,
-              image: p.images?.[0]?.url || 'https://moda.ao/placeholder.png',
+              image: p.images?.[0]?.url || 'https://amoda.ao/placeholder.png',
               brand: p.brand_name || undefined,
               offers: {
                 '@type': 'Offer',

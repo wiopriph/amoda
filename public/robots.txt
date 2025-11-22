@@ -13,4 +13,4 @@ Disallow: /en/auth
 
 Disallow: /_nuxt/
 
-Sitemap: https://moda.ao/sitemap.xml
+Sitemap: https://amoda.ao/sitemap.xml

@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   },
 
   i18n: {
-    baseUrl: 'https://moda.ao',
+    baseUrl: 'https://amoda.ao',
     defaultLocale: 'pt',
     detectBrowserLanguage: false,
     locales: [
