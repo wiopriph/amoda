@@ -223,7 +223,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
       </UPageSection>
 
       <CategoriesPills
-        v-if="categories.length"
+        v-if="categories?.length"
         :list="categories"
       />
 
