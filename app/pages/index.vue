@@ -182,7 +182,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           src="/images/hero.webp"
           alt="hero"
           class="w-full rounded-lg"
-          fetchpriority="high"
+          fetchPriority="high"
           preload
         />
       </UPageCTA>
