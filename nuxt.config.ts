@@ -6,6 +6,10 @@ export default defineNuxtConfig({
     enabled: process.env.NODE_ENV !== 'production',
   },
 
+  features: {
+    inlineStyles: true,
+  },
+
   i18n: {
     baseUrl: 'https://amoda.ao',
     defaultLocale: 'pt',

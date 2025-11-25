@@ -21,6 +21,8 @@ if (productError.value || !productResponse.value) {
 }
 
 const productData = computed(() => productResponse.value?.product);
+const productTitle = computed(() => productData.value?.title || '');
+
 const breadcrumbs = computed(() =>
   (productResponse.value?.breadcrumbs || []).map(crumb => ({
     label: crumb.label,
@@ -100,7 +102,6 @@ const addProductToCart = () => {
 
   addToCart(product, variant, selectedSize, 1);
 };
-
 
 watch(
   () => productData.value?.id,
@@ -186,6 +187,9 @@ useHead(() => ({
     { property: 'twitter:description', content: seoDescription.value },
     { property: 'twitter:image', content: seoImage.value },
   ],
+  link: [
+    { rel: 'canonical', href: productFullUrl.value },
+  ],
   script: [
     { type: 'application/ld+json', innerHTML: JSON.stringify(productSchema.value) },
     { type: 'application/ld+json', innerHTML: JSON.stringify(breadcrumbSchema.value) },
@@ -208,7 +212,10 @@ useHead(() => ({
         "description": "Compre roupas, sapatos e acessórios na Amoda. Moda feminina, masculina e infantil com entrega gratuita em Luanda. Pague apenas após experimentar."
       },
       "seo": {
-        "h1": "Compre {title} online em Angola — entrega gratuita e compra segura"
+        "h1": "Compre {title} online em Angola — entrega gratuita e compra segura",
+        "imageMainAlt": "{title} — foto principal do produto",
+        "thumbAlt": "{title} — foto {index}",
+        "variantAlt": "{title} — cor {color}"
       },
       "reco": {
         "title": "Talvez você também goste",
@@ -229,7 +236,10 @@ useHead(() => ({
         "description": "Shop clothes, shoes and accessories at Amoda. Fashion for women, men and kids with free delivery in Luanda. Pay only after trying on."
       },
       "seo": {
-        "h1": "Buy {title} online in Angola — free delivery and safe shopping"
+        "h1": "Buy {title} online in Angola — free delivery and safe shopping",
+        "imageMainAlt": "{title} — main product image",
+        "thumbAlt": "{title} — photo {index}",
+        "variantAlt": "{title} — color {color}"
       },
       "reco": {
         "title": "You may also like",
@@ -276,7 +286,9 @@ useHead(() => ({
               >
                 <NuxtImg
                   :src="image.url"
+                  :alt="t('product.seo.thumbAlt', { title: productTitle, index: index + 1 })"
                   class="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </button>
             </template>
@@ -296,6 +308,7 @@ useHead(() => ({
             >
               <NuxtImg
                 :src="galleryImages[activeImageIndex]?.url || '/placeholder.webp'"
+                :alt="t('product.seo.imageMainAlt', { title: productTitle })"
                 class="object-contain max-h-full max-w-full"
               />
             </div>
@@ -331,8 +344,9 @@ useHead(() => ({
               >
                 <NuxtImg
                   :src="variantOption.url"
-                  alt=""
+                  :alt="t('product.seo.variantAlt', { title: productTitle, color: variantOption.label })"
                   class="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </button>
             </div>
@@ -391,9 +405,7 @@ useHead(() => ({
       <UPageSection
         v-if="recItems.length"
         :title="t('product.reco.title')"
-        :ui="{
-          title: 'text-md font-semibold'
-        }"
+        :ui="{ title: 'text-md font-semibold' }"
         class="mt-10"
       >
         <UBlogPosts class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
