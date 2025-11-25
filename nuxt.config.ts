@@ -35,6 +35,17 @@ export default defineNuxtConfig({
     '@nuxtjs/sitemap',
   ],
 
+  nitro: {
+    routeRules: {
+      // Cache-Control для NuxtImg
+      '/_ipx/**': {
+        headers: {
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
+      },
+    },
+  },
+
   runtimeConfig: {
     supabase: {
       serviceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,

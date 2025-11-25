@@ -179,9 +179,10 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         class="mb-10 sm:mb-14"
       >
         <NuxtImg
-          src="/images/hero.png"
+          src="/images/hero.webp"
           alt="hero"
           class="w-full rounded-lg"
+          preload
         />
       </UPageCTA>
 
@@ -249,7 +250,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
             :key="product.id"
             :title="product.title"
             :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
-            :image="product.images?.[0]?.url || 'placeholder.png'"
+            :image="product.images?.[0]?.url || 'placeholder.webp'"
             :to="localeRoute({ name: 'product-slug', params: { slug: product.slug } })"
             :ui="{
               header: 'aspect-[4/5] object-cover',

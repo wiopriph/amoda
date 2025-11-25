@@ -148,7 +148,7 @@ useHead(() => ({
             item: {
               '@type': 'Product',
               name: p.title,
-              image: p.images?.[0]?.url || 'https://amoda.ao/placeholder.png',
+              image: p.images?.[0]?.url || 'https://amoda.ao/placeholder.webp',
               brand: p.brand_name || undefined,
               offers: {
                 '@type': 'Offer',
@@ -227,7 +227,7 @@ useHead(() => ({
           :key="product.id"
           :title="product.title"
           :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
-          :image="product.images?.[0]?.url || 'placeholder.png'"
+          :image="product.images?.[0]?.url || 'placeholder.webp'"
           :to="localeRoute({ name: 'product-slug', params: { slug: product.slug } })"
           :ui="{
             header: 'aspect-[4/5] object-cover',

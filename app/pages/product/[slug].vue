@@ -34,7 +34,7 @@ const productVariants = computed(() => productData.value?.variants || []);
 const variantOptions = computed(() =>
   productVariants.value.map(variant => ({
     id: variant.id,
-    url: variant.images?.[0]?.url || productData.value?.images?.[0]?.url || '/placeholder.png',
+    url: variant.images?.[0]?.url || productData.value?.images?.[0]?.url || '/placeholder.webp',
     label: variant.color || '—',
   })),
 );
@@ -134,7 +134,7 @@ const sendSelectProductEvent = (product: any) => {
 
 const seoTitle = computed(() => `${productData.value?.title || ''} | ${t('product.meta.titleSuffix')}`);
 const seoDescription = computed(() => productData.value?.description || t('product.meta.description'));
-const seoImage = computed(() => galleryImages.value?.[0]?.url || '/placeholder.png');
+const seoImage = computed(() => galleryImages.value?.[0]?.url || '/placeholder.webp');
 
 const productFullUrl = computed(() => {
   const localized = localeRoute({
@@ -295,7 +295,7 @@ useHead(() => ({
               class="relative w-full aspect-[4/5] overflow-hidden rounded-lg bg-gray-50 flex items-center justify-center"
             >
               <NuxtImg
-                :src="galleryImages[activeImageIndex]?.url || '/placeholder.png'"
+                :src="galleryImages[activeImageIndex]?.url || '/placeholder.webp'"
                 class="object-contain max-h-full max-w-full"
               />
             </div>
@@ -402,7 +402,7 @@ useHead(() => ({
             :key="item.id"
             :title="item.title"
             :description="`${new Intl.NumberFormat('pt-AO').format(item.price)} AOA`"
-            :image="item.images?.[0]?.url || '/placeholder.png'"
+            :image="item.images?.[0]?.url || '/placeholder.webp'"
             :to="localeRoute({ name: 'product-slug', params: { slug: item.slug } })"
             :ui="{
               header: 'aspect-[4/5] object-cover',
