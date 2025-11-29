@@ -10,11 +10,13 @@ type Category = {
   name: string
   slug: string
   parent_id: number | null
+  image: string | null
 };
 
 type NavigationItem = {
   slug: string
   name: string
+  image: string | null
 };
 
 export default defineEventHandler(async (event) => {
@@ -29,7 +31,7 @@ export default defineEventHandler(async (event) => {
   if (!query.slug) {
     const { data: topCategories, error: topErr } = await supabase
       .from('categories')
-      .select('id, name, slug, parent_id')
+      .select('id, name, slug, parent_id, image')
       .is('parent_id', null)
       .order('name', { ascending: true });
 
@@ -40,13 +42,14 @@ export default defineEventHandler(async (event) => {
     return (topCategories || []).map((c: Category) => ({
       slug: c.slug,
       name: c.name,
+      image: c.image,
     }));
   }
 
-  // --- 2. Есть slug → ищем категорию ---
+  // --- 2. Текущая категория ---
   const { data: category, error: catErr } = await supabase
     .from('categories')
-    .select('id, name, slug, parent_id')
+    .select('id, name, slug, parent_id, image')
     .eq('slug', String(query.slug))
     .maybeSingle();
 
@@ -60,62 +63,63 @@ export default defineEventHandler(async (event) => {
 
   currentCategory = category as Category;
 
-  // --- 3. Ищем родителя ---
+  // --- 3. Родитель ---
   if (currentCategory.parent_id !== null) {
     const { data: parentRow } = await supabase
       .from('categories')
-      .select('id, name, slug, parent_id')
+      .select('id, name, slug, parent_id, image')
       .eq('id', currentCategory.parent_id)
       .maybeSingle();
 
     if (parentRow) parentCategory = parentRow as Category;
   }
 
-  // --- 4. Ищем детей текущей категории ---
+  // --- 4. Дети ---
   const { data: children } = await supabase
     .from('categories')
-    .select('id, name, slug, parent_id')
+    .select('id, name, slug, parent_id, image')
     .eq('parent_id', currentCategory.id)
     .order('name', { ascending: true });
 
   if (children && children.length > 0) {
-    // структура: parent → current → children
     if (parentCategory) {
       navigation.push({
         slug: parentCategory.slug,
         name: parentCategory.name,
+        image: parentCategory.image,
       });
     }
 
     navigation.push({
       slug: currentCategory.slug,
       name: currentCategory.name,
+      image: currentCategory.image,
     });
 
     navigation.push(
       ...children.map((c: Category) => ({
         slug: c.slug,
         name: c.name,
+        image: c.image,
       })),
     );
   } else {
-    // --- 5. Нет детей → ищем соседей ---
+    // --- 5. Соседи ---
     let siblings: Category[] = [];
 
     if (parentCategory) {
       const { data: siblingRows } = await supabase
         .from('categories')
-        .select('id, name, slug, parent_id')
+        .select('id, name, slug, parent_id, image')
         .eq('parent_id', parentCategory.id)
         .neq('id', currentCategory.id)
         .order('name', { ascending: true });
 
       siblings = siblingRows || [];
     } else {
-      // root без детей → соседи по root
       const { data: rootSiblings } = await supabase
         .from('categories')
-        .select('id, name, slug, parent_id')
+        .select('id, name, slug, parent_id, image')
         .is('parent_id', null)
         .neq('id', currentCategory.id)
         .order('name', { ascending: true });
@@ -127,18 +131,21 @@ export default defineEventHandler(async (event) => {
       navigation.push({
         slug: parentCategory.slug,
         name: parentCategory.name,
+        image: parentCategory.image,
       });
     }
 
     navigation.push({
       slug: currentCategory.slug,
       name: currentCategory.name,
+      image: currentCategory.image,
     });
 
     navigation.push(
       ...siblings.map((c: Category) => ({
         slug: c.slug,
         name: c.name,
+        image: c.image,
       })),
     );
   }

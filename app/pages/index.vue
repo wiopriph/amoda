@@ -20,10 +20,7 @@ const { data, error } = await useFetch('/api/catalog/list', {
 
 const items = computed(() => data.value?.items || []);
 
-const { data: categories } = await useFetch('/api/categories/list', {
-  query: { limit: 15 },
-  watch: [() => route.fullPath],
-});
+const { data: categories } = await useFetch('/api/categories/list');
 
 const { trackSelectItem } = useAnalyticsEvent();
 
@@ -53,9 +50,6 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
     "home": {
       "title": "Moda Angola — Comprar roupas online com entrega gratuita | Amoda",
       "desc": "Loja de roupas online em Angola. Compre roupas com entrega gratuita em Luanda. Moda acessível, rápida e segura — experimente antes de pagar.",
-      "heroTitle": "Moda online fácil e segura",
-      "heroSubtitle": "Compre roupas online em Angola, receba no ponto de entrega e pague apenas se gostar.",
-      "heroButton": "Comprar agora",
       "categoriesTitle": "Categorias",
       "showcase": "Em destaque",
       "featuresTitle": "Por que escolher a Amoda?",
@@ -107,9 +101,6 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
     "home": {
       "title": "Fashion Angola — Buy clothes online with free delivery | Amoda",
       "desc": "Online clothing store in Angola. Free delivery in Luanda. Affordable, safe and easy — try before you pay.",
-      "heroTitle": "Easy and safe online fashion",
-      "heroSubtitle": "Buy clothes online in Angola, get free delivery and pay only if you love it.",
-      "heroButton": "Shop now",
       "categoriesTitle": "Categories",
       "showcase": "Featured",
       "featuresTitle": "Why choose Amoda?",
@@ -165,65 +156,6 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
     <UPageHeader :title="t('home.title')" />
 
     <UPageBody>
-      <UPageCTA
-        :title="t('home.heroTitle')"
-        :description="t('home.heroSubtitle')"
-        :links="[
-          {
-            label: t('home.heroButton'),
-            color: 'primary',
-            to: localeRoute({ name: 'index' })
-          }
-        ]"
-        orientation="horizontal"
-        class="mb-10 sm:mb-14"
-      >
-        <NuxtImg
-          src="/images/hero.webp"
-          alt="hero"
-          class="w-full rounded-lg"
-          fetchPriority="high"
-          preload
-        />
-      </UPageCTA>
-
-      <UPageSection
-        :title="t('home.featuresTitle')"
-        :features="[
-          {
-            icon: 'i-heroicons-truck',
-            title: t('home.features.delivery.title'),
-            description: t('home.features.delivery.desc')
-          },
-          {
-            icon: 'i-heroicons-lock-closed',
-            title: t('home.features.secure.title'),
-            description: t('home.features.secure.desc')
-          },
-          {
-            icon: 'i-heroicons-banknotes',
-            title: t('home.features.cheap.title'),
-            description: t('home.features.cheap.desc')
-          }
-        ]"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      />
-
-      <UPageSection
-        :title="t('home.how.title')"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      >
-        <UStepper
-          :modelValue="steps.length"
-          :items="steps"
-          color="primary"
-        />
-      </UPageSection>
-
       <CategoriesPills
         v-if="categories?.length"
         :list="categories"
@@ -262,6 +194,43 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
             @click="sendSelectProductEvent(product)"
           />
         </UBlogPosts>
+      </UPageSection>
+
+      <UPageSection
+        :title="t('home.featuresTitle')"
+        :features="[
+          {
+            icon: 'i-heroicons-truck',
+            title: t('home.features.delivery.title'),
+            description: t('home.features.delivery.desc')
+          },
+          {
+            icon: 'i-heroicons-lock-closed',
+            title: t('home.features.secure.title'),
+            description: t('home.features.secure.desc')
+          },
+          {
+            icon: 'i-heroicons-banknotes',
+            title: t('home.features.cheap.title'),
+            description: t('home.features.cheap.desc')
+          }
+        ]"
+        :ui="{
+          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
+        }"
+      />
+
+      <UPageSection
+        :title="t('home.how.title')"
+        :ui="{
+          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
+        }"
+      >
+        <UStepper
+          :modelValue="steps.length"
+          :items="steps"
+          color="primary"
+        />
       </UPageSection>
 
       <UPageSection
