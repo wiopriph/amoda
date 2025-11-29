@@ -10,7 +10,7 @@ const localeRoute = useLocaleRoute();
   <section>
     <div
       class="
-        flex flex-wrap justify-start
+        flex flex-wrap justify-center
         gap-3
       "
     >
