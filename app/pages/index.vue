@@ -14,9 +14,9 @@ useHead({
 });
 
 const { data, error } = await useFetch('/api/catalog/list', {
-  query: { limit: 15 },
+  query: { limit: 5 },
   watch: [() => route.fullPath],
-});
+}); // рандомные, с разных категорий
 
 const items = computed(() => data.value?.items || []);
 
@@ -52,38 +52,23 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
       "desc": "Loja de roupas online em Angola. Compre roupas com entrega gratuita em Luanda. Moda acessível, rápida e segura — experimente antes de pagar.",
       "categoriesTitle": "Categorias",
       "showcase": "Em destaque",
-      "featuresTitle": "Por que escolher a Amoda?",
-      "features": {
-        "delivery": {
-          "title": "Entrega gratuita",
-          "desc": "Recolha o seu pedido em Luanda sem custos adicionais."
-        },
-        "secure": {
-          "title": "Compra segura",
-          "desc": "Pague apenas depois de experimentar e confirmar o produto."
-        },
-        "cheap": {
-          "title": "Preços acessíveis",
-          "desc": "As melhores ofertas em roupas e moda online em Angola."
-        }
-      },
       "how": {
         "title": "Como funciona?",
         "steps": [
           {
-            "icon": "i-lucide-search",
-            "title": "Escolha online",
-            "desc": "Veja roupas, sapatos e acessórios e adicione ao carrinho."
-          },
-          {
             "icon": "i-lucide-truck",
-            "title": "Entrega no ponto",
-            "desc": "Encomende gratuitamente para o ponto de entrega mais próximo."
+            "title": "Entrega no dia seguinte",
+            "desc": "Em Luanda e em outras grandes cidades de Angola, você receberá o seu pedido já no dia seguinte! Informações mais detalhadas sobre as condições de entrega para a sua cidade podem ser encontradas aqui."
           },
           {
-            "icon": "i-lucide-shopping-bag",
-            "title": "Experimente e pague",
-            "desc": "Experimente no local e pague apenas se quiser ficar com o produto."
+            "icon": "i-lucide-shirt",
+            "title": "Prova antes da compra",
+            "desc": "A loja online AMBO Moda oferece a possibilidade de experimentar roupas, calçados e outros produtos antes de pagar pela entrega. Pague apenas pelo que lhe serviu e agradou!"
+          },
+          {
+            "icon": "i-lucide-wallet",
+            "title": "Formas de pagamento convenientes",
+            "desc": "Você pode pagar as suas compras não apenas em dinheiro, mas também com cartão bancário. Todos os entregadores da AMBO Moda têm consigo um terminal para pagamento com cartão."
           }
         ]
       },
@@ -103,38 +88,23 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
       "desc": "Online clothing store in Angola. Free delivery in Luanda. Affordable, safe and easy — try before you pay.",
       "categoriesTitle": "Categories",
       "showcase": "Featured",
-      "featuresTitle": "Why choose Amoda?",
-      "features": {
-        "delivery": {
-          "title": "Free delivery",
-          "desc": "Collect your order in Luanda with no extra fees."
-        },
-        "secure": {
-          "title": "Secure shopping",
-          "desc": "Try on first — pay only if you decide to keep it."
-        },
-        "cheap": {
-          "title": "Best prices",
-          "desc": "Affordable fashion and clothing online in Angola."
-        }
-      },
       "how": {
         "title": "How it works",
         "steps": [
           {
-            "icon": "i-lucide-search",
-            "title": "Choose online",
-            "desc": "Browse clothes, shoes and accessories and add to your cart."
-          },
-          {
             "icon": "i-lucide-truck",
-            "title": "Free pickup delivery",
-            "desc": "Order to the nearest pickup point in Luanda for free."
+            "title": "Next-day delivery",
+            "desc": "In Luanda and other major cities in Angola, you can receive your order as soon as the next day! More detailed information about delivery conditions for your area can be found here."
           },
           {
-            "icon": "i-lucide-shopping-bag",
-            "title": "Try and pay later",
-            "desc": "Try on your order and pay only if you love it."
+            "icon": "i-lucide-shirt",
+            "title": "Try before you buy",
+            "desc": "The AMBO Moda online store allows you to try on clothing, shoes and other items before paying for the delivery. Pay only for the items that fit you and that you genuinely like!"
+          },
+          {
+            "icon": "i-lucide-wallet",
+            "title": "Convenient payment options",
+            "desc": "You can pay for your purchases not only in cash but also by bank card. All AMBO Moda couriers carry a POS terminal for secure card payments."
           }
         ]
       },
@@ -160,6 +130,38 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         v-if="categories?.length"
         :list="categories"
       />
+
+      <UPageSection
+        :title="t('home.how.title')"
+        :ui="{
+          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col py-8 sm:py-10 lg:py-12'
+        }"
+      >
+        <div class="grid gap-10 md:grid-cols-3">
+          <article
+            v-for="step in steps"
+            :key="step.title"
+            class="flex flex-col items-center text-center gap-4"
+          >
+            <div class="flex items-center justify-center w-20 h-20 rounded-full bg-gray-50">
+              <UIcon
+                :name="step.icon"
+                class="w-8 h-8"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <h3 class="text-base font-semibold">
+                {{ step.title }}
+              </h3>
+
+              <p class="text-sm text-gray-600">
+                {{ step.description }}
+              </p>
+            </div>
+          </article>
+        </div>
+      </UPageSection>
 
       <UPageSection
         :title="t('home.showcase')"
@@ -194,43 +196,6 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
             @click="sendSelectProductEvent(product)"
           />
         </UBlogPosts>
-      </UPageSection>
-
-      <UPageSection
-        :title="t('home.featuresTitle')"
-        :features="[
-          {
-            icon: 'i-heroicons-truck',
-            title: t('home.features.delivery.title'),
-            description: t('home.features.delivery.desc')
-          },
-          {
-            icon: 'i-heroicons-lock-closed',
-            title: t('home.features.secure.title'),
-            description: t('home.features.secure.desc')
-          },
-          {
-            icon: 'i-heroicons-banknotes',
-            title: t('home.features.cheap.title'),
-            description: t('home.features.cheap.desc')
-          }
-        ]"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      />
-
-      <UPageSection
-        :title="t('home.how.title')"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      >
-        <UStepper
-          :modelValue="steps.length"
-          :items="steps"
-          color="primary"
-        />
       </UPageSection>
 
       <UPageSection
