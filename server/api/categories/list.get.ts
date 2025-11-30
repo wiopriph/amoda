@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
 
   const { data, error } = await client
     .from('categories')
-    .select('id, name, slug, image')
+    .select('id, name, slug, image, parent_id')
     .eq('active', true)
     .order('id', { ascending: true });
 

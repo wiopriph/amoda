@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { NavigationMenuItem } from '@nuxt/ui';
+
+
 const { t } = useI18n();
 const localeRoute = useLocaleRoute();
 const { count } = useCart();
@@ -19,6 +22,15 @@ type NavCategory = {
 const { data: categories } = await useFetch<NavCategory[]>('/api/categories/list');
 
 const hasCategories = computed(() => (categories.value?.length ?? 0) > 0);
+const topCategories = computed<NavCategory[]>(() =>
+  (categories.value?.filter(cat => !cat.parent_id) ?? []),
+);
+
+const menuItems = computed<NavigationMenuItem[]>(() => topCategories.value.map(cat => ({
+  label: cat.name,
+  to: localeRoute({ name: 'category-slug', params: { slug: cat.slug } }),
+})),
+);
 </script>
 
 <i18n lang="json">
@@ -134,6 +146,8 @@ const hasCategories = computed(() => (categories.value?.length ?? 0) > 0);
         </NuxtLink>
       </div>
     </template>
+
+    <UNavigationMenu :items="menuItems" />
 
     <template #right>
       <UButton
