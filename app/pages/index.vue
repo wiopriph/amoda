@@ -14,7 +14,7 @@ useHead({
 });
 
 const { data, error } = await useFetch('/api/catalog/list', {
-  query: { limit: 5 },
+  query: { limit: 5, sort: 'new' },
   watch: [() => route.fullPath],
 }); // рандомные, с разных категорий
 
@@ -81,7 +81,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           "Compre online e receba o seu pedido num ponto de entrega ou em casa, pagando apenas pelas peças que realmente ficar para si.",
           "Encontre as últimas tendências de moda, cosméticos e perfumes com preços acessíveis e entrega conveniente."
         ]
-      },
+      }
     }
   },
   "en": {
