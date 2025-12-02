@@ -22,6 +22,8 @@ const items = computed(() => data.value?.items || []);
 
 const { data: categories } = await useFetch('/api/categories/list');
 
+const topCategories = computed(() =>(categories.value?.filter(cat => !cat.parent_id) ?? []));
+
 const { trackSelectItem } = useAnalyticsEvent();
 
 const sendSelectProductEvent = (product: any) => {
@@ -48,9 +50,9 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
 {
   "pt": {
     "home": {
-      "title": "Moda Angola — Comprar roupas online com entrega gratuita | Amoda",
-      "desc": "Loja de roupas online em Angola. Compre roupas com entrega gratuita em Luanda. Moda acessível, rápida e segura — experimente antes de pagar.",
-      "categoriesTitle": "Categorias",
+      "title": "Moda Angola — Compre roupas, calçado e acessórios online com entrega gratuita | Amoda",
+      "desc": "Loja online de roupa, calçado, acessórios, cosméticos e perfumes em Angola. Compre na Amoda com entrega rápida em Luanda e possibilidade de experimentar antes de pagar.",
+      "chooseTitle": "Escolha a seção que mais lhe interessa",
       "showcase": "Em destaque",
       "how": {
         "title": "Como funciona?",
@@ -63,7 +65,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           {
             "icon": "i-lucide-shirt",
             "title": "Prova antes da compra",
-            "desc": "A loja online AMBO Moda oferece a possibilidade de experimentar roupas, calçados e outros produtos antes de pagar pela entrega. Pague apenas pelo que lhe serviu e agradou!"
+            "desc": "A loja online Amoda oferece a possibilidade de experimentar roupas, calçados e outros produtos antes de pagar pela entrega. Pague apenas pelo que lhe serviu e agradou!"
           },
           {
             "icon": "i-lucide-wallet",
@@ -73,20 +75,20 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         ]
       },
       "seo": {
-        "h1": "Roupas online em Angola com entrega gratuita — Amoda",
+        "h1": "Loja online de roupa, calçado, acessórios, cosméticos e perfumes em Angola — Amoda",
         "text": [
-          "A Amoda é a loja de moda online nº1 em Angola.",
-          "Faça as suas compras online, levante no ponto de entrega e pague apenas se gostar — simples, rápido e seguro.",
-          "Descubra as últimas tendências em moda Angola, com qualidade, estilo e os melhores preços."
+          "A Amoda é uma loja online de roupa, calçado e acessórios em Angola.",
+          "Compre online e receba o seu pedido num ponto de entrega ou em casa, pagando apenas pelas peças que realmente ficar para si.",
+          "Encontre as últimas tendências de moda, cosméticos e perfumes com preços acessíveis e entrega conveniente."
         ]
-      }
+      },
     }
   },
   "en": {
     "home": {
-      "title": "Fashion Angola — Buy clothes online with free delivery | Amoda",
-      "desc": "Online clothing store in Angola. Free delivery in Luanda. Affordable, safe and easy — try before you pay.",
-      "categoriesTitle": "Categories",
+      "title": "Fashion Angola — Buy shoes, clothing and accessories online with free delivery | Amoda",
+      "desc": "Online store for clothing, footwear, accessories, cosmetics and perfume in Angola. Shop at Amoda with fast delivery in Luanda and the option to try before you pay.",
+      "chooseTitle": "Choose the section you're interested in",
       "showcase": "Featured",
       "how": {
         "title": "How it works",
@@ -109,11 +111,11 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         ]
       },
       "seo": {
-        "h1": "Online clothing in Angola — Free delivery with Amoda",
+        "h1": "Online store for clothing, footwear, accessories, cosmetics and perfume in Angola — Amoda",
         "text": [
-          "Amoda is Angola’s leading online fashion store.",
-          "Shop online, pick up your order locally and pay only for what you keep — fast, safe and convenient.",
-          "Find the latest Angola fashion trends, stylish outfits and great prices."
+          "Amoda is an online store for clothing, footwear and accessories in Angola.",
+          "Shop online, receive your order at a pickup point or at home and pay only for the items you decide to keep.",
+          "Discover the latest fashion trends, cosmetics and perfumes with great prices and convenient delivery."
         ]
       }
     }
@@ -126,10 +128,32 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
     <UPageHeader :title="t('home.title')" />
 
     <UPageBody>
-      <CategoriesPills
-        v-if="categories?.length"
-        :list="categories"
-      />
+      <UPageSection
+        :title="t('home.chooseTitle')"
+        :ui="{
+          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col py-8 sm:py-10 lg:py-12'
+        }"
+      >
+        <UBlogPosts
+          v-if="topCategories?.length"
+          class="grid grid-cols-1 sm:grid-cols-3 gap-4"
+        >
+          <UBlogPost
+            v-for="category in topCategories"
+            :key="category.id"
+            :title="category.name"
+            :image="category.image || '/placeholder.webp'"
+            :to="localeRoute({ name: 'category-slug', params: { slug: category.slug } })"
+            :ui="{
+              header: 'aspect-[4/5] object-cover',
+              body: 'sm:p-3',
+              title: 'line-clamp-2 overflow-hidden'
+            }"
+            variant="outline"
+          />
+        </UBlogPosts>
+      </UPageSection>
+
 
       <UPageSection
         :title="t('home.how.title')"

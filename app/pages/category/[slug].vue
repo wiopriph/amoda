@@ -171,6 +171,7 @@ useHead(() => ({
   "pt": {
     "category": {
       "empty": "Não há produtos nesta categoria ainda.",
+      "emptyDescription": "Tente procurar em outras categorias - temos muitas opções disponíveis.",
       "seoTitle": "{category} | Moda online em Angola",
       "seoDescription": "Compre {category} na Amoda: roupas, calçado e acessórios com entrega gratuita em Luanda. Encomende online, experimente no ponto e pague apenas se gostar."
     }
@@ -178,6 +179,7 @@ useHead(() => ({
   "en": {
     "category": {
       "empty": "No products found in this category yet.",
+      "emptyDescription": "Try browsing other categories - we have plenty of options available.",
       "seoTitle": "{category} | Online fashion in Angola",
       "seoDescription": "Shop {category} at Amoda: apparel, shoes and accessories with free delivery in Luanda. Order online, try at pickup and pay only if you love it."
     }
@@ -211,12 +213,11 @@ useHead(() => ({
     </UPageHeader>
 
     <UPageBody>
-      <div
+      <UEmpty
         v-if="!products.length"
-        class="text-gray-500 text-sm"
-      >
-        {{ t('category.empty') }}
-      </div>
+        :title="t('category.empty')"
+        :description="t('category.emptyDescription')"
+      />
 
       <UBlogPosts
         v-else
