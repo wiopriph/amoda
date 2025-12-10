@@ -22,7 +22,7 @@ const items = computed(() => data.value?.items || []);
 
 const { data: categories } = await useFetch('/api/categories/list');
 
-const topCategories = computed(() =>(categories.value?.filter(cat => !cat.parent_id) ?? []));
+const topCategories = computed(() => (categories.value?.filter(cat => !cat.parent_id) ?? []));
 
 const { trackSelectItem } = useAnalyticsEvent();
 
@@ -134,9 +134,35 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col py-8 sm:py-10 lg:py-12'
         }"
       >
+        <div class="sm:hidden flex items-center bg-gray-100 rounded-2xl p-1">
+          <template
+            v-for="(category, idx) in topCategories"
+            :key="category.id"
+          >
+            <button
+              type="button"
+              class="flex-1 text-center py-2 text-sm font-medium transition rounded-xl"
+              :class="[
+                route.params.slug === category.slug
+                  ? 'bg-white shadow-md text-black'
+                  : 'text-gray-700'
+              ]"
+              @click="navigateTo(localeRoute({ name: 'category-slug', params: { slug: category.slug } }))"
+            >
+              {{ category.name }}
+            </button>
+
+            <div
+              v-if="idx < topCategories.length - 1"
+              class="w-px h-6 bg-gray-300 mx-1"
+            />
+          </template>
+        </div>
+
+
         <UBlogPosts
           v-if="topCategories?.length"
-          class="grid grid-cols-1 sm:grid-cols-3 gap-4"
+          class="hidden sm:grid grid-cols-1 sm:grid-cols-3 gap-4"
         >
           <UBlogPost
             v-for="category in topCategories"
