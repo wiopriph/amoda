@@ -1,0 +1,1 @@
+export const CONTACT_PHONE = '244942474166';

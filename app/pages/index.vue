@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+import { CONTACT_PHONE } from '~/constants/contacts';
 
 
 definePageMeta({ name: 'index' });
@@ -14,15 +15,41 @@ useHead({
 });
 
 const { data, error } = await useFetch('/api/catalog/list', {
-  query: { limit: 5, sort: 'new' },
+  query: { limit: 10, sort: 'new' },
   watch: [() => route.fullPath],
-}); // рандомные, с разных категорий
+});
 
 const items = computed(() => data.value?.items || []);
 
-const { data: categories } = await useFetch('/api/categories/list');
+const WOMEN_SLUG = 'mulheres';
 
-const topCategories = computed(() => (categories.value?.filter(cat => !cat.parent_id) ?? []));
+const startShoppingTo = computed(() =>
+  localeRoute({ name: 'category-slug', params: { slug: WOMEN_SLUG } }),
+);
+
+const whatsappHref = computed(() => {
+  const text = encodeURIComponent('Olá! Preciso de ajuda com um pedido na Amoda.');
+
+  return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
+});
+
+const headerLinks = computed(() => [
+  {
+    label: t('home.hero.ctaPrimary'),
+    to: startShoppingTo,
+    color: 'primary',
+    variant: 'solid',
+  },
+  {
+    label: t('home.hero.support'),
+    icon: 'i-simple-icons-whatsapp',
+    to: whatsappHref,
+    target: '_blank',
+    color: 'gray',
+    variant: 'ghost',
+  },
+]);
+
 
 const { trackSelectItem } = useAnalyticsEvent();
 
@@ -50,72 +77,88 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
 {
   "pt": {
     "home": {
-      "title": "Moda Angola — Compre roupas, calçado e acessórios online com entrega gratuita | Amoda",
-      "desc": "Loja online de roupa, calçado, acessórios, cosméticos e perfumes em Angola. Compre na Amoda com entrega rápida em Luanda e possibilidade de experimentar antes de pagar.",
-      "chooseTitle": "Escolha a seção que mais lhe interessa",
-      "showcase": "Em destaque",
+      "title": "Amoda - moda em Angola com prova antes de pagar",
+      "desc": "Loja online de roupa feminina em Angola. Encomende online, receba no ponto de entrega, experimente e pague apenas pelo que decidir ficar.",
+      "hero": {
+        "title": "Moda feminina em Angola com prova antes de pagar",
+        "subtitle": "Escolha online, receba no ponto de entrega, experimente e pague só se gostar.",
+        "ctaPrimary": "Começar a comprar",
+        "support": "Suporte no WhatsApp"
+      },
       "how": {
-        "title": "Como funciona?",
+        "title": "Como funciona",
         "steps": [
           {
-            "icon": "i-lucide-truck",
-            "title": "Entrega no dia seguinte",
-            "desc": "Em Luanda e em outras grandes cidades de Angola, você receberá o seu pedido já no dia seguinte! Informações mais detalhadas sobre as condições de entrega para a sua cidade podem ser encontradas aqui."
+            "icon": "i-lucide-shopping-bag",
+            "title": "Escolha online",
+            "desc": "Escolha roupas femininas no site da Amoda. Veja fotos reais, preços e tamanhos disponíveis. Não é necessário criar conta."
+          },
+          {
+            "icon": "i-lucide-map-pin",
+            "title": "Receba no ponto de entrega",
+            "desc": "Após o pedido, o produto é enviado para um ponto de entrega. Você será avisada quando o pedido estiver pronto para retirada."
           },
           {
             "icon": "i-lucide-shirt",
-            "title": "Prova antes da compra",
-            "desc": "A loja online Amoda oferece a possibilidade de experimentar roupas, calçados e outros produtos antes de pagar pela entrega. Pague apenas pelo que lhe serviu e agradou!"
-          },
-          {
-            "icon": "i-lucide-wallet",
-            "title": "Formas de pagamento convenientes",
-            "desc": "Você pode pagar as suas compras não apenas em dinheiro, mas também com cartão bancário. Todos os entregadores da AMBO Moda têm consigo um terminal para pagamento com cartão."
+            "title": "Experimente antes de pagar",
+            "desc": "No ponto de entrega, experimente a roupa. Se gostar e servir - paga. Se não servir ou não gostar - não paga nada."
           }
         ]
       },
+      "showcase": {
+        "title": "Novidades",
+        "ctaAll": "Ver todos os produtos"
+      },
       "seo": {
-        "h1": "Loja online de roupa, calçado, acessórios, cosméticos e perfumes em Angola — Amoda",
+        "title": "Amoda - loja online de roupa feminina em Angola",
         "text": [
-          "A Amoda é uma loja online de roupa, calçado e acessórios em Angola.",
-          "Compre online e receba o seu pedido num ponto de entrega ou em casa, pagando apenas pelas peças que realmente ficar para si.",
-          "Encontre as últimas tendências de moda, cosméticos e perfumes com preços acessíveis e entrega conveniente."
+          "A Amoda é uma loja online de roupa feminina em Angola.",
+          "Encomende online, receba no ponto de entrega, experimente e pague apenas pelo que decidir ficar.",
+          "Se tiver dúvidas, fale conosco no WhatsApp - ajudamos rapidamente."
         ]
       }
     }
   },
   "en": {
     "home": {
-      "title": "Fashion Angola — Buy shoes, clothing and accessories online with free delivery | Amoda",
-      "desc": "Online store for clothing, footwear, accessories, cosmetics and perfume in Angola. Shop at Amoda with fast delivery in Luanda and the option to try before you pay.",
-      "chooseTitle": "Choose the section you're interested in",
-      "showcase": "Featured",
+      "title": "Amoda - women’s fashion in Angola, try before you pay",
+      "desc": "Online store for women’s clothing in Angola. Order online, receive at a pickup point, try on and pay only for what you keep.",
+      "hero": {
+        "title": "Women’s fashion in Angola - try before you pay",
+        "subtitle": "Order online, receive at a pickup point, try on and pay only if it fits.",
+        "ctaPrimary": "Start shopping",
+        "support": "WhatsApp support"
+      },
       "how": {
         "title": "How it works",
         "steps": [
           {
-            "icon": "i-lucide-truck",
-            "title": "Next-day delivery",
-            "desc": "In Luanda and other major cities in Angola, you can receive your order as soon as the next day! More detailed information about delivery conditions for your area can be found here."
+            "icon": "i-lucide-shopping-bag",
+            "title": "Choose online",
+            "desc": "Browse women’s clothing on Amoda. View real photos, prices and available sizes. No account required."
+          },
+          {
+            "icon": "i-lucide-map-pin",
+            "title": "Pickup point delivery",
+            "desc": "After placing an order, the item is delivered to a pickup point. You’ll be notified when it’s ready."
           },
           {
             "icon": "i-lucide-shirt",
-            "title": "Try before you buy",
-            "desc": "The AMBO Moda online store allows you to try on clothing, shoes and other items before paying for the delivery. Pay only for the items that fit you and that you genuinely like!"
-          },
-          {
-            "icon": "i-lucide-wallet",
-            "title": "Convenient payment options",
-            "desc": "You can pay for your purchases not only in cash but also by bank card. All AMBO Moda couriers carry a POS terminal for secure card payments."
+            "title": "Try before you pay",
+            "desc": "At the pickup point, try the item on. Like it and it fits - pay. Don’t like it - return it and pay nothing."
           }
         ]
       },
+      "showcase": {
+        "title": "New arrivals",
+        "ctaAll": "View all products"
+      },
       "seo": {
-        "h1": "Online store for clothing, footwear, accessories, cosmetics and perfume in Angola — Amoda",
+        "title": "Amoda - online women’s clothing store in Angola",
         "text": [
-          "Amoda is an online store for clothing, footwear and accessories in Angola.",
-          "Shop online, receive your order at a pickup point or at home and pay only for the items you decide to keep.",
-          "Discover the latest fashion trends, cosmetics and perfumes with great prices and convenient delivery."
+          "Amoda is an online store for women’s clothing in Angola.",
+          "Order online, receive at a pickup point, try on, and pay only for what you keep.",
+          "Questions? Message us on WhatsApp - we respond quickly."
         ]
       }
     }
@@ -125,96 +168,54 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
 
 <template>
   <UPage>
-    <UPageHeader :title="t('home.title')" />
-
     <UPageBody>
-      <UPageSection
-        :title="t('home.chooseTitle')"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col py-8 sm:py-10 lg:py-12'
-        }"
+      <UPageCTA
+        :links="headerLinks"
+        variant="soft"
       >
-        <div class="sm:hidden flex items-center bg-gray-100 rounded-2xl p-1">
-          <template
-            v-for="(category, idx) in topCategories"
-            :key="category.id"
-          >
-            <button
-              type="button"
-              class="flex-1 text-center py-2 text-sm font-medium transition rounded-xl"
-              :class="[
-                route.params.slug === category.slug
-                  ? 'bg-white shadow-md text-black'
-                  : 'text-gray-700'
-              ]"
-              @click="navigateTo(localeRoute({ name: 'category-slug', params: { slug: category.slug } }))"
-            >
-              {{ category.name }}
-            </button>
+        <template #header>
+          <h1 class="text-3xl sm:text-4xl text-3xl sm:text-4xl lg:text-5xl text-pretty tracking-tight font-bold text-highlighted text-center">
+            {{ t('home.hero.title') }}
+          </h1>
 
-            <div
-              v-if="idx < topCategories.length - 1"
-              class="w-px h-6 bg-gray-300 mx-1"
-            />
-          </template>
-        </div>
-
-
-        <UBlogPosts
-          v-if="topCategories?.length"
-          class="hidden sm:grid grid-cols-1 sm:grid-cols-3 gap-4"
-        >
-          <UBlogPost
-            v-for="category in topCategories"
-            :key="category.id"
-            :title="category.name"
-            :image="category.image || '/placeholder.webp'"
-            :to="localeRoute({ name: 'category-slug', params: { slug: category.slug } })"
-            :ui="{
-              header: 'aspect-[4/5] object-cover',
-              body: 'sm:p-3',
-              title: 'line-clamp-2 overflow-hidden'
-            }"
-            variant="outline"
-          />
-        </UBlogPosts>
-      </UPageSection>
-
+          <p class="mt-6 text-base sm:text-lg text-center text-muted">
+            {{ t('home.hero.subtitle') }}
+          </p>
+        </template>
+      </UPageCTA>
 
       <UPageSection
         :title="t('home.how.title')"
         :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col py-8 sm:py-10 lg:py-12'
+          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
         }"
       >
-        <div class="grid gap-10 md:grid-cols-3">
+        <div class="grid gap-8 md:grid-cols-3">
           <article
             v-for="step in steps"
             :key="step.title"
-            class="flex flex-col items-center text-center gap-4"
+            class="flex flex-col items-center text-center gap-3"
           >
-            <div class="flex items-center justify-center w-20 h-20 rounded-full bg-gray-50">
+            <div class="flex items-center justify-center w-16 h-16 rounded-full bg-gray-50">
               <UIcon
                 :name="step.icon"
-                class="w-8 h-8"
+                class="w-7 h-7"
               />
             </div>
 
-            <div class="space-y-2">
-              <h3 class="text-base font-semibold">
-                {{ step.title }}
-              </h3>
+            <h3 class="text-base font-semibold">
+              {{ step.title }}
+            </h3>
 
-              <p class="text-sm text-gray-600">
-                {{ step.description }}
-              </p>
-            </div>
+            <p class="text-sm text-gray-600">
+              {{ step.description }}
+            </p>
           </article>
         </div>
       </UPageSection>
 
       <UPageSection
-        :title="t('home.showcase')"
+        :title="t('home.showcase.title')"
         :ui="{
           container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
         }"
@@ -223,7 +224,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
           v-if="error"
           class="text-sm text-red-600"
         >
-          Error
+          Error loading products
         </div>
 
         <UBlogPosts
@@ -246,23 +247,34 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
             @click="sendSelectProductEvent(product)"
           />
         </UBlogPosts>
-      </UPageSection>
 
-      <UPageSection
-        :title="t('home.seo.h1')"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col py-8 sm:py-10 lg:py-12 gap-4 sm:gap-5',
-          title: 'text-md font-semibold'
-        }"
-      >
-        <div class="prose prose-sm sm:prose-base max-w-none">
-          <p
-            v-for="(p, i) in seoParagraphs"
-            :key="i"
-            v-text="rt(p)"
-          />
+        <div class="mt-6 flex justify-center">
+          <UButton
+            size="lg"
+            variant="soft"
+            :to="startShoppingTo"
+          >
+            {{ t('home.showcase.ctaAll') }}
+          </UButton>
         </div>
       </UPageSection>
     </UPageBody>
+
+    <UPageSection
+      :title="t('home.seo.title')"
+      :ui="{
+        container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8',
+        title: 'text-md font-semibold'
+      }"
+    >
+      <div class="prose prose-sm sm:prose-base max-w-none text-gray-700">
+        <p
+          v-for="(p, i) in seoParagraphs"
+          :key="i"
+          class="text-center space-y-3"
+          v-text="rt(p)"
+        />
+      </div>
+    </UPageSection>
   </UPage>
 </template>
