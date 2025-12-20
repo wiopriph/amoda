@@ -1,1 +1,1 @@
-export const CONTACT_PHONE = '244942474166';
+export const CONTACT_PHONE = '244921641019';
