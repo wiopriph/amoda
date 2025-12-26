@@ -16,30 +16,21 @@ useHead(() => ({
   ],
 }));
 
-
-const {
-  items,
-  totalAOA,
-  increment,
-  decrement,
-  setQty,
-  remove,
-} = useCart();
+const { items, totalAOA, increment, decrement, setQty, remove } = useCart();
 
 const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
-
 
 const localeRoute = useLocaleRoute();
 const { trackBeginCheckout } = useAnalyticsEvent();
 
+const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0));
+
 const goCheckout = () => {
-  if (!items.value.length) {
-    return;
-  }
+  if (!items.value.length) return;
 
   if (import.meta.client) {
     const mappedItems = items.value.map((i): AnalyticsCartItem => ({
-      id: i.id, // составной id типа productId:variantId:sizeId
+      id: i.id,
       name: i.title,
       price: i.price,
       quantity: i.qty,
@@ -54,8 +45,6 @@ const goCheckout = () => {
 
   navigateTo(localeRoute({ name: 'checkout' }));
 };
-
-const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0));
 </script>
 
 <i18n lang="json">
@@ -116,23 +105,24 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
           :key="cartItem.id"
           class="p-4"
         >
-          <div class="flex items-center gap-4">
+          <!-- TOP: image + title -->
+          <div class="flex gap-4">
             <NuxtLink
               :to="localeRoute({ name: 'product-slug', params: { slug: cartItem.slug } })"
               class="shrink-0"
             >
               <NuxtImg
-                :src="cartItem.image || ''"
+                :src="cartItem.image || '/placeholder.webp'"
                 :alt="cartItem.title"
-                width="80"
-                height="80"
-                class="rounded-md border object-cover w-20 h-20"
+                width="96"
+                height="96"
+                class="rounded-xl border object-cover w-24 h-24"
               />
             </NuxtLink>
 
             <div class="flex-1 min-w-0">
               <NuxtLink
-                class="font-medium line-clamp-2 hover:underline"
+                class="font-medium hover:underline"
                 :to="localeRoute({ name: 'product-slug', params: { slug: cartItem.slug } })"
               >
                 {{ cartItem.title }}
@@ -142,46 +132,93 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
                 {{ t('cart.priceEach') }}: {{ fmtAOA(cartItem.price) }}
               </div>
 
-              <div class="flex items-center gap-2 mt-2">
-                <UButton
-                  size="xs"
-                  variant="ghost"
-                  aria-label="decrement"
-                  @click="decrement(cartItem.id)"
-                >
-                  −
-                </UButton>
+              <!-- DESKTOP: show line total inline -->
+              <div class="hidden sm:flex items-center justify-between mt-3">
+                <div class="flex items-center gap-2">
+                  <UButton
+                    size="sm"
+                    variant="soft"
+                    @click="decrement(cartItem.id)"
+                  >
+                    −
+                  </UButton>
 
-                <UInput
-                  type="number"
-                  inputmode="numeric"
-                  pattern="[0-9]*"
-                  size="xs"
-                  class="w-16 text-center"
-                  :modelValue="cartItem.qty"
-                  @update:model-value="val => setQty(cartItem.id, Number(val))"
-                />
+                  <UInput
+                    type="number"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    size="sm"
+                    class="w-16"
+                    :modelValue="cartItem.qty"
+                    @update:model-value="val => setQty(cartItem.id, Math.max(1, Number(val) || 1))"
+                  />
 
-                <UButton
-                  size="xs"
-                  variant="ghost"
-                  aria-label="increment"
-                  @click="increment(cartItem.id)"
-                >
-                  +
-                </UButton>
+                  <UButton
+                    size="sm"
+                    variant="soft"
+                    @click="increment(cartItem.id)"
+                  >
+                    +
+                  </UButton>
+                </div>
+
+                <div class="text-right">
+                  <div class="font-semibold">
+                    {{ fmtAOA(cartItem.price * cartItem.qty) }}
+                  </div>
+
+                  <UButton
+                    variant="ghost"
+                    size="xs"
+                    class="mt-1 text-gray-500 hover:text-red-600 px-0"
+                    @click="remove(cartItem.id)"
+                  >
+                    {{ t('cart.remove') }}
+                  </UButton>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div class="text-right">
-              <div class="font-semibold">
+          <!-- MOBILE: bottom row -->
+          <div class="sm:hidden mt-4 pt-4 border-t border-gray-200 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <UButton
+                size="sm"
+                variant="soft"
+                @click="decrement(cartItem.id)"
+              >
+                −
+              </UButton>
+
+              <UInput
+                type="number"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                size="sm"
+                class="w-18"
+                :modelValue="cartItem.qty"
+                @update:model-value="val => setQty(cartItem.id, Math.max(1, Number(val) || 1))"
+              />
+
+              <UButton
+                size="sm"
+                variant="soft"
+                @click="increment(cartItem.id)"
+              >
+                +
+              </UButton>
+            </div>
+
+            <div class="text-right shrink-0">
+              <div class="text-base font-semibold leading-tight">
                 {{ fmtAOA(cartItem.price * cartItem.qty) }}
               </div>
 
               <UButton
                 variant="ghost"
                 size="xs"
-                class="mt-1 text-gray-500 hover:text-red-600"
+                class="mt-1 text-gray-500 hover:text-red-600 px-0"
                 @click="remove(cartItem.id)"
               >
                 {{ t('cart.remove') }}
@@ -190,29 +227,31 @@ const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0)
           </div>
         </UCard>
 
-        <div class="flex items-center justify-between border-t pt-4 font-semibold text-lg">
-          <span>{{ t('cart.total') }}</span>
+        <div>
+          <div class="flex items-center justify-between border-t pt-4 font-semibold text-lg">
+            <span>{{ t('cart.total') }}</span>
 
-          <span>{{ fmtAOA(totalAOA) }}</span>
+            <span>{{ fmtAOA(totalAOA) }}</span>
+          </div>
+
+          <UAlert
+            :description="t('cart.delivery')"
+            icon="i-heroicons-information-circle"
+            color="primary"
+            variant="soft"
+            class="text-sm mt-4"
+          />
+
+          <UButton
+            size="xl"
+            color="primary"
+            class="w-full py-4 text-lg font-semibold tracking-wide uppercase justify-center mt-4"
+            :disabled="!items.length"
+            @click="goCheckout"
+          >
+            {{ t('cart.checkout') }} ({{ totalCount }})
+          </UButton>
         </div>
-
-        <UAlert
-          :description="t('cart.delivery')"
-          icon="i-heroicons-information-circle"
-          color="primary"
-          variant="soft"
-          class="text-sm"
-        />
-
-        <UButton
-          size="xl"
-          color="primary"
-          class="w-full py-4 text-lg font-semibold tracking-wide uppercase justify-center"
-          :disabled="!items.length"
-          @click="goCheckout"
-        >
-          {{ t('cart.checkout') }} ({{ totalCount }})
-        </UButton>
       </div>
     </UPageBody>
   </UPage>

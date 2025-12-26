@@ -17,6 +17,8 @@ useHead(() => ({
   meta: [...(i18nHead.value.meta || []), ...meta.value],
 }));
 
+const route = useRoute();
+const hasWhatsappButton = computed(() => !route.name?.startsWith('product-slug'));
 const whatsappHref = computed(() => {
   const text = encodeURIComponent('Olá! Preciso de ajuda com um pedido na Amoda.');
 
@@ -37,6 +39,7 @@ const whatsappHref = computed(() => {
     <AppFooter />
 
     <a
+      v-if="hasWhatsappButton"
       :href="whatsappHref"
       target="_blank"
       aria-label="WhatsApp support"
