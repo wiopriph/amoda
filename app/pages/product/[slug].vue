@@ -2,6 +2,7 @@
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { useOffices } from '~/composables/useOffices';
 import { CONTACT_PHONE } from '~/constants/contacts';
+import { makeGa4Item } from '~/utils/ga4';
 
 
 definePageMeta({ name: 'product-slug' });
@@ -149,34 +150,81 @@ const addProductToCart = () => {
   addToCart(product, variant, selectedSize, 1);
 };
 
-// ===== ANALYTICS =====
+// ===== ANALYTICS (GA4 ecommerce) =====
+const selectedSizeObj = computed(() =>
+  currentVariant.value?.sizes?.find((s: any) => s.id === selectedSizeId.value) || null,
+);
+
 watch(
-  () => productData.value?.id,
-  (id) => {
+  () => [productData.value?.id, currentVariant.value?.id, selectedSizeId.value] as const,
+  ([pid, vid, sid]) => {
     if (!import.meta.client) {
       return;
     }
 
-    if (!id || !productData.value) {
+    const product = productData.value;
+    const variant = currentVariant.value;
+
+    if (!pid || !product || !variant) {
+      return;
+    }
+
+    // size обязателен, но на первом рендере может быть null — не шлём пока не выберется
+    if (!sid) {
+      return;
+    }
+
+    const size = selectedSizeObj.value;
+
+    if (!size) {
       return;
     }
 
     trackViewItem({
-      itemId: productData.value.id,
-      itemName: productData.value?.title || '',
-      price: currentVariant.value?.price ?? 0,
-      categoryId: productData.value.primary_category_id,
+      items: [
+        makeGa4Item({
+          productId: product.id,
+          name: product.title,
+          brand: product.brand_name,
+          price: variant.price ?? 0,
+          quantity: 1,
+          variantId: variant.id,
+          sizeId: size.id,
+          variantLabel: variant.color ?? undefined,
+          sizeLabel: size.size ?? String(size.id),
+          categoryName: product.primary_category_id ? String(product.primary_category_id) : undefined,
+        }),
+      ],
     });
   },
   { immediate: true },
 );
 
 const sendSelectProductEvent = (product: any) => {
+  const v = product?.variants?.[0] ?? null;
+  const s = v?.sizes?.[0] ?? null;
+
+  if (!v?.id || !s?.id) {
+    return;
+  }
+
   trackSelectItem({
-    itemId: product.id,
-    itemName: product.title,
-    price: product.price,
-    categoryId: product.primary_category_id,
+    listId: 'recommendations',
+    listName: 'Recommendations',
+    items: [
+      makeGa4Item({
+        productId: product.id,
+        name: product.title,
+        brand: product.brand_name,
+        price: v.price ?? product.price ?? 0,
+        quantity: 1,
+        variantId: v.id,
+        sizeId: s.id,
+        variantLabel: v.color ?? undefined,
+        sizeLabel: s.size ?? String(s.id),
+        categoryName: product.primary_category_id ? String(product.primary_category_id) : undefined,
+      }),
+    ],
   });
 };
 
@@ -188,7 +236,6 @@ const whatsappHref = computed(() => {
 
   return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
 });
-
 
 // ===== OFFICES (PICKUP POINTS) =====
 const { offices, pending: officesPending, load: loadOffices } = useOffices();
@@ -286,9 +333,18 @@ useHead(() => ({
       },
       "howReceive": {
         "items": [
-          { "title": "Ponto de levantamento", "desc": "Receba e experimente no local." },
-          { "title": "Prova antes de pagar", "desc": "Pague apenas pelo que decidir ficar." },
-          { "title": "Suporte no WhatsApp", "desc": "Ajudamos rápido se tiver dúvidas." }
+          {
+            "title": "Ponto de levantamento",
+            "desc": "Receba e experimente no local."
+          },
+          {
+            "title": "Prova antes de pagar",
+            "desc": "Pague apenas pelo que decidir ficar."
+          },
+          {
+            "title": "Suporte no WhatsApp",
+            "desc": "Ajudamos rápido se tiver dúvidas."
+          }
         ]
       },
       "seo": {
@@ -296,7 +352,9 @@ useHead(() => ({
         "thumbAlt": "{title} — foto {index}",
         "variantAlt": "{title} — cor {color}"
       },
-      "reco": { "title": "Talvez você também goste" }
+      "reco": {
+        "title": "Talvez você também goste"
+      }
     }
   },
   "en": {
@@ -323,9 +381,18 @@ useHead(() => ({
       },
       "howReceive": {
         "items": [
-          { "title": "Pickup point", "desc": "Receive and try on at the location." },
-          { "title": "Try before you pay", "desc": "Pay only for what you keep." },
-          { "title": "WhatsApp support", "desc": "Fast help if you have questions." }
+          {
+            "title": "Pickup point",
+            "desc": "Receive and try on at the location."
+          },
+          {
+            "title": "Try before you pay",
+            "desc": "Pay only for what you keep."
+          },
+          {
+            "title": "WhatsApp support",
+            "desc": "Fast help if you have questions."
+          }
         ]
       },
       "seo": {
@@ -333,7 +400,9 @@ useHead(() => ({
         "thumbAlt": "{title} — photo {index}",
         "variantAlt": "{title} — color {color}"
       },
-      "reco": { "title": "You may also like" }
+      "reco": {
+        "title": "You may also like"
+      }
     }
   }
 }

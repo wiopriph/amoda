@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { CONTACT_PHONE } from '~/constants/contacts';
+import { makeGa4Item } from '~/utils/ga4';
 
 
 definePageMeta({ name: 'index' });
@@ -50,15 +51,61 @@ const headerLinks = computed(() => [
   },
 ]);
 
+/** АНАЛИТИКА (GA4 ecommerce) */
+const { trackViewItemList, trackSelectItem } = useAnalyticsEvent();
 
-const { trackSelectItem } = useAnalyticsEvent();
+const mapProductToGa4Item = (p: any, index?: number) => {
+  const variantId = Number(p.default_variant_id);
+  const sizeId = Number(p.default_size_id);
+
+  if (!variantId || !sizeId) {
+    return null;
+  }
+
+  return makeGa4Item({
+    productId: p.id,
+    name: p.title,
+    brand: p.brand_name ?? undefined,
+    price: p.price ?? 0,
+    quantity: 1,
+    variantId,
+    sizeId,
+    variantLabel: p.default_variant_color ?? undefined,
+    sizeLabel: p.default_size_label ?? undefined,
+    categoryName: p.primary_category_id ? String(p.primary_category_id) : undefined,
+    index,
+  });
+};
+
+if (import.meta.client) {
+  watch(
+    () => route.fullPath,
+    () => {
+      const ga4Items = items.value
+        .map((p: any, i: number) => mapProductToGa4Item(p, i + 1))
+        .filter(Boolean);
+
+      trackViewItemList({
+        listId: 'home_new',
+        listName: 'New arrivals',
+        items: ga4Items as any,
+      });
+    },
+    { immediate: true },
+  );
+}
 
 const sendSelectProductEvent = (product: any) => {
+  const item = mapProductToGa4Item(product);
+
+  if (!item) {
+    return;
+  }
+
   trackSelectItem({
-    itemId: product.id,
-    itemName: product.title,
-    price: product.price,
-    categoryId: product.primary_category_id,
+    listId: 'home_new',
+    listName: 'New arrivals',
+    items: [item],
   });
 };
 
@@ -236,7 +283,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
             :key="product.id"
             :title="product.title"
             :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
-            :image="product.images?.[0]?.url || 'placeholder.webp'"
+            :image="product.image || 'placeholder.webp'"
             :to="localeRoute({ name: 'product-slug', params: { slug: product.slug } })"
             :ui="{
               header: 'aspect-[4/5] object-cover',

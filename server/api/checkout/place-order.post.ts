@@ -2,12 +2,14 @@ import { serverSupabaseServiceRole } from '#supabase/server';
 
 
 type CartItem = {
-  id: string
+  productId: number
+  variantId: number
+  sizeId: number
   title: string
   price: number
   qty: number
   slug?: string
-  image?: string
+  image?: string | null
 };
 
 type Totals = { total: number; currency: string };
@@ -26,6 +28,7 @@ function generateOrderNumber() {
 
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseServiceRole(event);
+
   const body = await readBody<{
     items: CartItem[]
     totals: Totals
@@ -95,21 +98,20 @@ export default defineEventHandler(async (event) => {
   }
 
   const itemRows = body.items.map((item) => {
-    const [productStr, variantStr, sizeStr] = String(item.id).split(':');
-    const productId = Number(productStr);
-    const variantId = Number(variantStr);
-    const sizeId = sizeStr ? Number(sizeStr) : null;
+    const productId = Number(item.productId);
+    const variantId = Number(item.variantId);
+    const sizeId = Number(item.sizeId);
 
     if (!Number.isInteger(productId) || productId <= 0) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid product id' });
+      throw createError({ statusCode: 400, statusMessage: 'Invalid productId' });
     }
 
     if (!Number.isInteger(variantId) || variantId <= 0) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid variant id' });
+      throw createError({ statusCode: 400, statusMessage: 'Invalid variantId' });
     }
 
-    if (sizeId !== null && (!Number.isInteger(sizeId) || sizeId <= 0)) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid size id' });
+    if (!Number.isInteger(sizeId) || sizeId <= 0) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid sizeId' });
     }
 
     if (!Number.isInteger(item.qty) || item.qty <= 0) {

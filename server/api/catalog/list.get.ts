@@ -114,11 +114,10 @@ export default defineEventHandler(async (event) => {
         id,
         color,
         price,
-        product_variant_images(url, position)
+        product_variant_images(url, position),
+        sizes:product_variant_sizes(id, size)
       )
-    `,
-    { count: 'exact' },
-    )
+    `, { count: 'exact' })
     .eq('active', true);
 
   if (descendantIds.length > 0) {
@@ -143,6 +142,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // фильтр по цвету / цене — по варианту
   if (query.color) {
     productsQuery = productsQuery.eq('product_variants.color', query.color);
   }
@@ -179,21 +179,58 @@ export default defineEventHandler(async (event) => {
   }
 
   const items = (productRows || []).map((product: any) => {
-    const firstVariant = Array.isArray(product.variants) ? product.variants[0] : null;
-    const sortedImages = Array.isArray(firstVariant?.product_variant_images) ?
-      firstVariant.product_variant_images.sort((a, b) => (a?.position ?? 0) - (b?.position ?? 0)) :
+    const variants = Array.isArray(product.variants) ? product.variants.slice() : [];
+
+    // детерминируем default variant:
+    // 1) если сортировка по цене — берём вариант с min/max ценой
+    // 2) иначе — по id
+    let defaultVariant: any | null = null;
+
+    if (variants.length) {
+      if (query.sort === 'price_asc') {
+        variants.sort((a, b) => (a?.price ?? 0) - (b?.price ?? 0));
+      } else if (query.sort === 'price_desc') {
+        variants.sort((a, b) => (b?.price ?? 0) - (a?.price ?? 0));
+      } else {
+        variants.sort((a, b) => (a?.id ?? 0) - (b?.id ?? 0));
+      }
+
+      defaultVariant = variants[0] ?? null;
+    }
+
+    const sizes = Array.isArray(defaultVariant?.sizes) ? defaultVariant?.sizes.slice() : [];
+
+    sizes.sort((a: any, b: any) => (a?.id ?? 0) - (b?.id ?? 0));
+
+    const defaultSize = sizes[0] ?? null;
+
+    const imgs = Array.isArray(defaultVariant?.product_variant_images) ?
+      defaultVariant?.product_variant_images.slice() :
       [];
+
+    imgs.sort((a: any, b: any) => (a?.position ?? 0) - (b?.position ?? 0));
+
+    const imageUrl = imgs[0]?.url ?? null;
 
     return {
       id: product.id,
       slug: product.slug,
       title: product.title,
       primary_category_id: product.primary_category_id,
+      brand_id: product.brand_id ?? null,
       brand_name: product.brand?.name ?? null,
-      price: firstVariant?.price ?? 0,
-      variant_id: firstVariant?.id ?? null,
-      color: firstVariant?.color ?? null,
-      images: sortedImages,
+
+      // “витринная” цена — цена default варианта
+      price: defaultVariant?.price ?? 0,
+
+      // defaults для GA4
+      default_variant_id: defaultVariant?.id ?? null,
+      default_size_id: defaultSize?.id ?? null,
+      default_variant_color: defaultVariant?.color ?? null,
+      default_size_label: defaultSize?.size ?? null,
+
+      // чтоб карточка была самодостаточной
+      image: imageUrl,
     };
   });
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SelectMenuItem } from '@nuxt/ui';
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+import { makeGa4Item } from '~/utils/ga4';
 
 
 definePageMeta({ name: 'checkout' });
@@ -72,10 +73,21 @@ const submit = async () => {
   message.value = null;
 
   try {
+    const dtoItems = items.value.map(i => ({
+      productId: i.productId,
+      variantId: i.variantId,
+      sizeId: i.sizeId,
+      title: i.title,
+      price: i.price,
+      qty: i.qty,
+      slug: i.slug,
+      image: i.image ?? null,
+    }));
+
     const { number } = await $fetch('/api/checkout/place-order', {
       method: 'POST',
       body: {
-        items: unref(items),
+        items: dtoItems,
         totals: { total: unref(totalAOA), currency: 'AOA' },
         contact: {
           name: form.name,
@@ -88,15 +100,24 @@ const submit = async () => {
 
     if (import.meta.client) {
       trackPurchase({
-        transactionId: String(number),
-        total: totalAOA.value,
-        items: items.value.map((item) => ({
-          id: item.id, // составной id типа productId:variantId:sizeId
-          name: item.title,
-          price: item.price,
-          quantity: item.qty,
-        })),
-      });
+        transaction_id: String(number),
+        value: totalAOA.value,
+        items: items.value.map(i =>
+          makeGa4Item({
+            productId: i.productId,
+            name: i.title,
+            brand: i.brand ?? undefined,
+            price: i.price,
+            quantity: i.qty,
+            variantId: i.variantId,
+            sizeId: i.sizeId,
+            variantLabel: i.variantLabel ?? undefined,
+            sizeLabel: i.sizeLabel ?? undefined,
+            categoryName: i.categoryName ?? undefined,
+          }),
+        ),
+        pickup_office_id: form.pickupOfficeId,
+      } as any);
     }
 
     await navigateTo(localeRoute({ name: 'order-number', params: { number } }));

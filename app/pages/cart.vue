@@ -26,20 +26,26 @@ const { trackBeginCheckout } = useAnalyticsEvent();
 const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0));
 
 const goCheckout = () => {
-  if (!items.value.length) return;
+  if (!items.value.length) {
+    return;
+  }
 
   if (import.meta.client) {
-    const mappedItems = items.value.map((i): AnalyticsCartItem => ({
-      id: i.id,
-      name: i.title,
-      price: i.price,
-      quantity: i.qty,
-    }));
-
     trackBeginCheckout({
-      total: totalAOA.value,
-      items: mappedItems,
-      itemsCount: totalCount.value,
+      value: totalAOA.value,
+      items: items.value.map((i) => ({
+        item_id: i.key,
+        item_name: i.productName,
+        item_brand: i.brand ?? undefined,
+        item_category: i.categoryName ?? undefined,
+        item_variant: i.variantLabel ?? undefined,
+        price: i.price,
+        quantity: i.qty,
+
+        product_id: i.productId,
+        variant_id: i.variantId,
+        size_id: i.sizeId,
+      })),
     });
   }
 
@@ -102,7 +108,7 @@ const goCheckout = () => {
       >
         <UCard
           v-for="cartItem in items"
-          :key="cartItem.id"
+          :key="cartItem.key"
           class="p-4"
         >
           <!-- TOP: image + title -->
@@ -113,7 +119,7 @@ const goCheckout = () => {
             >
               <NuxtImg
                 :src="cartItem.image || '/placeholder.webp'"
-                :alt="cartItem.title"
+                :alt="cartItem.productName"
                 width="96"
                 height="96"
                 class="rounded-xl border object-cover w-24 h-24"
@@ -125,20 +131,24 @@ const goCheckout = () => {
                 class="font-medium hover:underline"
                 :to="localeRoute({ name: 'product-slug', params: { slug: cartItem.slug } })"
               >
-                {{ cartItem.title }}
+                {{ cartItem.productName }}
               </NuxtLink>
+
+              <div class="text-sm text-gray-500 mt-1">
+                {{ cartItem.variantLabel || '—' }} • {{ cartItem.sizeLabel || '—' }}
+              </div>
 
               <div class="text-sm text-gray-500 mt-1">
                 {{ t('cart.priceEach') }}: {{ fmtAOA(cartItem.price) }}
               </div>
 
-              <!-- DESKTOP: show line total inline -->
+              <!-- DESKTOP -->
               <div class="hidden sm:flex items-center justify-between mt-3">
                 <div class="flex items-center gap-2">
                   <UButton
                     size="sm"
                     variant="soft"
-                    @click="decrement(cartItem.id)"
+                    @click="decrement(cartItem.key)"
                   >
                     −
                   </UButton>
@@ -150,13 +160,13 @@ const goCheckout = () => {
                     size="sm"
                     class="w-16"
                     :modelValue="cartItem.qty"
-                    @update:model-value="val => setQty(cartItem.id, Math.max(1, Number(val) || 1))"
+                    @update:model-value="val => setQty(cartItem.key, Math.max(1, Number(val) || 1))"
                   />
 
                   <UButton
                     size="sm"
                     variant="soft"
-                    @click="increment(cartItem.id)"
+                    @click="increment(cartItem.key)"
                   >
                     +
                   </UButton>
@@ -171,7 +181,7 @@ const goCheckout = () => {
                     variant="ghost"
                     size="xs"
                     class="mt-1 text-gray-500 hover:text-red-600 px-0"
-                    @click="remove(cartItem.id)"
+                    @click="remove(cartItem.key)"
                   >
                     {{ t('cart.remove') }}
                   </UButton>
@@ -180,13 +190,13 @@ const goCheckout = () => {
             </div>
           </div>
 
-          <!-- MOBILE: bottom row -->
+          <!-- MOBILE -->
           <div class="sm:hidden mt-4 pt-4 border-t border-gray-200 flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
               <UButton
                 size="sm"
                 variant="soft"
-                @click="decrement(cartItem.id)"
+                @click="decrement(cartItem.key)"
               >
                 −
               </UButton>
@@ -198,13 +208,13 @@ const goCheckout = () => {
                 size="sm"
                 class="w-18"
                 :modelValue="cartItem.qty"
-                @update:model-value="val => setQty(cartItem.id, Math.max(1, Number(val) || 1))"
+                @update:model-value="val => setQty(cartItem.key, Math.max(1, Number(val) || 1))"
               />
 
               <UButton
                 size="sm"
                 variant="soft"
-                @click="increment(cartItem.id)"
+                @click="increment(cartItem.key)"
               >
                 +
               </UButton>
@@ -219,7 +229,7 @@ const goCheckout = () => {
                 variant="ghost"
                 size="xs"
                 class="mt-1 text-gray-500 hover:text-red-600 px-0"
-                @click="remove(cartItem.id)"
+                @click="remove(cartItem.key)"
               >
                 {{ t('cart.remove') }}
               </UButton>

@@ -1,5 +1,3 @@
-export type AnalyticsEventData = Record<string, unknown>;
-
 export const ANALYTICS_EVENTS = {
   VIEW_ITEM_LIST: 'view_item_list',
   SELECT_ITEM: 'select_item',
@@ -12,164 +10,195 @@ export const ANALYTICS_EVENTS = {
   FILTER_APPLY: 'filter_apply',
 } as const;
 
-export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];
-
-export interface AnalyticsProduct {
-  id: number;
-  name: string;
-  brand?: string;
+export type Ga4Item = {
+  item_id: string;
+  item_name: string;
+  item_brand?: string;
+  item_category?: string;
+  item_category2?: string;
+  item_category3?: string;
+  item_category4?: string;
+  item_category5?: string;
+  item_variant?: string;
   price?: number;
-  categoryId?: number
-}
+  quantity?: number;
+  item_list_id?: string;
+  item_list_name?: string;
+  index?: number;
+  coupon?: string;
+  discount?: number;
 
-export interface AnalyticsCartItem {
-  id: string; // составной id типа productId:variantId(:sizeId)
-  name: string;
-  price?: number;
-  quantity: number;
-}
+  // custom params
+  product_id?: number;
+  variant_id?: number;
+  size_id?: number;
+};
 
-/**
- * view_item_list — просмотр списка товаров (категория, поиск и т.п.)
- */
-export interface ViewItemListPayload extends AnalyticsEventData {
-  categoryId?: number
-  categoryName?: string;
-  items: AnalyticsProduct[];
-  itemsCount: number;
-}
+const CURRENCY = 'AOA' as const;
 
-/**
- * select_item — клик по карточке товара
- */
-export interface SelectItemPayload extends AnalyticsEventData {
-  itemId: number;
-  itemName: string;
-  price?: number;
-  categoryId?: number
-  categoryName?: string;
-}
+type ViewItemListPayload = {
+  listId?: string;
+  listName?: string;
+  items: Ga4Item[]
+};
 
-/**
- * view_item — просмотр карточки товара
- */
-export interface ViewItemPayload extends AnalyticsEventData {
-  itemId: number;
-  itemName: string;
-  price?: number;
-  categoryId?: number
-  categoryName?: string;
-}
+type SelectItemPayload = {
+  listId?: string;
+  listName?: string;
+  items: Ga4Item[]
+};
 
-/**
- * add_to_cart — добавление товара в корзину
- */
-export interface AddToCartPayload extends AnalyticsEventData {
-  itemId: string;
-  itemName: string;
-  price: number;
-  quantity: number;
-  size?: string;
-  variantId?: number;
-}
+type ViewItemPayload = { items: Ga4Item[] };
 
-/**
- * remove_from_cart — удаление товара из корзины
- */
-export interface RemoveFromCartPayload extends AnalyticsEventData {
-  itemId: string;
-  quantity: number;
-  size?: string;
-}
+type AddToCartPayload = {
+  value?: number;
+  items: Ga4Item[]
+};
 
-/**
- * begin_checkout — переход к оформлению заказа
- */
-export interface BeginCheckoutPayload extends AnalyticsEventData {
-  total: number;
-  items: AnalyticsCartItem[];
-  itemsCount: number;
-}
+type RemoveFromCartPayload = {
+  value?: number;
+  items: Ga4Item[]
+};
 
-/**
- * purchase — успешный заказ
- */
-export interface PurchasePayload extends AnalyticsEventData {
-  transactionId: string;
-  total: number;
-  items: AnalyticsCartItem[];
-}
+type BeginCheckoutPayload = {
+  value: number;
+  items: Ga4Item[]
+};
 
-/**
- * search — поиск по сайту
- */
-export interface SearchPayload extends AnalyticsEventData {
-  query: string;
-  resultsCount: number;
-}
+type PurchasePayload = {
+  transaction_id: string;
+  value: number;
+  tax?: number;
+  shipping?: number;
+  coupon?: string;
+  items: Ga4Item[]
+};
 
-/**
- * filter_apply — применение фильтра
- */
-export interface FilterApplyPayload extends AnalyticsEventData {
-  filterType: string;   // 'size' | 'brand' | 'price' | ...
-  filterValue: string;  // 'M', 'Nike', '1000-3000'
-  categoryId?: number
-}
+type SearchPayload = {
+  search_term: string;
+  results_count?: number
+};
+
+type FilterApplyPayload = {
+  filter_type: string;
+  filter_value: string;
+  category_id?: number
+};
+
+type PushParams = Record<string, unknown>;
 
 export function useAnalyticsEvent() {
-  const pushEvent = <T extends AnalyticsEventData = AnalyticsEventData>(
-    event: string,
-    data: T = {} as T,
-  ): void => {
-    if (
-      process.env.NODE_ENV === 'production' &&
-            import.meta.client &&
-            typeof window !== 'undefined' &&
-            'dataLayer' in window &&
-            Array.isArray((window as any).dataLayer)
-    ) {
-      (window as any).dataLayer.push({ event, ...data });
+  const canPush =
+        process.env.NODE_ENV === 'production' &&
+        import.meta.client &&
+        typeof window !== 'undefined' &&
+        'dataLayer' in window &&
+        Array.isArray((window as any).dataLayer);
+
+  const push = (obj: PushParams) => {
+    if (canPush) {
+      (window as any).dataLayer.push(obj);
     } else {
-      console.log('pushEvent', { event, ...data });
+      console.log('dataLayer.push', obj);
     }
   };
 
-  const trackViewItemList = (payload: ViewItemListPayload) => {
-    pushEvent<ViewItemListPayload>(ANALYTICS_EVENTS.VIEW_ITEM_LIST, payload);
+  const resetEcommerce = () => push({ ecommerce: null });
+
+  const pushEvent = (event: string, params: PushParams = {}) => push({ event, ...params });
+
+  const trackViewItemList = (p: ViewItemListPayload) => {
+    resetEcommerce();
+
+    pushEvent(ANALYTICS_EVENTS.VIEW_ITEM_LIST, {
+      ecommerce: {
+        currency: CURRENCY,
+        item_list_id: p.listId,
+        item_list_name: p.listName,
+        items: p.items,
+      },
+    });
   };
 
-  const trackSelectItem = (payload: SelectItemPayload) => {
-    pushEvent<SelectItemPayload>(ANALYTICS_EVENTS.SELECT_ITEM, payload);
+  const trackSelectItem = (p: SelectItemPayload) => {
+    resetEcommerce();
+
+    pushEvent(ANALYTICS_EVENTS.SELECT_ITEM, {
+      ecommerce: {
+        currency: CURRENCY,
+        item_list_id: p.listId,
+        item_list_name: p.listName,
+        items: p.items,
+      },
+    });
   };
 
-  const trackViewItem = (payload: ViewItemPayload) => {
-    pushEvent<ViewItemPayload>(ANALYTICS_EVENTS.VIEW_ITEM, payload);
+  const trackViewItem = (p: ViewItemPayload) => {
+    resetEcommerce();
+
+    pushEvent(ANALYTICS_EVENTS.VIEW_ITEM, {
+      ecommerce: {
+        currency: CURRENCY,
+        items: p.items,
+      },
+    });
   };
 
-  const trackAddToCart = (payload: AddToCartPayload) => {
-    pushEvent<AddToCartPayload>(ANALYTICS_EVENTS.ADD_TO_CART, payload);
+  const trackAddToCart = (p: AddToCartPayload) => {
+    resetEcommerce();
+
+    pushEvent(ANALYTICS_EVENTS.ADD_TO_CART, {
+      ecommerce: {
+        currency: CURRENCY,
+        value: p.value,
+        items: p.items,
+      },
+    });
   };
 
-  const trackRemoveFromCart = (payload: RemoveFromCartPayload) => {
-    pushEvent<RemoveFromCartPayload>(ANALYTICS_EVENTS.REMOVE_FROM_CART, payload);
+  const trackRemoveFromCart = (p: RemoveFromCartPayload) => {
+    resetEcommerce();
+
+    pushEvent(ANALYTICS_EVENTS.REMOVE_FROM_CART, {
+      ecommerce: {
+        currency: CURRENCY,
+        value: p.value,
+        items: p.items,
+      },
+    });
   };
 
-  const trackBeginCheckout = (payload: BeginCheckoutPayload) => {
-    pushEvent<BeginCheckoutPayload>(ANALYTICS_EVENTS.BEGIN_CHECKOUT, payload);
+  const trackBeginCheckout = (p: BeginCheckoutPayload) => {
+    resetEcommerce();
+
+    pushEvent(ANALYTICS_EVENTS.BEGIN_CHECKOUT, {
+      ecommerce: {
+        currency: CURRENCY,
+        value: p.value,
+        items: p.items,
+      },
+    });
   };
 
-  const trackPurchase = (payload: PurchasePayload) => {
-    pushEvent<PurchasePayload>(ANALYTICS_EVENTS.PURCHASE, payload);
+  const trackPurchase = (p: PurchasePayload) => {
+    resetEcommerce();
+
+    pushEvent(ANALYTICS_EVENTS.PURCHASE, {
+      ecommerce: {
+        transaction_id: p.transaction_id,
+        currency: CURRENCY,
+        value: p.value,
+        items: p.items,
+
+        tax: p.tax,
+        shipping: p.shipping,
+        coupon: p.coupon,
+      },
+    });
   };
 
-  const trackSearch = (payload: SearchPayload) => {
-    pushEvent<SearchPayload>(ANALYTICS_EVENTS.SEARCH, payload);
-  };
-
-  const trackFilterApply = (payload: FilterApplyPayload) => {
-    pushEvent<FilterApplyPayload>(ANALYTICS_EVENTS.FILTER_APPLY, payload);
-  };
+  const trackSearch = (p: SearchPayload) => pushEvent(ANALYTICS_EVENTS.SEARCH, p);
+  const trackFilterApply = (p: FilterApplyPayload) => pushEvent(ANALYTICS_EVENTS.FILTER_APPLY, p);
 
   return {
     pushEvent,
@@ -180,6 +209,7 @@ export function useAnalyticsEvent() {
     trackRemoveFromCart,
     trackBeginCheckout,
     trackPurchase,
+
     trackSearch,
     trackFilterApply,
   };
