@@ -88,18 +88,17 @@ type FilterApplyPayload = {
 type PushParams = Record<string, unknown>;
 
 export function useAnalyticsEvent() {
-  const canPush =
-        process.env.NODE_ENV === 'production' &&
-        import.meta.client &&
-        typeof window !== 'undefined' &&
-        'dataLayer' in window &&
-        Array.isArray((window as any).dataLayer);
-
   const push = (obj: PushParams) => {
-    if (canPush) {
+    if (
+      process.env.NODE_ENV === 'production' &&
+            import.meta.client &&
+            typeof window !== 'undefined' &&
+            'dataLayer' in window &&
+            Array.isArray((window as any).dataLayer)
+    ) {
       (window as any).dataLayer.push(obj);
     } else {
-      console.log('dataLayer.push', obj);
+      console.log('pushEvent', obj);
     }
   };
 
