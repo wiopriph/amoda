@@ -71,12 +71,8 @@ const variantOptions = computed(() =>
   })),
 );
 
-const sizeOptions = computed(() =>
-  (currentVariant.value?.sizes || []).map((size: any) => ({
-    id: size.id,
-    label: size.size,
-  })),
-);
+// ===== local cart key (same format as useCart) =====
+const makeKey = (productId: number, variantId: number, sizeId: number) => `p${productId}-v${variantId}-s${sizeId}`;
 
 // ===== GALLERY =====
 const galleryImages = computed(() => {
@@ -136,18 +132,67 @@ const formattedPriceAOA = computed(() => {
 });
 
 // ===== CART =====
-const { add: addToCart } = useCart();
+const { add: addToCart, getQty, increment, decrement, isEmpty: isEmptyCart } = useCart();
+
+const canAdd = computed(() => !!selectedSizeId.value);
+
+const currentSkuQty = computed(() => {
+  const p = productData.value;
+  const v = currentVariant.value;
+  const sid = selectedSizeId.value;
+
+  if (!p?.id || !v?.id || !sid) return 0;
+
+  return getQty(p.id, v.id, sid);
+});
+
+const currentSkuKey = computed(() => {
+  const p = productData.value;
+  const v = currentVariant.value;
+  const sid = selectedSizeId.value;
+
+  if (!p?.id || !v?.id || !sid) return '';
+
+  return makeKey(p.id, v.id, sid);
+});
+
+// size options с “в корзине”
+const sizeOptions = computed(() =>
+  (currentVariant.value?.sizes || []).map((size: any) => {
+    const p = productData.value;
+    const v = currentVariant.value;
+    const inCartQty = p?.id && v?.id ? getQty(p.id, v.id, size.id) : 0;
+
+    return {
+      id: size.id,
+      label: size.size,
+      inCartQty,
+    };
+  }),
+);
+
+// ===== MINI CART (Drawer) =====
+const cartDrawerOpen = ref(false);
+
+const cartPageTo = computed(() => localeRoute({ name: 'cart' }));
+
+const openCartDrawer = () => {
+  cartDrawerOpen.value = true;
+};
+
+const closeCartDrawer = () => {
+  cartDrawerOpen.value = false;
+};
 
 const addProductToCart = () => {
   const product = productData.value;
   const variant = currentVariant.value;
   const selectedSize = variant?.sizes?.find((s: any) => s.id === selectedSizeId.value);
 
-  if (!product || !variant || !selectedSize) {
-    return;
-  }
+  if (!product || !variant || !selectedSize) return;
 
   addToCart(product, variant, selectedSize, 1);
+  openCartDrawer();
 };
 
 // ===== ANALYTICS (GA4 ecommerce) =====
@@ -229,6 +274,13 @@ const sendSelectProductEvent = (product: any) => {
 };
 
 // ===== WHATSAPP =====
+const productFullUrl = computed(() => {
+  const localized = localeRoute({ name: 'product-slug', params: { slug: productData.value?.slug } });
+  const path = localized?.fullPath || '/';
+
+  return new URL(path, requestURL.origin).href;
+});
+
 const whatsappHref = computed(() => {
   const text = encodeURIComponent(
     `Olá! Tenho uma dúvida sobre este produto:\n${productTitle.value}\n${productFullUrl.value}`,
@@ -251,13 +303,6 @@ const officesPageTo = computed(() => localeRoute({ name: 'offices' }));
 const seoTitle = computed(() => `${productData.value?.title || ''} | ${t('product.meta.titleSuffix')}`);
 const seoDescription = computed(() => productData.value?.description || t('product.meta.description'));
 const seoImage = computed(() => galleryImages.value?.[0]?.url || '/placeholder.webp');
-
-const productFullUrl = computed(() => {
-  const localized = localeRoute({ name: 'product-slug', params: { slug: productData.value?.slug } });
-  const path = localized?.fullPath || '/';
-
-  return new URL(path, requestURL.origin).href;
-});
 
 const productSchema = computed(() => ({
   '@context': 'https://schema.org/',
@@ -329,7 +374,19 @@ useHead(() => ({
         "howReceiveTitle": "Como você recebe",
         "pickupCta": "Ver todos os pontos",
         "supportCta": "Falar no WhatsApp",
-        "ctaNote": "Prova no ponto • Pague só se ficar"
+        "ctaNote": "Prova no ponto • Pague só se ficar",
+        "addToCart": "Adicionar ao carrinho",
+        "addToCartShort": "Adicionar",
+        "inCart": "No carrinho",
+        "inCartShort": "no carrinho {qty}",
+        "checkout": "Finalizar",
+        "continueShopping": "Continuar compras"
+      },
+      "cartNudge": {
+        "title": "Adicionado ao carrinho",
+        "subtitle": "{qty} un. no carrinho",
+        "checkout": "Finalizar pedido",
+        "continue": "Continuar compras"
       },
       "howReceive": {
         "items": [
@@ -377,7 +434,19 @@ useHead(() => ({
         "howReceiveTitle": "How you receive it",
         "pickupCta": "View all pickup points",
         "supportCta": "Chat on WhatsApp",
-        "ctaNote": "Try at pickup • Pay only if you keep"
+        "ctaNote": "Try at pickup • Pay only if you keep",
+        "addToCart": "Add to cart",
+        "addToCartShort": "Add",
+        "inCart": "In cart",
+        "inCartShort": "in cart {qty}",
+        "checkout": "Checkout",
+        "continueShopping": "Continue shopping"
+      },
+      "cartNudge": {
+        "title": "Added to cart",
+        "subtitle": "{qty} item(s) in cart",
+        "checkout": "Checkout",
+        "continue": "Continue shopping"
       },
       "howReceive": {
         "items": [
@@ -412,7 +481,7 @@ useHead(() => ({
   <UPage>
     <UPageBody>
       <div class="grid lg:grid-cols-2 gap-8">
-        <!-- LEFT: GALLERY (CAROUSEL + THUMBNAILS) -->
+        <!-- LEFT: GALLERY -->
         <div class="flex-1 w-full">
           <div class="relative w-full">
             <UCarousel
@@ -427,7 +496,7 @@ useHead(() => ({
               class="w-full overflow-hidden"
               :ui="{
                 container: 'flex w-full ms-0',
-                item: 'basis-full shrink-0 ps-0',
+                item: 'basis-full shrink-0 ps-0'
               }"
               @select="onSelect"
             >
@@ -455,9 +524,7 @@ useHead(() => ({
             <!-- MOBILE COUNTER -->
             <div
               v-if="hasGalleryImages"
-              class="absolute bottom-3 right-3 lg:hidden
-             bg-black/60 text-white text-xs
-             px-2 py-1 rounded-full backdrop-blur-sm"
+              class="absolute bottom-3 right-3 lg:hidden bg-black/60 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm"
             >
               {{ activeIndex + 1 }} / {{ carouselItems.length }}
             </div>
@@ -559,15 +626,23 @@ useHead(() => ({
             </div>
 
             <div class="flex flex-wrap gap-2">
-              <UBadge
+              <button
                 v-for="sizeOption in sizeOptions"
                 :key="sizeOption.id"
-                :label="sizeOption.label"
-                size="lg"
-                class="cursor-pointer"
-                :variant="selectedSizeId === sizeOption.id ? 'solid' : 'outline'"
+                type="button"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-sm"
+                :class="selectedSizeId === sizeOption.id ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-400'"
                 @click="selectedSizeId = sizeOption.id"
-              />
+              >
+                <span class="font-medium">{{ sizeOption.label }}</span>
+
+                <UBadge
+                  v-if="sizeOption.inCartQty > 0"
+                  size="xs"
+                  variant="solid"
+                  :label="t('product.ui.inCartShort', { qty: sizeOption.inCartQty })"
+                />
+              </button>
             </div>
 
             <div
@@ -576,6 +651,80 @@ useHead(() => ({
             >
               {{ t('product.ui.chooseSize') }}
             </div>
+          </div>
+
+          <!-- CTA (smart) -->
+          <div class="space-y-3 hidden sm:block">
+            <!-- если SKU уже в корзине — показываем степпер -->
+            <div
+              v-if="canAdd && currentSkuQty > 0"
+              class="flex flex-col gap-3"
+            >
+              <div class="flex items-center gap-3">
+                <UButton
+                  variant="outline"
+                  class="shrink-0"
+                  :disabled="!currentSkuKey"
+                  @click="decrement(currentSkuKey)"
+                >
+                  −
+                </UButton>
+
+                <div class="flex-1 text-center">
+                  <div class="text-sm text-gray-500">
+                    {{ t('product.ui.inCart') }}
+                  </div>
+
+                  <div class="text-2xl font-semibold">
+                    {{ currentSkuQty }}
+                  </div>
+                </div>
+
+                <UButton
+                  variant="outline"
+                  class="shrink-0"
+                  :disabled="!currentSkuKey"
+                  @click="increment(currentSkuKey)"
+                >
+                  +
+                </UButton>
+              </div>
+
+              <UButton
+                size="xl"
+                class="w-full justify-center uppercase"
+                color="primary"
+                :to="cartPageTo"
+              >
+                {{ t('product.ui.checkout') }}
+              </UButton>
+            </div>
+
+            <!-- иначе обычная кнопка add -->
+            <UButton
+              v-else
+              size="xl"
+              color="primary"
+              class="w-full justify-center uppercase"
+              :disabled="!selectedSizeId"
+              @click="addProductToCart"
+            >
+              <span>
+                {{ selectedSizeId ? t('product.ui.addToCart') : t('product.ui.chooseSize') }}
+              </span>
+
+              <UBadge
+                v-if="currentSkuQty > 0"
+                class="ms-2"
+                variant="solid"
+                size="sm"
+                :label="String(currentSkuQty)"
+              />
+            </UButton>
+
+            <p class="text-xs text-gray-500 text-center">
+              {{ t('product.ui.ctaNote') }}
+            </p>
           </div>
 
           <!-- How receive (USP) -->
@@ -659,21 +808,6 @@ useHead(() => ({
             </div>
           </div>
 
-          <!-- CTA -->
-          <UButton
-            size="xl"
-            color="primary"
-            class="w-full uppercase justify-center"
-            :disabled="!selectedSizeId"
-            @click="addProductToCart"
-          >
-            {{ t('product.add') }}
-          </UButton>
-
-          <p class="text-xs text-gray-500 text-center">
-            {{ t('product.ui.ctaNote') }}
-          </p>
-
           <!-- Description -->
           <div>
             <h2 class="text-lg font-semibold mb-2">
@@ -709,9 +843,88 @@ useHead(() => ({
         </UBlogPosts>
       </UPageSection>
 
+      <!-- Mini cart (Drawer) -->
+      <UDrawer
+        v-model:open="cartDrawerOpen"
+        title=" "
+        :ui="{
+          header: 'px-0 pt-4 pb-0',
+          body: 'p-0'
+        }"
+      >
+        <span class="hidden" />
+
+        <template #header>
+          <div class="max-w-(--ui-container) mx-auto px-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-sm font-semibold">
+                  {{ t('product.cartNudge.title') }}
+                </div>
+
+                <div class="text-xs text-gray-600">
+                  {{ t('product.cartNudge.subtitle', { qty: currentSkuQty }) }}
+                </div>
+              </div>
+
+              <UButton
+                color="neutral"
+                variant="ghost"
+                icon="i-lucide-x"
+                @click="closeCartDrawer"
+              />
+            </div>
+          </div>
+        </template>
+
+        <template #body>
+          <div class="max-w-(--ui-container) mx-auto px-4 pb-5">
+            <div class="flex gap-3">
+              <div class="size-14 rounded-lg overflow-hidden bg-gray-50 shrink-0">
+                <NuxtImg
+                  :src="galleryImages?.[0]?.url || '/placeholder.webp'"
+                  :alt="productTitle"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-medium line-clamp-2">
+                  {{ productTitle }}
+                </div>
+
+                <div class="text-xs text-gray-600 mt-1">
+                  {{ formattedPriceAOA }}
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 flex flex-col gap-2">
+              <UButton
+                color="primary"
+                class="w-full justify-center uppercase"
+                :to="cartPageTo"
+                @click="closeCartDrawer"
+              >
+                {{ t('product.cartNudge.checkout') }}
+              </UButton>
+
+              <UButton
+                color="neutral"
+                variant="outline"
+                class="w-full justify-center uppercase"
+                @click="closeCartDrawer"
+              >
+                {{ t('product.cartNudge.continue') }}
+              </UButton>
+            </div>
+          </div>
+        </template>
+      </UDrawer>
+
       <!-- Sticky bottom bar (mobile) -->
       <div class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 p-3 sm:hidden">
-        <div class="max-w-(--ui-container) mx-auto px-4 flex gap-3">
+        <div class="max-w-(--ui-container) mx-auto px-4 flex gap-3 items-center">
           <UButton
             variant="outline"
             :to="whatsappHref"
@@ -720,14 +933,67 @@ useHead(() => ({
             class="shrink-0"
           />
 
-          <UButton
-            color="primary"
-            class="flex-1 justify-center"
-            :disabled="!selectedSizeId"
-            @click="addProductToCart"
-          >
-            {{ t('product.add') }}
-          </UButton>
+          <!-- если SKU уже в корзине: степпер + checkout -->
+          <template v-if="canAdd && currentSkuQty > 0">
+            <div class="flex-1 flex items-center gap-2">
+              <UButton
+                variant="outline"
+                class="shrink-0"
+                :disabled="!currentSkuKey"
+                @click="decrement(currentSkuKey)"
+              >
+                −
+              </UButton>
+
+              <div class="min-w-0 flex-1 text-center">
+                <div class="text-xs text-gray-500 leading-none">
+                  {{ t('product.ui.inCart') }}
+                </div>
+
+                <div class="text-base font-semibold leading-tight">
+                  {{ currentSkuQty }}
+                </div>
+              </div>
+
+              <UButton
+                variant="outline"
+                class="shrink-0"
+                :disabled="!currentSkuKey"
+                @click="increment(currentSkuKey)"
+              >
+                +
+              </UButton>
+            </div>
+
+            <UButton
+              color="primary"
+              class="shrink-0 uppercase"
+              :to="cartPageTo"
+            >
+              {{ t('product.ui.checkout') }}
+            </UButton>
+          </template>
+
+          <!-- иначе: add + отдельный checkout -->
+          <template v-else>
+            <UButton
+              color="primary"
+              class="flex-1 justify-center uppercase"
+              :disabled="!selectedSizeId"
+              @click="addProductToCart"
+            >
+              {{ selectedSizeId ? isEmptyCart ? t('product.ui.addToCart') : t('product.ui.addToCartShort') : t('product.ui.chooseSize') }}
+            </UButton>
+
+            <UButton
+              v-if="!isEmptyCart"
+              variant="outline"
+              class="shrink-0 uppercase"
+              :to="cartPageTo"
+            >
+              {{ t('product.ui.checkout') }}
+            </UButton>
+          </template>
         </div>
       </div>
     </UPageBody>

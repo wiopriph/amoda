@@ -147,7 +147,7 @@ const goCheckout = () => {
                 <div class="flex items-center gap-2">
                   <UButton
                     size="sm"
-                    variant="soft"
+                    variant="outline"
                     @click="decrement(cartItem.key)"
                   >
                     −
@@ -165,7 +165,7 @@ const goCheckout = () => {
 
                   <UButton
                     size="sm"
-                    variant="soft"
+                    variant="outline"
                     @click="increment(cartItem.key)"
                   >
                     +
@@ -195,7 +195,7 @@ const goCheckout = () => {
             <div class="flex items-center gap-2">
               <UButton
                 size="sm"
-                variant="soft"
+                variant="outline"
                 @click="decrement(cartItem.key)"
               >
                 −
@@ -213,7 +213,7 @@ const goCheckout = () => {
 
               <UButton
                 size="sm"
-                variant="soft"
+                variant="outline"
                 @click="increment(cartItem.key)"
               >
                 +
@@ -255,7 +255,7 @@ const goCheckout = () => {
           <UButton
             size="xl"
             color="primary"
-            class="w-full py-4 text-lg font-semibold tracking-wide uppercase justify-center mt-4"
+            class="w-full uppercase justify-center mt-4"
             :disabled="!items.length"
             @click="goCheckout"
           >

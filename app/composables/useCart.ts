@@ -140,8 +140,11 @@ export function useCart() {
       for (const item of normalized) {
         const exist = map.get(item.key);
 
-        if (exist) exist.qty += item.qty;
-        else map.set(item.key, item);
+        if (exist) {
+          exist.qty += item.qty;
+        } else {
+          map.set(item.key, item);
+        }
       }
 
       state.value = Array.from(map.values());
@@ -151,7 +154,9 @@ export function useCart() {
   };
 
   const persist = () => {
-    if (!isClient) return;
+    if (!isClient) {
+      return;
+    }
 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state.value));
@@ -229,12 +234,16 @@ export function useCart() {
   const setQty = (key: string, qty: number) => {
     const target = state.value.find(i => i.key === key);
 
-    if (!target) return;
+    if (!target) {
+      return;
+    }
 
     const next = Math.max(1, Math.floor(qty));
     const prev = target.qty;
 
-    if (next === prev) return;
+    if (next === prev) {
+      return;
+    }
 
     const delta = next - prev;
 
@@ -317,6 +326,18 @@ export function useCart() {
     state.value = [];
   };
 
+
+  const getQty = (productId: number, variantId: number, sizeId: number) => {
+    const key = makeKey(productId, variantId, sizeId);
+
+    return state.value.find(i => i.key === key)?.qty ?? 0;
+  };
+
+  const hasItem = (productId: number, variantId: number, sizeId: number) => getQty(productId, variantId, sizeId) > 0;
+
+  const getByKey = (key: string) => state.value.find(i => i.key === key) ?? null;
+
+
   return {
     items,
     count,
@@ -329,5 +350,9 @@ export function useCart() {
     decrement,
     remove,
     clear,
+
+    getQty,
+    hasItem,
+    getByKey,
   };
 }

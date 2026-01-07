@@ -209,7 +209,7 @@ const submit = async () => {
       <UAlert
         :description="t('checkout.hint')"
         icon="i-heroicons-information-circle"
-        color="primary"
+        color="success"
         variant="soft"
         class="mb-4 text-sm"
       />
@@ -292,7 +292,7 @@ const submit = async () => {
           size="xl"
           color="primary"
           type="submit"
-          class="w-full py-4 text-lg font-semibold tracking-wide uppercase justify-center"
+          class="w-full uppercase justify-center mt-4"
         >
           {{ t('checkout.submit') }}
         </UButton>
@@ -310,7 +310,7 @@ const submit = async () => {
         <UAlert
           :description="t('checkout.note')"
           color="success"
-          variant="subtle"
+          variant="soft"
           icon="i-heroicons-check-circle"
           class="mt-4 text-sm leading-relaxed"
         />
