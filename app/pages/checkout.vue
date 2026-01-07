@@ -105,7 +105,7 @@ const submit = async () => {
         items: items.value.map(i =>
           makeGa4Item({
             productId: i.productId,
-            name: i.title,
+            name: i.productName,
             brand: i.brand ?? undefined,
             price: i.price,
             quantity: i.qty,

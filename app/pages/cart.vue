@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+import { makeGa4Item } from '~/utils/ga4';
 
 
 definePageMeta({ name: 'cart' });
@@ -33,19 +34,19 @@ const goCheckout = () => {
   if (import.meta.client) {
     trackBeginCheckout({
       value: totalAOA.value,
-      items: items.value.map((i) => ({
-        item_id: i.key,
-        item_name: i.productName,
-        item_brand: i.brand ?? undefined,
-        item_category: i.categoryName ?? undefined,
-        item_variant: i.variantLabel ?? undefined,
-        price: i.price,
-        quantity: i.qty,
-
-        product_id: i.productId,
-        variant_id: i.variantId,
-        size_id: i.sizeId,
-      })),
+      items: items.value.map((i) =>
+        makeGa4Item({
+          productId: i.productId,
+          name: i.productName,
+          brand: i.brand ?? undefined,
+          price: i.price,
+          quantity: i.qty,
+          variantId: i.variantId,
+          sizeId: i.sizeId,
+          variantLabel: i.variantLabel ?? undefined,
+          sizeLabel: i.sizeLabel ?? undefined,
+          categoryName: i.categoryName ?? undefined,
+        })),
     });
   }
 
