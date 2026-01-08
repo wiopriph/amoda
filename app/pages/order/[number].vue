@@ -136,9 +136,13 @@ useHead(() => ({
                 {{ order.guestContact.email }}
               </p>
 
-              <p class="text-sm text-gray-500">
+              <a
+                v-if="order.guestContact?.phone"
+                :href="`tel:${order.guestContact?.phone}`"
+                class="text-sm text-primary underline underline-offset-2"
+              >
                 {{ order.guestContact?.phone }}
-              </p>
+              </a>
             </div>
 
             <div class="space-y-1">

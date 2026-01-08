@@ -4,11 +4,6 @@ const localeRoute = useLocaleRoute();
 
 const navItems = computed(() => [
   {
-    label: t('admin.dashboard'),
-    icon: 'i-lucide-layout-dashboard',
-    to: localeRoute({ name: 'admin' }),
-  },
-  {
     label: t('admin.brands'),
     icon: 'i-lucide-tag',
     to: localeRoute({ name: 'admin-brands' }),
@@ -20,8 +15,13 @@ const navItems = computed(() => [
   },
   {
     label: t('admin.products'),
-    icon: 'i-lucide-package',
+    icon: 'i-lucide-shirt',
     to: localeRoute({ name: 'admin-products' }),
+  },
+  {
+    label: t('admin.orders'),
+    icon: 'i-lucide-receipt',
+    to: localeRoute({ name: 'admin-orders' }),
   },
 ]);
 
@@ -32,7 +32,7 @@ const { signOut } = useAuth();
 {
   "en": {
     "admin": {
-      "dashboard": "Dashboard",
+      "orders": "Orders",
       "brands": "Brands",
       "categories": "Categories",
       "products": "Products",
@@ -41,7 +41,7 @@ const { signOut } = useAuth();
   },
   "pt": {
     "admin": {
-      "dashboard": "Dashboard",
+      "orders": "Pedidos",
       "brands": "Brands",
       "categories": "Categories",
       "products": "Products",
