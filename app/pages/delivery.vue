@@ -4,240 +4,243 @@ definePageMeta({ name: 'delivery' });
 const { t, tm, rt } = useI18n();
 const localeRoute = useLocaleRoute();
 
-useHead(() => {
-  const faqsItems = tm('delivery.faq.items');
+const seoTitle = computed(() => t('delivery.meta.title'));
+const seoDescription = computed(() => t('delivery.meta.description'));
 
+const steps = computed(() =>
+  (tm('delivery.how.steps') as any[]).map((s) => ({
+    icon: rt(s.icon),
+    title: rt(s.title),
+    desc: rt(s.desc),
+  })),
+);
+
+const faqs = computed(() =>
+  (tm('delivery.faq.items') as any[]).map((faq) => ({
+    label: rt(faq.q),
+    content: rt(faq.a),
+  })),
+);
+
+useHead(() => {
   const faqStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqsItems.map((f) => ({
+    mainEntity: (tm('delivery.faq.items') as any[]).map((f) => ({
       '@type': 'Question',
       name: rt(f.q),
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: rt(f.a),
-      },
+      acceptedAnswer: { '@type': 'Answer', text: rt(f.a) },
     })),
   };
 
   return {
-    title: t('delivery.meta.title'),
+    title: seoTitle.value,
     meta: [
-      { name: 'description', content: t('delivery.meta.description') },
-      { property: 'og:title', content: t('delivery.meta.title') },
-      { property: 'og:description', content: t('delivery.meta.description') },
+      { name: 'description', content: seoDescription.value },
+      { name: 'robots', content: 'index, follow' },
+      { property: 'og:title', content: seoTitle.value },
+      { property: 'og:description', content: seoDescription.value },
+      { property: 'twitter:title', content: seoTitle.value },
+      { property: 'twitter:description', content: seoDescription.value },
     ],
-    script: [
-      {
-        type: 'application/ld+json',
-        children: JSON.stringify(faqStructuredData),
-      },
-    ],
+    script: [{ type: 'application/ld+json', children: JSON.stringify(faqStructuredData) }],
   };
 });
-
-const steps = computed(() => tm('delivery.how.steps').map((s: any) => ({
-  icon: rt(s.icon),
-  title: rt(s.title),
-  desc: rt(s.desc),
-})));
-const faqs = computed(() => tm('delivery.faq.items').map((faq: any) => ({
-  label: rt(faq.q),
-  content: rt(faq.a),
-})));
 </script>
 
 <i18n lang="json">
 {
   "pt": {
     "delivery": {
-      "title": "Entrega gratuita e pontos de recolha",
-      "intro": "Na Amoda a entrega é 100% gratuita para pontos de recolha. Encomende roupas online em Angola, escolha o ponto em Luanda, experimente no local e pague apenas se gostar.",
+      "title": "Como comprar na Amoda",
+      "intro": "Compra online e levanta no ponto. Experimenta no local e decide na hora o que vais levar — simples e sem stress.",
       "meta": {
-        "title": "Entrega gratuita e pontos de recolha | Amoda Angola",
-        "description": "Entrega gratuita em Luanda, pontos de recolha, comprar roupas online Angola sem pagamento antecipado. Experimente no local e pague apenas se gostar."
+        "title": "Como comprar na Amoda | Pontos de levantamento em Luanda",
+        "description": "Passo a passo: escolher online, levantar no ponto, experimentar e decidir. Endereços e horários dos pontos de levantamento em Luanda."
       },
       "badges": {
-        "free": "Entrega gratuita",
-        "noprepay": "Sem pagamento antecipado",
-        "safe": "Compra segura — experimente primeiro"
+        "try": "Experimente primeiro",
+        "pickup": "Pontos de levantamento",
+        "fast": "Processo simples"
+      },
+      "value": {
+        "title": "Por que isto funciona melhor",
+        "subtitle": "A ideia é simples: você não precisa confiar em fotos. Você verifica no ponto e leva só o que faz sentido.",
+        "items": [
+          {
+            "icon": "i-lucide-check-circle",
+            "title": "Sem adivinhações",
+            "desc": "Experimente o tamanho e veja o caimento ao vivo. Se não ficar bem, recuse na hora."
+          },
+          {
+            "icon": "i-lucide-palette",
+            "title": "Cor e material reais",
+            "desc": "Veja a cor e o tecido na mão. O que você vê é o que você leva."
+          },
+          {
+            "icon": "i-lucide-shield-check",
+            "title": "Mais confiança",
+            "desc": "Você decide no ponto. Menos risco, menos arrependimento."
+          },
+          {
+            "icon": "i-lucide-clock",
+            "title": "Rápido e prático",
+            "desc": "Escolha online, confirme, levante. Sem conversas longas e sem complicação."
+          }
+        ]
       },
       "how": {
         "title": "Como funciona",
         "steps": [
-          {
-            "icon": "i-lucide-search",
-            "title": "Escolha online",
-            "desc": "Adicione roupas, sapatos e acessórios ao carrinho."
-          },
-          {
-            "icon": "i-lucide-map-pin",
-            "title": "Selecione o ponto",
-            "desc": "Escolha o ponto de recolha mais perto de si em Luanda."
-          },
-          {
-            "icon": "i-lucide-phone",
-            "title": "Confirmação",
-            "desc": "Quando a encomenda chegar, entraremos em contacto por telefone."
-          },
-          {
-            "icon": "i-lucide-shopping-bag",
-            "title": "Experimente no local",
-            "desc": "Veja e experimente. Pague apenas o que decidir levar."
-          }
+          { "icon": "i-lucide-search", "title": "Escolha online", "desc": "Navegue pelas categorias e adicione os artigos ao carrinho." },
+          { "icon": "i-lucide-clipboard-check", "title": "Finalize o pedido", "desc": "No checkout, preencha nome, telefone e email." },
+          { "icon": "i-lucide-map-pin", "title": "Selecione o ponto", "desc": "Escolha um ponto de levantamento conveniente." },
+          { "icon": "i-lucide-phone", "title": "Confirmação", "desc": "Entraremos em contacto quando o pedido estiver pronto." },
+          { "icon": "i-lucide-shopping-bag", "title": "Experimente e decida", "desc": "Experimente no ponto e pague apenas o que levar." }
         ]
       },
       "pickup": {
-        "title": "Pontos de recolha",
-        "desc": "Estamos a expandir a rede de pontos. No início — Luanda, depois outras cidades. Verifique o mapa e horários.",
-        "button": "Ver pontos de recolha"
+        "title": "Pontos de levantamento",
+        "desc": "Veja endereços, contactos e horários de funcionamento.",
+        "button": "Ver pontos de levantamento"
       },
-      "pay": {
-        "title": "Pagamento",
-        "methods": [
+      "rules": {
+        "title": "Regras e detalhes importantes",
+        "items": [
           {
-            "icon": "i-lucide-banknote",
-            "title": "Dinheiro",
-            "desc": "Pague em dinheiro no ponto de recolha."
+            "icon": "i-lucide-calendar-days",
+            "title": "Prazo para levantar",
+            "desc": "O pedido fica disponível por um período limitado. Avisaremos exatamente o prazo no contacto de confirmação."
           },
           {
-            "icon": "i-lucide-credit-card",
-            "title": "Cartão",
-            "desc": "Pagamento por cartão disponível em pontos selecionados."
+            "icon": "i-lucide-phone-call",
+            "title": "Confirmação por contacto",
+            "desc": "Confirmamos quando o pedido estiver pronto e combinamos o melhor horário para você levantar."
           },
           {
-            "icon": "i-lucide-smartphone",
-            "title": "Transferência / App",
-            "desc": "Métodos digitais populares — quando disponíveis no ponto."
+            "icon": "i-lucide-shirt",
+            "title": "Experimentação no ponto",
+            "desc": "Você pode experimentar e recusar qualquer artigo que não sirva ou não agrade."
+          },
+          {
+            "icon": "i-lucide-package-check",
+            "title": "Condição do artigo",
+            "desc": "Verifique o artigo no ponto antes de confirmar. Depois de levar, devoluções seguem a política."
+          },
+          {
+            "icon": "i-lucide-rotate-ccw",
+            "title": "Devoluções e reembolsos",
+            "desc": "Se você levar e depois mudar de ideia, as regras dependem do tipo de artigo e do estado. Veja os detalhes na política."
           }
         ],
-        "note": "Sem pré-pagamento. Só paga após verificar o produto."
+        "returnLinkText": "Política de Devoluções"
       },
       "faq": {
         "title": "Perguntas frequentes",
         "items": [
-          {
-            "q": "Quanto custa a entrega?",
-            "a": "Grátis para pontos de recolha em Luanda."
-          },
-          {
-            "q": "Preciso pagar online?",
-            "a": "Não. Sem pagamento antecipado — paga apenas no ponto de recolha."
-          },
-          {
-            "q": "Quanto tempo a encomenda fica no ponto?",
-            "a": "Normalmente guardamos por um período limitado. Receberá informação no contacto de confirmação."
-          },
-          {
-            "q": "Posso experimentar várias peças?",
-            "a": "Sim, pode experimentar e escolher apenas o que quiser levar."
-          },
-          {
-            "q": "O que acontece se nada servir?",
-            "a": "Sem problema — pode recusar no local e não paga nada."
-          }
+          { "q": "Posso experimentar várias peças?", "a": "Sim. Experimente e leve apenas o que quiser." },
+          { "q": "E se nada servir?", "a": "Sem problema — pode recusar no local e não paga nada." },
+          { "q": "Como sei quando posso levantar?", "a": "Entraremos em contacto quando o pedido estiver pronto." },
+          { "q": "Quanto tempo o pedido fica no ponto?", "a": "Guardamos por um período limitado. Os detalhes são informados no contacto de confirmação." },
+          { "q": "Onde vejo os pontos e horários?", "a": "Na página de pontos de levantamento (endereços, contactos e horários)." }
         ]
-      },
-      "cta": {
-        "title": "Pronto para comprar online?",
-        "desc": "Escolha as suas peças favoritas — entrega gratuita e compra segura nos nossos pontos.",
-        "button": "Começar a comprar"
       }
     }
   },
   "en": {
     "delivery": {
-      "title": "Free delivery & pickup points",
-      "intro": "With Amoda, delivery is 100% free to pickup points. Order clothes online in Angola, choose a point in Luanda, try on at the location, and pay only if you like it.",
+      "title": "How to shop on Amoda",
+      "intro": "Shop online and collect at a pickup point. Try on at the location and decide on the spot what you keep — simple and stress-free.",
       "meta": {
-        "title": "Free delivery and pickup points | Amoda Angola",
-        "description": "Free delivery in Luanda, pickup points, buy clothes online in Angola with no prepayment. Try first at pickup and pay only for what you keep."
+        "title": "How to shop on Amoda | Pickup points in Luanda",
+        "description": "Step-by-step: choose online, collect at a pickup point, try on and decide. Addresses and opening hours for pickup points in Luanda."
       },
       "badges": {
-        "free": "Free delivery",
-        "noprepay": "No prepayment",
-        "safe": "Safe shopping — try first"
+        "try": "Try first",
+        "pickup": "Pickup points",
+        "fast": "Simple process"
+      },
+      "value": {
+        "title": "Why this works better",
+        "subtitle": "Simple idea: you don’t have to trust photos. You check at pickup and keep only what makes sense.",
+        "items": [
+          {
+            "icon": "i-lucide-check-circle",
+            "title": "No guessing",
+            "desc": "Try the size and see the fit in real life. If it’s not right, decline on the spot."
+          },
+          {
+            "icon": "i-lucide-palette",
+            "title": "Real color & material",
+            "desc": "See the color and feel the fabric. What you see is what you get."
+          },
+          {
+            "icon": "i-lucide-shield-check",
+            "title": "More confidence",
+            "desc": "You decide at pickup. Less risk, less regret."
+          },
+          {
+            "icon": "i-lucide-clock",
+            "title": "Fast and practical",
+            "desc": "Choose online, confirm, collect. No long back-and-forth, no hassle."
+          }
+        ]
       },
       "how": {
         "title": "How it works",
         "steps": [
-          {
-            "icon": "i-lucide-search",
-            "title": "Choose online",
-            "desc": "Add clothes, shoes and accessories to your cart."
-          },
-          {
-            "icon": "i-lucide-map-pin",
-            "title": "Select pickup point",
-            "desc": "Pick the nearest location in Luanda."
-          },
-          {
-            "icon": "i-lucide-phone",
-            "title": "Get notified",
-            "desc": "We’ll call you when your order arrives."
-          },
-          {
-            "icon": "i-lucide-shopping-bag",
-            "title": "Try on & decide",
-            "desc": "Try your items on-site. Pay only for what you keep."
-          }
+          { "icon": "i-lucide-search", "title": "Choose online", "desc": "Browse categories and add items to your cart." },
+          { "icon": "i-lucide-clipboard-check", "title": "Checkout", "desc": "At checkout, enter your name, phone number and email." },
+          { "icon": "i-lucide-map-pin", "title": "Select pickup point", "desc": "Choose a convenient pickup point." },
+          { "icon": "i-lucide-phone", "title": "Confirmation", "desc": "We’ll contact you when your order is ready." },
+          { "icon": "i-lucide-shopping-bag", "title": "Try on & decide", "desc": "Try on at pickup and pay only for what you keep." }
         ]
       },
       "pickup": {
         "title": "Pickup points",
-        "desc": "We’re expanding our network. Starting with Luanda, more cities next. Check the map and opening hours.",
-        "button": "See pickup locations"
+        "desc": "See addresses, contacts, and opening hours.",
+        "button": "See pickup points"
       },
-      "pay": {
-        "title": "Payment",
-        "methods": [
+      "rules": {
+        "title": "Important rules & details",
+        "items": [
           {
-            "icon": "i-lucide-banknote",
-            "title": "Cash",
-            "desc": "Pay with cash at the pickup point."
+            "icon": "i-lucide-calendar-days",
+            "title": "Pickup window",
+            "desc": "Orders are held for a limited time. We’ll tell you the exact window during confirmation."
           },
           {
-            "icon": "i-lucide-credit-card",
-            "title": "Card",
-            "desc": "Card payments available at selected points."
+            "icon": "i-lucide-phone-call",
+            "title": "Confirmation contact",
+            "desc": "We confirm when the order is ready and help coordinate the best pickup time."
           },
           {
-            "icon": "i-lucide-smartphone",
-            "title": "Transfer / App",
-            "desc": "Popular digital methods — where available."
+            "icon": "i-lucide-shirt",
+            "title": "Try-on at pickup",
+            "desc": "You can try on and decline any item that doesn’t fit or you don’t like."
+          },
+          {
+            "icon": "i-lucide-package-check",
+            "title": "Check item condition",
+            "desc": "Inspect items at pickup before confirming. After collection, returns follow the policy."
+          },
+          {
+            "icon": "i-lucide-rotate-ccw",
+            "title": "Returns & refunds",
+            "desc": "If you collect and later change your mind, rules depend on item type and condition. See details in the policy."
           }
         ],
-        "note": "No upfront payment. You pay only after checking your items."
+        "returnLinkText": "Return Policy"
       },
       "faq": {
         "title": "FAQ",
         "items": [
-          {
-            "q": "How much is delivery?",
-            "a": "Free to pickup points in Luanda."
-          },
-          {
-            "q": "Do I need to pay online?",
-            "a": "No. No prepayment — you pay at the pickup point."
-          },
-          {
-            "q": "How long is my order held?",
-            "a": "We hold orders for a limited time. Details are shared in the confirmation call."
-          },
-          {
-            "q": "Can I try multiple items?",
-            "a": "Yes, try on and choose only what you want."
-          },
-          {
-            "q": "What if nothing fits?",
-            "a": "No problem — you can decline on-site and pay nothing."
-          }
+          { "q": "Can I try multiple items?", "a": "Yes. Try on and keep only what you want." },
+          { "q": "What if nothing fits?", "a": "No problem — you can decline on-site and pay nothing." },
+          { "q": "How do I know when I can pick up?", "a": "We’ll contact you when your order is ready." },
+          { "q": "How long is my order held?", "a": "Orders are held for a limited time. Details are shared during confirmation." },
+          { "q": "Where can I see locations and hours?", "a": "On the pickup points page (addresses, contacts, and opening hours)." }
         ]
-      },
-      "cta": {
-        "title": "Ready to shop online?",
-        "desc": "Pick your favorite styles — free delivery and safe shopping at our pickup points.",
-        "button": "Start shopping"
       }
     }
   }
@@ -246,48 +249,101 @@ const faqs = computed(() => tm('delivery.faq.items').map((faq: any) => ({
 
 <template>
   <UPage>
-    <UPageHeader :title="t('delivery.title')" />
+    <UPageHeader
+      :title="t('delivery.title')"
+      :description="t('delivery.intro')"
+    />
 
-    <UPageBody>
-      <UPageSection
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      >
-        <p v-text="t('delivery.intro')" />
-
-        <div class="mt-4 flex flex-wrap gap-2">
+    <UPageBody class="max-w-3xl mx-auto">
+      <div class="space-y-10">
+        <div class="flex flex-wrap gap-2">
           <UBadge>
-            {{ t('delivery.badges.free') }}
+            {{ t('delivery.badges.try') }}
           </UBadge>
 
           <UBadge>
-            {{ t('delivery.badges.noprepay') }}
+            {{ t('delivery.badges.pickup') }}
           </UBadge>
 
           <UBadge>
-            {{ t('delivery.badges.safe') }}
+            {{ t('delivery.badges.fast') }}
           </UBadge>
         </div>
-      </UPageSection>
 
-      <UPageSection
-        :title="t('delivery.how.title')"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      >
-        <UStepper
-          :items="steps"
-          color="primary"
-        />
-      </UPageSection>
+        <UCard>
+          <template #header>
+            <div class="space-y-1">
+              <h2 class="text-base font-semibold">
+                {{ t('delivery.value.title') }}
+              </h2>
 
-      <UPageSection
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      >
+              <p class="text-sm text-gray-600">
+                {{ t('delivery.value.subtitle') }}
+              </p>
+            </div>
+          </template>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <UCard
+              v-for="item in tm('delivery.value.items')"
+              :key="rt(item.title)"
+            >
+              <div class="flex items-start gap-3">
+                <UIcon
+                  :name="rt(item.icon)"
+                  class="size-6"
+                />
+
+                <div>
+                  <h3 class="font-medium">
+                    {{ rt(item.title) }}
+                  </h3>
+
+                  <p class="text-sm text-gray-600">
+                    {{ rt(item.desc) }}
+                  </p>
+                </div>
+              </div>
+            </UCard>
+          </div>
+        </UCard>
+
+        <UCard>
+          <template #header>
+            <h2 class="text-base font-semibold">
+              {{ t('delivery.how.title') }}
+            </h2>
+          </template>
+
+          <div class="space-y-3">
+            <UCard
+              v-for="(s, idx) in steps"
+              :key="`${idx}-${s.title}`"
+            >
+              <div class="flex items-start gap-3">
+                <div class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-sm font-semibold tabular-nums">
+                  {{ idx + 1 }}
+                </div>
+
+                <UIcon
+                  :name="s.icon"
+                  class="size-6 mt-0.5"
+                />
+
+                <div class="min-w-0">
+                  <div class="font-medium">
+                    {{ s.title }}
+                  </div>
+
+                  <div class="text-sm text-gray-600">
+                    {{ s.desc }}
+                  </div>
+                </div>
+              </div>
+            </UCard>
+          </div>
+        </UCard>
+
         <UCard>
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -301,80 +357,65 @@ const faqs = computed(() => tm('delivery.faq.items').map((faq: any) => ({
             </div>
 
             <UButton
-              :to="localeRoute({ name: 'contacts' })"
+              :to="localeRoute({ name: 'pickup-points' })"
               color="primary"
-              icon="i-lucide-map"
+              icon="i-lucide-map-pin"
             >
               {{ t('delivery.pickup.button') }}
             </UButton>
           </div>
         </UCard>
-      </UPageSection>
 
-      <UPageSection
-        :title="t('delivery.pay.title')"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      >
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <UCard
-            v-for="m in tm('delivery.pay.methods')"
-            :key="m.title"
-          >
-            <div class="flex items-start gap-3">
+        <UCard>
+          <template #header>
+            <h2 class="text-base font-semibold">
+              {{ t('delivery.rules.title') }}
+            </h2>
+          </template>
+
+          <div class="space-y-4">
+            <div
+              v-for="r in tm('delivery.rules.items')"
+              :key="rt(r.title)"
+              class="flex items-start gap-3"
+            >
               <UIcon
-                :name="rt(m.icon)"
-                class="size-6"
+                :name="rt(r.icon)"
+                class="size-6 mt-0.5"
               />
 
               <div>
-                <h4 class="font-medium">
-                  {{ rt(m.title) }}
-                </h4>
+                <div class="font-medium">
+                  {{ rt(r.title) }}
+                </div>
 
-                <p class="text-sm text-gray-600">
-                  {{ rt(m.desc) }}
-                </p>
+                <div class="text-sm text-gray-600">
+                  {{ rt(r.desc) }}
+                </div>
               </div>
             </div>
-          </UCard>
-        </div>
 
-        <p class="text-xs text-gray-500 mt-3">
-          {{ t('delivery.pay.note') }}
-        </p>
-      </UPageSection>
+            <div class="pt-2">
+              <NuxtLink
+                class="text-primary underline underline-offset-4"
+                :to="localeRoute({ name: 'return-policy' })"
+              >
+                {{ t('delivery.rules.returnLinkText') }}
+              </NuxtLink>
+            </div>
+          </div>
+        </UCard>
 
-      <UPageSection
-        :title="t('delivery.faq.title')"
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      >
-        <UAccordion
-          :items="faqs"
-        />
-      </UPageSection>
+        <UCard>
+          <template #header>
+            <h2 class="text-base font-semibold">
+              {{ t('delivery.faq.title') }}
+            </h2>
+          </template>
 
-      <UPageSection
-        :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
-        }"
-      >
-        <UPageCTA
-          :title="t('delivery.cta.title')"
-          :description="t('delivery.cta.desc')"
-          :links="[
-            {
-              label: t('delivery.cta.button'),
-              color: 'primary',
-              to: localeRoute({ name: 'index' })
-            }
-          ]"
-          orientation="horizontal"
-        />
-      </UPageSection>
+          <UAccordion :items="faqs" />
+        </UCard>
+      </div>
     </UPageBody>
   </UPage>
 </template>

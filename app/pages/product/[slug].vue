@@ -297,7 +297,7 @@ onMounted(() => {
 });
 
 const topOffices = computed(() => (offices.value || []).slice(0, 3));
-const officesPageTo = computed(() => localeRoute({ name: 'offices' }));
+const officesPageTo = computed(() => localeRoute({ name: 'pickup-points' }));
 
 // ===== SEO =====
 const seoTitle = computed(() => `${productData.value?.title || ''} | ${t('product.meta.titleSuffix')}`);

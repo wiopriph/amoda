@@ -19,13 +19,11 @@ export default defineNuxtConfig({
         code: 'pt',
         language: 'pt-AO',
         name: 'Português',
-        flag: '🇦🇴',
       },
       {
         code: 'en',
         language: 'en',
         name: 'English',
-        flag: '🇬🇧',
       },
     ],
     strategy: 'prefix_except_default',

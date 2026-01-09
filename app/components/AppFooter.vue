@@ -1,31 +1,56 @@
 <script setup lang="ts">
 const { t, locale, locales } = useI18n();
 const switchLocalePath = useSwitchLocalePath();
-
-
 const localeRoute = useLocaleRoute();
 
-const items = computed(() => [{
-  label: t('footer.delivery'),
-  to: localeRoute({ name: 'delivery' }),
-}, {
-  label: t('footer.contacts'),
-  to: localeRoute({ name: 'contacts' }),
-}]);
+const items = computed(() => [
+  {
+    label: t('footer.delivery'),
+    to: localeRoute({ name: 'delivery' }),
+  },
+  {
+    label: t('footer.pickup'),
+    to: localeRoute({ name: 'pickup-points' }),
+  },
+  {
+    label: t('footer.returns'),
+    to: localeRoute({ name: 'return-policy' }),
+  },
+  {
+    label: t('footer.privacy'),
+    to: localeRoute({ name: 'privacy-policy' }),
+  },
+  {
+    label: t('footer.terms'),
+    to: localeRoute({ name: 'terms-of-use' }),
+  },
+  {
+    label: t('footer.contacts'),
+    to: localeRoute({ name: 'contacts' }),
+  },
+]);
 </script>
 
 <i18n lang="json">
 {
   "pt": {
     "footer": {
-      "delivery": "Entrega",
+      "delivery": "Como comprar",
+      "pickup": "Pontos de levantamento",
+      "returns": "Devoluções",
+      "privacy": "Política de Privacidade",
+      "terms": "Termos de Utilização",
       "contacts": "Contactos",
       "rights": "Todos os direitos reservados."
     }
   },
   "en": {
     "footer": {
-      "delivery": "Delivery",
+      "delivery": "How it works",
+      "pickup": "Pickup points",
+      "returns": "Returns",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use",
       "contacts": "Contacts",
       "rights": "All rights reserved."
     }
@@ -37,7 +62,7 @@ const items = computed(() => [{
   <UFooter>
     <template #left>
       <p class="text-muted text-sm">
-        Copyright © {{ new Date().getFullYear() }}
+        © {{ new Date().getFullYear() }} Amoda. {{ t('footer.rights') }}
       </p>
     </template>
 
@@ -53,11 +78,8 @@ const items = computed(() => [{
         :to="switchLocalePath(lang.code)"
         size="xs"
         :variant="locale === lang.code ? 'solid' : 'outline'"
-        class="flex items-center gap-1"
       >
-        <span>{{ lang.flag }}</span>
-
-        <span class="hidden sm:inline">{{ lang.name }}</span>
+        {{ lang.name }}
       </UButton>
     </template>
   </UFooter>

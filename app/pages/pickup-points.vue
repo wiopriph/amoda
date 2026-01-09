@@ -1,11 +1,13 @@
 <script setup lang="ts">
+definePageMeta({ name: 'pickup-points' });
+
 const { t } = useI18n();
+
+const weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
 const { data, error } = await useFetch('/api/offices/list');
 
-const offices = computed(() => data.value?.items || []);
-
-const weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const offices = computed(() => data.value?.items ?? []);
 
 const seoTitle = computed(() => t('offices.meta.title'));
 const seoDescription = computed(() => t('offices.meta.description'));
@@ -20,6 +22,25 @@ useHead(() => ({
     { property: 'twitter:description', content: seoDescription.value },
   ],
 }));
+
+const toTel = (phone?: string) => {
+  if (!phone) {
+    return '';
+  }
+
+  return phone.replace(/[^\d+]/g, '');
+};
+
+const formatRanges = (ranges?: [string, string][]) => {
+  if (!ranges?.length) {
+    return '';
+  }
+
+  return ranges
+    .filter(r => r?.[0] && r?.[1])
+    .map(r => `${r[0]}–${r[1]}`)
+    .join(', ');
+};
 </script>
 
 <i18n lang="json">
@@ -28,6 +49,7 @@ useHead(() => ({
     "offices": {
       "title": "Pontos de levantamento",
       "error": "Erro ao carregar os pontos de levantamento.",
+      "empty": "Ainda não há pontos de levantamento disponíveis.",
       "hours": "Horário de funcionamento",
       "closed": "Fechado",
       "meta": {
@@ -49,6 +71,7 @@ useHead(() => ({
     "offices": {
       "title": "Pickup points",
       "error": "Failed to load pickup points.",
+      "empty": "No pickup points available yet.",
       "hours": "Opening hours",
       "closed": "Closed",
       "meta": {
@@ -71,21 +94,33 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageHeader :title="t('offices.title')" />
+    <UPageHeader
+      :title="t('offices.title')"
+      :description="t('offices.meta.description')"
+    />
 
-    <UPageBody>
-      <div v-if="error">
-        <p>
-          {{ t('offices.error') }}
-        </p>
-      </div>
+    <UPageBody class="max-w-3xl mx-auto">
+      <UAlert
+        v-if="error"
+        variant="soft"
+        icon="i-lucide-alert-triangle"
+        :title="t('offices.error')"
+      />
 
       <div
         v-else
-        class="flex flex-col gap-6"
+        class="space-y-6"
       >
+        <UAlert
+          v-if="offices.length === 0"
+          variant="soft"
+          icon="i-lucide-map-pin"
+          :title="t('offices.empty')"
+        />
+
         <UCard
           v-for="office in offices"
+          v-else
           :key="office.id"
           class="p-6"
         >
@@ -95,25 +130,33 @@ useHead(() => ({
                 {{ office.name }}
               </h2>
 
-              <p class="text-gray-600 text-sm">
+              <p
+                v-if="office.address"
+                class="text-gray-600 text-sm"
+              >
                 {{ office.address }}
               </p>
 
-              <p class="text-sm">
+              <p
+                v-if="office.phone"
+                class="text-sm"
+              >
                 <a
                   class="text-primary underline underline-offset-2"
-                  :href="`tel:${office.phone}`"
+                  :href="`tel:${toTel(office.phone)}`"
                 >
                   {{ office.phone }}
                 </a>
               </p>
 
-              <p class="text-sm leading-relaxed">
+              <p
+                v-if="office.description"
+                class="text-sm leading-relaxed"
+              >
                 {{ office.description }}
               </p>
             </div>
 
-            <!-- RIGHT SIDE (HOURS) -->
             <div class="md:w-64">
               <p class="font-semibold mb-2 text-sm">
                 {{ t('offices.hours') }}
@@ -123,20 +166,15 @@ useHead(() => ({
                 <li
                   v-for="day in weekDays"
                   :key="day"
-                  class="flex justify-between"
+                  class="flex justify-between gap-3"
                 >
                   <span class="w-16 font-medium">
                     {{ t(`offices.days.${day}`) }}:
                   </span>
 
-                  <span class="tabular-nums text-gray-700">
-                    <template v-if="office.opening_hours?.[day]?.length">
-                      <span
-                        v-for="(range, idx) in office.opening_hours[day]"
-                        :key="idx"
-                      >
-                        {{ range[0] }}–{{ range[1] }}<span v-if="idx < office.opening_hours[day].length - 1">, </span>
-                      </span>
+                  <span class="tabular-nums text-gray-700 text-right">
+                    <template v-if="formatRanges(office.opening_hours?.[day])">
+                      {{ formatRanges(office.opening_hours?.[day]) }}
                     </template>
 
                     <template v-else>
