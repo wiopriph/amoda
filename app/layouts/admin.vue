@@ -4,6 +4,11 @@ const localeRoute = useLocaleRoute();
 
 const navItems = computed(() => [
   {
+    label: t('admin.offices'),
+    icon: 'i-lucide-store',
+    to: localeRoute({ name: 'admin-offices' }),
+  },
+  {
     label: t('admin.brands'),
     icon: 'i-lucide-tag',
     to: localeRoute({ name: 'admin-brands' }),
@@ -33,6 +38,7 @@ const { signOut } = useAuth();
   "en": {
     "admin": {
       "orders": "Orders",
+      "offices": "Pickup points",
       "brands": "Brands",
       "categories": "Categories",
       "products": "Products",
@@ -42,6 +48,7 @@ const { signOut } = useAuth();
   "pt": {
     "admin": {
       "orders": "Pedidos",
+      "offices": "Pontos de levantamento",
       "brands": "Brands",
       "categories": "Categories",
       "products": "Products",
