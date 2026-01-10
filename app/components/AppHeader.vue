@@ -136,13 +136,12 @@ const menuItems = computed<NavigationMenuItem[]>(() => topCategories.value.map(c
 
         <NuxtLink
           :to="localeRoute({ name: 'index' })"
-          class="flex items-center gap-2 font-semibold tracking-tight text-lg"
+          class="flex items-center gap-2
+         font-montserrat font-semibold
+         tracking-tight text-[22px]
+         text-gray-900"
         >
-          <UIcon
-            name="i-heroicons-sparkles"
-            class="w-5 h-5 text-primary"
-          />
-          Amoda
+          AMODA
         </NuxtLink>
       </div>
     </template>
