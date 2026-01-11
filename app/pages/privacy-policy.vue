@@ -45,8 +45,7 @@ useHead(() => ({
         "p2": "We collect personal data only during checkout in order to process your order:",
         "items": {
           "name": "Name",
-          "phone": "Phone number",
-          "email": "Email address"
+          "phone": "Phone number"
         }
       },
       "howWeUse": {
@@ -142,8 +141,7 @@ useHead(() => ({
         "p2": "Recolhemos dados pessoais apenas no momento do checkout para processar o seu pedido:",
         "items": {
           "name": "Nome",
-          "phone": "Número de telefone",
-          "email": "Endereço de email"
+          "phone": "Número de telefone"
         }
       },
       "howWeUse": {
@@ -301,10 +299,6 @@ useHead(() => ({
 
               <li>
                 {{ t('sections.dataWeCollect.items.phone') }}
-              </li>
-
-              <li>
-                {{ t('sections.dataWeCollect.items.email') }}
               </li>
             </ul>
           </div>

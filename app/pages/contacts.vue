@@ -28,38 +28,56 @@ const waLink = computed(() => {
   "pt": {
     "contacts": {
       "title": "Contactos",
-      "intro": "Precisa de ajuda com um pedido, ponto de levantamento ou devolução? Fale connosco.",
+      "intro": "Precisa de ajuda com uma reserva, ponto de experimentação ou trocas? Fale connosco.",
       "cards": {
-        "email": { "title": "Email", "desc": "O canal mais rápido para suporte." },
-        "whatsapp": { "title": "WhatsApp", "desc": "Mensagens rápidas sobre pedidos e levantamentos." },
-        "address": { "title": "Endereço", "desc": "Informação legal da empresa." }
+        "email": {
+          "title": "Email",
+          "desc": "Para questões gerais e informação oficial."
+        },
+        "whatsapp": {
+          "title": "WhatsApp",
+          "desc": "Forma mais rápida para confirmar reservas e pontos de experimentação."
+        },
+        "address": {
+          "title": "Endereço",
+          "desc": "Informação legal da empresa."
+        }
       },
       "links": {
-        "pickup": "Ver pontos de levantamento",
-        "returns": "Política de devoluções"
+        "pickup": "Ver pontos para experimentar",
+        "returns": "Política de trocas e devoluções"
       },
       "meta": {
         "title": "Contactos | Amoda",
-        "description": "Contacte a Amoda: email, WhatsApp e informações legais."
+        "description": "Contacte a Amoda: WhatsApp para reservas e confirmação, email para informação oficial e dados legais."
       }
     }
   },
   "en": {
     "contacts": {
       "title": "Contacts",
-      "intro": "Need help with an order, pickup point, or returns? Contact us.",
+      "intro": "Need help with a reservation, try-on point, or exchanges? Contact us.",
       "cards": {
-        "email": { "title": "Email", "desc": "The fastest support channel." },
-        "whatsapp": { "title": "WhatsApp", "desc": "Quick messages about orders and pickup." },
-        "address": { "title": "Address", "desc": "Company legal information." }
+        "email": {
+          "title": "Email",
+          "desc": "For general inquiries and official information."
+        },
+        "whatsapp": {
+          "title": "WhatsApp",
+          "desc": "Fastest way to confirm reservations and try-on points."
+        },
+        "address": {
+          "title": "Address",
+          "desc": "Company legal information."
+        }
       },
       "links": {
-        "pickup": "See pickup points",
-        "returns": "Return policy"
+        "pickup": "See try-on points",
+        "returns": "Exchange & return policy"
       },
       "meta": {
         "title": "Contacts | Amoda",
-        "description": "Contact Amoda: email, WhatsApp and legal information."
+        "description": "Contact Amoda: WhatsApp for reservations and confirmations, email for official information and legal details."
       }
     }
   }

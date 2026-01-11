@@ -13,7 +13,7 @@ type CartItem = {
 };
 
 type Totals = { total: number; currency: string };
-type Contact = { name: string; phone: string; email?: string | null };
+type Contact = { name: string; phone: string; };
 
 function generateOrderNumber() {
   const ymd = new Date().toISOString()

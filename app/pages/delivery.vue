@@ -52,194 +52,194 @@ useHead(() => {
 {
   "pt": {
     "delivery": {
-      "title": "Como comprar na Amoda",
-      "intro": "Compra online e levanta no ponto. Experimenta no local e decide na hora o que vais levar — simples e sem stress.",
+      "title": "Como funciona a reserva na Amoda",
+      "intro": "Reserve online e venha experimentar no ponto. Sem pagamento online — você decide na hora o que levar.",
       "meta": {
-        "title": "Como comprar na Amoda | Pontos de levantamento em Luanda",
-        "description": "Passo a passo: escolher online, levantar no ponto, experimentar e decidir. Endereços e horários dos pontos de levantamento em Luanda."
+        "title": "Como funciona a Amoda | Reservar e experimentar em Luanda",
+        "description": "Passo a passo: escolher, reservar, selecionar o ponto, confirmar no WhatsApp e experimentar. Pontos e horários em Luanda."
       },
       "badges": {
-        "try": "Experimente primeiro",
-        "pickup": "Pontos de levantamento",
-        "fast": "Processo simples"
+        "try": "Reserva grátis",
+        "pickup": "Pontos para experimentar",
+        "fast": "Rápido e simples"
       },
       "value": {
         "title": "Por que isto funciona melhor",
-        "subtitle": "A ideia é simples: você não precisa confiar em fotos. Você verifica no ponto e leva só o que faz sentido.",
+        "subtitle": "Ideia simples: você não depende de fotos. Você vê ao vivo no ponto e leva só o que gostar.",
         "items": [
           {
             "icon": "i-lucide-check-circle",
             "title": "Sem adivinhações",
-            "desc": "Experimente o tamanho e veja o caimento ao vivo. Se não ficar bem, recuse na hora."
+            "desc": "Experimente o tamanho e veja o caimento ao vivo. Se não ficar bem, não leva."
           },
           {
             "icon": "i-lucide-palette",
             "title": "Cor e material reais",
-            "desc": "Veja a cor e o tecido na mão. O que você vê é o que você leva."
+            "desc": "Veja a cor e o tecido na mão. Sem surpresas."
           },
           {
             "icon": "i-lucide-shield-check",
             "title": "Mais confiança",
-            "desc": "Você decide no ponto. Menos risco, menos arrependimento."
+            "desc": "Você decide no ponto. Menos risco e menos arrependimento."
           },
           {
             "icon": "i-lucide-clock",
             "title": "Rápido e prático",
-            "desc": "Escolha online, confirme, levante. Sem conversas longas e sem complicação."
+            "desc": "Escolha, reserve e venha experimentar. Sem complicação."
           }
         ]
       },
       "how": {
         "title": "Como funciona",
         "steps": [
-          { "icon": "i-lucide-search", "title": "Escolha online", "desc": "Navegue pelas categorias e adicione os artigos ao carrinho." },
-          { "icon": "i-lucide-clipboard-check", "title": "Finalize o pedido", "desc": "No checkout, preencha nome, telefone e email." },
-          { "icon": "i-lucide-map-pin", "title": "Selecione o ponto", "desc": "Escolha um ponto de levantamento conveniente." },
-          { "icon": "i-lucide-phone", "title": "Confirmação", "desc": "Entraremos em contacto quando o pedido estiver pronto." },
-          { "icon": "i-lucide-shopping-bag", "title": "Experimente e decida", "desc": "Experimente no ponto e pague apenas o que levar." }
+          { "icon": "i-lucide-search", "title": "Escolha os itens", "desc": "Navegue pelas categorias e adicione os itens que quer experimentar." },
+          { "icon": "i-lucide-clipboard-check", "title": "Faça a reserva", "desc": "Preencha nome e WhatsApp — sem pagamento online." },
+          { "icon": "i-lucide-map-pin", "title": "Selecione o ponto", "desc": "Escolha um ponto de levantamento conveniente para experimentar." },
+          { "icon": "i-lucide-phone", "title": "Confirmação no WhatsApp", "desc": "Entraremos em contacto quando estiver pronto para experimentar." },
+          { "icon": "i-lucide-shirt", "title": "Experimente e decida", "desc": "Experimente no ponto e leve só o que gostar. Sem compromisso." }
         ]
       },
       "pickup": {
-        "title": "Pontos de levantamento",
+        "title": "Pontos para experimentar",
         "desc": "Veja endereços, contactos e horários de funcionamento.",
-        "button": "Ver pontos de levantamento"
+        "button": "Ver pontos"
       },
       "rules": {
         "title": "Regras e detalhes importantes",
         "items": [
           {
             "icon": "i-lucide-calendar-days",
-            "title": "Prazo para levantar",
-            "desc": "O pedido fica disponível por um período limitado. Avisaremos exatamente o prazo no contacto de confirmação."
+            "title": "Prazo da reserva",
+            "desc": "A reserva fica disponível por um período limitado. Avisaremos o prazo no WhatsApp."
           },
           {
             "icon": "i-lucide-phone-call",
-            "title": "Confirmação por contacto",
-            "desc": "Confirmamos quando o pedido estiver pronto e combinamos o melhor horário para você levantar."
+            "title": "Confirmação",
+            "desc": "Confirmamos quando estiver pronto e combinamos o melhor horário para você ir."
           },
           {
             "icon": "i-lucide-shirt",
             "title": "Experimentação no ponto",
-            "desc": "Você pode experimentar e recusar qualquer artigo que não sirva ou não agrade."
+            "desc": "Você pode experimentar e recusar qualquer item que não sirva ou não agrade."
           },
           {
             "icon": "i-lucide-package-check",
-            "title": "Condição do artigo",
-            "desc": "Verifique o artigo no ponto antes de confirmar. Depois de levar, devoluções seguem a política."
+            "title": "Verifique no local",
+            "desc": "Confira os itens no ponto antes de levar."
           },
           {
             "icon": "i-lucide-rotate-ccw",
-            "title": "Devoluções e reembolsos",
-            "desc": "Se você levar e depois mudar de ideia, as regras dependem do tipo de artigo e do estado. Veja os detalhes na política."
+            "title": "Trocas e devoluções",
+            "desc": "Se você levar e depois quiser trocar, as regras dependem do tipo do item e do estado. Veja a política."
           }
         ],
-        "returnLinkText": "Política de Devoluções"
+        "returnLinkText": "Política de Trocas e Devoluções"
       },
       "faq": {
         "title": "Perguntas frequentes",
         "items": [
-          { "q": "Posso experimentar várias peças?", "a": "Sim. Experimente e leve apenas o que quiser." },
-          { "q": "E se nada servir?", "a": "Sem problema — pode recusar no local e não paga nada." },
-          { "q": "Como sei quando posso levantar?", "a": "Entraremos em contacto quando o pedido estiver pronto." },
-          { "q": "Quanto tempo o pedido fica no ponto?", "a": "Guardamos por um período limitado. Os detalhes são informados no contacto de confirmação." },
-          { "q": "Onde vejo os pontos e horários?", "a": "Na página de pontos de levantamento (endereços, contactos e horários)." }
+          { "q": "Posso experimentar várias peças?", "a": "Sim. Reserve quantas quiser e leve apenas o que gostar." },
+          { "q": "E se nada servir?", "a": "Sem problema — você pode recusar no local e não leva nada." },
+          { "q": "Como sei quando posso ir?", "a": "Entraremos em contacto no WhatsApp quando estiver pronto para experimentar." },
+          { "q": "Quanto tempo a reserva fica no ponto?", "a": "Guardamos por um período limitado. Informamos o prazo no WhatsApp." },
+          { "q": "Onde vejo os pontos e horários?", "a": "Na página de pontos (endereços, contactos e horários)." }
         ]
       }
     }
   },
   "en": {
     "delivery": {
-      "title": "How to shop on Amoda",
-      "intro": "Shop online and collect at a pickup point. Try on at the location and decide on the spot what you keep — simple and stress-free.",
+      "title": "How Amoda reservation works",
+      "intro": "Reserve online and come try on at the point. No online payment — decide on the spot what you keep.",
       "meta": {
-        "title": "How to shop on Amoda | Pickup points in Luanda",
-        "description": "Step-by-step: choose online, collect at a pickup point, try on and decide. Addresses and opening hours for pickup points in Luanda."
+        "title": "How Amoda works | Reserve & try on in Luanda",
+        "description": "Step-by-step: choose, reserve, pick a point, WhatsApp confirmation, and try on. Points and opening hours in Luanda."
       },
       "badges": {
-        "try": "Try first",
-        "pickup": "Pickup points",
+        "try": "Free reservation",
+        "pickup": "Try-on points",
         "fast": "Simple process"
       },
       "value": {
         "title": "Why this works better",
-        "subtitle": "Simple idea: you don’t have to trust photos. You check at pickup and keep only what makes sense.",
+        "subtitle": "Simple idea: you don’t rely on photos. You check at the point and keep only what you like.",
         "items": [
           {
             "icon": "i-lucide-check-circle",
             "title": "No guessing",
-            "desc": "Try the size and see the fit in real life. If it’s not right, decline on the spot."
+            "desc": "Try the size and see the fit in real life. If it’s not right, don’t take it."
           },
           {
             "icon": "i-lucide-palette",
             "title": "Real color & material",
-            "desc": "See the color and feel the fabric. What you see is what you get."
+            "desc": "See the color and feel the fabric. No surprises."
           },
           {
             "icon": "i-lucide-shield-check",
             "title": "More confidence",
-            "desc": "You decide at pickup. Less risk, less regret."
+            "desc": "You decide at the point. Less risk, less regret."
           },
           {
             "icon": "i-lucide-clock",
             "title": "Fast and practical",
-            "desc": "Choose online, confirm, collect. No long back-and-forth, no hassle."
+            "desc": "Choose, reserve, and come try on. No hassle."
           }
         ]
       },
       "how": {
         "title": "How it works",
         "steps": [
-          { "icon": "i-lucide-search", "title": "Choose online", "desc": "Browse categories and add items to your cart." },
-          { "icon": "i-lucide-clipboard-check", "title": "Checkout", "desc": "At checkout, enter your name, phone number and email." },
-          { "icon": "i-lucide-map-pin", "title": "Select pickup point", "desc": "Choose a convenient pickup point." },
-          { "icon": "i-lucide-phone", "title": "Confirmation", "desc": "We’ll contact you when your order is ready." },
-          { "icon": "i-lucide-shopping-bag", "title": "Try on & decide", "desc": "Try on at pickup and pay only for what you keep." }
+          { "icon": "i-lucide-search", "title": "Choose items", "desc": "Browse categories and add the items you want to try on." },
+          { "icon": "i-lucide-clipboard-check", "title": "Place a reservation", "desc": "Enter your name and WhatsApp — no online payment." },
+          { "icon": "i-lucide-map-pin", "title": "Select a point", "desc": "Choose a convenient pickup point to try on." },
+          { "icon": "i-lucide-phone", "title": "WhatsApp confirmation", "desc": "We’ll message you when it’s ready to try on." },
+          { "icon": "i-lucide-shirt", "title": "Try on & decide", "desc": "Try on at the point and take only what you like. No obligation." }
         ]
       },
       "pickup": {
-        "title": "Pickup points",
+        "title": "Try-on points",
         "desc": "See addresses, contacts, and opening hours.",
-        "button": "See pickup points"
+        "button": "View points"
       },
       "rules": {
         "title": "Important rules & details",
         "items": [
           {
             "icon": "i-lucide-calendar-days",
-            "title": "Pickup window",
-            "desc": "Orders are held for a limited time. We’ll tell you the exact window during confirmation."
+            "title": "Reservation window",
+            "desc": "Reservations are held for a limited time. We’ll share the exact window on WhatsApp."
           },
           {
             "icon": "i-lucide-phone-call",
-            "title": "Confirmation contact",
-            "desc": "We confirm when the order is ready and help coordinate the best pickup time."
+            "title": "Confirmation",
+            "desc": "We confirm when it’s ready and help coordinate the best time to come."
           },
           {
             "icon": "i-lucide-shirt",
-            "title": "Try-on at pickup",
+            "title": "Try-on at the point",
             "desc": "You can try on and decline any item that doesn’t fit or you don’t like."
           },
           {
             "icon": "i-lucide-package-check",
-            "title": "Check item condition",
-            "desc": "Inspect items at pickup before confirming. After collection, returns follow the policy."
+            "title": "Check on-site",
+            "desc": "Inspect items at the point before taking them."
           },
           {
             "icon": "i-lucide-rotate-ccw",
-            "title": "Returns & refunds",
-            "desc": "If you collect and later change your mind, rules depend on item type and condition. See details in the policy."
+            "title": "Exchanges & returns",
+            "desc": "If you take items and later want to exchange, rules depend on item type and condition. See the policy."
           }
         ],
-        "returnLinkText": "Return Policy"
+        "returnLinkText": "Exchange & Return Policy"
       },
       "faq": {
         "title": "FAQ",
         "items": [
-          { "q": "Can I try multiple items?", "a": "Yes. Try on and keep only what you want." },
-          { "q": "What if nothing fits?", "a": "No problem — you can decline on-site and pay nothing." },
-          { "q": "How do I know when I can pick up?", "a": "We’ll contact you when your order is ready." },
-          { "q": "How long is my order held?", "a": "Orders are held for a limited time. Details are shared during confirmation." },
-          { "q": "Where can I see locations and hours?", "a": "On the pickup points page (addresses, contacts, and opening hours)." }
+          { "q": "Can I try multiple items?", "a": "Yes. Reserve as many as you want and keep only what you like." },
+          { "q": "What if nothing fits?", "a": "No problem — you can decline on-site and take nothing." },
+          { "q": "How do I know when I can come?", "a": "We’ll message you on WhatsApp when it’s ready to try on." },
+          { "q": "How long is my reservation held?", "a": "Reservations are held for a limited time. We’ll share the exact window on WhatsApp." },
+          { "q": "Where can I see locations and hours?", "a": "On the points page (addresses, contacts, and opening hours)." }
         ]
       }
     }

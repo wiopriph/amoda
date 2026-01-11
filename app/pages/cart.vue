@@ -58,31 +58,31 @@ const goCheckout = () => {
 {
   "pt": {
     "cart": {
-      "title": "Carrinho de compras",
-      "empty": "O seu carrinho está vazio. Explore as categorias e adicione roupas, sapatos ou acessórios para continuar a sua compra online.",
-      "priceEach": "Preço por unidade",
+      "title": "A sua seleção",
+      "empty": "Ainda não escolheu nada. Adicione os itens e reserve para experimentar — sem pagamento.",
+      "priceEach": "Preço por item",
       "remove": "Remover",
       "total": "Total",
-      "checkout": "Finalizar compra",
-      "delivery": "🚚 Entrega gratuita em Luanda — sem pagamento antecipado. Encomende online e pague só ao levantar.",
+      "checkout": "Reservar para experimentar",
+      "delivery": "✅ Sem pagamento online. Reserve agora e venha experimentar no ponto de levantamento. Você decide na hora se vai levar.",
       "meta": {
-        "title": "Carrinho | Amoda Angola",
-        "description": "Revise os seus produtos selecionados antes de concluir a compra online. Entrega gratuita e compra segura em Luanda."
+        "title": "A sua seleção | Amoda Angola",
+        "description": "Escolha os itens e faça uma reserva grátis para experimentar no ponto. Sem pagamento online."
       }
     }
   },
   "en": {
     "cart": {
-      "title": "Shopping Cart",
-      "empty": "Your cart is empty. Browse categories and add clothes, shoes or accessories to start your online shopping.",
+      "title": "Your selection",
+      "empty": "You haven’t picked anything yet. Add items and reserve to try on — no payment.",
       "priceEach": "Price per item",
       "remove": "Remove",
       "total": "Total",
-      "checkout": "Proceed to checkout",
-      "delivery": "🚚 Free delivery in Luanda — no prepayment. Order online and pay only when you pick up.",
+      "checkout": "Reserve to try on",
+      "delivery": "✅ No online payment. Reserve now and come try on at the pickup point. You decide on the spot if you want to take it.",
       "meta": {
-        "title": "Cart | Amoda Angola",
-        "description": "Review your selected products before completing your online order. Free delivery and secure checkout in Luanda."
+        "title": "Your selection | Amoda Angola",
+        "description": "Pick items and place a free reservation to try on at the pickup point. No online payment."
       }
     }
   }

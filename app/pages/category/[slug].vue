@@ -179,18 +179,18 @@ useHead(() => ({
 {
   "pt": {
     "category": {
-      "empty": "Não há produtos nesta categoria ainda.",
-      "emptyDescription": "Tente procurar em outras categorias - temos muitas opções disponíveis.",
-      "seoTitle": "{category} | Moda online em Angola",
-      "seoDescription": "Compre {category} na Amoda: roupas, calçado e acessórios com entrega gratuita em Luanda. Encomende online, experimente no ponto e pague apenas se gostar."
+      "empty": "Ainda não há itens nesta categoria.",
+      "emptyDescription": "Veja outras categorias ou use a pesquisa — você pode reservar e experimentar no ponto (sem pagamento online).",
+      "seoTitle": "{category} | Reserve e experimente em Angola",
+      "seoDescription": "Veja {category} na Amoda: roupa, calçado e acessórios. Reserve online sem pagamento, escolha o ponto e venha experimentar. Você decide na hora."
     }
   },
   "en": {
     "category": {
-      "empty": "No products found in this category yet.",
-      "emptyDescription": "Try browsing other categories - we have plenty of options available.",
-      "seoTitle": "{category} | Online fashion in Angola",
-      "seoDescription": "Shop {category} at Amoda: apparel, shoes and accessories with free delivery in Luanda. Order online, try at pickup and pay only if you love it."
+      "empty": "No items in this category yet.",
+      "emptyDescription": "Browse other categories or use search — you can reserve and try on at the point (no online payment).",
+      "seoTitle": "{category} | Reserve & try on in Angola",
+      "seoDescription": "Explore {category} at Amoda: apparel, shoes and accessories. Reserve online with no payment, choose a point, and come try on. Decide on the spot."
     }
   }
 }

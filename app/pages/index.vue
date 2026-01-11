@@ -124,12 +124,12 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
 {
   "pt": {
     "home": {
-      "title": "Amoda - moda em Angola com prova antes de pagar",
-      "desc": "Loja online de roupa feminina em Angola. Encomende online, receba no ponto de entrega, experimente e pague apenas pelo que decidir ficar.",
+      "title": "Amoda — reserve e experimente no ponto",
+      "desc": "Moda feminina em Angola. Reserve online sem pagamento, escolha o ponto e venha experimentar. Você decide na hora se quer levar.",
       "hero": {
         "title": "Moda feminina em Angola com prova antes de pagar",
-        "subtitle": "Escolha online, receba no ponto de entrega, experimente e pague só se gostar.",
-        "ctaPrimary": "Começar a comprar",
+        "subtitle": "Sem pagamento online. Escolha os itens, reserve e experimente — você decide na hora.",
+        "ctaPrimary": "Começar a escolher",
         "support": "Suporte no WhatsApp"
       },
       "how": {
@@ -137,43 +137,43 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         "steps": [
           {
             "icon": "i-lucide-shopping-bag",
-            "title": "Escolha online",
-            "desc": "Escolha roupas femininas no site da Amoda. Veja fotos reais, preços e tamanhos disponíveis. Não é necessário criar conta."
+            "title": "Escolha e reserve",
+            "desc": "Escolha as peças e o tamanho. Reserve em segundos — sem conta e sem pagamento."
           },
           {
             "icon": "i-lucide-map-pin",
-            "title": "Receba no ponto de entrega",
-            "desc": "Após o pedido, o produto é enviado para um ponto de entrega. Você será avisada quando o pedido estiver pronto para retirada."
+            "title": "Escolha o ponto",
+            "desc": "Selecione o ponto de levantamento. Vamos preparar os itens para você experimentar."
           },
           {
             "icon": "i-lucide-shirt",
-            "title": "Experimente antes de pagar",
-            "desc": "No ponto de entrega, experimente a roupa. Se gostar e servir - paga. Se não servir ou não gostar - não paga nada."
+            "title": "Experimente e decida",
+            "desc": "Experimente no ponto e leve só o que gostar. Sem compromisso."
           }
         ]
       },
       "showcase": {
         "title": "Novidades",
-        "ctaAll": "Ver todos os produtos"
+        "ctaAll": "Ver catálogo"
       },
       "seo": {
         "title": "Amoda - loja online de roupa feminina em Angola",
         "text": [
-          "A Amoda é uma loja online de roupa feminina em Angola.",
-          "Encomende online, receba no ponto de entrega, experimente e pague apenas pelo que decidir ficar.",
-          "Se tiver dúvidas, fale conosco no WhatsApp - ajudamos rapidamente."
+          "A Amoda ajuda você a escolher roupa online e experimentar no ponto.",
+          "Reserve sem pagamento online: selecione os itens, escolha o ponto e venha experimentar.",
+          "Dúvidas? Fale connosco no WhatsApp — respondemos rápido."
         ]
       }
     }
   },
   "en": {
     "home": {
-      "title": "Amoda - women’s fashion in Angola, try before you pay",
-      "desc": "Online store for women’s clothing in Angola. Order online, receive at a pickup point, try on and pay only for what you keep.",
+      "title": "Amoda — reserve and try on at the point",
+      "desc": "Women’s fashion in Angola. Reserve online with no payment, choose a pickup point, and come try on. You decide on the spot.",
       "hero": {
         "title": "Women’s fashion in Angola - try before you pay",
-        "subtitle": "Order online, receive at a pickup point, try on and pay only if it fits.",
-        "ctaPrimary": "Start shopping",
+        "subtitle": "No online payment. Pick items, reserve, and try on — decide on the spot.",
+        "ctaPrimary": "Start choosing",
         "support": "WhatsApp support"
       },
       "how": {
@@ -181,31 +181,31 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         "steps": [
           {
             "icon": "i-lucide-shopping-bag",
-            "title": "Choose online",
-            "desc": "Browse women’s clothing on Amoda. View real photos, prices and available sizes. No account required."
+            "title": "Choose & reserve",
+            "desc": "Pick items and size. Reserve in seconds — no account, no payment."
           },
           {
             "icon": "i-lucide-map-pin",
-            "title": "Pickup point delivery",
-            "desc": "After placing an order, the item is delivered to a pickup point. You’ll be notified when it’s ready."
+            "title": "Choose the point",
+            "desc": "Select a pickup point. We’ll prepare the items for fitting."
           },
           {
             "icon": "i-lucide-shirt",
-            "title": "Try before you pay",
-            "desc": "At the pickup point, try the item on. Like it and it fits - pay. Don’t like it - return it and pay nothing."
+            "title": "Try on & decide",
+            "desc": "Try on at the point and take only what you like. No obligation."
           }
         ]
       },
       "showcase": {
         "title": "New arrivals",
-        "ctaAll": "View all products"
+        "ctaAll": "View catalog"
       },
       "seo": {
         "title": "Amoda - online women’s clothing store in Angola",
         "text": [
-          "Amoda is an online store for women’s clothing in Angola.",
-          "Order online, receive at a pickup point, try on, and pay only for what you keep.",
-          "Questions? Message us on WhatsApp - we respond quickly."
+          "Amoda helps you choose online and try on at the pickup point.",
+          "Reserve with no online payment: select items, choose a point, and come try on.",
+          "Questions? Message us on WhatsApp — we respond quickly."
         ]
       }
     }

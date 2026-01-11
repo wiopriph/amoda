@@ -13,7 +13,6 @@ const order = computed(() => orderData.value as any || null);
 const formatAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
 const pageTitle = computed(() => `${t('order.title')} №${route.params.number} | Amoda`);
-
 const pageDescription = computed(() => t('order.meta.description', { number: String(route.params.number) }));
 
 useHead(() => ({
@@ -31,55 +30,55 @@ useHead(() => ({
 {
   "pt": {
     "order": {
-      "title": "Encomenda",
+      "title": "Reserva",
       "loading": "A carregar...",
-      "notFound": "Encomenda não encontrada",
-      "summary": "Resumo da encomenda",
+      "notFound": "Reserva não encontrada",
+      "summary": "Itens reservados",
       "contact": "Contacto",
       "pickup": {
-        "title": "Ponto de levantamento",
-        "notSelected": "O ponto de levantamento não foi selecionado."
+        "title": "Ponto para experimentar",
+        "notSelected": "O ponto não foi selecionado."
       },
-      "saveNotice": "Guarde o número da sua encomenda para acompanhar o levantamento no ponto de entrega. A Amoda irá notificá-lo quando estiver pronta para recolha.",
+      "saveNotice": "Guarde o número da sua reserva. Vamos confirmar no WhatsApp quando estiver pronto para experimentar no ponto.",
       "colItem": "Artigo",
-      "colPrice": "Preço",
+      "colPrice": "Valor",
       "colQty": "Qtd.",
-      "colSum": "Total",
+      "colSum": "Subtotal",
       "size": "Tamanho",
       "color": "Cor",
       "total": "Total",
       "meta": {
-        "description": "Veja os detalhes e o estado da sua encomenda nº {number} — contacto, artigos e total. A Amoda Angola simplifica as suas compras online."
+        "description": "Detalhes da sua reserva nº {number} — contacto, ponto e itens reservados. Sem pagamento online."
       },
       "seo": {
-        "h1": "Detalhes da sua encomenda nº {number}"
+        "h1": "Reserva nº {number}"
       }
     }
   },
   "en": {
     "order": {
-      "title": "Order",
+      "title": "Reservation",
       "loading": "Loading...",
-      "notFound": "Order not found",
-      "summary": "Order summary",
+      "notFound": "Reservation not found",
+      "summary": "Reserved items",
       "contact": "Contact",
       "pickup": {
-        "title": "Pickup point",
+        "title": "Try-on point",
         "notSelected": "Pickup point was not selected."
       },
-      "saveNotice": "Save your order number to track pickup status. Amoda will contact you once your order is ready.",
+      "saveNotice": "Save your reservation number. We’ll confirm on WhatsApp when it’s ready to try on at the point.",
       "colItem": "Item",
-      "colPrice": "Price",
+      "colPrice": "Value",
       "colQty": "Qty",
-      "colSum": "Total",
+      "colSum": "Subtotal",
       "size": "Size",
       "color": "Color",
       "total": "Total",
       "meta": {
-        "description": "View details and status of your order No. {number} — contact info, items and total. Amoda Angola makes online shopping simple."
+        "description": "Details of your reservation No. {number} — contact, point, and reserved items. No online payment."
       },
       "seo": {
-        "h1": "Order details No. {number}"
+        "h1": "Reservation No. {number}"
       }
     }
   }
@@ -127,13 +126,6 @@ useHead(() => ({
 
               <p class="font-semibold">
                 {{ order.guestContact?.name }}
-              </p>
-
-              <p
-                v-if="order.guestContact?.email"
-                class="text-sm text-gray-500 break-all"
-              >
-                {{ order.guestContact.email }}
               </p>
 
               <a

@@ -356,116 +356,116 @@ useHead(() => ({
 {
   "pt": {
     "offices": {
-      "title": "Pontos de levantamento"
+      "title": "Pontos para experimentar"
     },
     "product": {
       "price": "Preço",
       "size": "Tamanho",
       "color": "Cor",
-      "add": "Adicionar ao carrinho",
+      "add": "Adicionar",
       "description": "Descrição",
       "brand": "Marca",
       "meta": {
-        "titleSuffix": "Amoda Angola — moda online",
-        "description": "Compre moda na Amoda. Receba no ponto de levantamento, experimente e pague apenas pelo que decidir ficar."
+        "titleSuffix": "Amoda Angola",
+        "description": "Reserve grátis na Amoda: escolha o tamanho, confirme no WhatsApp e venha experimentar no ponto. Sem pagamento online."
       },
       "ui": {
-        "chooseSize": "Selecione um tamanho para continuar",
-        "howReceiveTitle": "Como você recebe",
+        "chooseSize": "Escolha um tamanho para reservar",
+        "howReceiveTitle": "Como funciona",
         "pickupCta": "Ver todos os pontos",
-        "supportCta": "Falar no WhatsApp",
-        "ctaNote": "Prova no ponto • Pague só se ficar",
-        "addToCart": "Adicionar ao carrinho",
-        "addToCartShort": "Adicionar",
-        "inCart": "No carrinho",
-        "inCartShort": "no carrinho {qty}",
+        "supportCta": "Perguntar no WhatsApp",
+        "ctaNote": "Reserva grátis • Prova no ponto • Você decide na hora",
+        "addToCart": "Reservar para experimentar",
+        "addToCartShort": "Reservar",
+        "inCart": "Reservado",
+        "inCartShort": "reservado {qty}",
         "checkout": "Finalizar",
-        "continueShopping": "Continuar compras"
+        "continueShopping": "Continuar"
       },
       "cartNudge": {
-        "title": "Adicionado ao carrinho",
-        "subtitle": "{qty} un. no carrinho",
-        "checkout": "Finalizar pedido",
-        "continue": "Continuar compras"
+        "title": "Reservado",
+        "subtitle": "{qty} un. reservada(s)",
+        "checkout": "Ver reserva",
+        "continue": "Continuar"
       },
       "howReceive": {
         "items": [
           {
-            "title": "Ponto de levantamento",
-            "desc": "Receba e experimente no local."
+            "title": "Reserve em 10 segundos",
+            "desc": "Escolha cor e tamanho e reserve — sem pagamento."
           },
           {
-            "title": "Prova antes de pagar",
-            "desc": "Pague apenas pelo que decidir ficar."
+            "title": "Experimente no ponto",
+            "desc": "Nós preparamos os itens para você experimentar."
           },
           {
-            "title": "Suporte no WhatsApp",
-            "desc": "Ajudamos rápido se tiver dúvidas."
+            "title": "Você decide na hora",
+            "desc": "Leve só o que gostar. Sem compromisso."
           }
         ]
       },
       "seo": {
-        "imageMainAlt": "{title} — foto principal do produto",
+        "imageMainAlt": "{title} — imagem principal",
         "thumbAlt": "{title} — foto {index}",
         "variantAlt": "{title} — cor {color}"
       },
       "reco": {
-        "title": "Talvez você também goste"
+        "title": "Você também pode gostar"
       }
     }
   },
   "en": {
     "offices": {
-      "title": "Pickup points"
+      "title": "Try-on points"
     },
     "product": {
       "price": "Price",
       "size": "Size",
       "color": "Color",
-      "add": "Add to cart",
+      "add": "Add",
       "description": "Description",
       "brand": "Brand",
       "meta": {
-        "titleSuffix": "Amoda Angola — online fashion",
-        "description": "Shop fashion at Amoda. Receive at a pickup point, try on, and pay only for what you keep."
+        "titleSuffix": "Amoda Angola",
+        "description": "Free reservation at Amoda: pick your size, confirm on WhatsApp, and come try on at the pickup point. No online payment."
       },
       "ui": {
-        "chooseSize": "Select a size to continue",
-        "howReceiveTitle": "How you receive it",
-        "pickupCta": "View all pickup points",
-        "supportCta": "Chat on WhatsApp",
-        "ctaNote": "Try at pickup • Pay only if you keep",
-        "addToCart": "Add to cart",
-        "addToCartShort": "Add",
-        "inCart": "In cart",
-        "inCartShort": "in cart {qty}",
+        "chooseSize": "Choose a size to reserve",
+        "howReceiveTitle": "How it works",
+        "pickupCta": "View all points",
+        "supportCta": "Ask on WhatsApp",
+        "ctaNote": "Free reservation • Try at the point • You decide on the spot",
+        "addToCart": "Reserve to try on",
+        "addToCartShort": "Reserve",
+        "inCart": "Reserved",
+        "inCartShort": "reserved {qty}",
         "checkout": "Checkout",
-        "continueShopping": "Continue shopping"
+        "continueShopping": "Continue"
       },
       "cartNudge": {
-        "title": "Added to cart",
-        "subtitle": "{qty} item(s) in cart",
-        "checkout": "Checkout",
-        "continue": "Continue shopping"
+        "title": "Reserved",
+        "subtitle": "{qty} item(s) reserved",
+        "checkout": "View reservation",
+        "continue": "Continue"
       },
       "howReceive": {
         "items": [
           {
-            "title": "Pickup point",
-            "desc": "Receive and try on at the location."
+            "title": "Reserve in 10 seconds",
+            "desc": "Pick color and size and reserve — no payment."
           },
           {
-            "title": "Try before you pay",
-            "desc": "Pay only for what you keep."
+            "title": "Try on at the point",
+            "desc": "We’ll prepare the items for fitting."
           },
           {
-            "title": "WhatsApp support",
-            "desc": "Fast help if you have questions."
+            "title": "Decide on the spot",
+            "desc": "Take only what you like. No obligation."
           }
         ]
       },
       "seo": {
-        "imageMainAlt": "{title} — main product image",
+        "imageMainAlt": "{title} — main image",
         "thumbAlt": "{title} — photo {index}",
         "variantAlt": "{title} — color {color}"
       },

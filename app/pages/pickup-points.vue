@@ -53,8 +53,8 @@ const formatRanges = (ranges?: [string, string][]) => {
       "hours": "Horário de funcionamento",
       "closed": "Fechado",
       "meta": {
-        "title": "Pontos de levantamento Amoda Angola — recolha gratuita de encomendas",
-        "description": "Encontre o ponto de levantamento Amoda mais perto de si em Luanda e Soyo. Horário de funcionamento, morada e contacto para recolher as suas encomendas com segurança."
+        "title": "Pontos de levantamento Amoda em Luanda",
+        "description": "Encontre o ponto de levantamento Amoda em Luanda. Morada, horário e contacto. Reserve online, experimente no ponto e pague apenas se ficar."
       },
       "days": {
         "mon": "Seg",
@@ -75,8 +75,8 @@ const formatRanges = (ranges?: [string, string][]) => {
       "hours": "Opening hours",
       "closed": "Closed",
       "meta": {
-        "title": "Amoda Angola pickup points — free order collection",
-        "description": "Find the nearest Amoda pickup point in Luanda and Soyo. Opening hours, address and contact information to collect your orders safely."
+        "title": "Amoda pickup points in Luanda",
+        "description": "Find Amoda pickup points in Luanda: address, hours and contact. Reserve online, try on at pickup, and pay only if you keep."
       },
       "days": {
         "mon": "Mon",
