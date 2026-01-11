@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { CONTACT_EMAIL, CONTACT_PHONE, COMPANY_ADDRESS } from '~/constants/contacts';
+import {
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  COMPANY_ADDRESS,
+  FACEBOOK_LINK,
+} from '~/constants/contacts';
 
 
 definePageMeta({ name: 'contacts' });
@@ -38,6 +43,10 @@ const waLink = computed(() => {
           "title": "WhatsApp",
           "desc": "Forma mais rápida para confirmar reservas e pontos de experimentação."
         },
+        "facebook": {
+          "title": "Facebook",
+          "desc": "Novidades, coleções e contacto direto por mensagem."
+        },
         "address": {
           "title": "Endereço",
           "desc": "Informação legal da empresa."
@@ -49,7 +58,7 @@ const waLink = computed(() => {
       },
       "meta": {
         "title": "Contactos | Amoda",
-        "description": "Contacte a Amoda: WhatsApp para reservas e confirmação, email para informação oficial e dados legais."
+        "description": "Contacte a Amoda: WhatsApp e Facebook para reservas e confirmação, email para informação oficial."
       }
     }
   },
@@ -66,6 +75,10 @@ const waLink = computed(() => {
           "title": "WhatsApp",
           "desc": "Fastest way to confirm reservations and try-on points."
         },
+        "facebook": {
+          "title": "Facebook",
+          "desc": "Updates, collections, and direct messages."
+        },
         "address": {
           "title": "Address",
           "desc": "Company legal information."
@@ -77,7 +90,7 @@ const waLink = computed(() => {
       },
       "meta": {
         "title": "Contacts | Amoda",
-        "description": "Contact Amoda: WhatsApp for reservations and confirmations, email for official information and legal details."
+        "description": "Contact Amoda: WhatsApp and Facebook for reservations and confirmation, email for official information."
       }
     }
   }
@@ -130,6 +143,27 @@ const waLink = computed(() => {
             rel="noreferrer"
           >
             +{{ CONTACT_PHONE }}
+          </a>
+        </UCard>
+
+        <UCard>
+          <template #header>
+            <div class="font-semibold">
+              {{ t('contacts.cards.facebook.title') }}
+            </div>
+
+            <div class="text-sm text-gray-600">
+              {{ t('contacts.cards.facebook.desc') }}
+            </div>
+          </template>
+
+          <a
+            class="text-primary underline underline-offset-4"
+            :href="FACEBOOK_LINK"
+            target="_blank"
+            rel="noreferrer"
+          >
+            facebook.com/amoda.ao
           </a>
         </UCard>
 

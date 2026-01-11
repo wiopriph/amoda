@@ -70,7 +70,7 @@ const items = computed(() => [
       :items="items"
       variant="link"
       :ui="{
-        list: 'flex flex-wrap md:flex-nowrap items-center gap-x-4 gap-y-2',
+        list: 'flex flex-wrap md:flex-nowrap items-center justify-center gap-x-4 gap-y-2',
         item: 'shrink min-w-0',
         link: 'whitespace-normal md:whitespace-nowrap break-words'
       }"

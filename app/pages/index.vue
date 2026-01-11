@@ -314,7 +314,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         title: 'text-md font-semibold'
       }"
     >
-      <div class="prose prose-sm sm:prose-base max-w-none text-gray-700">
+      <div class="prose prose-sm sm:prose-base max-w-none">
         <p
           v-for="(p, i) in seoParagraphs"
           :key="i"
