@@ -50,10 +50,9 @@ useHead(() => ({
         "items": {
           "name": "Name",
           "phone": "Phone number",
-          "email": "Email address",
           "pickup": "Pickup point selection (if available)",
           "truthful": "Provide accurate and current information",
-          "ownContact": "Use your own phone number and email address"
+          "ownContact": "Use your own phone number"
         },
         "note": "Amoda is not responsible for inability to fulfill an order due to incorrect contact information."
       },
@@ -161,10 +160,9 @@ useHead(() => ({
         "items": {
           "name": "Nome",
           "phone": "Número de telefone",
-          "email": "Endereço de email",
           "pickup": "Seleção do ponto de levantamento (se disponível)",
           "truthful": "Fornecer informações corretas e atualizadas",
-          "ownContact": "Utilizar o seu próprio número de telefone e email"
+          "ownContact": "Utilizar o seu próprio número de telefone"
         },
         "note": "A Amoda não se responsabiliza pela impossibilidade de cumprir um pedido devido a contactos incorretos."
       },
@@ -327,10 +325,6 @@ useHead(() => ({
 
               <li>
                 {{ t('sections.order.items.phone') }}
-              </li>
-
-              <li>
-                {{ t('sections.order.items.email') }}
               </li>
 
               <li>

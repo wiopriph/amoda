@@ -47,7 +47,7 @@ const officeItems = computed<SelectMenuItem[]>(() =>
 const form = reactive({
   name: '',
   phone: '',
-  pickupOfficeId: null as number | null,
+  pickupOfficeId: 2, // Talatona
 });
 
 const pending = ref(false);
