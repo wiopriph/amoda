@@ -215,7 +215,52 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
 
 <template>
   <UPage>
-    <UPageBody>
+    <UPageBody class="mt-2">
+      <UPageSection
+        :title="t('home.showcase.title')"
+        :ui="{
+          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
+        }"
+      >
+        <div
+          v-if="error"
+          class="text-sm text-red-600"
+        >
+          Error loading products
+        </div>
+
+        <UBlogPosts
+          v-else
+          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+        >
+          <UBlogPost
+            v-for="product in items"
+            :key="product.id"
+            :title="product.title"
+            :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
+            :image="product.image || 'placeholder.webp'"
+            :to="localeRoute({ name: 'product-slug', params: { slug: product.slug } })"
+            :ui="{
+              header: 'aspect-[4/5] object-cover',
+              body: 'sm:p-3',
+              title: 'line-clamp-2 overflow-hidden'
+            }"
+            variant="outline"
+            @click="sendSelectProductEvent(product)"
+          />
+        </UBlogPosts>
+
+        <div class="mt-6 flex justify-center">
+          <UButton
+            size="lg"
+            variant="soft"
+            :to="startShoppingTo"
+          >
+            {{ t('home.showcase.ctaAll') }}
+          </UButton>
+        </div>
+      </UPageSection>
+
       <UPageCTA
         :links="headerLinks"
         variant="soft"
@@ -262,66 +307,21 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
       </UPageSection>
 
       <UPageSection
-        :title="t('home.showcase.title')"
+        :title="t('home.seo.title')"
         :ui="{
-          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8'
+          container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8',
+          title: 'text-md font-semibold'
         }"
       >
-        <div
-          v-if="error"
-          class="text-sm text-red-600"
-        >
-          Error loading products
-        </div>
-
-        <UBlogPosts
-          v-else
-          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
-        >
-          <UBlogPost
-            v-for="product in items"
-            :key="product.id"
-            :title="product.title"
-            :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
-            :image="product.image || 'placeholder.webp'"
-            :to="localeRoute({ name: 'product-slug', params: { slug: product.slug } })"
-            :ui="{
-              header: 'aspect-[4/5] object-cover',
-              body: 'sm:p-3',
-              title: 'line-clamp-2 overflow-hidden'
-            }"
-            variant="outline"
-            @click="sendSelectProductEvent(product)"
+        <div class="prose prose-sm sm:prose-base max-w-none">
+          <p
+            v-for="(p, i) in seoParagraphs"
+            :key="i"
+            class="text-center space-y-3"
+            v-text="rt(p)"
           />
-        </UBlogPosts>
-
-        <div class="mt-6 flex justify-center">
-          <UButton
-            size="lg"
-            variant="soft"
-            :to="startShoppingTo"
-          >
-            {{ t('home.showcase.ctaAll') }}
-          </UButton>
         </div>
       </UPageSection>
     </UPageBody>
-
-    <UPageSection
-      :title="t('home.seo.title')"
-      :ui="{
-        container: 'w-full max-w-(--ui-container) mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:grid py-8 sm:py-10 lg:py-12 gap-6 sm:gap-8',
-        title: 'text-md font-semibold'
-      }"
-    >
-      <div class="prose prose-sm sm:prose-base max-w-none">
-        <p
-          v-for="(p, i) in seoParagraphs"
-          :key="i"
-          class="text-center space-y-3"
-          v-text="rt(p)"
-        />
-      </div>
-    </UPageSection>
   </UPage>
 </template>
