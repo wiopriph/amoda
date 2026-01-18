@@ -60,6 +60,7 @@ const menuItems = computed<NavigationMenuItem[]>(() => topCategories.value.map(c
     <template #left>
       <div class="flex items-center gap-1">
         <UButton
+          v-if="false"
           class="md:hidden -ml-1"
           variant="ghost"
           color="neutral"
