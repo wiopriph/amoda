@@ -1,4 +1,5 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
+import { notifyOrderToTelegram } from '~~/server/utils/notifyOrderToTelegram';
 
 
 type CartItem = {
@@ -90,7 +91,7 @@ export default defineEventHandler(async (event) => {
       totals: body.totals,
       pickup_office_id: pickupOfficeId,
     })
-    .select('id, number')
+    .select('id, number, created_at')
     .single();
 
   if (orderErr || !orderRow) {
@@ -132,16 +133,27 @@ export default defineEventHandler(async (event) => {
     };
   });
 
-  // --- вставляем позиции; при ошибке удаляем заказ (простой откат для MVP)
-  const { error: itemsErr } = await supabase.from('order_items')
+  const { error: itemsErr } = await supabase
+    .from('order_items')
     .insert(itemRows);
 
   if (itemsErr) {
-    await supabase.from('orders')
+    await supabase
+      .from('orders')
       .delete()
       .eq('id', orderRow.id);
 
     throw createError({ statusCode: 500, statusMessage: itemsErr.message });
+  }
+
+  try {
+    await notifyOrderToTelegram(event, {
+      id: orderRow.id,
+      number: orderRow.number,
+      createdAt: orderRow.created_at,
+    });
+  } catch (error) {
+    console.error('Failed to send telegram notifications', error);
   }
 
   setResponseStatus(event, 201);
