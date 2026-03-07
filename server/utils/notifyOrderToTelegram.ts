@@ -23,12 +23,6 @@ export async function notifyOrderToTelegram(
     throw new Error(error.message);
   }
 
-  const adminBaseUrl = process.env.NUXT_PUBLIC_ADMIN_BASE_URL;
-
-  if (!adminBaseUrl) {
-    throw new Error('NUXT_PUBLIC_ADMIN_BASE_URL is not set');
-  }
-
   const date = new Date(order.createdAt);
 
   const dateStr = date.toLocaleDateString('ru-RU', {
@@ -42,7 +36,7 @@ export async function notifyOrderToTelegram(
     minute: '2-digit',
   });
 
-  const adminUrl = `${adminBaseUrl}/orders/${order.id}`;
+  const adminUrl = `https://amoda.ao/en/admin/orders/${order.number}`;
 
   const text = [
     '🛍 Новый заказ',
