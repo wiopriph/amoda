@@ -142,7 +142,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // фильтр по цвету / цене — по варианту
   if (query.color) {
     productsQuery = productsQuery.eq('product_variants.color', query.color);
   }
@@ -163,10 +162,8 @@ export default defineEventHandler(async (event) => {
       productsQuery = productsQuery.order('product_variants.price', { ascending: false });
       break;
     case 'new':
-      productsQuery = productsQuery.order('id', { ascending: false });
-      break;
     default:
-      productsQuery = productsQuery.order('id', { ascending: true });
+      productsQuery = productsQuery.order('id', { ascending: false });
       break;
   }
 
@@ -198,14 +195,14 @@ export default defineEventHandler(async (event) => {
       defaultVariant = variants[0] ?? null;
     }
 
-    const sizes = Array.isArray(defaultVariant?.sizes) ? defaultVariant?.sizes.slice() : [];
+    const sizes = Array.isArray(defaultVariant?.sizes) ? defaultVariant.sizes.slice() : [];
 
     sizes.sort((a: any, b: any) => (a?.id ?? 0) - (b?.id ?? 0));
 
     const defaultSize = sizes[0] ?? null;
 
     const imgs = Array.isArray(defaultVariant?.product_variant_images) ?
-      defaultVariant?.product_variant_images.slice() :
+      defaultVariant.product_variant_images.slice() :
       [];
 
     imgs.sort((a: any, b: any) => (a?.position ?? 0) - (b?.position ?? 0));
