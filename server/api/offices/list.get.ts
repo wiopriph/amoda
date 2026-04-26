@@ -17,7 +17,8 @@ export default defineEventHandler(async (event) => {
       phone,
       opening_hours,
       active,
-      created_at
+      created_at,
+      map_url
     `)
     .eq('active', true)
     .order('name', { ascending: true });

@@ -1,11 +1,25 @@
 <script setup lang="ts">
 definePageMeta({ name: 'pickup-points' });
 
+type OpeningHours = Record<string, [string, string][]>;
+
+type Office = {
+  id: number
+  name: string
+  description?: string | null
+  address?: string | null
+  phone?: string | null
+  opening_hours?: OpeningHours | null
+  location_lat?: number | null
+  location_lng?: number | null
+  map_url?: string | null
+};
+
 const { t } = useI18n();
 
 const weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
-const { data, error } = await useFetch('/api/offices/list');
+const { data, error } = await useFetch<{ items: Office[] }>('/api/offices/list');
 
 const offices = computed(() => data.value?.items ?? []);
 
@@ -23,7 +37,7 @@ useHead(() => ({
   ],
 }));
 
-const toTel = (phone?: string) => {
+const toTel = (phone?: string | null) => {
   if (!phone) {
     return '';
   }
@@ -37,9 +51,51 @@ const formatRanges = (ranges?: [string, string][]) => {
   }
 
   return ranges
-    .filter(r => r?.[0] && r?.[1])
-    .map(r => `${r[0]}–${r[1]}`)
+    .filter((r) => r?.[0] && r?.[1])
+    .map((r) => `${r[0]}–${r[1]}`)
     .join(', ');
+};
+
+const getTodayKey = () => {
+  const day = new Date().getDay();
+
+  return weekDays[day === 0 ? 6 : day - 1];
+};
+
+const todayKey = getTodayKey();
+
+const getTodayHours = (hours?: OpeningHours | null) => {
+  const todayHours = hours?.[todayKey];
+
+  return formatRanges(todayHours) || t('offices.closed');
+};
+
+const getCompactHours = (hours?: OpeningHours | null) => weekDays.reduce<{ label: string, value: string }[]>((acc, day) => {
+  const value = formatRanges(hours?.[day]) || t('offices.closed');
+  const prev = acc[acc.length - 1];
+
+  if (prev?.value === value) {
+    prev.label = `${prev.label.split('–')[0]}–${t(`offices.days.${day}`)}`;
+  } else {
+    acc.push({
+      label: t(`offices.days.${day}`),
+      value,
+    });
+  }
+
+  return acc;
+}, []);
+
+const getMapUrl = (office: Office) => {
+  if (office.map_url) {
+    return office.map_url;
+  }
+
+  if (office.location_lat && office.location_lng) {
+    return `https://www.google.com/maps?q=${office.location_lat},${office.location_lng}`;
+  }
+
+  return null;
 };
 </script>
 
@@ -47,14 +103,18 @@ const formatRanges = (ranges?: [string, string][]) => {
 {
   "pt": {
     "offices": {
-      "title": "Pontos de levantamento",
-      "error": "Erro ao carregar os pontos de levantamento.",
-      "empty": "Ainda não há pontos de levantamento disponíveis.",
-      "hours": "Horário de funcionamento",
+      "title": "Pontos de experimentação",
+      "subtitle": "Escolha um ponto, veja o horário e abra a localização no mapa.",
+      "error": "Erro ao carregar os pontos.",
+      "empty": "Ainda não há pontos disponíveis.",
+      "today": "Hoje",
+      "hours": "Horário",
       "closed": "Fechado",
+      "phone": "Ligar",
+      "map": "Abrir no Google Maps",
       "meta": {
-        "title": "Pontos de levantamento Amoda em Luanda",
-        "description": "Encontre o ponto de levantamento Amoda em Luanda. Morada, horário e contacto. Reserve online, experimente no ponto e pague apenas se ficar."
+        "title": "Pontos de experimentação Amoda em Luanda",
+        "description": "Veja os pontos de experimentação Amoda em Luanda: endereço, horário, contacto e localização no mapa."
       },
       "days": {
         "mon": "Seg",
@@ -69,14 +129,18 @@ const formatRanges = (ranges?: [string, string][]) => {
   },
   "en": {
     "offices": {
-      "title": "Pickup points",
-      "error": "Failed to load pickup points.",
-      "empty": "No pickup points available yet.",
-      "hours": "Opening hours",
+      "title": "Try-on points",
+      "subtitle": "Choose a point, check opening hours, and open the location on the map.",
+      "error": "Failed to load points.",
+      "empty": "No points available yet.",
+      "today": "Today",
+      "hours": "Hours",
       "closed": "Closed",
+      "phone": "Call",
+      "map": "Open in Google Maps",
       "meta": {
-        "title": "Amoda pickup points in Luanda",
-        "description": "Find Amoda pickup points in Luanda: address, hours and contact. Reserve online, try on at pickup, and pay only if you keep."
+        "title": "Amoda try-on points in Luanda",
+        "description": "See Amoda try-on points in Luanda: address, opening hours, contact and map location."
       },
       "days": {
         "mon": "Mon",
@@ -94,99 +158,141 @@ const formatRanges = (ranges?: [string, string][]) => {
 
 <template>
   <UPage>
-    <UPageHeader
-      :title="t('offices.title')"
-      :description="t('offices.meta.description')"
-    />
+    <UPageBody class="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+        <UBadge
+          v-if="offices[0]"
+          color="primary"
+          variant="soft"
+          class="mb-4"
+        >
+          {{ t('offices.today') }}: {{ getTodayHours(offices[0].opening_hours) }}
+        </UBadge>
 
-    <UPageBody class="max-w-3xl mx-auto">
+        <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
+          {{ t('offices.title') }}
+        </h1>
+
+        <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
+          {{ t('offices.subtitle') }}
+        </p>
+      </section>
+
       <UAlert
         v-if="error"
+        class="mt-5 sm:mt-6"
         variant="soft"
+        color="error"
         icon="i-lucide-alert-triangle"
         :title="t('offices.error')"
       />
 
-      <div
-        v-else
-        class="space-y-6"
-      >
-        <UAlert
-          v-if="offices.length === 0"
-          variant="soft"
-          icon="i-lucide-map-pin"
-          :title="t('offices.empty')"
-        />
+      <UAlert
+        v-else-if="offices.length === 0"
+        class="mt-5 sm:mt-6"
+        variant="soft"
+        icon="i-lucide-map-pin"
+        :title="t('offices.empty')"
+      />
 
+      <section
+        v-else
+        class="mt-5 grid gap-4 sm:mt-6"
+      >
         <UCard
           v-for="office in offices"
-          v-else
           :key="office.id"
-          class="p-6"
         >
-          <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-6">
-            <div class="flex-1 space-y-3">
-              <h2 class="text-xl font-semibold">
-                {{ office.name }}
-              </h2>
+          <div class="flex flex-col gap-5">
+            <div>
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <h2 class="text-xl font-bold text-highlighted">
+                    {{ office.name }}
+                  </h2>
 
-              <p
-                v-if="office.address"
-                class="text-gray-600 text-sm"
-              >
-                {{ office.address }}
-              </p>
+                  <p
+                    v-if="office.address"
+                    class="mt-2 text-sm leading-6 text-muted"
+                  >
+                    {{ office.address }}
+                  </p>
+                </div>
 
-              <p
-                v-if="office.phone"
-                class="text-sm"
-              >
-                <a
-                  class="text-primary underline underline-offset-2"
-                  :href="`tel:${toTel(office.phone)}`"
+                <UBadge
+                  color="primary"
+                  variant="soft"
+                  class="shrink-0"
                 >
-                  {{ office.phone }}
-                </a>
-              </p>
+                  {{ t('offices.today') }}: {{ getTodayHours(office.opening_hours) }}
+                </UBadge>
+              </div>
 
               <p
                 v-if="office.description"
-                class="text-sm leading-relaxed"
+                class="mt-3 text-sm leading-6 text-toned"
               >
                 {{ office.description }}
               </p>
             </div>
 
-            <div class="md:w-64">
-              <p class="font-semibold mb-2 text-sm">
-                {{ t('offices.hours') }}
-              </p>
+            <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
+              <div class="mb-3 flex items-center gap-2">
+                <UIcon
+                  name="i-lucide-clock"
+                  class="size-4 text-primary"
+                />
 
-              <ul class="space-y-1 text-sm">
-                <li
-                  v-for="day in weekDays"
-                  :key="day"
-                  class="flex justify-between gap-3"
+                <h3 class="text-sm font-semibold text-highlighted">
+                  {{ t('offices.hours') }}
+                </h3>
+              </div>
+
+              <div class="grid gap-2 text-sm sm:grid-cols-2">
+                <div
+                  v-for="group in getCompactHours(office.opening_hours)"
+                  :key="`${group.label}-${group.value}`"
+                  class="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2"
                 >
-                  <span class="w-16 font-medium">
-                    {{ t(`offices.days.${day}`) }}:
+                  <span class="font-medium text-toned">
+                    {{ group.label }}
                   </span>
 
-                  <span class="tabular-nums text-gray-700 text-right">
-                    <template v-if="formatRanges(office.opening_hours?.[day])">
-                      {{ formatRanges(office.opening_hours?.[day]) }}
-                    </template>
-
-                    <template v-else>
-                      {{ t('offices.closed') }}
-                    </template>
+                  <span class="tabular-nums text-muted">
+                    {{ group.value }}
                   </span>
-                </li>
-              </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid gap-3 sm:flex sm:flex-wrap">
+              <UButton
+                v-if="getMapUrl(office)"
+                :to="getMapUrl(office)!"
+                target="_blank"
+                color="primary"
+                size="lg"
+                icon="i-lucide-map-pin"
+                class="justify-center"
+              >
+                {{ t('offices.map') }}
+              </UButton>
+
+              <UButton
+                v-if="office.phone"
+                :to="`tel:${toTel(office.phone)}`"
+                color="neutral"
+                variant="soft"
+                size="lg"
+                icon="i-lucide-phone"
+                class="justify-center"
+              >
+                {{ t('offices.phone') }}
+              </UButton>
             </div>
           </div>
         </UCard>
-      </div>
+      </section>
     </UPageBody>
   </UPage>
 </template>
