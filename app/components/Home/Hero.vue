@@ -92,9 +92,17 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
     <div class="relative overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 px-5 py-7 sm:px-8 sm:py-10 lg:px-12 lg:py-14">
       <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <div>
-          <div class="mb-4 flex flex-wrap items-center gap-2 text-sm font-semibold text-pink-600">
-            <span>{{ heroSocialProof }}</span>
-          </div>
+          <UButton
+            :to="TIKTOK_LINK"
+            target="_blank"
+            variant="soft"
+            color="neutral"
+            size="sm"
+            icon="i-simple-icons-tiktok"
+            class="mb-4 w-fit border border-pink-100 bg-white/70 font-semibold text-pink-600 shadow-sm backdrop-blur hover:bg-white"
+          >
+            {{ heroSocialProof }}
+          </UButton>
 
           <h1 class="text-4xl font-black tracking-tight text-highlighted text-balance sm:text-5xl lg:text-6xl">
             {{ heroTitle }}
@@ -112,17 +120,6 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
               icon="i-lucide-shopping-bag"
             >
               {{ heroCtaPrimary }}
-            </UButton>
-
-            <UButton
-              :to="TIKTOK_LINK"
-              size="xl"
-              color="neutral"
-              variant="soft"
-              icon="i-simple-icons-tiktok"
-              target="_blank"
-            >
-              TikTok
             </UButton>
 
             <UButton
@@ -158,8 +155,9 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
             v-if="isTiktokLive"
             color="error"
             variant="solid"
-            class="absolute right-3 top-3 z-10"
+            class="absolute right-3 top-3 z-10 flex items-center gap-1 px-2.5 py-1"
           >
+            <span class="size-2 rounded-full bg-white animate-pulse" />
             LIVE
           </UBadge>
 
@@ -181,11 +179,11 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
             <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <div class="min-w-0">
                 <p class="truncate text-sm font-bold text-highlighted">
-                  {{ heroTiktokTitle }}
+                  {{ isTiktokLive ? 'LIVE — ' : '' }}{{ heroTiktokTitle }}
                 </p>
 
                 <p class="line-clamp-2 text-xs text-muted sm:line-clamp-1">
-                  {{ heroTiktokSubtitle }}
+                  {{ isTiktokLive ? 'Ao vivo agora' : heroTiktokSubtitle }}
                 </p>
               </div>
 
