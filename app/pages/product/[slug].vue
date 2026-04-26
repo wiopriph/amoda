@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
-import { useOffices } from '~/composables/useOffices';
 import { CONTACT_PHONE } from '~/constants/contacts';
 import { makeGa4Item } from '~/utils/ga4';
 
@@ -289,14 +288,6 @@ const whatsappHref = computed(() => {
   return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
 });
 
-// ===== OFFICES (PICKUP POINTS) =====
-const { offices, pending: officesPending, load: loadOffices } = useOffices();
-
-onMounted(() => {
-  loadOffices();
-});
-
-const topOffices = computed(() => (offices.value || []).slice(0, 3));
 const officesPageTo = computed(() => localeRoute({ name: 'pickup-points' }));
 
 // ===== SEO =====
@@ -356,56 +347,57 @@ useHead(() => ({
 {
   "pt": {
     "offices": {
-      "title": "Pontos para experimentar"
+      "title": "Pontos para experimentar",
+      "subtitle": "Reserve online e experimente no ponto mais conveniente."
     },
     "product": {
       "price": "Preço",
       "size": "Tamanho",
       "color": "Cor",
-      "add": "Adicionar",
       "description": "Descrição",
-      "brand": "Marca",
       "meta": {
         "titleSuffix": "Amoda Angola",
-        "description": "Reserve grátis na Amoda: escolha o tamanho, confirme no WhatsApp e venha experimentar no ponto. Sem pagamento online."
+        "description": "Reserve grátis na Amoda: escolha o tamanho, confirme no WhatsApp e experimente no ponto."
       },
       "ui": {
-        "chooseSize": "Escolha um tamanho para reservar",
-        "howReceiveTitle": "Como funciona",
-        "pickupCta": "Ver todos os pontos",
-        "supportCta": "Perguntar no WhatsApp",
-        "ctaNote": "Reserva grátis • Prova no ponto • Você decide na hora",
+        "chooseSize": "Escolha um tamanho",
         "addToCart": "Reservar para experimentar",
         "addToCartShort": "Reservar",
         "inCart": "Reservado",
-        "inCartShort": "reservado {qty}",
-        "checkout": "Finalizar",
-        "continueShopping": "Continuar"
+        "checkout": "Ver reserva",
+        "pickupCta": "Ver pontos",
+        "supportCta": "Falar no WhatsApp",
+        "ctaNote": {
+          "wallet": "Sem pagamento online",
+          "shirt": "Experimente primeiro",
+          "whatsapp": "Decida na hora"
+        },
+        "howReceiveTitle": "Como funciona"
       },
       "cartNudge": {
         "title": "Reservado",
-        "subtitle": "{qty} un. reservada(s)",
+        "subtitle": "{qty} item(s) reservado(s)",
         "checkout": "Ver reserva",
         "continue": "Continuar"
       },
       "howReceive": {
         "items": [
           {
-            "title": "Reserve em 10 segundos",
-            "desc": "Escolha cor e tamanho e reserve — sem pagamento."
+            "title": "Reserve em segundos",
+            "desc": "Escolha o tamanho e reserve sem pagar."
           },
           {
             "title": "Experimente no ponto",
-            "desc": "Nós preparamos os itens para você experimentar."
+            "desc": "Veja ao vivo e experimente com calma."
           },
           {
-            "title": "Você decide na hora",
-            "desc": "Leve só o que gostar. Sem compromisso."
+            "title": "Decida na hora",
+            "desc": "Leve só o que gostar."
           }
         ]
       },
       "seo": {
-        "imageMainAlt": "{title} — imagem principal",
+        "imageMainAlt": "{title} — imagem",
         "thumbAlt": "{title} — foto {index}",
         "variantAlt": "{title} — cor {color}"
       },
@@ -416,31 +408,32 @@ useHead(() => ({
   },
   "en": {
     "offices": {
-      "title": "Try-on points"
+      "title": "Try-on points",
+      "subtitle": "Reserve online and try it at the most convenient location."
     },
     "product": {
       "price": "Price",
       "size": "Size",
       "color": "Color",
-      "add": "Add",
       "description": "Description",
-      "brand": "Brand",
       "meta": {
         "titleSuffix": "Amoda Angola",
-        "description": "Free reservation at Amoda: pick your size, confirm on WhatsApp, and come try on at the pickup point. No online payment."
+        "description": "Free reservation at Amoda: choose your size, confirm on WhatsApp and try before paying."
       },
       "ui": {
-        "chooseSize": "Choose a size to reserve",
-        "howReceiveTitle": "How it works",
-        "pickupCta": "View all points",
-        "supportCta": "Ask on WhatsApp",
-        "ctaNote": "Free reservation • Try at the point • You decide on the spot",
-        "addToCart": "Reserve to try on",
+        "chooseSize": "Choose a size",
+        "addToCart": "Reserve to try",
         "addToCartShort": "Reserve",
         "inCart": "Reserved",
-        "inCartShort": "reserved {qty}",
-        "checkout": "Checkout",
-        "continueShopping": "Continue"
+        "checkout": "View reservation",
+        "pickupCta": "View points",
+        "supportCta": "Chat on WhatsApp",
+        "ctaNote": {
+          "wallet": "No online payment",
+          "shirt": "Try first",
+          "whatsapp": "Decide later"
+        },
+        "howReceiveTitle": "How it works"
       },
       "cartNudge": {
         "title": "Reserved",
@@ -451,21 +444,21 @@ useHead(() => ({
       "howReceive": {
         "items": [
           {
-            "title": "Reserve in 10 seconds",
-            "desc": "Pick color and size and reserve — no payment."
+            "title": "Reserve in seconds",
+            "desc": "Choose size and reserve without paying."
           },
           {
-            "title": "Try on at the point",
-            "desc": "We’ll prepare the items for fitting."
+            "title": "Try at the point",
+            "desc": "See it in real life and try it on."
           },
           {
             "title": "Decide on the spot",
-            "desc": "Take only what you like. No obligation."
+            "desc": "Take only what you like."
           }
         ]
       },
       "seo": {
-        "imageMainAlt": "{title} — main image",
+        "imageMainAlt": "{title} — image",
         "thumbAlt": "{title} — photo {index}",
         "variantAlt": "{title} — color {color}"
       },
@@ -481,9 +474,8 @@ useHead(() => ({
   <UPage>
     <UPageBody>
       <div class="grid lg:grid-cols-2 gap-8">
-        <!-- LEFT: GALLERY -->
-        <div class="flex-1 w-full">
-          <div class="relative w-full">
+        <section class="flex-1 w-full">
+          <div class="relative overflow-hidden rounded-3xl bg-gray-50">
             <UCarousel
               v-if="hasGalleryImages"
               ref="carousel"
@@ -500,335 +492,346 @@ useHead(() => ({
               }"
               @select="onSelect"
             >
-              <div class="w-full aspect-[4/5] overflow-hidden rounded-2xl bg-gray-50">
+              <div class="aspect-[4/5] w-full overflow-hidden bg-gray-50">
                 <NuxtImg
                   :src="item.url"
                   :alt="item.alt"
-                  class="w-full h-full object-cover"
+                  class="h-full w-full object-cover"
                 />
               </div>
             </UCarousel>
 
-            <!-- FALLBACK -->
             <div
               v-else
-              class="relative w-full aspect-[4/5] overflow-hidden rounded-2xl bg-gray-50"
+              class="aspect-[4/5] w-full overflow-hidden bg-gray-50"
             >
               <NuxtImg
                 src="/placeholder.webp"
                 :alt="t('product.seo.imageMainAlt', { title: productTitle })"
-                class="object-cover w-full h-full"
+                class="h-full w-full object-cover"
               />
             </div>
 
-            <!-- MOBILE COUNTER -->
             <div
-              v-if="hasGalleryImages"
-              class="absolute bottom-3 right-3 lg:hidden bg-black/60 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm"
+              v-if="hasGalleryImages && carouselItems.length > 1"
+              class="absolute bottom-3 right-3 rounded-full bg-black/60 px-2 py-1 text-xs text-white backdrop-blur-sm"
             >
               {{ activeIndex + 1 }} / {{ carouselItems.length }}
             </div>
           </div>
 
-          <!-- THUMBNAILS (DESKTOP) -->
           <div
             v-if="hasGalleryImages && carouselItems.length > 1"
-            class="flex gap-2 pt-4 overflow-x-auto hidden md:flex"
+            class="mt-3 hidden gap-2 overflow-x-auto md:flex"
           >
             <button
               v-for="(thumb, index) in carouselItems"
               :key="thumb.idx"
               type="button"
-              class="size-11 flex-none rounded-lg overflow-hidden border transition-opacity"
+              class="size-14 flex-none overflow-hidden rounded-xl border transition"
               :class="activeIndex === index
-                ? 'opacity-100 border-primary'
-                : 'opacity-40 border-gray-200 hover:opacity-100'"
+                ? 'border-primary opacity-100 ring-1 ring-primary'
+                : 'border-gray-200 opacity-50 hover:opacity-100'"
               @click="select(index)"
             >
               <NuxtImg
                 :src="thumb.url"
                 :alt="thumb.alt"
-                class="w-full h-full object-cover"
+                class="h-full w-full object-cover"
                 loading="lazy"
               />
             </button>
           </div>
-        </div>
+        </section>
 
-        <!-- RIGHT: INFO -->
-        <div class="flex flex-col gap-6">
-          <!-- Breadcrumbs + H1 -->
-          <div class="space-y-2">
+        <!-- PRODUCT INFO -->
+        <section class="flex flex-col gap-5 px-2">
+          <div>
             <UBreadcrumb
               :items="breadcrumbs"
               class="hidden md:block"
               :ui="{
-                root: 'mb-4 hidden md:block',
+                root: 'mb-4',
                 list: 'flex items-center gap-1 min-w-0',
                 item: 'shrink-0 last:flex-1 last:min-w-0',
-                link: 'text-xs md:text-sm hover:text-primary-600 aria-[current=page]:pointer-events-none',
+                link: 'text-xs md:text-sm hover:text-primary aria-[current=page]:pointer-events-none',
                 linkLabel: 'block whitespace-nowrap overflow-hidden text-ellipsis truncate aria-[current=page]:font-medium',
                 separator: 'mx-1 text-gray-400'
               }"
             />
 
-            <h1 class="text-2xl md:text-3xl font-semibold tracking-tight">
+            <h1 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
               {{ productData?.title }}
             </h1>
 
-            <div class="text-sm text-gray-500">
-              {{ productData?.brand_name || '—' }}
-            </div>
-          </div>
+            <p
+              v-if="productData?.brand_name"
+              class="mt-1 text-sm text-muted"
+            >
+              {{ productData.brand_name }}
+            </p>
 
-          <!-- Price -->
-          <div>
-            <div class="text-xs uppercase text-gray-500">
-              {{ t('product.price') }}
-            </div>
-
-            <div class="text-3xl font-bold text-primary">
+            <div class="mt-4 text-3xl font-black text-primary">
               {{ formattedPriceAOA }}
             </div>
           </div>
 
-          <!-- Color -->
-          <div v-if="variantOptions.length">
-            <div class="text-sm font-medium mb-2 flex items-center gap-2">
-              <span>{{ t('product.color') }}:</span>
+          <!-- TRUST STRIP -->
+          <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-toned">
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-lucide-wallet"
+                class="size-4 text-primary"
+              />
 
-              <span class="text-gray-600">{{ selectedVariantLabel }}</span>
+              <span v-text="t('product.ui.ctaNote.wallet')" />
             </div>
 
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="variantOption in variantOptions"
-                :key="variantOption.id"
-                type="button"
-                class="relative overflow-hidden rounded-md border transition w-12 h-12 md:w-14 md:h-14"
-                :class="selectedVariantId === variantOption.id ? 'border-primary ring-1 ring-primary' : 'border-gray-200 hover:border-gray-400'"
-                @click="selectedVariantId = variantOption.id"
-              >
-                <NuxtImg
-                  :src="variantOption.url"
-                  :alt="t('product.seo.variantAlt', { title: productTitle, color: variantOption.label })"
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </button>
-            </div>
-          </div>
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-lucide-shirt"
+                class="size-4 text-primary"
+              />
 
-          <!-- Size -->
-          <div v-if="sizeOptions.length">
-            <div class="text-sm font-medium mb-2">
-              {{ t('product.size') }}
+              <span v-text="t('product.ui.ctaNote.shirt')" />
             </div>
 
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="sizeOption in sizeOptions"
-                :key="sizeOption.id"
-                type="button"
-                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-sm"
-                :class="selectedSizeId === sizeOption.id ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-400'"
-                @click="selectedSizeId = sizeOption.id"
-              >
-                <span class="font-medium">{{ sizeOption.label }}</span>
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-simple-icons-whatsapp"
+                class="size-4 text-primary"
+              />
 
-                <UBadge
-                  v-if="sizeOption.inCartQty > 0"
-                  size="xs"
-                  variant="solid"
-                  :label="t('product.ui.inCartShort', { qty: sizeOption.inCartQty })"
-                />
-              </button>
-            </div>
-
-            <div
-              v-if="!selectedSizeId"
-              class="text-sm text-red-600 mt-2"
-            >
-              {{ t('product.ui.chooseSize') }}
+              <span v-text="t('product.ui.ctaNote.whatsapp')" />
             </div>
           </div>
 
-          <!-- CTA (smart) -->
-          <div class="space-y-3 hidden sm:block">
-            <!-- если SKU уже в корзине — показываем степпер -->
-            <div
-              v-if="canAdd && currentSkuQty > 0"
-              class="flex flex-col gap-3"
-            >
-              <div class="flex items-center gap-3">
-                <UButton
-                  variant="outline"
-                  class="shrink-0"
-                  :disabled="!currentSkuKey"
-                  @click="decrement(currentSkuKey)"
-                >
-                  −
-                </UButton>
-
-                <div class="flex-1 text-center">
-                  <div class="text-sm text-gray-500">
-                    {{ t('product.ui.inCart') }}
+          <!-- OPTIONS -->
+          <UCard>
+            <div class="space-y-5">
+              <div v-if="variantOptions.length > 1">
+                <div class="mb-2 flex items-center justify-between gap-3">
+                  <div class="text-sm font-semibold text-highlighted">
+                    {{ t('product.color') }}
                   </div>
 
-                  <div class="text-2xl font-semibold">
-                    {{ currentSkuQty }}
+                  <div class="text-sm text-muted">
+                    {{ selectedVariantLabel }}
                   </div>
                 </div>
 
-                <UButton
-                  variant="outline"
-                  class="shrink-0"
-                  :disabled="!currentSkuKey"
-                  @click="increment(currentSkuKey)"
-                >
-                  +
-                </UButton>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    v-for="variantOption in variantOptions"
+                    :key="variantOption.id"
+                    type="button"
+                    class="relative size-14 overflow-hidden rounded-2xl border transition"
+                    :class="selectedVariantId === variantOption.id
+                      ? 'border-primary ring-2 ring-primary/30'
+                      : 'border-gray-200 hover:border-primary/50'"
+                    @click="selectedVariantId = variantOption.id"
+                  >
+                    <NuxtImg
+                      :src="variantOption.url"
+                      :alt="t('product.seo.variantAlt', { title: productTitle, color: variantOption.label })"
+                      class="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </button>
+                </div>
               </div>
 
-              <UButton
-                size="xl"
-                class="w-full justify-center uppercase"
-                color="primary"
-                :to="cartPageTo"
-              >
-                {{ t('product.ui.checkout') }}
-              </UButton>
+              <div v-if="sizeOptions.length">
+                <div class="mb-2 text-sm font-semibold text-highlighted">
+                  {{ t('product.size') }}
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    v-for="sizeOption in sizeOptions"
+                    :key="sizeOption.id"
+                    type="button"
+                    class="inline-flex min-w-12 items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition"
+                    :class="selectedSizeId === sizeOption.id
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-gray-200 bg-white hover:border-primary/50'"
+                    @click="selectedSizeId = sizeOption.id"
+                  >
+                    {{ sizeOption.label }}
+
+                    <UBadge
+                      v-if="sizeOption.inCartQty > 0"
+                      size="xs"
+                      variant="solid"
+                      :label="String(sizeOption.inCartQty)"
+                    />
+                  </button>
+                </div>
+
+                <p
+                  v-if="!selectedSizeId"
+                  class="mt-2 text-sm text-red-600"
+                >
+                  {{ t('product.ui.chooseSize') }}
+                </p>
+              </div>
+
+              <!-- DESKTOP CTA -->
+              <div class="hidden space-y-3 sm:block">
+                <!-- если SKU уже в корзине — показываем степпер -->
+                <div
+                  v-if="canAdd && currentSkuQty > 0"
+                  class="space-y-3"
+                >
+                  <div class="flex items-center gap-3 rounded-2xl bg-gray-50 p-3">
+                    <UButton
+                      variant="outline"
+                      :disabled="!currentSkuKey"
+                      @click="decrement(currentSkuKey)"
+                    >
+                      −
+                    </UButton>
+
+                    <div class="flex-1 text-center">
+                      <div class="text-xs text-muted">
+                        {{ t('product.ui.inCart') }}
+                      </div>
+
+                      <div class="text-xl font-bold text-highlighted">
+                        {{ currentSkuQty }}
+                      </div>
+                    </div>
+
+                    <UButton
+                      variant="outline"
+                      :disabled="!currentSkuKey"
+                      @click="increment(currentSkuKey)"
+                    >
+                      +
+                    </UButton>
+                  </div>
+
+                  <UButton
+                    size="xl"
+                    color="primary"
+                    class="w-full justify-center"
+                    :to="cartPageTo"
+                  >
+                    {{ t('product.ui.checkout') }}
+                  </UButton>
+                </div>
+
+                <UButton
+                  v-else
+                  size="xl"
+                  color="primary"
+                  class="w-full justify-center"
+                  :disabled="!selectedSizeId"
+                  @click="addProductToCart"
+                >
+                  {{ selectedSizeId ? t('product.ui.addToCart') : t('product.ui.chooseSize') }}
+                </UButton>
+              </div>
             </div>
+          </UCard>
 
-            <!-- иначе обычная кнопка add -->
-            <UButton
-              v-else
-              size="xl"
-              color="primary"
-              class="w-full justify-center uppercase"
-              :disabled="!selectedSizeId"
-              @click="addProductToCart"
-            >
-              <span>
-                {{ selectedSizeId ? t('product.ui.addToCart') : t('product.ui.chooseSize') }}
-              </span>
+          <!-- DESCRIPTION -->
+          <UCard v-if="productData?.description">
+            <h2 class="text-base font-bold text-highlighted">
+              {{ t('product.description') }}
+            </h2>
 
-              <UBadge
-                v-if="currentSkuQty > 0"
-                class="ms-2"
-                variant="solid"
-                size="sm"
-                :label="String(currentSkuQty)"
-              />
-            </UButton>
-
-            <p class="text-xs text-gray-500 text-center">
-              {{ t('product.ui.ctaNote') }}
+            <p class="mt-3 text-sm leading-7 text-toned">
+              {{ productData.description }}
             </p>
-          </div>
+          </UCard>
 
-          <!-- How receive (USP) -->
-          <div class="rounded-2xl bg-gray-50 p-4">
-            <div class="text-sm font-semibold mb-3">
+          <!-- HOW IT WORKS -->
+          <UCard class="border-primary/20 bg-primary/5">
+            <h2 class="text-base font-bold text-highlighted">
               {{ t('product.ui.howReceiveTitle') }}
-            </div>
+            </h2>
 
-            <div class="space-y-3">
+            <div class="mt-4 space-y-3">
               <div
-                v-for="x in tm('product.howReceive.items')"
+                v-for="(x, index) in tm('product.howReceive.items')"
                 :key="rt(x.title)"
                 class="flex gap-3"
               >
-                <div class="mt-1 w-2 h-2 rounded-full bg-primary" />
+                <div
+                  class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white"
+                >
+                  {{ index + 1 }}
+                </div>
 
                 <div>
-                  <div class="text-sm font-medium">
+                  <div class="text-sm font-semibold text-highlighted">
                     {{ rt(x.title) }}
                   </div>
 
-                  <div class="text-sm text-gray-600">
+                  <div class="text-sm leading-6 text-muted">
                     {{ rt(x.desc) }}
                   </div>
                 </div>
               </div>
             </div>
+          </UCard>
 
-            <!-- Pickup points preview -->
-            <div class="mt-4 pt-4 border-t border-gray-200">
-              <div class="text-sm font-medium mb-2">
-                {{ t('offices.title') }}
+          <!-- PICKUP / SUPPORT -->
+          <UCard>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 class="text-base font-bold text-highlighted">
+                  {{ t('offices.title') }}
+                </h2>
+
+                <p class="mt-1 text-sm text-muted">
+                  {{ t('offices.subtitle') }}
+                </p>
               </div>
 
-              <div
-                v-if="officesPending"
-                class="text-sm text-gray-600"
-              >
-                ...
-              </div>
-
-              <div
-                v-else
-                class="space-y-2"
-              >
-                <div
-                  v-for="o in topOffices"
-                  :key="o.id"
-                  class="text-sm text-gray-700"
+              <div class="grid gap-2 sm:flex">
+                <UButton
+                  :to="officesPageTo"
+                  variant="outline"
+                  size="xl"
+                  icon="i-lucide:map-pin"
+                  class="justify-center"
                 >
-                  <div class="font-medium">
-                    {{ o.name }}
-                  </div>
-
-                  <div class="text-gray-600">
-                    {{ o.address }}
-                  </div>
-                </div>
+                  <span
+                    class="sm:hidden"
+                    v-text="t('product.ui.pickupCta')"
+                  />
+                </UButton>
 
                 <UButton
-                  variant="outline"
-                  size="sm"
-                  :to="officesPageTo"
-                  class="mt-2"
+                  :to="whatsappHref"
+                  size="xl"
+                  target="_blank"
+                  icon="i-simple-icons-whatsapp"
+                  class="justify-center"
                 >
-                  {{ t('product.ui.pickupCta') }}
+                  <span
+                    class="sm:hidden"
+                    v-text="t('product.ui.supportCta')"
+                  />
                 </UButton>
               </div>
             </div>
-
-            <div class="mt-4">
-              <UButton
-                variant="ghost"
-                :to="whatsappHref"
-                target="_blank"
-                icon="i-simple-icons-whatsapp"
-                class="px-0"
-              >
-                {{ t('product.ui.supportCta') }}
-              </UButton>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <div>
-            <h2 class="text-lg font-semibold mb-2">
-              {{ t('product.description') }}
-            </h2>
-
-            <p class="text-sm text-gray-700 leading-relaxed">
-              {{ productData?.description || '—' }}
-            </p>
-          </div>
-        </div>
+          </UCard>
+        </section>
       </div>
 
-      <!-- Recommendations -->
-      <UPageSection
+      <!-- RECOMMENDATIONS -->
+      <section
         v-if="recItems.length"
-        :title="t('product.reco.title')"
-        :ui="{ title: 'text-md font-semibold' }"
         class="mt-10"
       >
-        <UBlogPosts class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <h2 class="text-2xl font-black tracking-tight text-highlighted">
+          {{ t('product.reco.title') }}
+        </h2>
+
+        <UBlogPosts class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4">
           <UBlogPost
             v-for="item in recItems"
             :key="item.id"
@@ -836,14 +839,21 @@ useHead(() => ({
             :description="`${new Intl.NumberFormat('pt-AO').format(item.price)} AOA`"
             :image="item.images?.[0]?.url || '/placeholder.webp'"
             :to="localeRoute({ name: 'product-slug', params: { slug: item.slug } })"
-            :ui="{ header: 'aspect-[4/5] object-cover', body: 'sm:p-3', title: 'line-clamp-2 overflow-hidden' }"
+            :ui="{
+              root: 'group overflow-hidden border border-gray-100 rounded-2xl hover:shadow-md transition',
+              header: 'aspect-[4/5] overflow-hidden bg-gray-50',
+              image: 'h-full w-full object-cover transition duration-300 group-hover:scale-105',
+              body: 'p-3',
+              title: 'text-sm font-semibold text-highlighted line-clamp-2 min-h-[40px]',
+              description: 'mt-2 text-sm font-bold text-primary'
+            }"
             variant="outline"
             @click="sendSelectProductEvent(item)"
           />
         </UBlogPosts>
-      </UPageSection>
+      </section>
 
-      <!-- Mini cart (Drawer) -->
+      <!-- DRAWER -->
       <UDrawer
         v-model:open="cartDrawerOpen"
         title=" "
@@ -855,14 +865,14 @@ useHead(() => ({
         <span class="hidden" />
 
         <template #header>
-          <div class="max-w-(--ui-container) mx-auto px-4">
+          <div class="mx-auto max-w-(--ui-container) px-4">
             <div class="flex items-start justify-between gap-3">
               <div>
                 <div class="text-sm font-semibold">
                   {{ t('product.cartNudge.title') }}
                 </div>
 
-                <div class="text-xs text-gray-600">
+                <div class="text-xs text-muted">
                   {{ t('product.cartNudge.subtitle', { qty: currentSkuQty }) }}
                 </div>
               </div>
@@ -878,41 +888,43 @@ useHead(() => ({
         </template>
 
         <template #body>
-          <div class="max-w-(--ui-container) mx-auto px-4 pb-5">
+          <div class="mx-auto max-w-(--ui-container) px-4 pb-5">
             <div class="flex gap-3">
-              <div class="size-14 rounded-lg overflow-hidden bg-gray-50 shrink-0">
+              <div class="size-16 shrink-0 overflow-hidden rounded-xl bg-gray-50">
                 <NuxtImg
                   :src="galleryImages?.[0]?.url || '/placeholder.webp'"
                   :alt="productTitle"
-                  class="w-full h-full object-cover"
+                  class="h-full w-full object-cover"
                 />
               </div>
 
               <div class="min-w-0 flex-1">
-                <div class="text-sm font-medium line-clamp-2">
+                <div class="line-clamp-2 text-sm font-semibold">
                   {{ productTitle }}
                 </div>
 
-                <div class="text-xs text-gray-600 mt-1">
+                <div class="mt-1 text-sm font-bold text-primary">
                   {{ formattedPriceAOA }}
                 </div>
               </div>
             </div>
 
-            <div class="mt-3 flex flex-col gap-2">
+            <div class="mt-4 grid gap-2">
               <UButton
-                color="primary"
-                class="w-full justify-center uppercase"
                 :to="cartPageTo"
+                size="xl"
+                color="primary"
+                class="w-full justify-center"
                 @click="closeCartDrawer"
               >
                 {{ t('product.cartNudge.checkout') }}
               </UButton>
 
               <UButton
+                size="xl"
                 color="neutral"
                 variant="outline"
-                class="w-full justify-center uppercase"
+                class="w-full justify-center"
                 @click="closeCartDrawer"
               >
                 {{ t('product.cartNudge.continue') }}
@@ -922,74 +934,72 @@ useHead(() => ({
         </template>
       </UDrawer>
 
-      <!-- Sticky bottom bar (mobile) -->
-      <div class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 p-3 sm:hidden">
-        <div class="max-w-(--ui-container) mx-auto px-4 flex gap-3 items-center">
+      <!-- MOBILE STICKY CTA -->
+      <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 sm:hidden">
+        <div class="mx-auto flex max-w-(--ui-container) items-center gap-2 px-1">
           <UButton
-            variant="outline"
             :to="whatsappHref"
+            size="xl"
+            variant="outline"
             target="_blank"
             icon="i-simple-icons-whatsapp"
             class="shrink-0"
           />
 
-          <!-- если SKU уже в корзине: степпер + checkout -->
           <template v-if="canAdd && currentSkuQty > 0">
-            <div class="flex-1 flex items-center gap-2">
-              <UButton
-                variant="outline"
-                class="shrink-0"
-                :disabled="!currentSkuKey"
-                @click="decrement(currentSkuKey)"
-              >
-                −
-              </UButton>
+            <UButton
+              :disabled="!currentSkuKey"
+              size="xl"
+              variant="outline"
+              @click="decrement(currentSkuKey)"
+            >
+              −
+            </UButton>
 
-              <div class="min-w-0 flex-1 text-center">
-                <div class="text-xs text-gray-500 leading-none">
-                  {{ t('product.ui.inCart') }}
-                </div>
-
-                <div class="text-base font-semibold leading-tight">
-                  {{ currentSkuQty }}
-                </div>
+            <div class="min-w-0 flex-1 text-center">
+              <div class="text-xs text-muted">
+                {{ t('product.ui.inCart') }}
               </div>
 
-              <UButton
-                variant="outline"
-                class="shrink-0"
-                :disabled="!currentSkuKey"
-                @click="increment(currentSkuKey)"
-              >
-                +
-              </UButton>
+              <div class="text-base font-bold">
+                {{ currentSkuQty }}
+              </div>
             </div>
 
             <UButton
-              color="primary"
-              class="shrink-0 uppercase"
+              :disabled="!currentSkuKey"
+              size="xl"
+              variant="outline"
+              @click="increment(currentSkuKey)"
+            >
+              +
+            </UButton>
+
+            <UButton
               :to="cartPageTo"
+              size="xl"
+              color="primary"
             >
               {{ t('product.ui.checkout') }}
             </UButton>
           </template>
 
-          <!-- иначе: add + отдельный checkout -->
           <template v-else>
             <UButton
-              color="primary"
-              class="flex-1 justify-center uppercase"
               :disabled="!selectedSizeId"
+              size="xl"
+              color="primary"
+              class="flex-1 justify-center"
               @click="addProductToCart"
             >
-              {{ selectedSizeId ? isEmptyCart ? t('product.ui.addToCart') : t('product.ui.addToCartShort') : t('product.ui.chooseSize') }}
+              {{ selectedSizeId ? t('product.ui.addToCartShort') : t('product.size') }}
             </UButton>
 
             <UButton
               v-if="!isEmptyCart"
-              variant="outline"
-              class="shrink-0 uppercase"
               :to="cartPageTo"
+              size="xl"
+              variant="outline"
             >
               {{ t('product.ui.checkout') }}
             </UButton>
