@@ -39,7 +39,6 @@ const total = computed(() => data.value!.total || 0);
 const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)));
 const makePaginationTo = (pageNum: number) => ({ query: { page: pageNum } });
 
-
 const category = computed(() => data.value!.category);
 const categoryTitle = computed(() => category.value?.name || '');
 
@@ -48,7 +47,6 @@ const breadcrumbItems = computed(() => (data.value!.breadcrumbs || []).map((c: a
   to: localeRoute(c.to),
 })));
 
-/** АНАЛИТИКА (GA4 ecommerce) */
 const { trackViewItemList, trackSelectItem } = useAnalyticsEvent();
 
 const mapProductToGa4Item = (p: any, index?: number) => {
@@ -106,7 +104,6 @@ const sendSelectProductEvent = (product: any) => {
   });
 };
 
-/** SEO */
 const { t } = useI18n();
 const requestURL = useRequestURL();
 
@@ -179,18 +176,24 @@ useHead(() => ({
 {
   "pt": {
     "category": {
+      "count": "{count} produtos disponíveis",
       "empty": "Ainda não há itens nesta categoria.",
-      "emptyDescription": "Veja outras categorias ou use a pesquisa — você pode reservar e experimentar no ponto (sem pagamento online).",
-      "seoTitle": "{category} | Reserve e experimente em Angola",
-      "seoDescription": "Veja {category} na Amoda: roupa, calçado e acessórios. Reserve online sem pagamento, escolha o ponto e venha experimentar. Você decide na hora."
+      "emptyDescription": "Veja outras categorias ou volte em breve. Você pode reservar online, experimentar primeiro e pagar apenas pelo que gostar.",
+      "allCategories": "Ver categorias",
+      "newBadge": "NOVO",
+      "seoTitle": "{category} | Experimente antes de pagar",
+      "seoDescription": "Veja {category} na Amoda. Reserve online sem pagamento, experimente antes e pague apenas pelo que gostar."
     }
   },
   "en": {
     "category": {
+      "count": "{count} products available",
       "empty": "No items in this category yet.",
-      "emptyDescription": "Browse other categories or use search — you can reserve and try on at the point (no online payment).",
-      "seoTitle": "{category} | Reserve & try on in Angola",
-      "seoDescription": "Explore {category} at Amoda: apparel, shoes and accessories. Reserve online with no payment, choose a point, and come try on. Decide on the spot."
+      "emptyDescription": "Browse other categories or come back soon. You can reserve online, try first, and pay only for what you like.",
+      "allCategories": "View categories",
+      "newBadge": "NEW",
+      "seoTitle": "{category} | Try before you pay",
+      "seoDescription": "Explore {category} at Amoda. Reserve online with no payment, try first, and pay only for what you like."
     }
   }
 }
@@ -198,68 +201,102 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <template #left>
-      <UPageAside>
-        <SidebarCategories />
-      </UPageAside>
-    </template>
+    <UPageBody>
+      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+        <UBreadcrumb
+          :items="breadcrumbItems"
+          class="hidden md:block"
+        />
 
-    <UPageHeader
-      :title="categoryTitle"
-      :description="pageDescription"
-      :ui="{ title: 'text-xl md:text-2xl font-semibold' }"
-    >
-      <template #headline>
-        <div class="space-y-5">
-          <UBreadcrumb
-            :items="breadcrumbItems"
-            class="hidden md:block"
-          />
+        <div class="mt-0 md:mt-5">
+          <UBadge
+            color="primary"
+            variant="soft"
+          >
+            {{ t('category.count', { count: total }) }}
+          </UBadge>
 
+          <h1 class="mt-4 text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
+            {{ categoryTitle }}
+          </h1>
+
+          <p class="mt-4 text-base leading-7 text-muted sm:text-lg">
+            {{ pageDescription }}
+          </p>
+        </div>
+
+        <div
+          v-if="navigation?.length"
+          class="mt-5"
+        >
           <CategoriesPills :list="navigation" />
         </div>
-      </template>
-    </UPageHeader>
+      </section>
 
-    <UPageBody>
       <UEmpty
         v-if="!products.length"
+        class="mt-6"
         :title="t('category.empty')"
         :description="t('category.emptyDescription')"
-      />
+      >
+        <template #actions>
+          <UButton
+            :to="localeRoute({ name: 'index' })"
+            color="primary"
+          >
+            {{ t('category.allCategories') }}
+          </UButton>
+        </template>
+      </UEmpty>
 
-      <UBlogPosts
+      <section
         v-else
-        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4"
+        class="mt-6"
       >
-        <UBlogPost
-          v-for="product in products"
-          :key="product.id"
-          :title="product.title"
-          :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
-          :image="product.image || 'placeholder.webp'"
-          :to="localeRoute({ name: 'product-slug', params: { slug: product.slug } })"
-          :ui="{
-            header: 'aspect-[4/5] object-cover',
-            body: 'sm:p-3',
-            title: 'line-clamp-2 overflow-hidden'
-          }"
-          variant="outline"
-          @click="sendSelectProductEvent(product)"
-        />
-      </UBlogPosts>
+        <UBlogPosts class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4">
+          <UBlogPost
+            v-for="(product, index) in products"
+            :key="product.id"
+            :title="product.title"
+            :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
+            :image="product.image || 'placeholder.webp'"
+            :to="localeRoute({ name: 'product-slug', params: { slug: product.slug } })"
+            :ui="{
+              root: 'group overflow-hidden border border-gray-100 rounded-2xl hover:shadow-md transition',
+              header: 'aspect-[4/5] overflow-hidden bg-gray-50',
+              image: 'h-full w-full object-cover transition duration-300 group-hover:scale-105',
+              body: 'sm:p-3',
+              title: 'text-sm font-semibold text-highlighted line-clamp-2 min-h-[40px]',
+              description: 'mt-2 text-sm font-bold text-primary'
+            }"
+            variant="outline"
+            @click="sendSelectProductEvent(product)"
+          >
+            <template #badge>
+              <UBadge
+                v-if="index < 3"
+                color="primary"
+                variant="solid"
+                class="absolute left-2 top-2"
+              >
+                {{ t('category.newBadge') }}
+              </UBadge>
+            </template>
+          </UBlogPost>
+        </UBlogPosts>
 
-      <div
-        v-if="pages > 1"
-        class="mt-8 flex justify-center"
-      >
-        <UPagination
-          v-model:page="page"
-          :itemsPerPage="limit"
-          :total="total"
-          :to="makePaginationTo"
-        />
-      </div>
+        <div
+          v-if="pages > 1"
+          class="mt-8 flex justify-center"
+        >
+          <UPagination
+            v-model:page="page"
+            :itemsPerPage="limit"
+            :total="total"
+            :to="makePaginationTo"
+          />
+        </div>
+      </section>
     </UPageBody>
   </UPage>
 </template>

@@ -111,6 +111,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
     "home": {
       "title": "Amoda — roupa feminina em Luanda com prova antes de pagar",
       "desc": "Escolha roupa feminina online em Luanda, reserve sem pagar, experimente primeiro e pague apenas pelo que gostar.",
+      "newBadge": "NOVO",
       "how": {
         "title": "Como comprar na Amoda",
         "steps": [
@@ -171,6 +172,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
     "home": {
       "title": "Amoda — women’s fashion in Luanda with try before you pay",
       "desc": "Choose women’s clothing online in Luanda, reserve with no payment, try first, and pay only for what you like.",
+      "newBadge": "NEW",
       "how": {
         "title": "How to buy on Amoda",
         "steps": [
@@ -304,7 +306,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
                 variant="solid"
                 class="absolute top-2 left-2"
               >
-                NEW
+                {{ t('home.newBadge') }}
               </UBadge>
             </template>
           </UBlogPost>
@@ -397,7 +399,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
             {{ t('home.seo.title') }}
           </h2>
 
-          <div class="mt-4 space-y-3 text-sm leading-7 text-muted">
+          <div class="mt-4 space-y-1 text-sm leading-7 text-muted">
             <p
               v-for="(p, i) in seoParagraphs"
               :key="i"

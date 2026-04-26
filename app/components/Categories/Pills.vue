@@ -1,59 +1,45 @@
 <script setup lang="ts">
-const props = defineProps<{
-  list: Array<{ id: number; name: string; slug: string; image: string }>
+type CategoryPill = {
+  id: number
+  name: string
+  slug: string
+  image?: string | null
+};
+
+defineProps<{
+  list: CategoryPill[]
 }>();
 
 const localeRoute = useLocaleRoute();
 </script>
 
 <template>
-  <div class="flex flex-wrap justify-center gap-3">
-    <NuxtLink
-      v-for="item in props.list"
-      :key="item.id"
-      :to="localeRoute({ name: 'category-slug', params: { slug: item.slug } })"
-    >
-      <UCard
-        class="
-            w-[100px] h-[100px]
-            sm:w-[120px] sm:h-[120px]
-            rounded-xl border border-gray-100 shadow-sm
-            hover:shadow-md transition-all
-            flex flex-col items-center justify-start
-          "
-        :ui="{ body: 'p-2 sm:p-3 flex flex-col items-center w-full h-full' }"
+  <nav
+    v-if="list?.length"
+    aria-label="Category navigation"
+  >
+    <div class="flex gap-2 pb-1 flex-wrap sm:gap-3 sm:pb-0">
+      <NuxtLink
+        v-for="item in list"
+        :key="item.id"
+        :to="localeRoute({ name: 'category-slug', params: { slug: item.slug } })"
+        class="group shrink-0"
       >
-        <div
-          class="
-              w-12 h-12
-              sm:w-14 sm:h-14
-              rounded-full overflow-hidden bg-white
-              flex items-center justify-center
-              shrink-0
-            "
-        >
-          <img
-            :src="item.image || '/placeholder.webp'"
-            :alt="item.name"
-            class="w-12 h-12 sm:w-14 sm:h-14 object-cover"
-          >
-        </div>
+        <div class="flex min-w-[132px] items-center gap-2 rounded-full border border-gray-100 bg-white/80 px-3 py-2 shadow-sm transition hover:border-primary/30 hover:bg-primary/5 hover:shadow-md sm:min-w-0">
+          <div class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100">
+            <img
+              :src="item.image || '/placeholder.webp'"
+              :alt="item.name"
+              class="size-full object-cover transition group-hover:scale-105"
+              loading="lazy"
+            >
+          </div>
 
-        <p
-          class="
-              text-[11px] sm:text-xs
-              text-gray-900 text-center
-              mt-1 sm:mt-2
-              leading-tight
-              line-clamp-2
-              h-[28px] sm:h-[32px]
-              flex items-center justify-center
-              px-1
-            "
-        >
-          {{ item.name }}
-        </p>
-      </UCard>
-    </NuxtLink>
-  </div>
+          <span class="max-w-[120px] truncate text-sm font-medium text-highlighted">
+            {{ item.name }}
+          </span>
+        </div>
+      </NuxtLink>
+    </div>
+  </nav>
 </template>
