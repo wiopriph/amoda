@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CONTACT_PHONE } from '~/constants/contacts';
+import { CONTACT_PHONE, TIKTOK_LINK } from '~/constants/contacts';
 
 
 type HeroProps = {
@@ -115,11 +115,11 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
             </UButton>
 
             <UButton
+              :to="TIKTOK_LINK"
               size="xl"
               color="neutral"
               variant="soft"
               icon="i-simple-icons-tiktok"
-              to="https://www.tiktok.com/@amoda.ao"
               target="_blank"
             >
               TikTok
@@ -172,7 +172,7 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
           </div>
 
           <a
-            href="https://www.tiktok.com/@amoda.ao"
+            :href="TIKTOK_LINK"
             target="_blank"
             rel="noopener noreferrer"
             class="absolute bottom-3 left-3 right-3 rounded-2xl bg-white/90 px-3 py-3 shadow-lg backdrop-blur transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary sm:bottom-4 sm:left-4 sm:right-4 sm:px-4"

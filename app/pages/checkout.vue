@@ -47,7 +47,7 @@ const officeItems = computed<SelectMenuItem[]>(() =>
 const form = reactive({
   name: '',
   phone: '',
-  pickupOfficeId: 4, // Kilamba
+  pickupOfficeId: 1,
 });
 
 const pending = ref(false);
