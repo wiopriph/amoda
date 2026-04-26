@@ -26,7 +26,9 @@ export default defineEventHandler(async (event) => {
         name,
         address,
         phone,
-        opening_hours
+        location_lat,
+        location_lng,
+        map_url
       ),
 
       items:order_items(
@@ -106,7 +108,9 @@ export default defineEventHandler(async (event) => {
       name: data.pickup_office.name,
       address: data.pickup_office.address,
       phone: data.pickup_office.phone,
-      openingHours: data.pickup_office.opening_hours,
+      mapUrl: data.pickup_office.map_url,
+      locationLat: data.pickup_office.location_lat,
+      locationLng: data.pickup_office.location_lng,
     } :
     null;
 
