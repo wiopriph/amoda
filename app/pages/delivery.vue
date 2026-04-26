@@ -7,11 +7,26 @@ const localeRoute = useLocaleRoute();
 const seoTitle = computed(() => t('delivery.meta.title'));
 const seoDescription = computed(() => t('delivery.meta.description'));
 
+const valueItems = computed(() =>
+  (tm('delivery.value.items') as any[]).map((item) => ({
+    icon: rt(item.icon),
+    title: rt(item.title),
+    desc: rt(item.desc),
+  })),
+);
+
 const steps = computed(() =>
   (tm('delivery.how.steps') as any[]).map((s) => ({
-    icon: rt(s.icon),
     title: rt(s.title),
     desc: rt(s.desc),
+  })),
+);
+
+const ruleItems = computed(() =>
+  (tm('delivery.rules.items') as any[]).map((item) => ({
+    icon: rt(item.icon),
+    title: rt(item.title),
+    desc: rt(item.desc),
   })),
 );
 
@@ -52,194 +67,254 @@ useHead(() => {
 {
   "pt": {
     "delivery": {
-      "title": "Como funciona a reserva na Amoda",
-      "intro": "Reserve online e venha experimentar no ponto. Sem pagamento online — você decide na hora o que levar.",
+      "title": "Escolha online. Experimente antes de pagar.",
+      "intro": "Na Amoda você reserva as peças pelo site, recebe a confirmação no WhatsApp e experimenta antes de decidir. Pague apenas pelo que gostar.",
       "meta": {
-        "title": "Como funciona a Amoda | Reservar e experimentar em Luanda",
-        "description": "Passo a passo: escolher, reservar, selecionar o ponto, confirmar no WhatsApp e experimentar. Pontos e horários em Luanda."
+        "title": "Como comprar na Amoda | Experimente antes de pagar em Luanda",
+        "description": "Veja como funciona a Amoda: escolha roupa online, reserve sem pagar, confirme no WhatsApp, experimente e pague apenas pelo que gostar."
       },
       "badges": {
-        "try": "Reserva grátis",
-        "pickup": "Pontos para experimentar",
-        "fast": "Rápido e simples"
+        "try": "Sem pagamento online",
+        "pickup": "Experimente antes",
+        "fast": "Fácil pelo WhatsApp"
       },
       "value": {
-        "title": "Por que isto funciona melhor",
-        "subtitle": "Ideia simples: você não depende de fotos. Você vê ao vivo no ponto e leva só o que gostar.",
+        "title": "Comprar roupa online sem medo",
+        "subtitle": "Sabemos que roupa pode ficar diferente no corpo. Por isso você não precisa pagar antes de experimentar.",
         "items": [
           {
-            "icon": "i-lucide-check-circle",
-            "title": "Sem adivinhações",
-            "desc": "Experimente o tamanho e veja o caimento ao vivo. Se não ficar bem, não leva."
+            "icon": "i-lucide-shirt",
+            "title": "Você prova primeiro",
+            "desc": "Veja o tamanho, o tecido e como a peça fica em você antes de decidir."
           },
           {
-            "icon": "i-lucide-palette",
-            "title": "Cor e material reais",
-            "desc": "Veja a cor e o tecido na mão. Sem surpresas."
+            "icon": "i-lucide-wallet",
+            "title": "Paga só o que gostar",
+            "desc": "Se uma peça não servir ou não agradar, você simplesmente não leva."
           },
           {
             "icon": "i-lucide-shield-check",
-            "title": "Mais confiança",
-            "desc": "Você decide no ponto. Menos risco e menos arrependimento."
+            "title": "Sem risco desnecessário",
+            "desc": "Nada de pagar online por uma peça que você ainda não viu ao vivo."
           },
           {
-            "icon": "i-lucide-clock",
-            "title": "Rápido e prático",
-            "desc": "Escolha, reserve e venha experimentar. Sem complicação."
+            "icon": "i-simple-icons-whatsapp",
+            "title": "Ajuda no WhatsApp",
+            "desc": "Se tiver dúvidas sobre tamanho, ponto ou reserva, fale connosco pelo WhatsApp."
           }
         ]
       },
       "how": {
         "title": "Como funciona",
         "steps": [
-          { "icon": "i-lucide-search", "title": "Escolha os itens", "desc": "Navegue pelas categorias e adicione os itens que quer experimentar." },
-          { "icon": "i-lucide-clipboard-check", "title": "Faça a reserva", "desc": "Preencha nome e WhatsApp — sem pagamento online." },
-          { "icon": "i-lucide-map-pin", "title": "Selecione o ponto", "desc": "Escolha um ponto de levantamento conveniente para experimentar." },
-          { "icon": "i-lucide-phone", "title": "Confirmação no WhatsApp", "desc": "Entraremos em contacto quando estiver pronto para experimentar." },
-          { "icon": "i-lucide-shirt", "title": "Experimente e decida", "desc": "Experimente no ponto e leve só o que gostar. Sem compromisso." }
+          {
+            "title": "Escolha as peças",
+            "desc": "Veja os produtos no site e adicione ao pedido as peças que quer experimentar."
+          },
+          {
+            "title": "Faça a reserva",
+            "desc": "Envie o pedido com seu nome e WhatsApp. Não precisa pagar online."
+          },
+          {
+            "title": "Nós confirmamos",
+            "desc": "A nossa equipa fala consigo no WhatsApp para confirmar a reserva e orientar o próximo passo."
+          },
+          {
+            "title": "Experimente",
+            "desc": "Receba ou vá ao ponto combinado para ver as peças ao vivo e experimentar."
+          },
+          {
+            "title": "Pague só o que levar",
+            "desc": "Gostou? Leva e paga. Não gostou? Sem problema, não precisa levar."
+          }
         ]
       },
       "pickup": {
-        "title": "Pontos para experimentar",
-        "desc": "Veja endereços, contactos e horários de funcionamento.",
-        "button": "Ver pontos"
+        "title": "Quer ver onde experimentar?",
+        "desc": "Veja os pontos disponíveis, endereço, horário e contactos.",
+        "button": "Ver pontos de experimentação"
       },
       "rules": {
-        "title": "Regras e detalhes importantes",
+        "title": "Informações importantes",
         "items": [
           {
-            "icon": "i-lucide-calendar-days",
-            "title": "Prazo da reserva",
-            "desc": "A reserva fica disponível por um período limitado. Avisaremos o prazo no WhatsApp."
+            "icon": "i-lucide-shopping-bag",
+            "title": "A reserva não é compra obrigatória",
+            "desc": "Reservar significa que você quer experimentar. Você só paga se decidir levar."
           },
           {
-            "icon": "i-lucide-phone-call",
-            "title": "Confirmação",
-            "desc": "Confirmamos quando estiver pronto e combinamos o melhor horário para você ir."
+            "icon": "i-simple-icons-whatsapp",
+            "title": "Confirmação pelo WhatsApp",
+            "desc": "Depois do pedido, a nossa equipa entra em contacto para confirmar disponibilidade e detalhes."
           },
           {
-            "icon": "i-lucide-shirt",
-            "title": "Experimentação no ponto",
-            "desc": "Você pode experimentar e recusar qualquer item que não sirva ou não agrade."
+            "icon": "i-lucide-clock",
+            "title": "Produtos ficam reservados por tempo limitado",
+            "desc": "Informamos no WhatsApp até quando a sua reserva estará disponível."
           },
           {
-            "icon": "i-lucide-package-check",
-            "title": "Verifique no local",
-            "desc": "Confira os itens no ponto antes de levar."
+            "icon": "i-lucide-search-check",
+            "title": "Confira tudo antes de pagar",
+            "desc": "Veja tamanho, cor, tecido e estado da peça antes de finalizar a compra."
           },
           {
-            "icon": "i-lucide-rotate-ccw",
+            "icon": "i-lucide-refresh-ccw",
             "title": "Trocas e devoluções",
-            "desc": "Se você levar e depois quiser trocar, as regras dependem do tipo do item e do estado. Veja a política."
+            "desc": "Depois de comprar, trocas e devoluções seguem a nossa política oficial."
           }
         ],
-        "returnLinkText": "Política de Trocas e Devoluções"
+        "returnLinkText": "Ver política de trocas"
       },
       "faq": {
-        "title": "Perguntas frequentes",
+        "title": "Dúvidas frequentes",
         "items": [
-          { "q": "Posso experimentar várias peças?", "a": "Sim. Reserve quantas quiser e leve apenas o que gostar." },
-          { "q": "E se nada servir?", "a": "Sem problema — você pode recusar no local e não leva nada." },
-          { "q": "Como sei quando posso ir?", "a": "Entraremos em contacto no WhatsApp quando estiver pronto para experimentar." },
-          { "q": "Quanto tempo a reserva fica no ponto?", "a": "Guardamos por um período limitado. Informamos o prazo no WhatsApp." },
-          { "q": "Onde vejo os pontos e horários?", "a": "Na página de pontos (endereços, contactos e horários)." }
+          {
+            "q": "Preciso pagar antes?",
+            "a": "Não. Você reserva online e paga apenas se gostar da peça depois de experimentar."
+          },
+          {
+            "q": "Posso reservar várias peças?",
+            "a": "Sim. Você pode escolher várias peças e levar apenas as que gostar."
+          },
+          {
+            "q": "E se nada servir?",
+            "a": "Tudo bem. Se nada servir ou agradar, você não precisa comprar."
+          },
+          {
+            "q": "Como sei quando posso experimentar?",
+            "a": "A nossa equipa entra em contacto pelo WhatsApp para confirmar os detalhes."
+          },
+          {
+            "q": "Onde vejo os pontos?",
+            "a": "Na página de pontos de experimentação, com endereço, horário e contactos."
+          }
         ]
       }
     }
   },
   "en": {
     "delivery": {
-      "title": "How Amoda reservation works",
-      "intro": "Reserve online and come try on at the point. No online payment — decide on the spot what you keep.",
+      "title": "Choose online. Try before you pay.",
+      "intro": "With Amoda, you reserve items on the website, get confirmation on WhatsApp, and try before deciding. Pay only for what you like.",
       "meta": {
-        "title": "How Amoda works | Reserve & try on in Luanda",
-        "description": "Step-by-step: choose, reserve, pick a point, WhatsApp confirmation, and try on. Points and opening hours in Luanda."
+        "title": "How to buy on Amoda | Try before you pay in Luanda",
+        "description": "Learn how Amoda works: choose clothes online, reserve with no payment, confirm on WhatsApp, try on, and pay only for what you like."
       },
       "badges": {
-        "try": "Free reservation",
-        "pickup": "Try-on points",
-        "fast": "Simple process"
+        "try": "No online payment",
+        "pickup": "Try before paying",
+        "fast": "Easy via WhatsApp"
       },
       "value": {
-        "title": "Why this works better",
-        "subtitle": "Simple idea: you don’t rely on photos. You check at the point and keep only what you like.",
+        "title": "Buy clothes online with less risk",
+        "subtitle": "Clothes can look different in real life. That is why you do not need to pay before trying.",
         "items": [
           {
-            "icon": "i-lucide-check-circle",
-            "title": "No guessing",
-            "desc": "Try the size and see the fit in real life. If it’s not right, don’t take it."
+            "icon": "i-lucide-shirt",
+            "title": "Try first",
+            "desc": "Check the size, fabric, and fit before deciding."
           },
           {
-            "icon": "i-lucide-palette",
-            "title": "Real color & material",
-            "desc": "See the color and feel the fabric. No surprises."
+            "icon": "i-lucide-wallet",
+            "title": "Pay only for what you like",
+            "desc": "If an item does not fit or you do not like it, simply do not take it."
           },
           {
             "icon": "i-lucide-shield-check",
-            "title": "More confidence",
-            "desc": "You decide at the point. Less risk, less regret."
+            "title": "Less risk",
+            "desc": "No need to pay online for an item you have not seen in real life."
           },
           {
-            "icon": "i-lucide-clock",
-            "title": "Fast and practical",
-            "desc": "Choose, reserve, and come try on. No hassle."
+            "icon": "i-simple-icons-whatsapp",
+            "title": "WhatsApp support",
+            "desc": "Ask us about sizes, points, or your reservation on WhatsApp."
           }
         ]
       },
       "how": {
         "title": "How it works",
         "steps": [
-          { "icon": "i-lucide-search", "title": "Choose items", "desc": "Browse categories and add the items you want to try on." },
-          { "icon": "i-lucide-clipboard-check", "title": "Place a reservation", "desc": "Enter your name and WhatsApp — no online payment." },
-          { "icon": "i-lucide-map-pin", "title": "Select a point", "desc": "Choose a convenient pickup point to try on." },
-          { "icon": "i-lucide-phone", "title": "WhatsApp confirmation", "desc": "We’ll message you when it’s ready to try on." },
-          { "icon": "i-lucide-shirt", "title": "Try on & decide", "desc": "Try on at the point and take only what you like. No obligation." }
+          {
+            "title": "Choose items",
+            "desc": "Browse the website and add the items you want to try."
+          },
+          {
+            "title": "Reserve",
+            "desc": "Send your request with your name and WhatsApp. No online payment needed."
+          },
+          {
+            "title": "We confirm",
+            "desc": "Our team contacts you on WhatsApp to confirm availability and details."
+          },
+          {
+            "title": "Try on",
+            "desc": "Receive or visit the agreed point to see the items in real life and try them."
+          },
+          {
+            "title": "Pay only if you keep it",
+            "desc": "Like it? Take it and pay. Do not like it? No problem."
+          }
         ]
       },
       "pickup": {
-        "title": "Try-on points",
-        "desc": "See addresses, contacts, and opening hours.",
-        "button": "View points"
+        "title": "Want to see where to try?",
+        "desc": "See available points, address, opening hours, and contacts.",
+        "button": "See try-on points"
       },
       "rules": {
-        "title": "Important rules & details",
+        "title": "Important information",
         "items": [
           {
-            "icon": "i-lucide-calendar-days",
-            "title": "Reservation window",
-            "desc": "Reservations are held for a limited time. We’ll share the exact window on WhatsApp."
+            "icon": "i-lucide-shopping-bag",
+            "title": "A reservation is not an obligation to buy",
+            "desc": "Reservation means you want to try. You only pay if you decide to keep the item."
           },
           {
-            "icon": "i-lucide-phone-call",
-            "title": "Confirmation",
-            "desc": "We confirm when it’s ready and help coordinate the best time to come."
+            "icon": "i-simple-icons-whatsapp",
+            "title": "WhatsApp confirmation",
+            "desc": "After your request, our team contacts you to confirm availability and details."
           },
           {
-            "icon": "i-lucide-shirt",
-            "title": "Try-on at the point",
-            "desc": "You can try on and decline any item that doesn’t fit or you don’t like."
+            "icon": "i-lucide-clock",
+            "title": "Items are reserved for a limited time",
+            "desc": "We will tell you on WhatsApp how long your reservation is available."
           },
           {
-            "icon": "i-lucide-package-check",
-            "title": "Check on-site",
-            "desc": "Inspect items at the point before taking them."
+            "icon": "i-lucide-search-check",
+            "title": "Check everything before paying",
+            "desc": "Check size, color, fabric, and condition before completing the purchase."
           },
           {
-            "icon": "i-lucide-rotate-ccw",
-            "title": "Exchanges & returns",
-            "desc": "If you take items and later want to exchange, rules depend on item type and condition. See the policy."
+            "icon": "i-lucide-refresh-ccw",
+            "title": "Exchanges and returns",
+            "desc": "After purchase, exchanges and returns follow our official policy."
           }
         ],
-        "returnLinkText": "Exchange & Return Policy"
+        "returnLinkText": "See exchange policy"
       },
       "faq": {
         "title": "FAQ",
         "items": [
-          { "q": "Can I try multiple items?", "a": "Yes. Reserve as many as you want and keep only what you like." },
-          { "q": "What if nothing fits?", "a": "No problem — you can decline on-site and take nothing." },
-          { "q": "How do I know when I can come?", "a": "We’ll message you on WhatsApp when it’s ready to try on." },
-          { "q": "How long is my reservation held?", "a": "Reservations are held for a limited time. We’ll share the exact window on WhatsApp." },
-          { "q": "Where can I see locations and hours?", "a": "On the points page (addresses, contacts, and opening hours)." }
+          {
+            "q": "Do I need to pay first?",
+            "a": "No. You reserve online and pay only if you like the item after trying it."
+          },
+          {
+            "q": "Can I reserve several items?",
+            "a": "Yes. You can choose several items and keep only the ones you like."
+          },
+          {
+            "q": "What if nothing fits?",
+            "a": "No problem. If nothing fits or you do not like it, you do not need to buy."
+          },
+          {
+            "q": "How do I know when I can try?",
+            "a": "Our team contacts you on WhatsApp to confirm the details."
+          },
+          {
+            "q": "Where can I see the points?",
+            "a": "On the try-on points page, with address, opening hours, and contacts."
+          }
         ]
       }
     }
@@ -249,109 +324,139 @@ useHead(() => {
 
 <template>
   <UPage>
-    <UPageHeader
-      :title="t('delivery.title')"
-      :description="t('delivery.intro')"
-    />
-
-    <UPageBody class="max-w-3xl mx-auto">
-      <div class="space-y-10">
+    <UPageBody class="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
         <div class="flex flex-wrap gap-2">
-          <UBadge>
+          <UBadge
+            color="primary"
+            variant="soft"
+          >
             {{ t('delivery.badges.try') }}
           </UBadge>
 
-          <UBadge>
+          <UBadge
+            color="primary"
+            variant="soft"
+          >
             {{ t('delivery.badges.pickup') }}
           </UBadge>
 
-          <UBadge>
+          <UBadge
+            color="primary"
+            variant="soft"
+          >
             {{ t('delivery.badges.fast') }}
           </UBadge>
         </div>
 
-        <UCard>
-          <template #header>
-            <div class="space-y-1">
-              <h2 class="text-base font-semibold">
-                {{ t('delivery.value.title') }}
-              </h2>
+        <h1 class="mt-5 text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
+          {{ t('delivery.title') }}
+        </h1>
 
-              <p class="text-sm text-gray-600">
-                {{ t('delivery.value.subtitle') }}
+        <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
+          {{ t('delivery.intro') }}
+        </p>
+
+        <div class="mt-6 grid gap-3 sm:flex sm:flex-wrap">
+          <UButton
+            :to="localeRoute({ name: 'pickup-points' })"
+            size="xl"
+            color="primary"
+            icon="i-lucide-map-pin"
+            class="justify-center"
+          >
+            {{ t('delivery.pickup.button') }}
+          </UButton>
+
+          <UButton
+            :to="localeRoute({ name: 'return-policy' })"
+            size="xl"
+            color="primary"
+            variant="soft"
+            icon="i-lucide-refresh-ccw"
+            class="justify-center"
+          >
+            {{ t('delivery.rules.returnLinkText') }}
+          </UButton>
+        </div>
+      </section>
+
+      <section class="mt-5 sm:mt-6">
+        <UCard>
+          <div>
+            <h2 class="text-xl font-bold text-highlighted">
+              {{ t('delivery.value.title') }}
+            </h2>
+
+            <p class="mt-2 text-sm leading-6 text-muted sm:text-base">
+              {{ t('delivery.value.subtitle') }}
+            </p>
+          </div>
+
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            <div
+              v-for="item in valueItems"
+              :key="item.title"
+              class="rounded-2xl border border-gray-100 bg-gray-50/60 p-4"
+            >
+              <div class="flex items-center gap-2">
+                <UIcon
+                  :name="item.icon"
+                  class="size-5 text-primary"
+                />
+
+                <h3 class="font-semibold text-highlighted">
+                  {{ item.title }}
+                </h3>
+              </div>
+
+              <p class="mt-2 text-sm leading-6 text-muted">
+                {{ item.desc }}
               </p>
             </div>
-          </template>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <UCard
-              v-for="item in tm('delivery.value.items')"
-              :key="rt(item.title)"
-            >
-              <div class="flex items-start gap-3">
-                <UIcon
-                  :name="rt(item.icon)"
-                  class="size-6"
-                />
-
-                <div>
-                  <h3 class="font-medium">
-                    {{ rt(item.title) }}
-                  </h3>
-
-                  <p class="text-sm text-gray-600">
-                    {{ rt(item.desc) }}
-                  </p>
-                </div>
-              </div>
-            </UCard>
           </div>
         </UCard>
+      </section>
 
+      <section class="mt-5 sm:mt-6">
         <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('delivery.how.title') }}
-            </h2>
-          </template>
+          <h2 class="text-xl font-bold text-highlighted">
+            {{ t('delivery.how.title') }}
+          </h2>
 
-          <div class="space-y-3">
-            <UCard
+          <div class="mt-5 space-y-3">
+            <div
               v-for="(s, idx) in steps"
               :key="`${idx}-${s.title}`"
+              class="flex gap-3 rounded-2xl border border-gray-100 bg-white p-4"
             >
-              <div class="flex items-start gap-3">
-                <div class="flex items-center justify-center size-8 rounded-full bg-primary/10 text-primary text-sm font-semibold tabular-nums">
-                  {{ idx + 1 }}
-                </div>
-
-                <UIcon
-                  :name="s.icon"
-                  class="size-6 mt-0.5"
-                />
-
-                <div class="min-w-0">
-                  <div class="font-medium">
-                    {{ s.title }}
-                  </div>
-
-                  <div class="text-sm text-gray-600">
-                    {{ s.desc }}
-                  </div>
-                </div>
+              <div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+                {{ idx + 1 }}
               </div>
-            </UCard>
+
+              <div class="min-w-0">
+                <h3 class="font-semibold text-highlighted">
+                  {{ s.title }}
+                </h3>
+
+                <p class="mt-1 text-sm leading-6 text-muted">
+                  {{ s.desc }}
+                </p>
+              </div>
+            </div>
           </div>
         </UCard>
+      </section>
 
-        <UCard>
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <section class="mt-5 sm:mt-6">
+        <UCard class="border-primary/20 bg-primary/5">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 class="text-base sm:text-lg font-semibold">
+              <h2 class="text-lg font-bold text-highlighted">
                 {{ t('delivery.pickup.title') }}
-              </h3>
+              </h2>
 
-              <p class="text-sm text-gray-600 mt-1">
+              <p class="mt-1 text-sm leading-6 text-muted">
                 {{ t('delivery.pickup.desc') }}
               </p>
             </div>
@@ -359,63 +464,68 @@ useHead(() => {
             <UButton
               :to="localeRoute({ name: 'pickup-points' })"
               color="primary"
-              icon="i-lucide-map-pin"
+              size="lg"
+              class="w-full justify-center sm:w-auto"
             >
               {{ t('delivery.pickup.button') }}
             </UButton>
           </div>
         </UCard>
+      </section>
 
+      <section class="mt-5 sm:mt-6">
         <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('delivery.rules.title') }}
-            </h2>
-          </template>
+          <h2 class="text-xl font-bold text-highlighted">
+            {{ t('delivery.rules.title') }}
+          </h2>
 
-          <div class="space-y-4">
+          <div class="mt-5 divide-y divide-gray-100">
             <div
-              v-for="r in tm('delivery.rules.items')"
-              :key="rt(r.title)"
-              class="flex items-start gap-3"
+              v-for="rule in ruleItems"
+              :key="rule.title"
+              class="py-4 first:pt-0 last:pb-0"
             >
-              <UIcon
-                :name="rt(r.icon)"
-                class="size-6 mt-0.5"
-              />
+              <div class="flex items-center gap-2">
+                <UIcon
+                  :name="rule.icon"
+                  class="size-5 text-primary"
+                />
 
-              <div>
-                <div class="font-medium">
-                  {{ rt(r.title) }}
-                </div>
-
-                <div class="text-sm text-gray-600">
-                  {{ rt(r.desc) }}
-                </div>
+                <h3 class="font-semibold text-highlighted">
+                  {{ rule.title }}
+                </h3>
               </div>
-            </div>
 
-            <div class="pt-2">
-              <NuxtLink
-                class="text-primary underline underline-offset-4"
-                :to="localeRoute({ name: 'return-policy' })"
-              >
-                {{ t('delivery.rules.returnLinkText') }}
-              </NuxtLink>
+              <p class="mt-2 text-sm leading-6 text-muted">
+                {{ rule.desc }}
+              </p>
             </div>
           </div>
-        </UCard>
 
+          <div class="mt-5">
+            <UButton
+              :to="localeRoute({ name: 'return-policy' })"
+              color="neutral"
+              variant="soft"
+              class="w-full justify-center sm:w-auto"
+            >
+              {{ t('delivery.rules.returnLinkText') }}
+            </UButton>
+          </div>
+        </UCard>
+      </section>
+
+      <section class="mt-5 sm:mt-6">
         <UCard>
           <template #header>
-            <h2 class="text-base font-semibold">
+            <h2 class="text-xl font-bold text-highlighted">
               {{ t('delivery.faq.title') }}
             </h2>
           </template>
 
           <UAccordion :items="faqs" />
         </UCard>
-      </div>
+      </section>
     </UPageBody>
   </UPage>
 </template>
