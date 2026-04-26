@@ -41,7 +41,6 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
       "intro": "Fale connosco para confirmar reservas, tirar dúvidas ou encontrar o ponto de experimentação mais próximo.",
       "hero": {
         "badge": "Atendimento rápido",
-        "primary": "Falar no WhatsApp",
         "secondary": "Ver pontos"
       },
       "cards": {
@@ -87,7 +86,6 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
       "intro": "Contact us to confirm reservations, ask questions, or find the nearest try-on point.",
       "hero": {
         "badge": "Fast support",
-        "primary": "Chat on WhatsApp",
         "secondary": "See points"
       },
       "cards": {
@@ -152,16 +150,6 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
         </p>
 
         <div class="mt-6 grid gap-3 sm:flex sm:flex-wrap">
-          <UButton
-            size="xl"
-            color="success"
-            icon="i-simple-icons-whatsapp"
-            :to="waLink"
-            target="_blank"
-          >
-            {{ t('contacts.hero.primary') }}
-          </UButton>
-
           <UButton
             size="xl"
             color="primary"
