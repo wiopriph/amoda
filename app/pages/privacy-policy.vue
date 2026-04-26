@@ -1,210 +1,255 @@
 <script setup lang="ts">
-import { CONTACT_EMAIL, COMPANY_ADDRESS } from '~/constants/contacts';
+import { CONTACT_PHONE, COMPANY_ADDRESS } from '~/constants/contacts';
 
 
 definePageMeta({
   name: 'privacy-policy',
 });
 
-const { t } = useI18n();
+const { t, tm, rt } = useI18n();
+
+const whatsappHref = computed(() => {
+  const text = encodeURIComponent('Olá! Preciso de ajuda com privacidade ou dados pessoais na Amoda.');
+
+  return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
+});
+
+const highlights = computed(() =>
+  (tm('privacy.highlights.items') as any[]).map((item) => ({
+    icon: rt(item.icon),
+    title: rt(item.title),
+  })),
+);
+
+const sections = computed(() =>
+  (tm('privacy.sections') as any[]).map((section) => ({
+    icon: rt(section.icon),
+    title: rt(section.title),
+    text: rt(section.text),
+    items: section.items ? (section.items as any[]).map((item) => rt(item)) : [],
+  })),
+);
 
 useHead(() => ({
-  title: t('meta.title'),
-  meta: [{ name: 'robots', content: 'index, follow' }],
+  title: t('privacy.meta.title'),
+  meta: [
+    { name: 'description', content: t('privacy.meta.description') },
+    { name: 'robots', content: 'index, follow' },
+    { property: 'og:title', content: t('privacy.meta.title') },
+    { property: 'og:description', content: t('privacy.meta.description') },
+  ],
 }));
 </script>
 
 <i18n lang="json">
 {
-  "en": {
-    "meta": {
-      "title": "Privacy Policy | Amoda"
-    },
-    "page": {
-      "title": "Privacy Policy",
-      "subtitle": "How Amoda collects and uses your personal data",
-      "effectiveDateLabel": "Effective Date:",
-      "effectiveDateValue": "09/01/2026"
-    },
-    "sections": {
-      "general": {
-        "title": "1. General",
-        "p1": "This Privacy Policy explains what personal data Amoda collects and processes when you use our website (the “Platform”), and for what purposes.",
-        "p2": "Amoda respects your privacy and processes only the data necessary to place an order and contact you about it.",
-        "p3": "By using the Platform, you agree to this Privacy Policy."
+  "pt": {
+    "privacy": {
+      "title": "Política de Privacidade",
+      "subtitle": "A Amoda usa apenas os dados necessários para receber a sua reserva, falar consigo no WhatsApp e preparar os seus itens.",
+      "badge": "Privacidade simples",
+      "effective": "Atualizado em 09/01/2026",
+      "highlights": {
+        "items": [
+          {
+            "icon": "i-lucide-user",
+            "title": "Sem cadastro obrigatório"
+          },
+          {
+            "icon": "i-simple-icons-whatsapp",
+            "title": "Usamos o WhatsApp para confirmar"
+          },
+          {
+            "icon": "i-lucide-shield-check",
+            "title": "Dados usados só para o pedido"
+          }
+        ]
       },
-      "whoWeAre": {
-        "title": "2. Who we are",
-        "p1": "Amoda is the owner and operator of the Platform.",
-        "addressLabel": "Address: ",
-        "emailLabel": "Email: "
+      "main": {
+        "title": "O mais importante",
+        "text": "Você não precisa criar conta para usar a Amoda. Quando faz uma reserva, pedimos apenas o seu nome e WhatsApp para confirmar o pedido e combinar a experimentação."
       },
-      "dataWeCollect": {
-        "title": "3. Personal data we collect",
-        "p1": "The Platform does not require user registration.",
-        "p2": "We collect personal data only during checkout in order to process your order:",
-        "items": {
-          "name": "Name",
-          "phone": "Phone number"
+      "sections": [
+        {
+          "icon": "i-lucide-building-2",
+          "title": "Quem somos",
+          "text": "A Amoda é a responsável pelo website e pelo tratamento dos dados usados para reservas.",
+          "items": [
+            "Endereço: %%address%%"
+          ]
+        },
+        {
+          "icon": "i-lucide-database",
+          "title": "Dados que recolhemos",
+          "text": "Não pedimos dados desnecessários. No checkout, recolhemos apenas o necessário para processar a reserva.",
+          "items": [
+            "Nome",
+            "Número de telefone / WhatsApp",
+            "Itens escolhidos e ponto de experimentação"
+          ]
+        },
+        {
+          "icon": "i-lucide-message-circle",
+          "title": "Como usamos os dados",
+          "text": "Usamos os seus dados para confirmar a reserva, preparar os itens, falar consigo no WhatsApp e prestar apoio ao cliente.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-share-2",
+          "title": "Partilha de dados",
+          "text": "Não vendemos os seus dados. Só partilhamos informações quando for necessário para cumprir o pedido ou quando a lei exigir.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-clock",
+          "title": "Por quanto tempo guardamos",
+          "text": "Guardamos os dados pelo tempo necessário para gerir a reserva, apoio ao cliente e obrigações legais. Depois, os dados podem ser eliminados ou anonimizados.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-lock",
+          "title": "Segurança",
+          "text": "Aplicamos medidas razoáveis para proteger os seus dados contra acesso não autorizado, perda ou alteração.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-user-check",
+          "title": "Os seus direitos",
+          "text": "Você pode pedir informação, correção ou eliminação dos seus dados, quando aplicável. Para isso, fale connosco no WhatsApp.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-child",
+          "title": "Menores",
+          "text": "A Amoda não é destinada a menores. Se acredita que recebemos dados de um menor, contacte-nos para resolvermos.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-external-link",
+          "title": "Links externos",
+          "text": "O nosso site pode ter links para outros websites, como WhatsApp, TikTok, Facebook ou Google Maps. Não controlamos as políticas desses serviços.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-refresh-ccw",
+          "title": "Alterações",
+          "text": "Podemos atualizar esta política quando necessário. A versão nova entra em vigor quando for publicada no site.",
+          "items": []
         }
+      ],
+      "contact": {
+        "title": "Precisa de ajuda com privacidade?",
+        "text": "Fale connosco no WhatsApp se quiser perguntar algo sobre os seus dados pessoais.",
+        "button": "Falar no WhatsApp"
       },
-      "howWeUse": {
-        "title": "4. How we use your personal data",
-        "p1": "We use your personal data only for the following purposes:",
-        "items": {
-          "order": "To process and fulfill your order",
-          "contact": "To contact you about your order",
-          "support": "To provide customer support",
-          "legal": "To comply with applicable legal requirements when necessary"
-        }
-      },
-      "legalBasis": {
-        "title": "5. Legal basis",
-        "items": {
-          "contract": "Contractual necessity (to place and fulfill your order)",
-          "consent": "Your consent when you voluntarily provide your data during checkout",
-          "law": "Compliance with legal obligations where applicable"
-        }
-      },
-      "sharing": {
-        "title": "6. Sharing of personal data",
-        "p1": "We may share personal data only in limited cases:",
-        "p2": "In all cases, we share only the minimum data required for the specific purpose.",
-        "items": {
-          "law": "When required by law",
-          "delivery": "When necessary to fulfill an order (for example, with delivery providers if applicable)"
-        }
-      },
-      "storage": {
-        "title": "7. Data retention",
-        "p1": "We store personal data for as long as necessary to fulfill your order.",
-        "p2": "We may retain data longer if required by applicable law. After that, data is deleted or anonymized."
-      },
-      "security": {
-        "title": "8. Data security",
-        "p1": "We apply reasonable technical and organizational measures to protect personal data from loss, unauthorized access, alteration, or disclosure.",
-        "p2": "Access to personal data is limited to those who need it to operate the Platform and fulfill orders."
-      },
-      "rights": {
-        "title": "9. Your rights",
-        "p1": "You may have the right to:",
-        "p2": "To exercise your rights, contact us at",
-        "items": {
-          "access": "Request information about the personal data we hold about you",
-          "correct": "Request correction of inaccurate data",
-          "delete": "Request deletion of your data (where applicable)",
-          "withdraw": "Withdraw your consent (where processing is based on consent)"
-        }
-      },
-      "minors": {
-        "title": "10. Minors",
-        "p1": "The Platform is not intended for minors.",
-        "p2": "If you believe we have received personal data from a minor, please contact us and we will take steps to delete it."
-      },
-      "thirdPartyLinks": {
-        "title": "11. Third-party links",
-        "p1": "The Platform may contain links to third-party websites. We are not responsible for their content or privacy practices."
-      },
-      "changes": {
-        "title": "12. Changes to this Privacy Policy",
-        "p1": "We may update this Privacy Policy from time to time.",
-        "p2": "The updated version becomes effective when published on the Platform."
+      "meta": {
+        "title": "Política de Privacidade | Amoda",
+        "description": "Entenda como a Amoda recolhe e usa os seus dados pessoais para reservas, WhatsApp e apoio ao cliente."
       }
     }
   },
-  "pt": {
-    "meta": {
-      "title": "Política de Privacidade | Amoda"
-    },
-    "page": {
-      "title": "Política de Privacidade",
-      "subtitle": "Como a Amoda recolhe e utiliza os seus dados pessoais",
-      "effectiveDateLabel": "Data de entrada em vigor:",
-      "effectiveDateValue": "09/01/2026"
-    },
-    "sections": {
-      "general": {
-        "title": "1. Disposições gerais",
-        "p1": "Esta Política de Privacidade explica quais dados pessoais a Amoda recolhe e trata quando você utiliza o nosso website (a “Plataforma”) e para quais finalidades.",
-        "p2": "A Amoda respeita a sua privacidade e trata apenas os dados necessários para realizar um pedido e entrar em contacto consigo sobre esse pedido.",
-        "p3": "Ao utilizar a Plataforma, você concorda com esta Política de Privacidade."
+  "en": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "subtitle": "Amoda only uses the data needed to receive your reservation, contact you on WhatsApp, and prepare your items.",
+      "badge": "Simple privacy",
+      "effective": "Updated on 09/01/2026",
+      "highlights": {
+        "items": [
+          {
+            "icon": "i-lucide-user",
+            "title": "No account required"
+          },
+          {
+            "icon": "i-simple-icons-whatsapp",
+            "title": "We use WhatsApp to confirm"
+          },
+          {
+            "icon": "i-lucide-shield-check",
+            "title": "Data used only for orders"
+          }
+        ]
       },
-      "whoWeAre": {
-        "title": "2. Quem somos",
-        "p1": "A Amoda é a proprietária e operadora da Plataforma.",
-        "addressLabel": "Endereço: ",
-        "emailLabel": "Email: "
+      "main": {
+        "title": "Most important",
+        "text": "You do not need to create an account to use Amoda. When you place a reservation, we only ask for your name and WhatsApp to confirm the request and arrange the try-on."
       },
-      "dataWeCollect": {
-        "title": "3. Dados pessoais que recolhemos",
-        "p1": "A Plataforma não exige registo de utilizadores.",
-        "p2": "Recolhemos dados pessoais apenas no momento do checkout para processar o seu pedido:",
-        "items": {
-          "name": "Nome",
-          "phone": "Número de telefone"
+      "sections": [
+        {
+          "icon": "i-lucide-building-2",
+          "title": "Who we are",
+          "text": "Amoda is responsible for the website and the data used for reservations.",
+          "items": [
+            "Address: %%address%%"
+          ]
+        },
+        {
+          "icon": "i-lucide-database",
+          "title": "Data we collect",
+          "text": "We do not ask for unnecessary data. At checkout, we collect only what is needed to process your reservation.",
+          "items": [
+            "Name",
+            "Phone number / WhatsApp",
+            "Selected items and try-on point"
+          ]
+        },
+        {
+          "icon": "i-lucide-message-circle",
+          "title": "How we use data",
+          "text": "We use your data to confirm the reservation, prepare items, contact you on WhatsApp, and provide customer support.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-share-2",
+          "title": "Data sharing",
+          "text": "We do not sell your data. We only share information when needed to complete your request or when required by law.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-clock",
+          "title": "How long we keep data",
+          "text": "We keep data as long as needed to manage reservations, customer support, and legal obligations. After that, data may be deleted or anonymized.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-lock",
+          "title": "Security",
+          "text": "We apply reasonable measures to protect your data against unauthorized access, loss, or changes.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-user-check",
+          "title": "Your rights",
+          "text": "You may request information, correction, or deletion of your data where applicable. To do so, contact us on WhatsApp.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-scan-face",
+          "title": "Minors",
+          "text": "Amoda is not intended for minors. If you believe we received data from a minor, contact us so we can resolve it.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-external-link",
+          "title": "External links",
+          "text": "Our website may include links to other services, such as WhatsApp, TikTok, Facebook, or Google Maps. We do not control their policies.",
+          "items": []
+        },
+        {
+          "icon": "i-lucide-refresh-ccw",
+          "title": "Changes",
+          "text": "We may update this policy when needed. The new version becomes effective when published on the website.",
+          "items": []
         }
+      ],
+      "contact": {
+        "title": "Need help with privacy?",
+        "text": "Message us on WhatsApp if you have questions about your personal data.",
+        "button": "Chat on WhatsApp"
       },
-      "howWeUse": {
-        "title": "4. Como utilizamos os seus dados pessoais",
-        "p1": "Utilizamos os seus dados pessoais apenas para as seguintes finalidades:",
-        "items": {
-          "order": "Processar e cumprir o seu pedido",
-          "contact": "Entrar em contacto consigo sobre o seu pedido",
-          "support": "Prestar apoio ao cliente",
-          "legal": "Cumprir requisitos legais aplicáveis quando necessário"
-        }
-      },
-      "legalBasis": {
-        "title": "5. Bases legais",
-        "items": {
-          "contract": "Necessidade contratual (para efetuar e cumprir o seu pedido)",
-          "consent": "O seu consentimento quando fornece voluntariamente os dados no checkout",
-          "law": "Cumprimento de obrigações legais quando aplicável"
-        }
-      },
-      "sharing": {
-        "title": "6. Partilha de dados pessoais",
-        "p1": "Podemos partilhar dados pessoais apenas em casos limitados:",
-        "p2": "Em todos os casos, partilhamos apenas os dados mínimos necessários para a finalidade específica.",
-        "items": {
-          "law": "Quando exigido por lei",
-          "delivery": "Quando necessário para cumprir um pedido (por exemplo, com prestadores de entrega, se aplicável)"
-        }
-      },
-      "storage": {
-        "title": "7. Retenção de dados",
-        "p1": "Guardamos os dados pessoais pelo tempo necessário para cumprir o seu pedido.",
-        "p2": "Podemos reter dados por mais tempo se exigido por lei aplicável. Depois disso, os dados são eliminados ou anonimizados."
-      },
-      "security": {
-        "title": "8. Segurança dos dados",
-        "p1": "Aplicamos medidas técnicas e organizacionais razoáveis para proteger os dados pessoais contra perda, acesso não autorizado, alteração ou divulgação.",
-        "p2": "O acesso aos dados pessoais é limitado a quem necessita deles para operar a Plataforma e cumprir pedidos."
-      },
-      "rights": {
-        "title": "9. Os seus direitos",
-        "p1": "Você pode ter o direito de:",
-        "p2": "Para exercer os seus direitos, contacte-nos em",
-        "items": {
-          "access": "Solicitar informações sobre os dados pessoais que mantemos sobre você",
-          "correct": "Solicitar a correção de dados incorretos",
-          "delete": "Solicitar a eliminação dos seus dados (quando aplicável)",
-          "withdraw": "Retirar o seu consentimento (quando o tratamento se baseia no consentimento)"
-        }
-      },
-      "minors": {
-        "title": "10. Menores",
-        "p1": "A Plataforma não se destina a menores.",
-        "p2": "Se você acredita que recebemos dados pessoais de um menor, por favor contacte-nos e tomaremos medidas para os eliminar."
-      },
-      "thirdPartyLinks": {
-        "title": "11. Links de terceiros",
-        "p1": "A Plataforma pode conter links para websites de terceiros. Não nos responsabilizamos pelo conteúdo nem pelas práticas de privacidade desses websites."
-      },
-      "changes": {
-        "title": "12. Alterações a esta Política de Privacidade",
-        "p1": "Podemos atualizar esta Política de Privacidade periodicamente.",
-        "p2": "A versão atualizada entra em vigor quando publicada na Plataforma."
+      "meta": {
+        "title": "Privacy Policy | Amoda",
+        "description": "Understand how Amoda collects and uses your personal data for reservations, WhatsApp, and customer support."
       }
     }
   }
@@ -213,307 +258,119 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageHeader
-      :title="t('page.title')"
-      :description="t('page.subtitle')"
-    />
+    <UPageBody class="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+        <UBadge
+          color="primary"
+          variant="soft"
+          class="mb-4"
+        >
+          {{ t('privacy.badge') }}
+        </UBadge>
 
-    <UPageBody class="max-w-3xl mx-auto">
-      <div class="space-y-6">
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          {{ t('page.effectiveDateLabel') }} <strong>{{ t('page.effectiveDateValue') }}</strong>
+        <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
+          {{ t('privacy.title') }}
+        </h1>
+
+        <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
+          {{ t('privacy.subtitle') }}
         </p>
 
+        <p class="mt-3 text-sm text-muted">
+          {{ t('privacy.effective') }}
+        </p>
+
+        <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-toned">
+          <div
+            v-for="item in highlights"
+            :key="item.title"
+            class="flex items-center gap-2"
+          >
+            <UIcon
+              :name="item.icon"
+              class="size-4 text-primary"
+            />
+
+            <span>{{ item.title }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-5 sm:mt-6">
+        <UCard class="border-primary/20 bg-primary/5">
+          <h2 class="text-xl font-black text-highlighted">
+            {{ t('privacy.main.title') }}
+          </h2>
+
+          <p class="mt-3 text-sm leading-7 text-muted sm:text-base">
+            {{ t('privacy.main.text') }}
+          </p>
+        </UCard>
+      </section>
+
+      <section class="mt-5 sm:mt-6">
         <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.general.title') }}
-            </h2>
-          </template>
+          <div class="divide-y divide-gray-100">
+            <div
+              v-for="section in sections"
+              :key="section.title"
+              class="py-5 first:pt-0 last:pb-0"
+            >
+              <div class="flex items-center gap-2">
+                <UIcon
+                  :name="section.icon"
+                  class="size-5 text-primary"
+                />
 
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.general.p1') }}
-            </p>
+                <h2 class="text-lg font-bold text-highlighted">
+                  {{ section.title }}
+                </h2>
+              </div>
 
-            <p>
-              {{ t('sections.general.p2') }}
-            </p>
+              <p class="mt-2 text-sm leading-7 text-muted sm:text-base">
+                {{ section.text }}
+              </p>
 
-            <p>
-              {{ t('sections.general.p3') }}
-            </p>
+              <ul
+                v-if="section.items.length"
+                class="mt-3 space-y-2 text-sm leading-6 text-muted"
+              >
+                <li
+                  v-for="item in section.items"
+                  :key="item"
+                  class="flex gap-2"
+                >
+                  <span class="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
+
+                  <span>{{ item.replace('%%address%%', COMPANY_ADDRESS) }}</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </UCard>
+      </section>
 
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.whoWeAre.title') }}
-            </h2>
+      <section class="mt-5 sm:mt-6">
+        <UAlert
+          color="success"
+          variant="soft"
+          icon="i-simple-icons-whatsapp"
+          :title="t('privacy.contact.title')"
+          :description="t('privacy.contact.text')"
+        >
+          <template #actions>
+            <UButton
+              :to="whatsappHref"
+              target="_blank"
+              color="success"
+              variant="solid"
+              size="sm"
+            >
+              {{ t('privacy.contact.button') }}
+            </UButton>
           </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.whoWeAre.p1') }}
-            </p>
-
-            <ul class="list-disc pl-5 space-y-1">
-              <li>
-                <strong>{{ t('sections.whoWeAre.addressLabel') }}</strong>
-                {{ COMPANY_ADDRESS }}
-              </li>
-
-              <li>
-                <strong>{{ t('sections.whoWeAre.emailLabel') }}</strong>
-
-                <a
-                  class="underline underline-offset-4"
-                  :href="`mailto:${CONTACT_EMAIL}`"
-                >{{ CONTACT_EMAIL }}</a>
-              </li>
-            </ul>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.dataWeCollect.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.dataWeCollect.p1') }}
-            </p>
-
-            <p>
-              {{ t('sections.dataWeCollect.p2') }}
-            </p>
-
-            <ul class="list-disc pl-5 space-y-1">
-              <li>
-                {{ t('sections.dataWeCollect.items.name') }}
-              </li>
-
-              <li>
-                {{ t('sections.dataWeCollect.items.phone') }}
-              </li>
-            </ul>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.howWeUse.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.howWeUse.p1') }}
-            </p>
-
-            <ul class="list-disc pl-5 space-y-1">
-              <li>
-                {{ t('sections.howWeUse.items.order') }}
-              </li>
-
-              <li>
-                {{ t('sections.howWeUse.items.contact') }}
-              </li>
-
-              <li>
-                {{ t('sections.howWeUse.items.support') }}
-              </li>
-
-              <li>
-                {{ t('sections.howWeUse.items.legal') }}
-              </li>
-            </ul>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.legalBasis.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <ul class="list-disc pl-5 space-y-1">
-              <li>
-                {{ t('sections.legalBasis.items.contract') }}
-              </li>
-
-              <li>
-                {{ t('sections.legalBasis.items.consent') }}
-              </li>
-
-              <li>
-                {{ t('sections.legalBasis.items.law') }}
-              </li>
-            </ul>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.sharing.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.sharing.p1') }}
-            </p>
-
-            <ul class="list-disc pl-5 space-y-1">
-              <li>
-                {{ t('sections.sharing.items.law') }}
-              </li>
-
-              <li>
-                {{ t('sections.sharing.items.delivery') }}
-              </li>
-            </ul>
-
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              {{ t('sections.sharing.p2') }}
-            </p>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.storage.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.storage.p1') }}
-            </p>
-
-            <p>
-              {{ t('sections.storage.p2') }}
-            </p>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.security.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.security.p1') }}
-            </p>
-
-            <p>
-              {{ t('sections.security.p2') }}
-            </p>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.rights.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.rights.p1') }}
-            </p>
-
-            <ul class="list-disc pl-5 space-y-1">
-              <li>
-                {{ t('sections.rights.items.access') }}
-              </li>
-
-              <li>
-                {{ t('sections.rights.items.correct') }}
-              </li>
-
-              <li>
-                {{ t('sections.rights.items.delete') }}
-              </li>
-
-              <li>
-                {{ t('sections.rights.items.withdraw') }}
-              </li>
-            </ul>
-
-            <p>
-              {{ t('sections.rights.p2') }}
-              <a
-                class="underline underline-offset-4"
-                :href="`mailto:${CONTACT_EMAIL}`"
-              >{{ CONTACT_EMAIL }}</a>.
-            </p>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.minors.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.minors.p1') }}
-            </p>
-
-            <p>
-              {{ t('sections.minors.p2') }}
-            </p>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.thirdPartyLinks.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.thirdPartyLinks.p1') }}
-            </p>
-          </div>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-base font-semibold">
-              {{ t('sections.changes.title') }}
-            </h2>
-          </template>
-
-          <div class="space-y-3 leading-7">
-            <p>
-              {{ t('sections.changes.p1') }}
-            </p>
-
-            <p>
-              {{ t('sections.changes.p2') }}
-            </p>
-          </div>
-        </UCard>
-      </div>
+        </UAlert>
+      </section>
     </UPageBody>
   </UPage>
 </template>
