@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CONTACT_PHONE, COMPANY_ADDRESS } from '~/constants/contacts';
+import { CONTACT_PHONE } from '~/constants/contacts';
 
 
 definePageMeta({ name: 'terms-of-use' });

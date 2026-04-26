@@ -124,7 +124,7 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
 
             <UButton
               size="xl"
-              color="success"
+              color="neutral"
               variant="soft"
               icon="i-simple-icons-whatsapp"
               :to="whatsappHref"
