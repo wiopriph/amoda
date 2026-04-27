@@ -29,6 +29,8 @@ const items = computed(() => [
     to: localeRoute({ name: 'contacts' }),
   },
 ]);
+
+const availableLocales = computed(() => locales.value.filter(i => i.code !== locale.value));
 </script>
 
 <i18n lang="json">
@@ -77,15 +79,19 @@ const items = computed(() => [
     />
 
     <template #right>
-      <UButton
-        v-for="lang in locales"
+      <a
+        v-for="lang in availableLocales"
         :key="lang.code"
-        :to="switchLocalePath(lang.code)"
-        size="xs"
-        :variant="locale === lang.code ? 'solid' : 'outline'"
+        :href="switchLocalePath(lang.code)"
       >
-        {{ lang.name }}
-      </UButton>
+        <UButton
+          as="span"
+          variant="outline"
+          size="xs"
+        >
+          {{ lang.name }}
+        </UButton>
+      </a>
     </template>
   </UFooter>
 </template>
