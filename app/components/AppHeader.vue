@@ -66,6 +66,7 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
 
     <UHeader
       :toggle="false"
+      :ui="{ container: 'lg:px-12' }"
       class="border-b border-gray-100 bg-white/85 backdrop-blur supports-[backdrop-filter]:bg-white/75"
     >
       <template #left>
@@ -117,7 +118,9 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
                       class="group flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 transition hover:border-primary/30 hover:bg-primary/5"
                       @click="isCategoriesOpen = false"
                     >
-                      <div class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100">
+                      <div
+                        class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100"
+                      >
                         <img
                           v-if="category.image"
                           :src="category.image"
