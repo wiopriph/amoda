@@ -64,13 +64,29 @@ const getTodayKey = () => {
 
 const todayKey = getTodayKey();
 
-const getTodayHours = (hours?: OpeningHours | null) => {
+const isOpenNow = (hours?: OpeningHours | null) => {
   const todayHours = hours?.[todayKey];
 
-  return formatRanges(todayHours) || t('offices.closed');
+  if (!todayHours?.length) return false;
+
+  const now = new Date();
+  const current = now.getHours() * 60 + now.getMinutes();
+
+  return todayHours.some(([from, to]) => {
+    const [fromHours = 0, fromMinutes = 0] = from.split(':').map(Number);
+    const [toHours = 0, toMinutes = 0] = to.split(':').map(Number);
+
+    const start = fromHours * 60 + fromMinutes;
+    const end = toHours * 60 + toMinutes;
+
+    return current >= start && current <= end;
+  });
 };
 
-const getCompactHours = (hours?: OpeningHours | null) => weekDays.reduce<{ label: string, value: string }[]>((acc, day) => {
+const getCompactHours = (hours?: OpeningHours | null) => weekDays.reduce<{
+  label: string,
+  value: string
+}[]>((acc, day) => {
   const value = formatRanges(hours?.[day]) || t('offices.closed');
   const prev = acc[acc.length - 1];
 
@@ -109,6 +125,7 @@ const getMapUrl = (office: Office) => {
       "empty": "Ainda não há pontos disponíveis.",
       "today": "Hoje",
       "hours": "Horário",
+      "openNow": "Aberto agora",
       "closed": "Fechado",
       "phone": "Ligar",
       "map": "Abrir no Google Maps",
@@ -135,6 +152,7 @@ const getMapUrl = (office: Office) => {
       "empty": "No points available yet.",
       "today": "Today",
       "hours": "Hours",
+      "openNow": "Open now",
       "closed": "Closed",
       "phone": "Call",
       "map": "Open in Google Maps",
@@ -159,23 +177,27 @@ const getMapUrl = (office: Office) => {
 <template>
   <UPage>
     <UPageBody class="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
-      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+      <section
+        class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8"
+      >
         <UBadge
           v-if="offices[0]"
-          color="primary"
+          :color="isOpenNow(offices[0].opening_hours) ? 'success' : 'error'"
           variant="soft"
           class="mb-4"
         >
-          {{ t('offices.today') }}: {{ getTodayHours(offices[0].opening_hours) }}
+          {{ isOpenNow(offices[0].opening_hours) ? t('offices.openNow') : t('offices.closed') }}
         </UBadge>
 
-        <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-          {{ t('offices.title') }}
-        </h1>
+        <h1
+          class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl"
+          v-text="t('offices.title')"
+        />
 
-        <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-          {{ t('offices.subtitle') }}
-        </p>
+        <p
+          class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg"
+          v-text="t('offices.subtitle')"
+        />
       </section>
 
       <UAlert
@@ -207,33 +229,32 @@ const getMapUrl = (office: Office) => {
             <div>
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                  <h2 class="text-xl font-bold text-highlighted">
-                    {{ office.name }}
-                  </h2>
-
-                  <p
-                    v-if="office.address"
-                    class="mt-2 text-sm leading-6 text-muted"
-                  >
-                    {{ office.address }}
-                  </p>
+                  <h2
+                    class="text-xl font-bold text-highlighted"
+                    v-text="office.name"
+                  />
                 </div>
 
                 <UBadge
-                  color="primary"
+                  :color="isOpenNow(office.opening_hours) ? 'success' : 'error'"
                   variant="soft"
                   class="shrink-0"
                 >
-                  {{ t('offices.today') }}: {{ getTodayHours(office.opening_hours) }}
+                  {{ isOpenNow(office.opening_hours) ? t('offices.openNow') : t('offices.closed') }}
                 </UBadge>
               </div>
 
               <p
+                v-if="office.address"
+                class="mt-2 text-sm leading-6 text-muted"
+                v-text="office.address"
+              />
+
+              <p
                 v-if="office.description"
                 class="mt-3 text-sm leading-6 text-toned"
-              >
-                {{ office.description }}
-              </p>
+                v-text="office.description "
+              />
             </div>
 
             <div class="rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
@@ -243,9 +264,10 @@ const getMapUrl = (office: Office) => {
                   class="size-4 text-primary"
                 />
 
-                <h3 class="text-sm font-semibold text-highlighted">
-                  {{ t('offices.hours') }}
-                </h3>
+                <h3
+                  class="text-sm font-semibold text-highlighted"
+                  v-text="t('offices.hours')"
+                />
               </div>
 
               <div class="grid gap-2 text-sm sm:grid-cols-2">
@@ -254,13 +276,15 @@ const getMapUrl = (office: Office) => {
                   :key="`${group.label}-${group.value}`"
                   class="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2"
                 >
-                  <span class="font-medium text-toned">
-                    {{ group.label }}
-                  </span>
+                  <span
+                    class="font-medium text-toned"
+                    v-text="group.label"
+                  />
 
-                  <span class="tabular-nums text-muted">
-                    {{ group.value }}
-                  </span>
+                  <span
+                    class="tabular-nums text-muted"
+                    v-text="group.value"
+                  />
                 </div>
               </div>
             </div>
