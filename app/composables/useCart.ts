@@ -71,6 +71,7 @@ const pickPrimaryImage = (product?: ProductLike, variant?: VariantLike): string 
 
 export function useCart() {
   const state = useState<CartItem[]>('cart:items', () => []);
+  const isLoading = useState<boolean>('cart:loading', () => true);
 
   const { trackAddToCart, trackRemoveFromCart } = useAnalyticsEvent();
 
@@ -90,6 +91,8 @@ export function useCart() {
 
   const loadFromStorage = () => {
     if (!isClient) return;
+
+    isLoading.value = true;
 
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -150,6 +153,8 @@ export function useCart() {
       state.value = Array.from(map.values());
     } catch {
       state.value = [];
+    } finally {
+      isLoading.value = false;
     }
   };
 
@@ -343,6 +348,7 @@ export function useCart() {
     count,
     totalAOA,
     isEmpty,
+    isLoading,
 
     add,
     setQty,

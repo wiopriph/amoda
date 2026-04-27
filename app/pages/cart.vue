@@ -17,7 +17,15 @@ useHead(() => ({
   ],
 }));
 
-const { items, totalAOA, increment, decrement, setQty, remove } = useCart();
+const {
+  isLoading,
+  items,
+  totalAOA,
+  increment,
+  decrement,
+  setQty,
+  remove,
+} = useCart();
 
 const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
@@ -95,7 +103,7 @@ const goCheckout = () => {
       "checkout": "Confirmar reserva",
       "continue": "Continuar a escolher",
       "trust": {
-        "title": "Sem risco para você",
+        "title": "Entrega gratuita",
         "items": [
           {
             "icon": "i-lucide-wallet",
@@ -159,7 +167,7 @@ const goCheckout = () => {
       "checkout": "Confirm reservation",
       "continue": "Continue choosing",
       "trust": {
-        "title": "No risk for you",
+        "title": "Free delivery",
         "items": [
           {
             "icon": "i-lucide-wallet",
@@ -203,7 +211,7 @@ const goCheckout = () => {
 
 <template>
   <UPage>
-    <UPageBody class="mx-auto max-w-5xl px-4 py-5 pb-28 sm:px-6 sm:py-8 sm:pb-8 lg:px-8">
+    <UPageBody class="mx-auto max-w-5xl px-4 py-5 pb-2 sm:px-6 sm:py-8 sm:pb-8 lg:px-8">
       <!-- HERO -->
       <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
         <UBadge
@@ -238,9 +246,77 @@ const goCheckout = () => {
         </div>
       </section>
 
-      <!-- EMPTY -->
       <section
-        v-if="!items.length"
+        v-if="isLoading"
+        class="mt-5 grid min-w-0 gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start"
+      >
+        <!-- ITEMS -->
+        <section class="min-w-0 space-y-3">
+          <UCard
+            v-for="i in 3"
+            :key="i"
+          >
+            <div class="flex min-w-0 gap-3 sm:gap-4">
+              <!-- image -->
+              <USkeleton class="h-24 w-20 shrink-0 rounded-2xl sm:h-28 sm:w-24" />
+
+              <!-- content -->
+              <div class="min-w-0 flex-1 overflow-hidden">
+                <USkeleton class="h-5 w-full max-w-[220px]" />
+
+                <USkeleton class="mt-3 h-4 w-full max-w-[160px]" />
+
+                <USkeleton class="mt-2 h-4 w-full max-w-[120px]" />
+
+                <div class="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <!-- qty -->
+                  <div class="flex shrink-0 items-center gap-2">
+                    <USkeleton class="h-8 w-8 rounded-lg" />
+
+                    <USkeleton class="h-8 w-14 rounded-lg sm:w-16" />
+
+                    <USkeleton class="h-8 w-8 rounded-lg" />
+                  </div>
+
+                  <!-- price -->
+                  <div class="flex min-w-0 flex-row items-center gap-2 sm:flex-col sm:items-end">
+                    <USkeleton class="h-5 w-20 sm:w-24" />
+
+                    <USkeleton class="h-4 w-14 sm:w-16" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </UCard>
+        </section>
+
+        <aside class="hidden lg:block">
+          <UCard class="border-primary/20 bg-primary/5">
+            <USkeleton class="h-6 w-44" />
+
+            <div class="mt-5 space-y-4">
+              <div class="flex justify-between">
+                <USkeleton class="h-4 w-24" />
+
+                <USkeleton class="h-4 w-10" />
+              </div>
+
+              <div class="flex justify-between border-t border-primary/10 pt-4">
+                <USkeleton class="h-5 w-32" />
+
+                <USkeleton class="h-6 w-28" />
+              </div>
+
+              <USkeleton class="h-10 w-full rounded-xl" />
+
+              <USkeleton class="h-10 w-full rounded-xl" />
+            </div>
+          </UCard>
+        </aside>
+      </section>
+
+      <section
+        v-else-if="!items.length"
         class="mt-5 sm:mt-6"
       >
         <UCard>
@@ -313,7 +389,7 @@ const goCheckout = () => {
                     <span class="font-semibold text-toned">{{ fmtAOA(cartItem.price) }}</span>
                   </div>
 
-                  <div class="mt-4 flex items-end justify-between gap-3">
+                  <div class="mt-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <div class="mb-1 text-xs font-medium text-muted">
                         {{ t('cart.item.qty') }}
@@ -334,7 +410,7 @@ const goCheckout = () => {
                           inputmode="numeric"
                           pattern="[0-9]*"
                           size="sm"
-                          class="w-16"
+                          class="w-14 sm:w-16"
                           :modelValue="cartItem.qty"
                           @update:model-value="val => setQty(cartItem.key, Math.max(1, Number(val) || 1))"
                         />
@@ -349,7 +425,7 @@ const goCheckout = () => {
                       </div>
                     </div>
 
-                    <div class="text-right">
+                    <div class="flex min-w-0 items-center justify-between gap-3 sm:block sm:text-right">
                       <div class="text-base font-black text-primary sm:text-lg">
                         {{ fmtAOA(cartItem.price * cartItem.qty) }}
                       </div>
@@ -358,7 +434,7 @@ const goCheckout = () => {
                         variant="ghost"
                         size="xs"
                         color="neutral"
-                        class="mt-1 px-0 text-muted hover:text-red-600"
+                        class="mt-0 shrink-0 px-0 text-muted hover:text-red-600 sm:mt-1"
                         @click="remove(cartItem.key)"
                       >
                         {{ t('cart.item.remove') }}
@@ -370,7 +446,6 @@ const goCheckout = () => {
             </UCard>
           </section>
 
-          <!-- SUMMARY DESKTOP -->
           <aside class="hidden lg:block">
             <div class="sticky top-24 space-y-4">
               <UCard class="border-primary/20 bg-primary/5">

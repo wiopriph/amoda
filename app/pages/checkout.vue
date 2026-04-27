@@ -8,6 +8,7 @@ import { makeGa4Item } from '~/utils/ga4';
 definePageMeta({ name: 'checkout' });
 
 const { t, tm, rt } = useI18n();
+const toast = useToast();
 
 useHead(() => ({
   title: t('checkout.meta.title'),
@@ -19,12 +20,21 @@ useHead(() => ({
   ],
 }));
 
-const { items, totalAOA, clear } = useCart();
-const { trackPurchase } = useAnalyticsEvent();
+const {
+  isLoading,
+  items,
+  totalAOA,
+  clear,
+} = useCart();
 
+const { trackPurchase } = useAnalyticsEvent();
 const localeRoute = useLocaleRoute();
 
 const redirectIfEmpty = () => {
+  if (isLoading.value) {
+    return;
+  }
+
   if (!items.value.length) {
     navigateTo(localeRoute({ name: 'cart' }));
   }
@@ -32,6 +42,7 @@ const redirectIfEmpty = () => {
 
 if (process.client) {
   onMounted(redirectIfEmpty);
+  watch(isLoading, redirectIfEmpty);
 }
 
 const { data: officesData } = await useFetch('/api/offices/list');
@@ -51,8 +62,27 @@ const form = reactive({
   pickupOfficeId: offices.value?.[0]?.id ?? null,
 });
 
+const errors = reactive({
+  name: false,
+  phone: false,
+});
+
+const validateForm = () => {
+  errors.name = !form.name.trim();
+  errors.phone = !form.phone.trim() || form.phone.replace(/\D/g, '').length < 12;
+
+  return !errors.name && !errors.phone;
+};
+
+watch(() => form.name, () => {
+  if (errors.name && form.name.trim()) errors.name = false;
+});
+
+watch(() => form.phone, () => {
+  if (errors.phone && form.phone.trim()) errors.phone = false;
+});
+
 const pending = ref(false);
-const message = ref<string | null>(null);
 
 const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
@@ -103,20 +133,29 @@ const selectedOfficeMapUrl = computed(() => {
 });
 
 const submit = async () => {
+  if (!validateForm()) {
+    return;
+  }
+
   if (!items.value.length) {
-    message.value = t('checkout.errors.empty');
+    toast.add({
+      title: t('checkout.errors.empty'),
+      color: 'error',
+    });
 
     return;
   }
 
   if (!form.pickupOfficeId) {
-    message.value = t('checkout.errors.pickupRequired');
+    toast.add({
+      title: t('checkout.errors.pickupRequired'),
+      color: 'error',
+    });
 
     return;
   }
 
   pending.value = true;
-  message.value = null;
 
   try {
     const dtoItems = items.value.map(i => ({
@@ -169,7 +208,10 @@ const submit = async () => {
 
     clear();
   } catch (error: any) {
-    message.value = error?.data?.message || t('checkout.errors.common');
+    toast.add({
+      title: error?.data?.message || t('checkout.errors.common'),
+      color: 'error',
+    });
   } finally {
     pending.value = false;
   }
@@ -241,6 +283,8 @@ const submit = async () => {
         ]
       },
       "errors": {
+        "nameRequired": "Por favor, indique o seu nome.",
+        "phoneRequired": "Por favor, indique o seu número de WhatsApp.",
         "empty": "A sua seleção está vazia.",
         "common": "Não foi possível enviar a reserva. Tente novamente em alguns instantes.",
         "pickupRequired": "Escolha um ponto de experimentação."
@@ -314,6 +358,8 @@ const submit = async () => {
         ]
       },
       "errors": {
+        "nameRequired": "Please enter your name.",
+        "phoneRequired": "Please enter your WhatsApp number.",
         "empty": "Your selection is empty.",
         "common": "We could not send your reservation. Please try again shortly.",
         "pickupRequired": "Choose a try-on point."
@@ -329,7 +375,7 @@ const submit = async () => {
 
 <template>
   <UPage>
-    <UPageBody class="mx-auto max-w-5xl px-4 py-5 pb-28 sm:px-6 sm:py-8 sm:pb-8 lg:px-8">
+    <UPageBody class="mx-auto max-w-5xl px-4 py-5 pb-2 sm:px-6 sm:py-8 sm:pb-8 lg:px-8">
       <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
         <UBadge
           color="primary"
@@ -363,7 +409,115 @@ const submit = async () => {
         </div>
       </section>
 
-      <div class="mt-5 grid gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start">
+      <div
+        v-if="isLoading"
+        class="mt-5 grid min-w-0 gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start"
+      >
+        <section class="min-w-0 space-y-4 overflow-hidden">
+          <UCard>
+            <USkeleton class="h-7 w-full max-w-[180px]" />
+
+            <USkeleton class="mt-3 h-4 w-full max-w-[260px]" />
+
+            <div class="mt-5 grid gap-4">
+              <div>
+                <USkeleton class="mb-2 h-4 w-full max-w-[96px]" />
+
+                <USkeleton class="h-11 w-full rounded-xl" />
+              </div>
+
+              <div>
+                <USkeleton class="mb-2 h-4 w-full max-w-[96px]" />
+
+                <USkeleton class="h-11 w-full rounded-xl" />
+              </div>
+            </div>
+          </UCard>
+
+          <UCard>
+            <USkeleton class="h-7 w-full max-w-[220px]" />
+
+            <div class="mt-5">
+              <USkeleton class="mb-2 h-4 w-full max-w-[160px]" />
+
+              <USkeleton class="h-11 w-full rounded-xl" />
+
+              <USkeleton class="mt-2 h-4 w-full max-w-[260px]" />
+
+              <div class="mt-4 overflow-hidden rounded-2xl border border-primary/15 bg-primary/5 p-4">
+                <USkeleton class="h-4 w-full max-w-[128px]" />
+
+                <USkeleton class="mt-3 h-5 w-full max-w-[190px]" />
+
+                <USkeleton class="mt-3 h-4 w-full" />
+
+                <USkeleton class="mt-2 h-4 w-full max-w-[220px]" />
+
+                <div class="mt-4 grid gap-2 sm:flex">
+                  <USkeleton class="h-9 w-full rounded-xl sm:w-28" />
+
+                  <USkeleton class="h-9 w-full rounded-xl sm:w-44" />
+                </div>
+              </div>
+            </div>
+          </UCard>
+        </section>
+
+        <aside class="hidden lg:block">
+          <div class="sticky top-24 space-y-4">
+            <UCard class="border-primary/20 bg-primary/5">
+              <USkeleton class="h-6 w-28" />
+
+              <div class="mt-4 space-y-3">
+                <div class="flex justify-between">
+                  <USkeleton class="h-4 w-24" />
+
+                  <USkeleton class="h-4 w-8" />
+                </div>
+
+                <div class="flex justify-between border-t border-primary/10 pt-3">
+                  <USkeleton class="h-5 w-32" />
+
+                  <USkeleton class="h-6 w-28" />
+                </div>
+
+                <USkeleton class="h-4 w-full" />
+
+                <USkeleton class="h-4 w-3/4" />
+              </div>
+
+              <USkeleton class="mt-5 h-12 w-full rounded-xl" />
+
+              <USkeleton class="mt-2 h-10 w-full rounded-xl" />
+            </UCard>
+
+            <UCard>
+              <USkeleton class="h-5 w-40" />
+
+              <div class="mt-4 space-y-3">
+                <div
+                  v-for="i in 3"
+                  :key="i"
+                  class="flex gap-3"
+                >
+                  <USkeleton class="size-7 shrink-0 rounded-full" />
+
+                  <div class="min-w-0 flex-1">
+                    <USkeleton class="h-4 w-36" />
+
+                    <USkeleton class="mt-2 h-4 w-full" />
+                  </div>
+                </div>
+              </div>
+            </UCard>
+          </div>
+        </aside>
+      </div>
+
+      <div
+        v-else
+        class="mt-5 grid gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start"
+      >
         <section>
           <UForm
             class="space-y-4"
@@ -379,7 +533,11 @@ const submit = async () => {
               </p>
 
               <div class="mt-5 grid gap-4">
-                <UFormField :label="t('checkout.name')">
+                <UFormField
+                  :label="t('checkout.name')"
+                  :error="errors.name ? t('checkout.errors.nameRequired') : undefined"
+                  required
+                >
                   <UInput
                     v-model="form.name"
                     required
@@ -390,7 +548,11 @@ const submit = async () => {
                   />
                 </UFormField>
 
-                <UFormField :label="t('checkout.phone')">
+                <UFormField
+                  :label="t('checkout.phone')"
+                  :error="errors.phone ? t('checkout.errors.phoneRequired') : undefined"
+                  required
+                >
                   <UInput
                     v-model="form.phone"
                     v-maska="'+244 ### ### ###'"
@@ -493,27 +655,6 @@ const submit = async () => {
                 </div>
               </div>
             </UCard>
-
-            <UAlert
-              v-if="message"
-              color="error"
-              variant="subtle"
-              icon="i-heroicons-exclamation-triangle"
-              :description="message"
-            />
-
-            <div class="lg:hidden">
-              <UButton
-                :loading="pending"
-                :disabled="!items.length"
-                size="xl"
-                color="primary"
-                type="submit"
-                class="w-full justify-center"
-              >
-                {{ t('checkout.submit') }}
-              </UButton>
-            </div>
           </UForm>
         </section>
 
@@ -548,7 +689,7 @@ const submit = async () => {
 
               <UButton
                 :loading="pending"
-                :disabled="!items.length"
+                :disabled="!items.length || errors.name || errors.phone"
                 size="xl"
                 color="primary"
                 type="button"
@@ -600,7 +741,10 @@ const submit = async () => {
         </aside>
       </div>
 
-      <section class="mt-5 lg:hidden">
+      <section
+        v-if="!isLoading"
+        class="mt-5 lg:hidden"
+      >
         <UCard>
           <h2 class="text-base font-bold text-highlighted">
             {{ t('checkout.steps.title') }}
@@ -630,7 +774,10 @@ const submit = async () => {
         </UCard>
       </section>
 
-      <div class="fixed bottom-0 left-0 right-0 z-60 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] lg:hidden">
+      <div
+        v-if="!isLoading"
+        class="fixed bottom-0 left-0 right-0 z-60 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] lg:hidden"
+      >
         <div class="mx-auto max-w-5xl">
           <div class="mb-2 flex items-center justify-between gap-3">
             <div>
@@ -650,7 +797,7 @@ const submit = async () => {
 
           <UButton
             :loading="pending"
-            :disabled="!items.length"
+            :disabled="!items.length || errors.name || errors.phone"
             size="xl"
             color="primary"
             class="w-full justify-center"
