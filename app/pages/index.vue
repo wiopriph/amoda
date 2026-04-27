@@ -323,7 +323,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         </div>
       </section>
 
-      <section class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <UCard class="overflow-hidden">
           <div class="flex flex-col gap-6">
             <div>
@@ -360,7 +360,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         </UCard>
       </section>
 
-      <section class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <UCard class="border-primary/20 bg-primary/5">
           <div>
             <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
@@ -393,7 +393,7 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         </UCard>
       </section>
 
-      <section class="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div class="text-center">
           <h2 class="text-lg font-bold text-highlighted">
             {{ t('home.seo.title') }}
