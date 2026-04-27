@@ -3,7 +3,7 @@ const { t, locale, locales } = useI18n();
 const switchLocalePath = useSwitchLocalePath();
 const localeRoute = useLocaleRoute();
 
-const items = computed(() => [
+const links = computed(() => [
   {
     label: t('footer.delivery'),
     to: localeRoute({ name: 'delivery' }),
@@ -40,8 +40,8 @@ const availableLocales = computed(() => locales.value.filter(i => i.code !== loc
       "delivery": "Como comprar",
       "pickup": "Pontos de levantamento",
       "returns": "Devoluções",
-      "privacy": "Política de Privacidade",
-      "terms": "Termos de Utilização",
+      "privacy": "Privacidade",
+      "terms": "Termos",
       "contacts": "Contactos",
       "rights": "Todos os direitos reservados."
     }
@@ -51,8 +51,8 @@ const availableLocales = computed(() => locales.value.filter(i => i.code !== loc
       "delivery": "How it works",
       "pickup": "Pickup points",
       "returns": "Returns",
-      "privacy": "Privacy Policy",
-      "terms": "Terms of Use",
+      "privacy": "Privacy",
+      "terms": "Terms",
       "contacts": "Contacts",
       "rights": "All rights reserved."
     }
@@ -61,37 +61,40 @@ const availableLocales = computed(() => locales.value.filter(i => i.code !== loc
 </i18n>
 
 <template>
-  <UFooter>
-    <template #left>
-      <p class="text-muted text-sm">
-        © {{ new Date().getFullYear() }} Amoda. {{ t('footer.rights') }}
-      </p>
-    </template>
-
-    <UNavigationMenu
-      :items="items"
-      variant="link"
-      :ui="{
-        list: 'flex flex-wrap md:flex-nowrap items-center justify-center gap-x-4 gap-y-2',
-        item: 'shrink min-w-0',
-        link: 'whitespace-normal md:whitespace-nowrap break-words'
-      }"
-    />
-
-    <template #right>
-      <a
-        v-for="lang in availableLocales"
-        :key="lang.code"
-        :href="switchLocalePath(lang.code)"
-      >
-        <UButton
-          as="span"
-          variant="outline"
-          size="xs"
+  <footer class="border-t border-gray-100 bg-white">
+    <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <nav class="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm sm:gap-x-6">
+        <NuxtLink
+          v-for="item in links"
+          :key="item.label"
+          :to="item.to"
+          class="text-muted transition hover:text-primary"
         >
-          {{ lang.name }}
-        </UButton>
-      </a>
-    </template>
-  </UFooter>
+          {{ item.label }}
+        </NuxtLink>
+      </nav>
+
+      <div class="mt-6 flex flex-col items-center gap-3 border-t pt-4 sm:flex-row sm:justify-between">
+        <p class="text-xs text-muted text-center sm:text-left">
+          © {{ new Date().getFullYear() }} Amoda. {{ t('footer.rights') }}
+        </p>
+
+        <div class="flex gap-2">
+          <a
+            v-for="lang in availableLocales"
+            :key="lang.code"
+            :href="switchLocalePath(lang.code)"
+          >
+            <UButton
+              as="span"
+              variant="outline"
+              size="xs"
+            >
+              {{ lang.name }}
+            </UButton>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
 </template>
