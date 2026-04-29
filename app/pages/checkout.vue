@@ -375,8 +375,8 @@ const submit = async () => {
 
 <template>
   <UPage>
-    <UPageBody class="mx-auto max-w-5xl px-4 py-5 pb-2 sm:px-6 sm:py-8 sm:pb-8 lg:px-8">
-      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+    <UPageBody>
+      <section class="overflow-hidden  mb-2 sm:mb-2 rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
         <UBadge
           color="primary"
           variant="soft"
@@ -389,7 +389,7 @@ const submit = async () => {
           {{ t('checkout.title') }}
         </h1>
 
-        <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
+        <p class="mt-4 text-base leading-7 text-muted sm:text-lg">
           {{ t('checkout.subtitle') }}
         </p>
 
