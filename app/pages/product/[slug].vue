@@ -472,8 +472,8 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageBody>
-      <div class="grid lg:grid-cols-2 gap-8">
+    <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-3">
         <section class="flex-1 w-full">
           <div class="relative overflow-hidden rounded-3xl bg-gray-50">
             <UCarousel
@@ -566,7 +566,7 @@ useHead(() => ({
 
             <p
               v-if="productData?.brand_name"
-              class="mt-1 text-sm text-muted"
+              class="mt-2 text-sm text-muted"
             >
               {{ productData.brand_name }}
             </p>
