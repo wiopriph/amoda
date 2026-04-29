@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ name: 'auth' });
 
-const { t } = useI18n();
+const { t, tm, rt } = useI18n();
 
 useHead({ title: t('auth.metaTitle') });
 
@@ -16,6 +16,13 @@ const { signIn, signUp, signInOtp, signOut, user, isLoading, error } = useAuth()
 const login = reactive({ email: '', password: '' });
 const reg = reactive({ email: '', password: '' });
 const otp = reactive({ email: '' });
+
+const benefits = computed(() =>
+  (tm('auth.benefits') as any[]).map((item) => ({
+    icon: rt(item.icon),
+    title: rt(item.title),
+  })),
+);
 
 const onLogin = async () => {
   const ok = await signIn(login);
@@ -53,40 +60,74 @@ const onMagic = async () => {
 {
   "pt": {
     "auth": {
-      "title": "Entrar na sua conta Amoda",
+      "title": "Entre na Amoda",
+      "subtitle": "Guarde a sua seleção, acompanhe reservas e compre roupa sem pagamento antecipado.",
       "login": "Entrar",
       "register": "Criar conta",
       "email": "E-mail",
       "password": "Palavra-passe",
-      "magicTitle": "Ou entre sem palavra-passe",
-      "magic": "Enviar link mágico",
+      "magicTitle": "Entrada rápida",
+      "magicDesc": "Receba um link seguro no e-mail.",
+      "magic": "Enviar link",
       "checkEmail": "Verifique o seu e-mail — enviámos um link de acesso seguro.",
       "welcomeBack": "Bem-vindo de volta à Amoda!",
-      "confirmEmail": "Confirme o seu e-mail para ativar a conta e começar a comprar online.",
+      "confirmEmail": "Confirme o seu e-mail para ativar a conta.",
       "logout": "Sair",
       "metaTitle": "Entrar ou criar conta | Amoda Angola",
-      "magicSent": "Link mágico enviado para o seu e-mail",
-      "hintLogin": "Use o seu e-mail e palavra-passe para aceder ou experimente o login rápido com link mágico.",
-      "hintRegister": "Crie a sua conta Amoda para comprar roupas online com entrega gratuita e sem pagamento antecipado."
+      "magicSent": "Link mágico enviado",
+      "accountTitle": "A sua conta",
+      "accountDesc": "Você já está autenticado.",
+      "continue": "Continuar a comprar",
+      "benefits": [
+        {
+          "icon": "i-lucide-wallet",
+          "title": "Sem pagamento online"
+        },
+        {
+          "icon": "i-lucide-shirt",
+          "title": "Experimente antes"
+        },
+        {
+          "icon": "i-lucide-check-circle-2",
+          "title": "Pague só o que gostar"
+        }
+      ]
     }
   },
   "en": {
     "auth": {
-      "title": "Sign in to your Amoda account",
+      "title": "Sign in to Amoda",
+      "subtitle": "Save your selection, manage reservations and shop clothes with no prepayment.",
       "login": "Sign in",
       "register": "Create account",
       "email": "E-mail",
       "password": "Password",
-      "magicTitle": "Or sign in without a password",
-      "magic": "Send magic link",
+      "magicTitle": "Quick access",
+      "magicDesc": "Get a secure login link by email.",
+      "magic": "Send link",
       "checkEmail": "Check your inbox — we’ve sent a secure login link.",
       "welcomeBack": "Welcome back to Amoda!",
-      "confirmEmail": "Please confirm your email to activate your account and start shopping online.",
+      "confirmEmail": "Please confirm your email to activate your account.",
       "logout": "Sign out",
       "metaTitle": "Sign in or create account | Amoda Angola",
-      "magicSent": "Magic link sent to your email",
-      "hintLogin": "Use your email and password to log in, or try quick access with a magic link.",
-      "hintRegister": "Create your Amoda account to shop clothes online with free delivery and no prepayment."
+      "magicSent": "Magic link sent",
+      "accountTitle": "Your account",
+      "accountDesc": "You are already signed in.",
+      "continue": "Continue shopping",
+      "benefits": [
+        {
+          "icon": "i-lucide-wallet",
+          "title": "No online payment"
+        },
+        {
+          "icon": "i-lucide-shirt",
+          "title": "Try before paying"
+        },
+        {
+          "icon": "i-lucide-check-circle-2",
+          "title": "Pay only for what you like"
+        }
+      ]
     }
   }
 }
@@ -94,156 +135,220 @@ const onMagic = async () => {
 
 <template>
   <UPage>
-    <UPageHeader :title="t('auth.title')" />
+    <UPageBody class="mx-auto max-w-4xl sm:px-6 lg:px-8">
+      <section class="overflow-hidden mb-2 sm:mb-2 rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+        <UBadge
+          color="primary"
+          variant="soft"
+          class="mb-4"
+        >
+          Amoda
+        </UBadge>
 
-    <UPageBody class="max-w-md mx-auto">
-      <div
-        v-if="user"
-        class="mt-4 text-center"
-      >
-        <p v-if="user.email">
-          {{ user.email }}
+        <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
+          {{ t('auth.title') }}
+        </h1>
+
+        <p class="mt-4 text-base leading-7 text-muted sm:text-lg">
+          {{ t('auth.subtitle') }}
         </p>
 
-        <UButton
-          variant="ghost"
-          @click="signOut"
-        >
-          {{ t('auth.logout') }}
-        </UButton>
-      </div>
-
-      <UCard v-else>
-        <UTabs
-          :items="[
-            { label: t('auth.login'), slot: 'login' },
-            { label: t('auth.register'), slot: 'register' }
-          ]"
-        >
-          <!-- LOGIN -->
-          <template #login>
-            <UAlert
-              :description="t('auth.hintLogin')"
-              icon="i-heroicons-information-circle"
-              color="primary"
-              variant="soft"
-              class="text-sm mb-4"
+        <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-toned">
+          <div
+            v-for="item in benefits"
+            :key="item.title"
+            class="flex items-center gap-2"
+          >
+            <UIcon
+              :name="item.icon"
+              class="size-4 text-primary"
             />
 
-            <UForm
-              class="space-y-4"
-              @submit.prevent="onLogin"
+            <span>{{ item.title }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="mx-auto grid max-w-5xl mt-5 sm:mt-6">
+        <UCard v-if="user">
+          <div class="flex flex-col items-center py-8 text-center">
+            <div class="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <UIcon
+                name="i-lucide-user-check"
+                class="size-7"
+              />
+            </div>
+
+            <h2 class="mt-4 text-xl font-black text-highlighted">
+              {{ t('auth.accountTitle') }}
+            </h2>
+
+            <p class="mt-2 text-sm text-muted">
+              {{ t('auth.accountDesc') }}
+            </p>
+
+            <p
+              v-if="user.email"
+              class="mt-3 break-all text-sm font-semibold text-toned"
             >
-              <UFormField :label="t('auth.email')">
-                <UInput
-                  v-model="login.email"
-                  type="email"
-                  class="w-full"
-                />
-              </UFormField>
+              {{ user.email }}
+            </p>
 
-              <UFormField :label="t('auth.password')">
-                <UInput
-                  v-model="login.password"
-                  type="password"
-                  class="w-full"
-                />
-              </UFormField>
+            <UButton
+              size="lg"
+              color="primary"
+              class="mt-6 w-full justify-center"
+              :to="localeRoute({ name: 'index' })"
+            >
+              {{ t('auth.continue') }}
+            </UButton>
 
-              <UButton
-                :loading="isLoading"
-                type="submit"
-                color="primary"
-                class="w-full justify-center"
-              >
-                {{ t('auth.login') }}
-              </UButton>
+            <UButton
+              variant="ghost"
+              color="neutral"
+              class="mt-2 w-full justify-center"
+              @click="signOut"
+            >
+              {{ t('auth.logout') }}
+            </UButton>
+          </div>
+        </UCard>
 
-              <div class="space-y-3 pt-2">
-                <p class="text-sm text-gray-500">
-                  {{ t('auth.magicTitle') }}
-                </p>
+        <template v-else>
+          <UCard>
+            <UTabs
+              :items="[
+                { label: t('auth.login'), slot: 'login' },
+                { label: t('auth.register'), slot: 'register' }
+              ]"
+            >
+              <template #login>
+                <UForm
+                  class="space-y-4 pt-4"
+                  @submit.prevent="onLogin"
+                >
+                  <UFormField :label="t('auth.email')">
+                    <UInput
+                      v-model="login.email"
+                      type="email"
+                      autocomplete="email"
+                      size="lg"
+                      class="w-full"
+                    />
+                  </UFormField>
 
-                <div class="flex gap-2">
-                  <UInput
-                    v-model="otp.email"
-                    type="email"
-                    placeholder="name@email.com"
-                    class="flex-1"
-                  />
+                  <UFormField :label="t('auth.password')">
+                    <UInput
+                      v-model="login.password"
+                      type="password"
+                      autocomplete="current-password"
+                      size="lg"
+                      class="w-full"
+                    />
+                  </UFormField>
 
                   <UButton
-                    variant="soft"
                     :loading="isLoading"
-                    @click="onMagic"
+                    type="submit"
+                    color="primary"
+                    size="xl"
+                    class="w-full justify-center"
                   >
-                    {{ t('auth.magic') }}
+                    {{ t('auth.login') }}
                   </UButton>
-                </div>
-              </div>
 
-              <UAlert
-                v-if="error"
-                :description="error"
-                color="error"
-                variant="subtle"
-                icon="i-heroicons-exclamation-triangle"
-                class="text-sm mt-3"
+                  <UAlert
+                    v-if="error"
+                    :description="error"
+                    color="error"
+                    variant="subtle"
+                    icon="i-heroicons-exclamation-triangle"
+                    class="text-sm"
+                  />
+                </UForm>
+              </template>
+
+              <template #register>
+                <UForm
+                  class="space-y-4 pt-4"
+                  @submit.prevent="onRegister"
+                >
+                  <UFormField :label="t('auth.email')">
+                    <UInput
+                      v-model="reg.email"
+                      type="email"
+                      autocomplete="email"
+                      size="lg"
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <UFormField :label="t('auth.password')">
+                    <UInput
+                      v-model="reg.password"
+                      type="password"
+                      autocomplete="new-password"
+                      size="lg"
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <UButton
+                    :loading="isLoading"
+                    type="submit"
+                    color="primary"
+                    size="xl"
+                    class="w-full justify-center"
+                  >
+                    {{ t('auth.register') }}
+                  </UButton>
+
+                  <UAlert
+                    v-if="error"
+                    :description="error"
+                    color="error"
+                    variant="subtle"
+                    icon="i-heroicons-exclamation-triangle"
+                    class="text-sm"
+                  />
+                </UForm>
+              </template>
+            </UTabs>
+          </UCard>
+
+          <UCard class="mt-5 border-primary/20 bg-primary/5">
+            <h2 class="text-lg font-black text-highlighted">
+              {{ t('auth.magicTitle') }}
+            </h2>
+
+            <p class="mt-2 text-sm leading-6 text-muted">
+              {{ t('auth.magicDesc') }}
+            </p>
+
+            <div class="mt-4 space-y-3">
+              <UInput
+                v-model="otp.email"
+                type="email"
+                autocomplete="email"
+                placeholder="name@email.com"
+                size="lg"
+                class="w-full"
               />
-            </UForm>
-          </template>
-
-          <!-- REGISTER -->
-          <template #register>
-            <UAlert
-              :description="t('auth.hintRegister')"
-              icon="i-heroicons-information-circle"
-              color="primary"
-              variant="soft"
-              class="text-sm mb-4"
-            />
-
-            <UForm
-              class="space-y-4"
-              @submit.prevent="onRegister"
-            >
-              <UFormField :label="t('auth.email')">
-                <UInput
-                  v-model="reg.email"
-                  type="email"
-                  class="w-full"
-                />
-              </UFormField>
-
-              <UFormField :label="t('auth.password')">
-                <UInput
-                  v-model="reg.password"
-                  type="password"
-                  class="w-full"
-                />
-              </UFormField>
 
               <UButton
-                :loading="isLoading"
-                type="submit"
                 color="primary"
+                variant="soft"
+                size="lg"
                 class="w-full justify-center"
+                :loading="isLoading"
+                @click="onMagic"
               >
-                {{ t('auth.register') }}
+                {{ t('auth.magic') }}
               </UButton>
-
-              <UAlert
-                v-if="error"
-                :description="error"
-                color="error"
-                variant="subtle"
-                icon="i-heroicons-exclamation-triangle"
-                class="text-sm mt-3"
-              />
-            </UForm>
-          </template>
-        </UTabs>
-      </UCard>
+            </div>
+          </UCard>
+        </template>
+      </section>
     </UPageBody>
   </UPage>
 </template>

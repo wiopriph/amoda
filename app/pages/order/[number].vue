@@ -133,7 +133,8 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageBody>
+    <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
+      >
       <UCard
         v-if="isPending"
         class="py-10 text-center text-muted"

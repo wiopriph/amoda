@@ -201,7 +201,7 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageBody>
+    <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
       <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
         <UBreadcrumb
           :items="breadcrumbItems"

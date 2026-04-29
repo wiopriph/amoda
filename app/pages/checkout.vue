@@ -394,7 +394,7 @@ const submit = async () => {
 
 <template>
   <UPage>
-    <UPageBody>
+    <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
       <section class="overflow-hidden  mb-2 sm:mb-2 rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
         <UBadge
           color="primary"

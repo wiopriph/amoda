@@ -192,8 +192,7 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageBody class="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <!-- HERO -->
+    <UPageBody class="mx-auto max-w-4xl sm:px-6 lg:px-8">
       <section class="rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-6 sm:p-8">
         <UBadge
           color="primary"

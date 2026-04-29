@@ -66,7 +66,7 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
 
     <UHeader
       :toggle="false"
-      :ui="{ container: 'lg:px-12' }"
+      :ui="{ container: 'mx-auto max-w-6xl sm:px-6 lg:px-8' }"
       class="border-b border-gray-100 bg-white/85 backdrop-blur supports-[backdrop-filter]:bg-white/75"
     >
       <template #left>
