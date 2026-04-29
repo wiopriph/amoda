@@ -63,20 +63,14 @@ const form = reactive({
 });
 
 const errors = reactive({
-  name: false,
   phone: false,
 });
 
 const validateForm = () => {
-  errors.name = !form.name.trim();
   errors.phone = !form.phone.trim() || form.phone.replace(/\D/g, '').length < 12;
 
-  return !errors.name && !errors.phone;
+  return !errors.phone;
 };
-
-watch(() => form.name, () => {
-  if (errors.name && form.name.trim()) errors.name = false;
-});
 
 watch(() => form.phone, () => {
   if (errors.phone && form.phone.trim()) errors.phone = false;
@@ -84,7 +78,7 @@ watch(() => form.phone, () => {
 
 const pending = ref(false);
 
-const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
+const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
 const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0));
 
@@ -132,8 +126,33 @@ const selectedOfficeMapUrl = computed(() => {
   return null;
 });
 
+const phoneInputRef = ref<any>(null);
+
+const scrollToPhoneInput = async () => {
+  await nextTick();
+
+  const inputEl = phoneInputRef.value?.inputRef ||
+    phoneInputRef.value?.$el?.querySelector?.('input') ||
+    document.querySelector('input[name="phone"]');
+
+  if (!inputEl) {
+    return;
+  }
+
+  inputEl.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  });
+
+  setTimeout(() => {
+    inputEl.focus();
+  }, 300);
+};
+
 const submit = async () => {
   if (!validateForm()) {
+    await scrollToPhoneInput();
+
     return;
   }
 
@@ -534,32 +553,28 @@ const submit = async () => {
 
               <div class="mt-5 grid gap-4">
                 <UFormField
-                  :label="t('checkout.name')"
-                  :error="errors.name ? t('checkout.errors.nameRequired') : undefined"
-                  required
-                >
-                  <UInput
-                    v-model="form.name"
-                    required
-                    name="name"
-                    placeholder="Ex: Maria Silva"
-                    size="lg"
-                    class="w-full"
-                  />
-                </UFormField>
-
-                <UFormField
                   :label="t('checkout.phone')"
                   :error="errors.phone ? t('checkout.errors.phoneRequired') : undefined"
                   required
                 >
                   <UInput
+                    ref="phoneInputRef"
                     v-model="form.phone"
                     v-maska="'+244 ### ### ###'"
                     required
                     name="phone"
                     placeholder="+244 XXX XXX XXX"
                     type="tel"
+                    size="lg"
+                    class="w-full"
+                  />
+                </UFormField>
+
+                <UFormField :label="t('checkout.name')">
+                  <UInput
+                    v-model="form.name"
+                    name="name"
+                    placeholder="Ex: Maria Silva"
                     size="lg"
                     class="w-full"
                   />
@@ -658,7 +673,7 @@ const submit = async () => {
           </UForm>
         </section>
 
-        <aside class="hidden lg:block">
+        <aside>
           <div class="sticky top-24 space-y-4">
             <UCard class="border-primary/20 bg-primary/5">
               <h2 class="text-lg font-black text-highlighted">
@@ -689,7 +704,7 @@ const submit = async () => {
 
               <UButton
                 :loading="pending"
-                :disabled="!items.length || errors.name || errors.phone"
+                :disabled="!items.length || errors.phone"
                 size="xl"
                 color="primary"
                 type="button"
@@ -739,73 +754,6 @@ const submit = async () => {
             </UCard>
           </div>
         </aside>
-      </div>
-
-      <section
-        v-if="!isLoading"
-        class="mt-5 lg:hidden"
-      >
-        <UCard>
-          <h2 class="text-base font-bold text-highlighted">
-            {{ t('checkout.steps.title') }}
-          </h2>
-
-          <div class="mt-4 space-y-3">
-            <div
-              v-for="(step, index) in steps"
-              :key="step.title"
-              class="flex gap-3"
-            >
-              <div class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                {{ index + 1 }}
-              </div>
-
-              <div>
-                <div class="text-sm font-semibold text-highlighted">
-                  {{ step.title }}
-                </div>
-
-                <div class="text-sm leading-6 text-muted">
-                  {{ step.desc }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </UCard>
-      </section>
-
-      <div
-        v-if="!isLoading"
-        class="fixed bottom-0 left-0 right-0 z-60 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] lg:hidden"
-      >
-        <div class="mx-auto max-w-5xl">
-          <div class="mb-2 flex items-center justify-between gap-3">
-            <div>
-              <div class="text-xs text-muted">
-                {{ t('checkout.summary.total') }}
-              </div>
-
-              <div class="text-lg font-black text-primary">
-                {{ fmtAOA(totalAOA) }}
-              </div>
-            </div>
-
-            <div class="text-right text-xs leading-5 text-muted">
-              {{ t('checkout.summary.items', { count: totalCount }) }}
-            </div>
-          </div>
-
-          <UButton
-            :loading="pending"
-            :disabled="!items.length || errors.name || errors.phone"
-            size="xl"
-            color="primary"
-            class="w-full justify-center"
-            @click="submit"
-          >
-            {{ t('checkout.submit') }}
-          </UButton>
-        </div>
       </div>
     </UPageBody>
   </UPage>

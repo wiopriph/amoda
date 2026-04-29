@@ -57,7 +57,7 @@ const total = computed(() => Number(data.value?.total || 0));
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
 
-const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
+const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
 const getTotal = (totals: any) => {
   const v = totals?.total ?? totals?.grandTotal ?? totals?.amount ?? null;

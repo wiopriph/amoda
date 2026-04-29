@@ -133,7 +133,7 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageBody class="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+    <UPageBody>
       <UCard
         v-if="isPending"
         class="py-10 text-center text-muted"
@@ -150,7 +150,7 @@ useHead(() => ({
       />
 
       <template v-else>
-        <section class="overflow-hidden rounded-3xl border border-green-100 bg-gradient-to-br from-green-50 via-white to-primary/5 p-5 text-center shadow-sm sm:p-8">
+        <section class="overflow-hidden  mb-2 sm:mb-2 rounded-3xl border border-green-100 bg-gradient-to-br from-green-50 via-white to-primary/5 p-5 text-center shadow-sm sm:p-8">
           <div class="mx-auto flex size-14 items-center justify-center rounded-full bg-green-100 text-green-700">
             <UIcon
               name="i-lucide-check"
@@ -349,9 +349,11 @@ useHead(() => ({
               </h2>
 
               <div class="mt-3 text-sm leading-6">
-                <div class="font-semibold text-highlighted">
-                  {{ order.guestContact?.name || '—' }}
-                </div>
+                <div
+                  v-if="order.guestContact?.name"
+                  class="font-semibold text-highlighted"
+                  v-text="order.guestContact?.name"
+                />
 
                 <a
                   v-if="order.guestContact?.phone"

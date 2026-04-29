@@ -27,7 +27,7 @@ const {
   remove,
 } = useCart();
 
-const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
+const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
 
 const localeRoute = useLocaleRoute();
 const { trackBeginCheckout } = useAnalyticsEvent();
@@ -445,7 +445,7 @@ const goCheckout = () => {
             </UCard>
           </section>
 
-          <aside class="hidden lg:block">
+          <aside>
             <div class="sticky top-24 space-y-4">
               <UCard class="border-primary/20 bg-primary/5">
                 <h2 class="text-lg font-black text-highlighted">
@@ -524,68 +524,6 @@ const goCheckout = () => {
               </UCard>
             </div>
           </aside>
-        </div>
-
-        <!-- STEPS MOBILE/TABLET -->
-        <section class="mt-5 lg:hidden">
-          <UCard>
-            <h2 class="text-base font-bold text-highlighted">
-              {{ t('cart.steps.title') }}
-            </h2>
-
-            <div class="mt-4 space-y-3">
-              <div
-                v-for="(step, index) in steps"
-                :key="step.title"
-                class="flex gap-3"
-              >
-                <div class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                  {{ index + 1 }}
-                </div>
-
-                <div>
-                  <div class="text-sm font-semibold text-highlighted">
-                    {{ step.title }}
-                  </div>
-
-                  <div class="text-sm leading-6 text-muted">
-                    {{ step.desc }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </UCard>
-        </section>
-
-        <!-- MOBILE STICKY SUMMARY -->
-        <div class="fixed bottom-0 left-0 right-0 z-60 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] lg:hidden">
-          <div class="mx-auto max-w-5xl">
-            <div class="mb-2 flex items-center justify-between gap-3">
-              <div>
-                <div class="text-xs text-muted">
-                  {{ t('cart.summary.total') }}
-                </div>
-
-                <div class="text-lg font-black text-primary">
-                  {{ fmtAOA(totalAOA) }}
-                </div>
-              </div>
-
-              <div class="text-right text-xs leading-5 text-muted">
-                {{ t('cart.summary.items', { count: totalCount }) }}
-              </div>
-            </div>
-
-            <UButton
-              size="xl"
-              color="primary"
-              class="w-full justify-center"
-              :disabled="!items.length"
-              @click="goCheckout"
-            >
-              {{ t('cart.checkout') }}
-            </UButton>
-          </div>
         </div>
       </template>
     </UPageBody>

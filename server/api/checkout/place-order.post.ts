@@ -41,8 +41,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Cart is empty' });
   }
 
-  if (!body.contact?.name || !body.contact?.phone) {
-    throw createError({ statusCode: 400, statusMessage: 'Name and phone are required' });
+  if (!body.contact?.phone) {
+    throw createError({ statusCode: 400, statusMessage: 'Phone is required' });
   }
 
   if (!Number.isInteger(body.totals?.total) || body.totals.total < 0) {
