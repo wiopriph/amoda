@@ -37,7 +37,24 @@ if (error.value || !data.value) {
 const products = computed(() => data.value!.items || []);
 const total = computed(() => data.value!.total || 0);
 const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)));
-const makePaginationTo = (pageNum: number) => ({ query: { page: pageNum } });
+
+const makePaginationTo = (pageNum: number) => ({
+  query: {
+    ...route.query,
+    page: pageNum === 1 ? undefined : pageNum,
+  },
+});
+
+if (import.meta.client) {
+  watch(
+    () => route.query.page,
+    async () => {
+      await nextTick();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+  );
+}
+
 
 const category = computed(() => data.value!.category);
 const categoryTitle = computed(() => category.value?.name || '');
