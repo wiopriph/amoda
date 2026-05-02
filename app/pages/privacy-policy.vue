@@ -119,7 +119,7 @@ useHead(() => ({
           "items": []
         },
         {
-          "icon": "i-lucide-child",
+          "icon": "i-lucide-scan-face",
           "title": "Menores",
           "text": "A Amoda não é destinada a menores. Se acredita que recebemos dados de um menor, contacte-nos para resolvermos.",
           "items": []
