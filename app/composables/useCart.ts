@@ -1,21 +1,18 @@
+/* eslint-disable camelcase */
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { makeGa4Item } from '~/utils/ga4';
 
 
 type CartItem = {
   key: string;
-
   productId: number;
   variantId: number;
   sizeId: number;
-
   productName: string;
   brand?: string | null;
   categoryName?: string | null;
-
   sizeLabel?: string | null;
   variantLabel?: string | null;
-
   slug: string;
   image?: string | null;
   price: number;
@@ -43,16 +40,34 @@ type SizeLike = {
   size: string;
 };
 
-const STORAGE_KEY = 'amoda:cart';
-const isClient = typeof window !== 'undefined';
-
-const toInt = (v: unknown): number => {
-  const n = typeof v === 'string' ? Number(v) : (v as number);
-
-  if (!Number.isFinite(n)) throw new Error('Invalid number');
-
-  return Math.trunc(n);
+type ServerCartResponse = {
+  cart?: {
+    publicCode?: string | null
+    contactSnapshot?: Record<string, any> | null
+  }
+  publicCode?: string | null
+  items?: any[]
 };
+
+const MAX_QTY = 99;
+const QTY_UPDATE_DEBOUNCE_MS = 500;
+
+let initPromise: Promise<void> | null = null;
+
+const qtyUpdateTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const qtyUpdateVersions = new Map<string, number>();
+
+const toInt = (value: unknown, fallback = 0): number => {
+  const n = typeof value === 'string' ? Number(value) : value;
+
+  if (!Number.isFinite(n)) {
+    return fallback;
+  }
+
+  return Math.trunc(Number(n));
+};
+
+const clampQty = (qty: unknown) => Math.min(MAX_QTY, Math.max(1, Math.floor(Number(qty) || 1)));
 
 const makeKey = (productId: number, variantId: number, sizeId: number) => `p${productId}-v${variantId}-s${sizeId}`;
 
@@ -69,190 +84,282 @@ const pickPrimaryImage = (product?: ProductLike, variant?: VariantLike): string 
   return variantImg || productImg || null;
 };
 
+const normalizeServerItem = (item: any): CartItem => {
+  const productId = toInt(item.productId ?? item.product_id);
+  const variantId = toInt(item.variantId ?? item.variant_id);
+  const sizeId = toInt(item.sizeId ?? item.productVariantSizeId ?? item.product_variant_size_id);
+
+  return {
+    key: makeKey(productId, variantId, sizeId),
+    productId,
+    variantId,
+    sizeId,
+    productName: String(item.productName ?? item.product_name ?? ''),
+    brand: item.brand ?? null,
+    categoryName: item.categoryName ?? item.category_name ?? null,
+    sizeLabel: item.sizeLabel ?? item.size_label ?? null,
+    variantLabel: item.variantLabel ?? item.variant_label ?? null,
+    slug: String(item.slug ?? ''),
+    image: item.image ?? null,
+    price: toInt(item.priceSnapshot ?? item.price_snapshot ?? item.price),
+    qty: clampQty(item.qty),
+  };
+};
+
 export function useCart() {
-  const state = useState<CartItem[]>('cart:items', () => []);
+  const itemsState = useState<CartItem[]>('cart:items', () => []);
   const isLoading = useState<boolean>('cart:loading', () => true);
+  const initialized = useState<boolean>('cart:initialized', () => false);
+  const sessionId = useState<string | null>('cart:sessionId', () => null);
+  const publicCode = useState<string | null>('cart:publicCode', () => null);
+  const contactSnapshot = useState<Record<string, any> | null>('cart:contactSnapshot', () => null);
+  const isPending = useState<boolean>('cart:pending', () => false);
+  const error = useState<string | null>('cart:error', () => null);
 
   const { trackAddToCart, trackRemoveFromCart } = useAnalyticsEvent();
 
-  const toCartGa4Item = (i: CartItem, quantity: number) =>
-    makeGa4Item({
-      productId: i.productId,
-      name: i.productName,
-      brand: i.brand ?? undefined,
-      categoryName: i.categoryName ?? undefined,
-      price: i.price,
-      quantity,
-      variantId: i.variantId,
-      sizeId: i.sizeId,
-      variantLabel: i.variantLabel ?? undefined,
-      sizeLabel: i.sizeLabel ?? undefined,
-    });
+  const currentSessionId = () => sessionId.value || useCookie<string | null>('sid').value || null;
 
-  const loadFromStorage = () => {
-    if (!isClient) return;
+  const applyServerCart = (response: ServerCartResponse | null | undefined) => {
+    if (!response) {
+      return;
+    }
 
-    isLoading.value = true;
+    publicCode.value = response.publicCode ?? response.cart?.publicCode ?? publicCode.value;
+    contactSnapshot.value = response.cart?.contactSnapshot ?? contactSnapshot.value;
+    itemsState.value = Array.isArray(response.items) ? response.items.map(normalizeServerItem) : [];
+  };
+
+  const requestCart = async <T extends ServerCartResponse>(url: string, body: Record<string, any>) => {
+    const sid = currentSessionId();
+
+    if (!sid) {
+      throw new Error('Cart session is missing');
+    }
+
+    sessionId.value = sid;
+    isPending.value = true;
 
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const parsed = raw ? (JSON.parse(raw) as any[]) : [];
+      const response = await $fetch<T>(url, {
+        method: 'POST',
+        body: {
+          session_id: sid,
+          ...body,
+        },
+      });
 
-      if (!Array.isArray(parsed)) {
-        state.value = [];
+      applyServerCart(response);
+      error.value = null;
+
+      return response;
+    } catch (requestError: any) {
+      error.value = requestError?.data?.message || requestError?.message || 'Cart request failed';
+      throw requestError;
+    } finally {
+      isPending.value = false;
+    }
+  };
+
+  const initCart = async (sid?: string | null) => {
+    if (initialized.value) {
+      return;
+    }
+
+    if (initPromise) {
+      return initPromise;
+    }
+
+    sessionId.value = sid || currentSessionId();
+
+    initPromise = (async () => {
+      if (!sessionId.value) {
+        isLoading.value = false;
+        initialized.value = true;
 
         return;
       }
 
-      const normalized: CartItem[] = parsed.map((i) => {
-        const productId = toInt(i.productId);
-        const variantId = toInt(i.variantId);
-        const sizeId = toInt(i.sizeId);
+      isLoading.value = true;
 
-        const key = String(i.key || makeKey(productId, variantId, sizeId));
+      try {
+        await requestCart('/api/cart/init', {});
+      } catch {
+        itemsState.value = [];
+      } finally {
+        isLoading.value = false;
+        initialized.value = true;
+        initPromise = null;
+      }
+    })();
 
-        const price = toInt(i.price ?? 0);
-        const qty = Math.max(1, toInt(i.qty ?? 1));
+    return initPromise;
+  };
 
-        const productName = String(i.productName ?? i.title ?? '');
+  const toCartGa4Item = (item: CartItem, quantity: number) =>
+    makeGa4Item({
+      productId: item.productId,
+      name: item.productName,
+      brand: item.brand ?? undefined,
+      categoryName: item.categoryName ?? undefined,
+      price: item.price,
+      quantity,
+      variantId: item.variantId,
+      sizeId: item.sizeId,
+      variantLabel: item.variantLabel ?? undefined,
+      sizeLabel: item.sizeLabel ?? undefined,
+    });
 
-        return {
-          key,
+  const cancelScheduledQtyUpdate = (key: string) => {
+    const timer = qtyUpdateTimers.get(key);
 
-          productId,
-          variantId,
-          sizeId,
+    if (timer) {
+      clearTimeout(timer);
+      qtyUpdateTimers.delete(key);
+    }
 
-          productName,
-          brand: (i.brand ?? null) as string | null,
-          categoryName: (i.categoryName ?? null) as string | null,
+    qtyUpdateVersions.set(key, (qtyUpdateVersions.get(key) || 0) + 1);
+  };
 
-          variantLabel: (i.variantLabel ?? null) as string | null,
-          sizeLabel: (i.sizeLabel ?? null) as string | null,
+  const cancelAllScheduledQtyUpdates = () => {
+    for (const timer of qtyUpdateTimers.values()) {
+      clearTimeout(timer);
+    }
 
-          slug: String(i.slug ?? ''),
-          image: i.image ?? null,
-          price,
-          qty,
-        };
-      });
+    qtyUpdateTimers.clear();
+    qtyUpdateVersions.clear();
+  };
 
-      // мердж по key (если вдруг задублилось)
-      const map = new Map<string, CartItem>();
+  const scheduleQtyUpdate = (item: CartItem) => {
+    const nextVersion = (qtyUpdateVersions.get(item.key) || 0) + 1;
+    const snapshot = {
+      key: item.key,
+      variantId: item.variantId,
+      sizeId: item.sizeId,
+      qty: item.qty,
+    };
 
-      for (const item of normalized) {
-        const exist = map.get(item.key);
+    const existingTimer = qtyUpdateTimers.get(item.key);
 
-        if (exist) {
-          exist.qty += item.qty;
-        } else {
-          map.set(item.key, item);
-        }
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+
+    qtyUpdateVersions.set(item.key, nextVersion);
+
+    qtyUpdateTimers.set(item.key, setTimeout(async () => {
+      qtyUpdateTimers.delete(snapshot.key);
+
+      const sid = currentSessionId();
+
+      if (!sid || qtyUpdateVersions.get(snapshot.key) !== nextVersion) {
+        return;
       }
 
-      state.value = Array.from(map.values());
-    } catch {
-      state.value = [];
-    } finally {
-      isLoading.value = false;
-    }
+      isPending.value = true;
+
+      try {
+        const response = await $fetch<ServerCartResponse>('/api/cart/items/update', {
+          method: 'POST',
+          body: {
+            session_id: sid,
+            variant_id: snapshot.variantId,
+            product_variant_size_id: snapshot.sizeId,
+            qty: snapshot.qty,
+          },
+        });
+
+        if (qtyUpdateVersions.get(snapshot.key) === nextVersion) {
+          applyServerCart(response);
+          error.value = null;
+        }
+      } catch (requestError: any) {
+        if (qtyUpdateVersions.get(snapshot.key) === nextVersion) {
+          error.value = requestError?.data?.message || requestError?.message || 'Cart request failed';
+        }
+      } finally {
+        if (qtyUpdateVersions.get(snapshot.key) === nextVersion) {
+          isPending.value = false;
+        }
+      }
+    }, QTY_UPDATE_DEBOUNCE_MS));
   };
 
-  const persist = () => {
-    if (!isClient) {
-      return;
-    }
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.value));
-    } catch {}
-  };
-
-  if (isClient) {
-    onMounted(loadFromStorage);
-    watch(state, persist, { deep: true });
-  }
-
-  const items = computed(() => state.value);
-  const count = computed(() => state.value.reduce((acc, item) => acc + item.qty, 0));
-  const totalAOA = computed(() => state.value.reduce((sum, item) => sum + item.price * item.qty, 0));
-  const isEmpty = computed(() => state.value.length === 0);
-
-  const add = (product: ProductLike, variant: VariantLike, size: SizeLike, qty = 1) => {
+  const addItem = async (product: ProductLike, variant: VariantLike, size: SizeLike, qty = 1) => {
     if (!product?.id || !variant?.id || !size?.id) {
       throw new Error('product/variant/size missing');
     }
 
-    const safeQty = Math.max(1, Math.floor(qty));
-
+    const safeQty = clampQty(qty);
     const productId = toInt(product.id);
     const variantId = toInt(variant.id);
     const sizeId = toInt(size.id);
-
     const key = makeKey(productId, variantId, sizeId);
+    const existing = itemsState.value.find(item => item.key === key);
 
-    const existing = state.value.find(i => i.key === key);
+    const previousItems = [...itemsState.value];
 
     if (existing) {
-      existing.qty += safeQty;
-
-      if (import.meta.client) {
-        trackAddToCart({
-          value: existing.price * safeQty,
-          items: [toCartGa4Item(existing, safeQty)],
-        });
-      }
-
-      return;
+      existing.qty = Math.min(MAX_QTY, existing.qty + safeQty);
+    } else {
+      itemsState.value.push({
+        key,
+        productId,
+        variantId,
+        sizeId,
+        productName: product.title,
+        brand: product.brand_name ?? null,
+        categoryName: product.primary_category_id ? String(product.primary_category_id) : null,
+        variantLabel: variant.color ?? null,
+        sizeLabel: size.size ?? null,
+        slug: product.slug,
+        image: pickPrimaryImage(product, variant),
+        price: toInt(variant.price),
+        qty: safeQty,
+      });
     }
 
-    const next: CartItem = {
-      key,
+    const trackedItem = itemsState.value.find(item => item.key === key);
 
-      productId,
-      variantId,
-      sizeId,
-
-      productName: product.title,
-      brand: product.brand_name ?? null,
-      categoryName: product.primary_category_id ? String(product.primary_category_id) : null,
-
-      variantLabel: variant.color ?? null,
-      sizeLabel: size.size ?? null,
-
-      slug: product.slug,
-      image: pickPrimaryImage(product, variant),
-      price: toInt(variant.price),
-      qty: safeQty,
-    };
-
-    state.value.push(next);
-
-    if (import.meta.client) {
+    if (import.meta.client && trackedItem) {
       trackAddToCart({
-        value: next.price * safeQty,
-        items: [toCartGa4Item(next, safeQty)],
+        value: trackedItem.price * safeQty,
+        items: [toCartGa4Item(trackedItem, safeQty)],
       });
+    }
+
+    try {
+      cancelScheduledQtyUpdate(key);
+
+      await requestCart('/api/cart/items/add', {
+        variant_id: variantId,
+        product_variant_size_id: sizeId,
+        qty: safeQty,
+      });
+    } catch {
+      itemsState.value = previousItems;
     }
   };
 
-  const setQty = (key: string, qty: number) => {
-    const target = state.value.find(i => i.key === key);
+  const updateQty = async (key: string, qty: number) => {
+    const target = itemsState.value.find(item => item.key === key);
 
     if (!target) {
       return;
     }
 
-    const next = Math.max(1, Math.floor(qty));
-    const prev = target.qty;
+    const nextQty = clampQty(qty);
+    const previousQty = target.qty;
 
-    if (next === prev) {
+    if (nextQty === previousQty) {
       return;
     }
 
-    const delta = next - prev;
+    target.qty = nextQty;
 
     if (import.meta.client) {
+      const delta = nextQty - previousQty;
+
       if (delta > 0) {
         trackAddToCart({
           value: target.price * delta,
@@ -266,32 +373,20 @@ export function useCart() {
       }
     }
 
-    target.qty = next;
+    scheduleQtyUpdate(target);
   };
 
-  const increment = (key: string) => {
-    const target = state.value.find(i => i.key === key);
+  const removeItem = async (key: string) => {
+    const target = itemsState.value.find(item => item.key === key);
 
     if (!target) {
       return;
     }
 
-    if (import.meta.client) {
-      trackAddToCart({
-        value: target.price,
-        items: [toCartGa4Item(target, 1)],
-      });
-    }
+    const previousItems = [...itemsState.value];
 
-    target.qty += 1;
-  };
-
-  const remove = (key: string) => {
-    const target = state.value.find(i => i.key === key);
-
-    if (!target) {
-      return;
-    }
+    cancelScheduledQtyUpdate(key);
+    itemsState.value = itemsState.value.filter(item => item.key !== key);
 
     if (import.meta.client) {
       trackRemoveFromCart({
@@ -300,48 +395,65 @@ export function useCart() {
       });
     }
 
-    state.value = state.value.filter(i => i.key !== key);
+    try {
+      await requestCart('/api/cart/items/remove', {
+        variant_id: target.variantId,
+        product_variant_size_id: target.sizeId,
+      });
+    } catch {
+      itemsState.value = previousItems;
+    }
+  };
+
+  const increment = (key: string) => {
+    const target = itemsState.value.find(item => item.key === key);
+
+    if (target) {
+      return updateQty(key, target.qty + 1);
+    }
   };
 
   const decrement = (key: string) => {
-    const target = state.value.find(i => i.key === key);
+    const target = itemsState.value.find(item => item.key === key);
 
     if (!target) {
       return;
     }
 
     if (target.qty <= 1) {
-      // корректно: минус 1 при qty=1 == remove item
-      remove(key);
-
-      return;
+      return removeItem(key);
     }
 
-    if (import.meta.client) {
-      trackRemoveFromCart({
-        value: target.price,
-        items: [toCartGa4Item(target, 1)],
-      });
+    return updateQty(key, target.qty - 1);
+  };
+
+  const clearCart = async () => {
+    const previousItems = [...itemsState.value];
+
+    cancelAllScheduledQtyUpdates();
+    itemsState.value = [];
+
+    try {
+      await requestCart('/api/cart/clear', {});
+    } catch {
+      itemsState.value = previousItems;
     }
-
-    target.qty -= 1;
   };
 
-  const clear = () => {
-    state.value = [];
-  };
+  const startCheckout = async (contact?: unknown) =>
+    requestCart('/api/cart/checkout-started', { contact: contact ?? null });
 
+  const items = computed(() => itemsState.value);
+  const count = computed(() => itemsState.value.reduce((acc, item) => acc + item.qty, 0));
+  const totalAOA = computed(() => itemsState.value.reduce((sum, item) => sum + item.price * item.qty, 0));
+  const isEmpty = computed(() => itemsState.value.length === 0);
 
-  const getQty = (productId: number, variantId: number, sizeId: number) => {
-    const key = makeKey(productId, variantId, sizeId);
-
-    return state.value.find(i => i.key === key)?.qty ?? 0;
-  };
+  const getQty = (productId: number, variantId: number, sizeId: number) =>
+    itemsState.value.find(item => item.key === makeKey(productId, variantId, sizeId))?.qty ?? 0;
 
   const hasItem = (productId: number, variantId: number, sizeId: number) => getQty(productId, variantId, sizeId) > 0;
 
-  const getByKey = (key: string) => state.value.find(i => i.key === key) ?? null;
-
+  const getByKey = (key: string) => itemsState.value.find(item => item.key === key) ?? null;
 
   return {
     items,
@@ -349,14 +461,22 @@ export function useCart() {
     totalAOA,
     isEmpty,
     isLoading,
-
-    add,
-    setQty,
+    publicCode,
+    contactSnapshot,
+    isPending,
+    error,
+    initCart,
+    addItem,
+    removeItem,
+    updateQty,
+    clearCart,
+    startCheckout,
+    add: addItem,
+    setQty: updateQty,
     increment,
     decrement,
-    remove,
-    clear,
-
+    remove: removeItem,
+    clear: clearCart,
     getQty,
     hasItem,
     getByKey,

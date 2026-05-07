@@ -131,7 +131,14 @@ const formattedPriceAOA = computed(() => {
 });
 
 // ===== CART =====
-const { add: addToCart, getQty, increment, decrement, isEmpty: isEmptyCart } = useCart();
+const {
+  add: addToCart,
+  getQty,
+  increment,
+  decrement,
+  isEmpty: isEmptyCart,
+  publicCode,
+} = useCart();
 
 const canAdd = computed(() => !!selectedSizeId.value);
 
@@ -281,9 +288,8 @@ const productFullUrl = computed(() => {
 });
 
 const whatsappHref = computed(() => {
-  const text = encodeURIComponent(
-    `Olá! Tenho uma dúvida sobre este produto:\n${productTitle.value}\n${productFullUrl.value}`,
-  );
+  const cartCodeLine = publicCode.value ? `Cart code: ${publicCode.value}` : '';
+  const text = encodeURIComponent(`Olá! Tenho uma pergunta sobre este produto:\n${productFullUrl.value}\n${cartCodeLine}`);
 
   return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
 });

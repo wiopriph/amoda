@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable camelcase */
 import type { SelectMenuItem } from '@nuxt/ui';
 import { vMaska } from 'maska/vue';
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
@@ -25,10 +26,16 @@ const {
   items,
   totalAOA,
   clear,
+  startCheckout,
+  contactSnapshot,
 } = useCart();
 
 const { trackPurchase } = useAnalyticsEvent();
 const localeRoute = useLocaleRoute();
+const CONTACT_SYNC_DEBOUNCE_MS = 900;
+
+let contactSyncTimer: ReturnType<typeof setTimeout> | null = null;
+let applyingContactSnapshot = false;
 
 const redirectIfEmpty = () => {
   if (isLoading.value) {
@@ -61,6 +68,66 @@ const form = reactive({
   phone: '',
   pickupOfficeId: offices.value?.[0]?.id ?? null,
 });
+
+const getContactSnapshot = () => ({
+  name: form.name.trim(),
+  phone: form.phone.trim(),
+  pickupOfficeId: form.pickupOfficeId,
+});
+
+const hasContactData = () => Boolean(form.name.trim() || form.phone.trim());
+
+const syncContactSnapshot = () => {
+  if (!import.meta.client || applyingContactSnapshot || !hasContactData()) {
+    return;
+  }
+
+  if (contactSyncTimer) {
+    clearTimeout(contactSyncTimer);
+  }
+
+  contactSyncTimer = setTimeout(() => {
+    contactSyncTimer = null;
+    startCheckout(getContactSnapshot()).catch(() => {});
+  }, CONTACT_SYNC_DEBOUNCE_MS);
+};
+
+if (import.meta.client) {
+  watch(
+    contactSnapshot,
+    (snapshot) => {
+      if (!snapshot || hasContactData()) {
+        return;
+      }
+
+      applyingContactSnapshot = true;
+
+      if (typeof snapshot.name === 'string') {
+        form.name = snapshot.name;
+      }
+
+      if (typeof snapshot.phone === 'string') {
+        form.phone = snapshot.phone;
+      }
+
+      if (snapshot.pickupOfficeId) {
+        form.pickupOfficeId = snapshot.pickupOfficeId;
+      }
+
+      nextTick(() => {
+        applyingContactSnapshot = false;
+      });
+    },
+    { immediate: true },
+  );
+
+  watch(
+    () => [form.name, form.phone, form.pickupOfficeId] as const,
+    () => {
+      syncContactSnapshot();
+    },
+  );
+}
 
 const errors = reactive({
   phone: false,
@@ -177,6 +244,8 @@ const submit = async () => {
   pending.value = true;
 
   try {
+    await startCheckout(getContactSnapshot());
+
     const dtoItems = items.value.map(i => ({
       productId: i.productId,
       variantId: i.variantId,
@@ -223,9 +292,8 @@ const submit = async () => {
       } as any);
     }
 
+    await clear();
     await navigateTo(localeRoute({ name: 'order-number', params: { number } }));
-
-    clear();
   } catch (error: any) {
     toast.add({
       title: error?.data?.message || t('checkout.errors.common'),

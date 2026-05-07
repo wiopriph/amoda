@@ -25,6 +25,9 @@ const {
   decrement,
   setQty,
   remove,
+  publicCode,
+  isPending,
+  error,
 } = useCart();
 
 const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
@@ -98,7 +101,10 @@ const goCheckout = () => {
         "title": "Resumo da reserva",
         "items": "{count} item(ns)",
         "total": "Total se levar tudo",
-        "note": "Você não paga agora. Este valor é apenas uma referência caso decida levar todos os itens depois de experimentar."
+        "note": "Você não paga agora. Este valor é apenas uma referência caso decida levar todos os itens depois de experimentar.",
+        "code": "Cart code",
+        "saving": "A guardar reserva...",
+        "error": "Não foi possível atualizar a reserva. Tente novamente."
       },
       "checkout": "Confirmar reserva",
       "continue": "Continuar a escolher",
@@ -162,7 +168,10 @@ const goCheckout = () => {
         "title": "Reservation summary",
         "items": "{count} item(s)",
         "total": "Total if you keep everything",
-        "note": "You do not pay now. This amount is only a reference if you decide to keep all items after trying them."
+        "note": "You do not pay now. This amount is only a reference if you decide to keep all items after trying them.",
+        "code": "Cart code",
+        "saving": "Saving reservation...",
+        "error": "Could not update the reservation. Please try again."
       },
       "checkout": "Confirm reservation",
       "continue": "Continue choosing",
@@ -472,6 +481,35 @@ const goCheckout = () => {
                   <p class="text-xs leading-5 text-muted">
                     {{ t('cart.summary.note') }}
                   </p>
+
+                  <div
+                    v-if="publicCode"
+                    class="rounded-xl border border-primary/15 bg-white/80 px-3 py-2 text-xs text-muted"
+                  >
+                    <span>{{ t('cart.summary.code') }}:</span>
+
+                    <span class="ml-1 font-bold text-highlighted">{{ publicCode }}</span>
+                  </div>
+
+                  <UAlert
+                    v-if="error"
+                    color="warning"
+                    variant="soft"
+                    icon="i-lucide-cloud-off"
+                    :description="t('cart.summary.error')"
+                  />
+
+                  <div
+                    v-else-if="isPending"
+                    class="flex items-center gap-2 text-xs text-muted"
+                  >
+                    <UIcon
+                      name="i-lucide-loader-2"
+                      class="size-4 animate-spin"
+                    />
+
+                    <span>{{ t('cart.summary.saving') }}</span>
+                  </div>
                 </div>
 
                 <UButton
