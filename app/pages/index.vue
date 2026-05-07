@@ -103,6 +103,9 @@ const trustItems = computed(() =>
 );
 
 const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
+
+const { makeWhatsappHref } = useWhatsappLink();
+const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
 </script>
 
 <i18n lang="json">
@@ -111,6 +114,8 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
     "home": {
       "title": "Amoda - Moda feminina em Luanda ao alcance de todos",
       "desc": "Escolha moda feminina online em Luanda, reserve sem pagar, experimente com calma e leve apenas as peças que combinam consigo.",
+      "whatsappAria": "Falar com a Amoda no WhatsApp",
+      "whatsappMessage": "Olá! Preciso de ajuda para escolher peças na Amoda.",
       "newBadge": "NOVO",
       "how": {
         "title": "Como comprar na Amoda",
@@ -172,6 +177,8 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
     "home": {
       "title": "Amoda - Women's fashion in Luanda, easy to shop online",
       "desc": "Choose women's fashion online in Luanda, reserve with no payment, try it on at your pace, and keep only the pieces you love.",
+      "whatsappAria": "Chat with Amoda on WhatsApp",
+      "whatsappMessage": "Hello! I need help choosing pieces at Amoda.",
       "newBadge": "NEW",
       "how": {
         "title": "How to buy on Amoda",
@@ -409,5 +416,10 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
         </div>
       </section>
     </UPageBody>
+
+    <AppWhatsappButton
+      :to="whatsappHref"
+      :aria-label="t('home.whatsappAria')"
+    />
   </UPage>
 </template>

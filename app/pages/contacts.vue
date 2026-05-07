@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   CONTACT_EMAIL,
-  CONTACT_PHONE,
   COMPANY_ADDRESS,
   COMPANY_ADDRESS_MAP_LINK,
   FACEBOOK_LINK,
@@ -13,6 +12,7 @@ definePageMeta({ name: 'contacts' });
 
 const { t } = useI18n();
 const localeRoute = useLocaleRoute();
+const { makeWhatsappHref } = useWhatsappLink();
 
 useHead(() => ({
   title: t('contacts.meta.title'),
@@ -23,12 +23,7 @@ useHead(() => ({
   ],
 }));
 
-const waLink = computed(() => {
-  const digits = String(CONTACT_PHONE).replace(/[^\d]/g, '');
-  const text = encodeURIComponent('Olá! Preciso de ajuda com uma reserva na Amoda.');
-
-  return `https://wa.me/${digits}?text=${text}`;
-});
+const waLink = makeWhatsappHref(() => t('contacts.whatsappMessage'));
 
 const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
 </script>
@@ -39,6 +34,7 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
     "contacts": {
       "title": "Como podemos ajudar?",
       "intro": "Fale connosco para confirmar reservas, tirar dúvidas ou encontrar o ponto de experimentação mais próximo.",
+      "whatsappMessage": "Olá! Preciso de ajuda com uma reserva na Amoda.",
       "hero": {
         "badge": "Atendimento rápido",
         "secondary": "Ver pontos"
@@ -84,6 +80,7 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
     "contacts": {
       "title": "How can we help?",
       "intro": "Contact us to confirm reservations, ask questions, or find the nearest try-on point.",
+      "whatsappMessage": "Hello! I need help with a reservation at Amoda.",
       "hero": {
         "badge": "Fast support",
         "secondary": "See points"

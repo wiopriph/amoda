@@ -127,6 +127,9 @@ const requestURL = useRequestURL();
 const pageTitle = computed(() => t('category.seoTitle', { category: categoryTitle.value }));
 const pageDescription = computed(() => t('category.seoDescription', { category: categoryTitle.value }));
 
+const { makeWhatsappHref } = useWhatsappLink();
+const whatsappHref = makeWhatsappHref(() => t('category.whatsappMessage', { category: categoryTitle.value }));
+
 useHead(() => ({
   title: `${pageTitle.value} | Amoda`,
   meta: [
@@ -198,6 +201,8 @@ useHead(() => ({
       "emptyDescription": "Veja outras categorias ou volte em breve. Você pode reservar online, experimentar primeiro e pagar apenas pelo que gostar.",
       "allCategories": "Ver categorias",
       "newBadge": "NOVO",
+      "whatsappAria": "Falar com a Amoda no WhatsApp",
+      "whatsappMessage": "Olá! Preciso de ajuda com a categoria {category} na Amoda.",
       "seoTitle": "{category} em Luanda {'|'} Reserve e experimente antes de pagar",
       "seoDescription": "Encontre {category} na Amoda em Luanda. Reserve online sem pagar, experimente primeiro e leve apenas o que gostar."
     }
@@ -209,6 +214,8 @@ useHead(() => ({
       "emptyDescription": "Browse other categories or come back soon. You can reserve online, try first, and pay only for what you like.",
       "allCategories": "View categories",
       "newBadge": "NEW",
+      "whatsappAria": "Chat with Amoda on WhatsApp",
+      "whatsappMessage": "Hello! I need help with the {category} category at Amoda.",
       "seoTitle": "{category} in Luanda {'|'} Reserve and try before paying",
       "seoDescription": "Explore {category} at Amoda in Luanda. Reserve online with no payment, try first, and keep only what you love."
     }
@@ -315,5 +322,10 @@ useHead(() => ({
         </div>
       </section>
     </UPageBody>
+
+    <AppWhatsappButton
+      :to="whatsappHref"
+      :aria-label="t('category.whatsappAria')"
+    />
   </UPage>
 </template>

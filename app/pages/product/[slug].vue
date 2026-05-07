@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
-import { CONTACT_PHONE } from '~/constants/contacts';
 import { makeGa4Item } from '~/utils/ga4';
 
 
@@ -137,7 +136,6 @@ const {
   increment,
   decrement,
   isEmpty: isEmptyCart,
-  publicCode,
 } = useCart();
 
 const canAdd = computed(() => !!selectedSizeId.value);
@@ -287,12 +285,8 @@ const productFullUrl = computed(() => {
   return new URL(path, requestURL.origin).href;
 });
 
-const whatsappHref = computed(() => {
-  const cartCodeLine = publicCode.value ? `Cart code: ${publicCode.value}` : '';
-  const text = encodeURIComponent(`Olá! Tenho uma pergunta sobre este produto:\n${productFullUrl.value}\n${cartCodeLine}`);
-
-  return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
-});
+const { makeWhatsappHref } = useWhatsappLink();
+const whatsappHref = makeWhatsappHref(() => t('product.whatsappMessage', { url: productFullUrl.value }));
 
 const officesPageTo = computed(() => localeRoute({ name: 'pickup-points' }));
 
@@ -361,6 +355,7 @@ useHead(() => ({
       "size": "Tamanho",
       "color": "Cor",
       "description": "Descrição",
+      "whatsappMessage": "Olá! Tenho uma pergunta sobre este produto:\n{url}",
       "meta": {
         "titleSuffix": "Reserve sem pagar {'|'} Amoda",
         "description": "Reserve {title} na Amoda em Luanda. Escolha o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar."
@@ -422,6 +417,7 @@ useHead(() => ({
       "size": "Size",
       "color": "Color",
       "description": "Description",
+      "whatsappMessage": "Hello! I have a question about this product:\n{url}",
       "meta": {
         "titleSuffix": "Reserve with no payment {'|'} Amoda",
         "description": "Reserve {title} at Amoda in Luanda. Choose your size, confirm on WhatsApp, try first, and pay only if you love it."

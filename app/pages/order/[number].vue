@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { CONTACT_PHONE } from '~/constants/contacts';
-
-
 definePageMeta({ name: 'order-number' });
 
 const { t } = useI18n();
 const route = useRoute();
 const localeRoute = useLocaleRoute();
+const { makeWhatsappHref } = useWhatsappLink();
 
 const { data: orderData, error: orderError, pending: isPending } = await useFetch('/api/orders/get', {
   query: { number: route.params.number },
@@ -42,13 +40,7 @@ const pickupMapUrl = computed(() => {
   return null;
 });
 
-const whatsappHref = computed(() => {
-  const text = encodeURIComponent(
-    `Olá! Quero confirmar a minha reserva #${route.params.number}.`,
-  );
-
-  return `https://wa.me/${toTel(CONTACT_PHONE)}?text=${text}`;
-});
+const whatsappHref = makeWhatsappHref(() => t('order.whatsappMessage', { number: String(route.params.number) }));
 
 const pageTitle = computed(() => `${t('order.title')} #${route.params.number} | Amoda`);
 const pageDescription = computed(() => t('order.meta.description', { number: String(route.params.number) }));
@@ -81,6 +73,7 @@ useHead(() => ({
       "call": "Ligar",
       "map": "Abrir no Google Maps",
       "whatsapp": "Falar connosco no WhatsApp",
+      "whatsappMessage": "Olá! Quero confirmar a minha reserva #{number}.",
       "note": "Você ainda não pagou nada. O valor é apenas uma referência. Pague apenas depois de experimentar e só pelo que decidir levar.",
       "pickup": {
         "title": "Ponto para experimentar",
@@ -112,6 +105,7 @@ useHead(() => ({
       "call": "Call",
       "map": "Open in Google Maps",
       "whatsapp": "Chat with us on WhatsApp",
+      "whatsappMessage": "Hello! I want to confirm my reservation #{number}.",
       "note": "You have not paid anything yet. The amount is only a reference. Pay only after trying and only for what you decide to keep.",
       "pickup": {
         "title": "Try-on point",

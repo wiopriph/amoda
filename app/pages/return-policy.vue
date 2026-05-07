@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { CONTACT_PHONE } from '~/constants/contacts';
-
-
 definePageMeta({ name: 'return-policy' });
 
 const { t, tm, rt } = useI18n();
+const { makeWhatsappHref } = useWhatsappLink();
 
 const highlights = computed(() =>
   (tm('returnPolicy.highlights.items') as any[]).map((item) => ({
@@ -21,11 +19,7 @@ const rules = computed(() =>
   })),
 );
 
-const whatsappHref = computed(() => {
-  const text = encodeURIComponent('Olá! Preciso de ajuda com troca ou devolução na Amoda.');
-
-  return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
-});
+const whatsappHref = makeWhatsappHref(() => t('returnPolicy.whatsappMessage'));
 
 useHead(() => ({
   title: t('returnPolicy.meta.title'),
@@ -44,6 +38,7 @@ useHead(() => ({
       "title": "Trocas e devoluções",
       "intro": "Na Amoda, você pode experimentar antes de pagar. Se não gostar no ponto, não leva e não paga.",
       "badge": "Sem pagamento antes de experimentar",
+      "whatsappMessage": "Olá! Preciso de ajuda com troca ou devolução na Amoda.",
       "highlights": {
         "items": [
           {
@@ -114,6 +109,7 @@ useHead(() => ({
       "title": "Exchanges and returns",
       "intro": "At Amoda, you can try before paying. If you do not like it at the point, do not take it and do not pay.",
       "badge": "No payment before trying",
+      "whatsappMessage": "Hello! I need help with an exchange or return at Amoda.",
       "highlights": {
         "items": [
           {

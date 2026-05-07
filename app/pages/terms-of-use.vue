@@ -1,16 +1,10 @@
 <script setup lang="ts">
-import { CONTACT_PHONE } from '~/constants/contacts';
-
-
 definePageMeta({ name: 'terms-of-use' });
 
 const { t, tm, rt } = useI18n();
+const { makeWhatsappHref } = useWhatsappLink();
 
-const whatsappHref = computed(() => {
-  const text = encodeURIComponent('Olá! Tenho uma dúvida sobre os termos de uso da Amoda.');
-
-  return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
-});
+const whatsappHref = makeWhatsappHref(() => t('terms.whatsappMessage'));
 
 const highlights = computed(() =>
   (tm('terms.highlights.items') as any[]).map((item) => ({
@@ -46,6 +40,7 @@ useHead(() => ({
       "title": "Termos de Uso",
       "subtitle": "Regras simples para usar a Amoda",
       "badge": "Sem complicação",
+      "whatsappMessage": "Olá! Tenho uma dúvida sobre os termos de uso da Amoda.",
       "main": {
         "title": "Resumo rápido",
         "text": "Você usa a Amoda para escolher roupas, reservar sem pagar e experimentar antes de decidir. Nós usamos seus dados apenas para processar o pedido e falar com você."
@@ -123,6 +118,7 @@ useHead(() => ({
       "title": "Terms of Use",
       "subtitle": "Simple rules for using Amoda",
       "badge": "No complexity",
+      "whatsappMessage": "Hello! I have a question about Amoda terms of use.",
       "main": {
         "title": "Quick summary",
         "text": "You use Amoda to choose clothes, reserve without paying, and try before deciding. We only use your data to process your request and contact you."

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CONTACT_PHONE, COMPANY_ADDRESS } from '~/constants/contacts';
+import { COMPANY_ADDRESS } from '~/constants/contacts';
 
 
 definePageMeta({
@@ -7,12 +7,9 @@ definePageMeta({
 });
 
 const { t, tm, rt } = useI18n();
+const { makeWhatsappHref } = useWhatsappLink();
 
-const whatsappHref = computed(() => {
-  const text = encodeURIComponent('Olá! Preciso de ajuda com privacidade ou dados pessoais na Amoda.');
-
-  return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
-});
+const whatsappHref = makeWhatsappHref(() => t('privacy.whatsappMessage'));
 
 const highlights = computed(() =>
   (tm('privacy.highlights.items') as any[]).map((item) => ({
@@ -48,6 +45,7 @@ useHead(() => ({
       "title": "Política de Privacidade",
       "subtitle": "A Amoda usa apenas os dados necessários para receber a sua reserva, falar consigo no WhatsApp e preparar os seus itens.",
       "badge": "Privacidade simples",
+      "whatsappMessage": "Olá! Preciso de ajuda com privacidade ou dados pessoais na Amoda.",
       "effective": "Atualizado em 09/01/2026",
       "highlights": {
         "items": [
@@ -153,6 +151,7 @@ useHead(() => ({
       "title": "Privacy Policy",
       "subtitle": "Amoda only uses the data needed to receive your reservation, contact you on WhatsApp, and prepare your items.",
       "badge": "Simple privacy",
+      "whatsappMessage": "Hello! I need help with privacy or personal data at Amoda.",
       "effective": "Updated on 09/01/2026",
       "highlights": {
         "items": [
