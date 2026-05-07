@@ -198,26 +198,26 @@ useHead(() => ({
     "category": {
       "count": "{count} produtos disponíveis",
       "empty": "Ainda não há itens nesta categoria.",
-      "emptyDescription": "Veja outras categorias ou volte em breve. Você pode reservar online, experimentar primeiro e pagar apenas pelo que gostar.",
+      "emptyDescription": "Veja outras categorias ou volte em breve. Você pode escolher online, experimentar primeiro e pagar apenas pelo que gostar.",
       "allCategories": "Ver categorias",
       "newBadge": "NOVO",
       "whatsappAria": "Falar com a Amoda no WhatsApp",
       "whatsappMessage": "Olá! Preciso de ajuda com a categoria {category} na Amoda.",
-      "seoTitle": "{category} em Luanda {'|'} Reserve e experimente antes de pagar",
-      "seoDescription": "Encontre {category} na Amoda em Luanda. Reserve online sem pagar, experimente primeiro e leve apenas o que gostar."
+      "seoTitle": "{category} em Luanda {'|'} Escolha e experimente antes de pagar",
+      "seoDescription": "Encontre {category} na Amoda em Luanda. Escolha online sem pagar, experimente primeiro e leve apenas o que gostar."
     }
   },
   "en": {
     "category": {
       "count": "{count} products available",
       "empty": "No items in this category yet.",
-      "emptyDescription": "Browse other categories or come back soon. You can reserve online, try first, and pay only for what you like.",
+      "emptyDescription": "Browse other categories or come back soon. You can select online, try first, and pay only for what you like.",
       "allCategories": "View categories",
       "newBadge": "NEW",
       "whatsappAria": "Chat with Amoda on WhatsApp",
       "whatsappMessage": "Hello! I need help with the {category} category at Amoda.",
-      "seoTitle": "{category} in Luanda {'|'} Reserve and try before paying",
-      "seoDescription": "Explore {category} at Amoda in Luanda. Reserve online with no payment, try first, and keep only what you love."
+      "seoTitle": "{category} in Luanda {'|'} Select and try before paying",
+      "seoDescription": "Explore {category} at Amoda in Luanda. Select online with no payment, try first, and keep only what you love."
     }
   }
 }

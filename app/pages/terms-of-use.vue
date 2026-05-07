@@ -43,11 +43,11 @@ useHead(() => ({
       "whatsappMessage": "Olá! Tenho uma dúvida sobre os termos de uso da Amoda.",
       "main": {
         "title": "Resumo rápido",
-        "text": "Você usa a Amoda para escolher roupas, reservar sem pagar e experimentar antes de decidir. Nós usamos seus dados apenas para processar o pedido e falar com você."
+        "text": "Você usa a Amoda para escolher roupas, selecionar sem pagar e experimentar antes de decidir. Nós usamos seus dados apenas para processar o pedido e falar com você."
       },
       "highlights": {
         "items": [
-          { "icon": "i-lucide-shirt", "title": "Escolher e reservar online" },
+          { "icon": "i-lucide-shirt", "title": "Escolher online" },
           { "icon": "i-lucide-wallet", "title": "Sem pagamento antecipado" },
           { "icon": "i-simple-icons-whatsapp", "title": "Confirmamos via WhatsApp" }
         ]
@@ -56,7 +56,7 @@ useHead(() => ({
         {
           "icon": "i-lucide-shopping-cart",
           "title": "Como funciona",
-          "text": "Você pode navegar, escolher produtos e fazer uma reserva sem criar conta.",
+          "text": "Você pode navegar, escolher produtos e enviar a sua escolha sem criar conta.",
           "items": {
             "1": "Adicionar produtos ao carrinho",
             "2": "Fazer pedido sem pagar",
@@ -108,8 +108,8 @@ useHead(() => ({
         "button": "Falar no WhatsApp"
       },
       "meta": {
-        "title": "Termos de Uso da Amoda {'|'} Reservas online sem pagamento antecipado",
-        "description": "Leia os termos de uso da Amoda para reservar roupa online em Luanda, experimentar antes de pagar e confirmar pedidos pelo WhatsApp."
+        "title": "Termos de Uso da Amoda {'|'} Escolhas online sem pagamento antecipado",
+        "description": "Leia os termos de uso da Amoda para escolher roupa online em Luanda, experimentar antes de pagar e confirmar pedidos pelo WhatsApp."
       }
     }
   },
@@ -121,11 +121,11 @@ useHead(() => ({
       "whatsappMessage": "Hello! I have a question about Amoda terms of use.",
       "main": {
         "title": "Quick summary",
-        "text": "You use Amoda to choose clothes, reserve without paying, and try before deciding. We only use your data to process your request and contact you."
+        "text": "You use Amoda to choose clothes, select without paying, and try before deciding. We only use your data to process your request and contact you."
       },
       "highlights": {
         "items": [
-          { "icon": "i-lucide-shirt", "title": "Browse and reserve online" },
+          { "icon": "i-lucide-shirt", "title": "Browse and select online" },
           { "icon": "i-lucide-wallet", "title": "No upfront payment" },
           { "icon": "i-simple-icons-whatsapp", "title": "We confirm via WhatsApp" }
         ]
@@ -134,7 +134,7 @@ useHead(() => ({
         {
           "icon": "i-lucide-shopping-cart",
           "title": "How it works",
-          "text": "You can browse, choose products, and place a reservation without creating an account.",
+          "text": "You can browse, choose products, and send your selection without creating an account.",
           "items": {
             "1": "Add items to cart",
             "2": "Place order without payment",
@@ -186,8 +186,8 @@ useHead(() => ({
         "button": "Chat on WhatsApp"
       },
       "meta": {
-        "title": "Amoda Terms of Use {'|'} Online reservations with no prepayment",
-        "description": "Read Amoda terms for reserving clothes online in Luanda, trying before paying, and confirming requests through WhatsApp."
+        "title": "Amoda Terms of Use {'|'} Online selections with no prepayment",
+        "description": "Read Amoda terms for choosing clothes online in Luanda, trying before paying, and confirming requests through WhatsApp."
       }
     }
   }

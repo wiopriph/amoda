@@ -43,7 +43,7 @@ useHead(() => ({
   "pt": {
     "privacy": {
       "title": "Política de Privacidade",
-      "subtitle": "A Amoda usa apenas os dados necessários para receber a sua reserva, falar consigo no WhatsApp e preparar os seus itens.",
+      "subtitle": "A Amoda usa apenas os dados necessários para receber a sua escolha, falar consigo no WhatsApp e preparar os seus itens.",
       "badge": "Privacidade simples",
       "whatsappMessage": "Olá! Preciso de ajuda com privacidade ou dados pessoais na Amoda.",
       "effective": "Atualizado em 09/01/2026",
@@ -65,13 +65,13 @@ useHead(() => ({
       },
       "main": {
         "title": "O mais importante",
-        "text": "Você não precisa criar conta para usar a Amoda. Quando faz uma reserva, pedimos apenas o seu nome e WhatsApp para confirmar o pedido e combinar a experimentação."
+        "text": "Você não precisa criar conta para usar a Amoda. Quando confirma uma escolha, pedimos apenas o seu nome e WhatsApp para confirmar o pedido e combinar a experimentação."
       },
       "sections": [
         {
           "icon": "i-lucide-building-2",
           "title": "Quem somos",
-          "text": "A Amoda é a responsável pelo website e pelo tratamento dos dados usados para reservas.",
+          "text": "A Amoda é a responsável pelo website e pelo tratamento dos dados usados para escolhas online.",
           "items": [
             "Endereço: %%address%%"
           ]
@@ -79,7 +79,7 @@ useHead(() => ({
         {
           "icon": "i-lucide-database",
           "title": "Dados que recolhemos",
-          "text": "Não pedimos dados desnecessários. No checkout, recolhemos apenas o necessário para processar a reserva.",
+          "text": "Não pedimos dados desnecessários. No checkout, recolhemos apenas o necessário para processar a sua escolha.",
           "items": [
             "Nome",
             "Número de telefone / WhatsApp",
@@ -89,7 +89,7 @@ useHead(() => ({
         {
           "icon": "i-lucide-message-circle",
           "title": "Como usamos os dados",
-          "text": "Usamos os seus dados para confirmar a reserva, preparar os itens, falar consigo no WhatsApp e prestar apoio ao cliente.",
+          "text": "Usamos os seus dados para confirmar a escolha, preparar os itens, falar consigo no WhatsApp e prestar apoio ao cliente.",
           "items": []
         },
         {
@@ -101,7 +101,7 @@ useHead(() => ({
         {
           "icon": "i-lucide-clock",
           "title": "Por quanto tempo guardamos",
-          "text": "Guardamos os dados pelo tempo necessário para gerir a reserva, apoio ao cliente e obrigações legais. Depois, os dados podem ser eliminados ou anonimizados.",
+          "text": "Guardamos os dados pelo tempo necessário para gerir a escolha, apoio ao cliente e obrigações legais. Depois, os dados podem ser eliminados ou anonimizados.",
           "items": []
         },
         {
@@ -141,15 +141,15 @@ useHead(() => ({
         "button": "Falar no WhatsApp"
       },
       "meta": {
-        "title": "Política de Privacidade da Amoda {'|'} Dados de reservas e WhatsApp",
-        "description": "Veja como a Amoda usa dados pessoais para reservas online, confirmação pelo WhatsApp, pontos de experimentação e apoio ao cliente."
+        "title": "Política de Privacidade da Amoda {'|'} Dados de escolhas e WhatsApp",
+        "description": "Veja como a Amoda usa dados pessoais para escolhas online, confirmação pelo WhatsApp, pontos de experimentação e apoio ao cliente."
       }
     }
   },
   "en": {
     "privacy": {
       "title": "Privacy Policy",
-      "subtitle": "Amoda only uses the data needed to receive your reservation, contact you on WhatsApp, and prepare your items.",
+      "subtitle": "Amoda only uses the data needed to receive your selection, contact you on WhatsApp, and prepare your items.",
       "badge": "Simple privacy",
       "whatsappMessage": "Hello! I need help with privacy or personal data at Amoda.",
       "effective": "Updated on 09/01/2026",
@@ -171,13 +171,13 @@ useHead(() => ({
       },
       "main": {
         "title": "Most important",
-        "text": "You do not need to create an account to use Amoda. When you place a reservation, we only ask for your name and WhatsApp to confirm the request and arrange the try-on."
+        "text": "You do not need to create an account to use Amoda. When you confirm a selection, we only ask for your name and WhatsApp to confirm the request and arrange the try-on."
       },
       "sections": [
         {
           "icon": "i-lucide-building-2",
           "title": "Who we are",
-          "text": "Amoda is responsible for the website and the data used for reservations.",
+          "text": "Amoda is responsible for the website and the data used for online selections.",
           "items": [
             "Address: %%address%%"
           ]
@@ -185,7 +185,7 @@ useHead(() => ({
         {
           "icon": "i-lucide-database",
           "title": "Data we collect",
-          "text": "We do not ask for unnecessary data. At checkout, we collect only what is needed to process your reservation.",
+          "text": "We do not ask for unnecessary data. At checkout, we collect only what is needed to process your selection.",
           "items": [
             "Name",
             "Phone number / WhatsApp",
@@ -195,7 +195,7 @@ useHead(() => ({
         {
           "icon": "i-lucide-message-circle",
           "title": "How we use data",
-          "text": "We use your data to confirm the reservation, prepare items, contact you on WhatsApp, and provide customer support.",
+          "text": "We use your data to confirm the selection, prepare items, contact you on WhatsApp, and provide customer support.",
           "items": []
         },
         {
@@ -207,7 +207,7 @@ useHead(() => ({
         {
           "icon": "i-lucide-clock",
           "title": "How long we keep data",
-          "text": "We keep data as long as needed to manage reservations, customer support, and legal obligations. After that, data may be deleted or anonymized.",
+          "text": "We keep data as long as needed to manage selections, customer support, and legal obligations. After that, data may be deleted or anonymized.",
           "items": []
         },
         {
@@ -247,8 +247,8 @@ useHead(() => ({
         "button": "Chat on WhatsApp"
       },
       "meta": {
-        "title": "Amoda Privacy Policy {'|'} Reservation and WhatsApp data",
-        "description": "See how Amoda uses personal data for online reservations, WhatsApp confirmation, try-on points and customer support."
+        "title": "Amoda Privacy Policy {'|'} Selection and WhatsApp data",
+        "description": "See how Amoda uses personal data for online selections, WhatsApp confirmation, try-on points and customer support."
       }
     }
   }

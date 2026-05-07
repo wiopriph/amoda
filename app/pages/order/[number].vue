@@ -60,20 +60,20 @@ useHead(() => ({
 {
   "pt": {
     "order": {
-      "title": "Reserva",
-      "loading": "A carregar reserva...",
-      "notFound": "Reserva não encontrada",
-      "successTitle": "Reserva criada com sucesso",
-      "number": "Número da reserva",
+      "title": "Escolha",
+      "loading": "A carregar escolha...",
+      "notFound": "Escolha não encontrada",
+      "successTitle": "Escolha criada com sucesso",
+      "number": "Número da escolha",
       "contact": "Os seus dados",
-      "summary": "Itens reservados",
+      "summary": "Itens selecionados",
       "total": "Total se levar tudo",
       "size": "Tamanho",
       "color": "Cor",
       "call": "Ligar",
       "map": "Abrir no Google Maps",
       "whatsapp": "Falar connosco no WhatsApp",
-      "whatsappMessage": "Olá! Quero confirmar a minha reserva #{number}.",
+      "whatsappMessage": "Olá! Quero confirmar a minha escolha #{number}.",
       "note": "Você ainda não pagou nada. O valor é apenas uma referência. Pague apenas depois de experimentar e só pelo que decidir levar.",
       "pickup": {
         "title": "Ponto para experimentar",
@@ -86,26 +86,26 @@ useHead(() => ({
         "step3": "Você experimenta e decide com calma."
       },
       "meta": {
-        "description": "Veja os detalhes da sua reserva #{number} na Amoda: contacto, ponto de experimentação, itens reservados e valor apenas se decidir levar."
+        "description": "Veja os detalhes da sua escolha #{number} na Amoda: contacto, ponto de experimentação, itens selecionados e valor apenas se decidir levar."
       }
     }
   },
   "en": {
     "order": {
-      "title": "Reservation",
-      "loading": "Loading reservation...",
-      "notFound": "Reservation not found",
-      "successTitle": "Reservation created successfully",
-      "number": "Reservation number",
+      "title": "Selection",
+      "loading": "Loading selection...",
+      "notFound": "Selection not found",
+      "successTitle": "Selection created successfully",
+      "number": "Selection number",
       "contact": "Your details",
-      "summary": "Reserved items",
+      "summary": "Selected items",
       "total": "Total if you keep everything",
       "size": "Size",
       "color": "Color",
       "call": "Call",
       "map": "Open in Google Maps",
       "whatsapp": "Chat with us on WhatsApp",
-      "whatsappMessage": "Hello! I want to confirm my reservation #{number}.",
+      "whatsappMessage": "Hello! I want to confirm my selection #{number}.",
       "note": "You have not paid anything yet. The amount is only a reference. Pay only after trying and only for what you decide to keep.",
       "pickup": {
         "title": "Try-on point",
@@ -118,7 +118,7 @@ useHead(() => ({
         "step3": "You try and decide calmly."
       },
       "meta": {
-        "description": "View your Amoda reservation #{number}: contact details, try-on point, reserved items and total only if you decide to keep them."
+        "description": "View your Amoda selection #{number}: contact details, try-on point, selected items and total only if you decide to keep them."
       }
     }
   }

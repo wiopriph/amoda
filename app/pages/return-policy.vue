@@ -91,7 +91,7 @@ useHead(() => ({
       },
       "how": {
         "title": "Como pedir troca ou devolução",
-        "text": "Entre em contacto e informe o número da reserva. A nossa equipa vai orientar os próximos passos."
+        "text": "Entre em contacto e informe o número da escolha. A nossa equipa vai orientar os próximos passos."
       },
       "contact": {
         "title": "Precisa de ajuda?",
@@ -162,7 +162,7 @@ useHead(() => ({
       },
       "how": {
         "title": "How to request exchange or return",
-        "text": "Contact us and provide your reservation number. Our team will guide you through the next steps."
+        "text": "Contact us and provide your selection number. Our team will guide you through the next steps."
       },
       "contact": {
         "title": "Need help?",

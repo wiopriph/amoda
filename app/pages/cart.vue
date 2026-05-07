@@ -84,7 +84,7 @@ const goCheckout = () => {
   "pt": {
     "cart": {
       "title": "A sua seleção para experimentar",
-      "subtitle": "Estes itens ainda não estão comprados. Você só está a reservar para experimentar primeiro.",
+      "subtitle": "Estes itens ainda não estão comprados. Esta é a sua escolha para experimentar primeiro.",
       "empty": {
         "title": "A sua seleção está vazia",
         "desc": "Escolha algumas peças para experimentar. Não precisa pagar agora.",
@@ -98,15 +98,15 @@ const goCheckout = () => {
         "remove": "Remover"
       },
       "summary": {
-        "title": "Resumo da reserva",
+        "title": "Resumo da escolha",
         "items": "{count} item(ns)",
         "total": "Total se levar tudo",
         "note": "Você não paga agora. Este valor é apenas uma referência caso decida levar todos os itens depois de experimentar.",
         "code": "Cart code",
-        "saving": "A guardar reserva...",
-        "error": "Não foi possível atualizar a reserva. Tente novamente."
+        "saving": "A guardar escolha...",
+        "error": "Não foi possível atualizar a escolha. Tente novamente."
       },
-      "checkout": "Confirmar reserva",
+      "checkout": "Confirmar escolha",
       "continue": "Continuar a escolher",
       "trust": {
         "title": "Entrega gratuita",
@@ -129,7 +129,7 @@ const goCheckout = () => {
         "title": "O que acontece depois?",
         "items": [
           {
-            "title": "Confirme a reserva",
+            "title": "Confirme a escolha",
             "desc": "Enviaremos o pedido com os itens escolhidos."
           },
           {
@@ -144,14 +144,14 @@ const goCheckout = () => {
       },
       "meta": {
         "title": "Seleção para experimentar {'|'} Amoda",
-        "description": "Revise as peças reservadas na Amoda antes de confirmar. Você não paga online: experimenta primeiro e paga apenas pelo que gostar."
+        "description": "Revise a sua seleção na Amoda antes de confirmar. Você não paga online: experimenta primeiro e paga apenas pelo que gostar."
       }
     }
   },
   "en": {
     "cart": {
       "title": "Your try-on selection",
-      "subtitle": "These items are not purchased yet. You are only reserving them to try first.",
+      "subtitle": "These items are not purchased yet. This is your selection to try first.",
       "empty": {
         "title": "Your selection is empty",
         "desc": "Choose a few items to try on. No need to pay now.",
@@ -165,15 +165,15 @@ const goCheckout = () => {
         "remove": "Remove"
       },
       "summary": {
-        "title": "Reservation summary",
+        "title": "Selection summary",
         "items": "{count} item(s)",
         "total": "Total if you keep everything",
         "note": "You do not pay now. This amount is only a reference if you decide to keep all items after trying them.",
         "code": "Cart code",
-        "saving": "Saving reservation...",
-        "error": "Could not update the reservation. Please try again."
+        "saving": "Saving selection...",
+        "error": "Could not update the selection. Please try again."
       },
-      "checkout": "Confirm reservation",
+      "checkout": "Confirm selection",
       "continue": "Continue choosing",
       "trust": {
         "title": "Free delivery",
@@ -196,7 +196,7 @@ const goCheckout = () => {
         "title": "What happens next?",
         "items": [
           {
-            "title": "Confirm reservation",
+            "title": "Confirm selection",
             "desc": "We receive your selected items."
           },
           {
@@ -211,7 +211,7 @@ const goCheckout = () => {
       },
       "meta": {
         "title": "Try-on selection {'|'} Amoda",
-        "description": "Review your reserved pieces at Amoda before confirming. No online payment: try first and pay only for what you love."
+        "description": "Review your Amoda selection before confirming. No online payment: try first and pay only for what you love."
       }
     }
   }

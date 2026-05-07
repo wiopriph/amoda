@@ -36,8 +36,8 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
   "pt": {
     "header": {
       "tagline": "Experimente antes de pagar · Pague só o que gostar",
-      "cart": "Reserva",
-      "cartCount": "Itens reservados: {count}",
+      "cart": "Escolha",
+      "cartCount": "Itens selecionados: {count}",
       "categories": "Categorias",
       "categoriesDesc": "Escolha o que quer experimentar",
       "close": "Fechar",
@@ -48,7 +48,7 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
     "header": {
       "tagline": "Try before you pay · Pay only for what you like",
       "cart": "Selection",
-      "cartCount": "Reserved items: {count}",
+      "cartCount": "Selected items: {count}",
       "categories": "Categories",
       "categoriesDesc": "Choose what you want to try",
       "close": "Close",

@@ -33,8 +33,8 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
   "pt": {
     "contacts": {
       "title": "Como podemos ajudar?",
-      "intro": "Fale connosco para confirmar reservas, tirar dúvidas ou encontrar o ponto de experimentação mais próximo.",
-      "whatsappMessage": "Olá! Preciso de ajuda com uma reserva na Amoda.",
+      "intro": "Fale connosco para confirmar escolhas, tirar dúvidas ou encontrar o ponto de experimentação mais próximo.",
+      "whatsappMessage": "Olá! Preciso de ajuda com uma escolha na Amoda.",
       "hero": {
         "badge": "Atendimento rápido",
         "secondary": "Ver pontos"
@@ -42,7 +42,7 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
       "cards": {
         "whatsapp": {
           "title": "WhatsApp",
-          "desc": "Melhor opção para confirmar reservas, tamanhos e pontos de experimentação.",
+          "desc": "Melhor opção para confirmar escolhas, tamanhos e pontos de experimentação.",
           "cta": "Abrir WhatsApp"
         },
         "tiktok": {
@@ -71,16 +71,16 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
         "returns": "Trocas e devoluções"
       },
       "meta": {
-        "title": "Contactos da Amoda {'|'} WhatsApp, reservas e pontos em Luanda",
-        "description": "Fale com a Amoda pelo WhatsApp para reservas, tamanhos e pontos de experimentação em Luanda. Veja também TikTok, Facebook, email e endereço."
+        "title": "Contactos da Amoda {'|'} WhatsApp, escolhas e pontos em Luanda",
+        "description": "Fale com a Amoda pelo WhatsApp para escolhas, tamanhos e pontos de experimentação em Luanda. Veja também TikTok, Facebook, email e endereço."
       }
     }
   },
   "en": {
     "contacts": {
       "title": "How can we help?",
-      "intro": "Contact us to confirm reservations, ask questions, or find the nearest try-on point.",
-      "whatsappMessage": "Hello! I need help with a reservation at Amoda.",
+      "intro": "Contact us to confirm selections, ask questions, or find the nearest try-on point.",
+      "whatsappMessage": "Hello! I need help with a selection at Amoda.",
       "hero": {
         "badge": "Fast support",
         "secondary": "See points"
@@ -88,7 +88,7 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
       "cards": {
         "whatsapp": {
           "title": "WhatsApp",
-          "desc": "Best option to confirm reservations, sizes and try-on points.",
+          "desc": "Best option to confirm selections, sizes and try-on points.",
           "cta": "Open WhatsApp"
         },
         "tiktok": {
@@ -117,8 +117,8 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
         "returns": "Exchange & return policy"
       },
       "meta": {
-        "title": "Amoda contacts {'|'} WhatsApp, reservations and Luanda points",
-        "description": "Contact Amoda on WhatsApp for reservations, sizes and try-on points in Luanda. Find TikTok, Facebook, email and address details too."
+        "title": "Amoda contacts {'|'} WhatsApp, selections and Luanda points",
+        "description": "Contact Amoda on WhatsApp for selections, sizes and try-on points in Luanda. Find TikTok, Facebook, email and address details too."
       }
     }
   }

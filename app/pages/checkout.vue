@@ -309,15 +309,15 @@ const submit = async () => {
 {
   "pt": {
     "checkout": {
-      "title": "Confirmar reserva",
+      "title": "Confirmar escolha",
       "subtitle": "Não paga agora. Só precisamos dos seus dados para preparar as peças para experimentar.",
-      "badge": "Reserva grátis",
+      "badge": "Escolha grátis",
       "name": "O seu nome",
       "phone": "WhatsApp",
-      "submit": "Confirmar reserva grátis",
+      "submit": "Confirmar escolha",
       "backToCart": "Voltar à seleção",
       "formTitle": "Os seus dados",
-      "formDesc": "Vamos usar estes dados apenas para confirmar a reserva no WhatsApp.",
+      "formDesc": "Vamos usar estes dados apenas para confirmar a sua escolha no WhatsApp.",
       "pickup": {
         "title": "Onde quer experimentar?",
         "label": "Ponto de experimentação",
@@ -356,7 +356,7 @@ const submit = async () => {
         "title": "Depois de confirmar",
         "items": [
           {
-            "title": "Recebemos a sua reserva",
+            "title": "Recebemos a sua escolha",
             "desc": "A nossa equipa vê os itens escolhidos."
           },
           {
@@ -373,26 +373,26 @@ const submit = async () => {
         "nameRequired": "Por favor, indique o seu nome.",
         "phoneRequired": "Por favor, indique o seu número de WhatsApp.",
         "empty": "A sua seleção está vazia.",
-        "common": "Não foi possível enviar a reserva. Tente novamente em alguns instantes.",
+        "common": "Não foi possível enviar a sua escolha. Tente novamente em alguns instantes.",
         "pickupRequired": "Escolha um ponto de experimentação."
       },
       "meta": {
-        "title": "Confirmar reserva grátis {'|'} Amoda",
-        "description": "Confirme a sua reserva grátis na Amoda, escolha o ponto de experimentação em Luanda e pague apenas depois de provar as peças."
+        "title": "Confirmar escolha {'|'} Amoda",
+        "description": "Confirme a sua escolha na Amoda, selecione o ponto de experimentação em Luanda e pague apenas depois de provar as peças."
       }
     }
   },
   "en": {
     "checkout": {
-      "title": "Confirm reservation",
+      "title": "Confirm selection",
       "subtitle": "You do not pay now. We only need your details to prepare the items for try-on.",
-      "badge": "Free reservation",
+      "badge": "Free selection",
       "name": "Your name",
       "phone": "WhatsApp",
-      "submit": "Confirm free reservation",
+      "submit": "Confirm selection",
       "backToCart": "Back to selection",
       "formTitle": "Your details",
-      "formDesc": "We will use these details only to confirm your reservation on WhatsApp.",
+      "formDesc": "We will use these details only to confirm your selection on WhatsApp.",
       "pickup": {
         "title": "Where do you want to try?",
         "label": "Try-on point",
@@ -431,7 +431,7 @@ const submit = async () => {
         "title": "After confirmation",
         "items": [
           {
-            "title": "We receive your reservation",
+            "title": "We receive your selection",
             "desc": "Our team sees your selected items."
           },
           {
@@ -448,12 +448,12 @@ const submit = async () => {
         "nameRequired": "Please enter your name.",
         "phoneRequired": "Please enter your WhatsApp number.",
         "empty": "Your selection is empty.",
-        "common": "We could not send your reservation. Please try again shortly.",
+        "common": "We could not send your selection. Please try again shortly.",
         "pickupRequired": "Choose a try-on point."
       },
       "meta": {
-        "title": "Confirm free reservation {'|'} Amoda",
-        "description": "Confirm your free Amoda reservation, choose a try-on point in Luanda, and pay only after trying the pieces."
+        "title": "Confirm selection {'|'} Amoda",
+        "description": "Confirm your Amoda selection, choose a try-on point in Luanda, and pay only after trying the pieces."
       }
     }
   }

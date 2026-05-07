@@ -69,7 +69,7 @@ const onMagic = async () => {
   "pt": {
     "auth": {
       "title": "Entre na Amoda",
-      "subtitle": "Guarde a sua seleção, acompanhe reservas e compre roupa sem pagamento antecipado.",
+      "subtitle": "Guarde a sua seleção, acompanhe as suas escolhas e compre roupa sem pagamento antecipado.",
       "login": "Entrar",
       "register": "Criar conta",
       "email": "E-mail",
@@ -81,8 +81,8 @@ const onMagic = async () => {
       "welcomeBack": "Bem-vindo de volta à Amoda!",
       "confirmEmail": "Confirme o seu e-mail para ativar a conta.",
       "logout": "Sair",
-      "metaTitle": "Entrar na Amoda {'|'} Conta para reservas de moda feminina",
-      "metaDescription": "Entre ou crie conta na Amoda para guardar a sua seleção, acompanhar reservas e comprar moda feminina sem pagamento antecipado.",
+      "metaTitle": "Entrar na Amoda {'|'} Conta para escolhas de moda feminina",
+      "metaDescription": "Entre ou crie conta na Amoda para guardar a sua seleção, acompanhar escolhas e comprar moda feminina sem pagamento antecipado.",
       "magicSent": "Link mágico enviado",
       "accountTitle": "A sua conta",
       "accountDesc": "Você já está autenticado.",
@@ -106,7 +106,7 @@ const onMagic = async () => {
   "en": {
     "auth": {
       "title": "Sign in to Amoda",
-      "subtitle": "Save your selection, manage reservations and shop clothes with no prepayment.",
+      "subtitle": "Save your selection, manage your choices and shop clothes with no prepayment.",
       "login": "Sign in",
       "register": "Create account",
       "email": "E-mail",
@@ -118,8 +118,8 @@ const onMagic = async () => {
       "welcomeBack": "Welcome back to Amoda!",
       "confirmEmail": "Please confirm your email to activate your account.",
       "logout": "Sign out",
-      "metaTitle": "Sign in to Amoda {'|'} Account for fashion reservations",
-      "metaDescription": "Sign in or create an Amoda account to save your selection, manage reservations and shop women's fashion with no prepayment.",
+      "metaTitle": "Sign in to Amoda {'|'} Account for fashion selections",
+      "metaDescription": "Sign in or create an Amoda account to save your selection, manage choices and shop women's fashion with no prepayment.",
       "magicSent": "Magic link sent",
       "accountTitle": "Your account",
       "accountDesc": "You are already signed in.",

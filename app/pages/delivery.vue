@@ -68,10 +68,10 @@ useHead(() => {
   "pt": {
     "delivery": {
       "title": "Escolha online. Experimente antes de pagar.",
-      "intro": "Na Amoda você reserva as peças pelo site, recebe a confirmação no WhatsApp e experimenta antes de decidir. Pague apenas pelo que gostar.",
+      "intro": "Na Amoda você escolhe as peças pelo site, recebe a confirmação no WhatsApp e experimenta antes de decidir. Pague apenas pelo que gostar.",
       "meta": {
         "title": "Como comprar roupa online na Amoda {'|'} Experimente antes de pagar",
-        "description": "Veja como comprar moda feminina online em Luanda na Amoda: reserve sem pagar, confirme no WhatsApp, experimente e pague só pelo que gostar."
+        "description": "Veja como comprar moda feminina online em Luanda na Amoda: escolha sem pagar, confirme no WhatsApp, experimente e pague só pelo que gostar."
       },
       "badges": {
         "try": "Sem pagamento online",
@@ -100,7 +100,7 @@ useHead(() => {
           {
             "icon": "i-simple-icons-whatsapp",
             "title": "Ajuda no WhatsApp",
-            "desc": "Se tiver dúvidas sobre tamanho, ponto ou reserva, fale connosco pelo WhatsApp."
+            "desc": "Se tiver dúvidas sobre tamanho, ponto ou escolha, fale connosco pelo WhatsApp."
           }
         ]
       },
@@ -112,12 +112,12 @@ useHead(() => {
             "desc": "Veja os produtos no site e adicione ao pedido as peças que quer experimentar."
           },
           {
-            "title": "Faça a reserva",
+            "title": "Confirme a escolha",
             "desc": "Envie o pedido com seu nome e WhatsApp. Não precisa pagar online."
           },
           {
             "title": "Nós confirmamos",
-            "desc": "A nossa equipa fala consigo no WhatsApp para confirmar a reserva e orientar o próximo passo."
+            "desc": "A nossa equipa fala consigo no WhatsApp para confirmar a escolha e orientar o próximo passo."
           },
           {
             "title": "Experimente",
@@ -139,8 +139,8 @@ useHead(() => {
         "items": [
           {
             "icon": "i-lucide-shopping-bag",
-            "title": "A reserva não é compra obrigatória",
-            "desc": "Reservar significa que você quer experimentar. Você só paga se decidir levar."
+            "title": "A escolha não é compra obrigatória",
+            "desc": "Selecionar significa que você quer experimentar. Você só paga se decidir levar."
           },
           {
             "icon": "i-simple-icons-whatsapp",
@@ -149,8 +149,8 @@ useHead(() => {
           },
           {
             "icon": "i-lucide-clock",
-            "title": "Produtos ficam reservados por tempo limitado",
-            "desc": "Informamos no WhatsApp até quando a sua reserva estará disponível."
+            "title": "Produtos ficam separados por tempo limitado",
+            "desc": "Informamos no WhatsApp até quando a sua escolha estará disponível."
           },
           {
             "icon": "i-lucide-search-check",
@@ -170,10 +170,10 @@ useHead(() => {
         "items": [
           {
             "q": "Preciso pagar antes?",
-            "a": "Não. Você reserva online e paga apenas se gostar da peça depois de experimentar."
+            "a": "Não. Você escolhe online e paga apenas se gostar da peça depois de experimentar."
           },
           {
-            "q": "Posso reservar várias peças?",
+            "q": "Posso escolher várias peças?",
             "a": "Sim. Você pode escolher várias peças e levar apenas as que gostar."
           },
           {
@@ -195,10 +195,10 @@ useHead(() => {
   "en": {
     "delivery": {
       "title": "Choose online. Try before you pay.",
-      "intro": "With Amoda, you reserve items on the website, get confirmation on WhatsApp, and try before deciding. Pay only for what you like.",
+      "intro": "With Amoda, you choose items on the website, get confirmation on WhatsApp, and try before deciding. Pay only for what you like.",
       "meta": {
         "title": "How to shop online at Amoda {'|'} Try before you pay",
-        "description": "Learn how to shop women's fashion online in Luanda with Amoda: reserve with no payment, confirm on WhatsApp, try first, and pay only for what you love."
+        "description": "Learn how to shop women's fashion online in Luanda with Amoda: select with no payment, confirm on WhatsApp, try first, and pay only for what you love."
       },
       "badges": {
         "try": "No online payment",
@@ -227,7 +227,7 @@ useHead(() => {
           {
             "icon": "i-simple-icons-whatsapp",
             "title": "WhatsApp support",
-            "desc": "Ask us about sizes, points, or your reservation on WhatsApp."
+            "desc": "Ask us about sizes, points, or your selection on WhatsApp."
           }
         ]
       },
@@ -239,7 +239,7 @@ useHead(() => {
             "desc": "Browse the website and add the items you want to try."
           },
           {
-            "title": "Reserve",
+            "title": "Confirm selection",
             "desc": "Send your request with your name and WhatsApp. No online payment needed."
           },
           {
@@ -266,8 +266,8 @@ useHead(() => {
         "items": [
           {
             "icon": "i-lucide-shopping-bag",
-            "title": "A reservation is not an obligation to buy",
-            "desc": "Reservation means you want to try. You only pay if you decide to keep the item."
+            "title": "A selection is not an obligation to buy",
+            "desc": "Selecting means you want to try. You only pay if you decide to keep the item."
           },
           {
             "icon": "i-simple-icons-whatsapp",
@@ -276,8 +276,8 @@ useHead(() => {
           },
           {
             "icon": "i-lucide-clock",
-            "title": "Items are reserved for a limited time",
-            "desc": "We will tell you on WhatsApp how long your reservation is available."
+            "title": "Items are held for a limited time",
+            "desc": "We will tell you on WhatsApp how long your selection is available."
           },
           {
             "icon": "i-lucide-search-check",
@@ -297,10 +297,10 @@ useHead(() => {
         "items": [
           {
             "q": "Do I need to pay first?",
-            "a": "No. You reserve online and pay only if you like the item after trying it."
+            "a": "No. You select online and pay only if you like the item after trying it."
           },
           {
-            "q": "Can I reserve several items?",
+            "q": "Can I select several items?",
             "a": "Yes. You can choose several items and keep only the ones you like."
           },
           {

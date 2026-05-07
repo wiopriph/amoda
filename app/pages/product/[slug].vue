@@ -348,7 +348,7 @@ useHead(() => ({
   "pt": {
     "offices": {
       "title": "Pontos para experimentar",
-      "subtitle": "Reserve online e experimente no ponto mais conveniente."
+      "subtitle": "Escolha online e experimente no ponto mais conveniente."
     },
     "product": {
       "price": "Preço",
@@ -357,15 +357,14 @@ useHead(() => ({
       "description": "Descrição",
       "whatsappMessage": "Olá! Tenho uma pergunta sobre este produto:\n{url}",
       "meta": {
-        "titleSuffix": "Reserve sem pagar {'|'} Amoda",
-        "description": "Reserve {title} na Amoda em Luanda. Escolha o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar."
+        "titleSuffix": "Escolha sem pagar {'|'} Amoda",
+        "description": "Escolha {title} na Amoda em Luanda. Selecione o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar."
       },
       "ui": {
         "chooseSize": "Escolha um tamanho",
-        "addToCart": "Reservar para experimentar",
-        "addToCartShort": "Reservar",
-        "inCart": "Reservado",
-        "checkout": "Ver reserva",
+        "addToCart": "Escolher",
+        "inCart": "Selecionado",
+        "checkout": "Ver selecionados",
         "pickupCta": "Ver pontos",
         "supportCta": "Falar no WhatsApp",
         "ctaNote": {
@@ -376,16 +375,15 @@ useHead(() => ({
         "howReceiveTitle": "Como funciona"
       },
       "cartNudge": {
-        "title": "Reservado",
-        "subtitle": "{qty} item(s) reservado(s)",
-        "checkout": "Ver reserva",
+        "title": "Selecionado",
+        "subtitle": "{qty} item(s) selecionado(s)",
         "continue": "Continuar"
       },
       "howReceive": {
         "items": [
           {
-            "title": "Reserve em segundos",
-            "desc": "Escolha o tamanho e reserve sem pagar."
+            "title": "Escolha em segundos",
+            "desc": "Selecione o tamanho sem pagar agora."
           },
           {
             "title": "Experimente no ponto",
@@ -410,7 +408,7 @@ useHead(() => ({
   "en": {
     "offices": {
       "title": "Try-on points",
-      "subtitle": "Reserve online and try it at the most convenient location."
+      "subtitle": "Choose online and try it at the most convenient location."
     },
     "product": {
       "price": "Price",
@@ -419,15 +417,14 @@ useHead(() => ({
       "description": "Description",
       "whatsappMessage": "Hello! I have a question about this product:\n{url}",
       "meta": {
-        "titleSuffix": "Reserve with no payment {'|'} Amoda",
-        "description": "Reserve {title} at Amoda in Luanda. Choose your size, confirm on WhatsApp, try first, and pay only if you love it."
+        "titleSuffix": "Select with no payment {'|'} Amoda",
+        "description": "Select {title} at Amoda in Luanda. Choose your size, confirm on WhatsApp, try first, and pay only if you love it."
       },
       "ui": {
         "chooseSize": "Choose a size",
-        "addToCart": "Reserve to try",
-        "addToCartShort": "Reserve",
-        "inCart": "Reserved",
-        "checkout": "View reservation",
+        "addToCart": "Select",
+        "inCart": "Selected",
+        "checkout": "View selected",
         "pickupCta": "View points",
         "supportCta": "Chat on WhatsApp",
         "ctaNote": {
@@ -438,16 +435,15 @@ useHead(() => ({
         "howReceiveTitle": "How it works"
       },
       "cartNudge": {
-        "title": "Reserved",
-        "subtitle": "{qty} item(s) reserved",
-        "checkout": "View reservation",
+        "title": "Selected",
+        "subtitle": "{qty} item(s) selected",
         "continue": "Continue"
       },
       "howReceive": {
         "items": [
           {
-            "title": "Reserve in seconds",
-            "desc": "Choose size and reserve without paying."
+            "title": "Select in seconds",
+            "desc": "Choose your size with no payment now."
           },
           {
             "title": "Try at the point",
@@ -860,37 +856,35 @@ useHead(() => ({
         v-model:open="cartDrawerOpen"
         title=" "
         :ui="{
-          header: 'px-0 pt-4 pb-0',
+          container: 'mx-auto max-w-6xl gap-3 sm:px-6 lg:px-8',
           body: 'p-0'
         }"
       >
         <span class="hidden" />
 
         <template #header>
-          <div class="mx-auto max-w-(--ui-container) px-4">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <div class="text-sm font-semibold">
-                  {{ t('product.cartNudge.title') }}
-                </div>
-
-                <div class="text-xs text-muted">
-                  {{ t('product.cartNudge.subtitle', { qty: currentSkuQty }) }}
-                </div>
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-sm font-semibold">
+                {{ t('product.cartNudge.title') }}
               </div>
 
-              <UButton
-                color="neutral"
-                variant="ghost"
-                icon="i-lucide-x"
-                @click="closeCartDrawer"
-              />
+              <div class="text-xs text-muted">
+                {{ t('product.cartNudge.subtitle', { qty: currentSkuQty }) }}
+              </div>
             </div>
+
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-x"
+              @click="closeCartDrawer"
+            />
           </div>
         </template>
 
         <template #body>
-          <div class="mx-auto max-w-(--ui-container) px-4 pb-5">
+          <div class="b-5">
             <div class="flex gap-3">
               <div class="size-16 shrink-0 overflow-hidden rounded-xl bg-gray-50">
                 <NuxtImg
@@ -919,7 +913,7 @@ useHead(() => ({
                 class="w-full justify-center"
                 @click="closeCartDrawer"
               >
-                {{ t('product.cartNudge.checkout') }}
+                {{ t('product.ui.checkout') }}
               </UButton>
 
               <UButton
@@ -939,15 +933,6 @@ useHead(() => ({
       <!-- MOBILE STICKY CTA -->
       <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 sm:hidden">
         <div class="mx-auto flex max-w-(--ui-container) items-center gap-2 px-1">
-          <UButton
-            :to="whatsappHref"
-            size="xl"
-            variant="outline"
-            target="_blank"
-            icon="i-simple-icons-whatsapp"
-            class="shrink-0"
-          />
-
           <template v-if="canAdd && currentSkuQty > 0">
             <UButton
               :disabled="!currentSkuKey"
@@ -958,14 +943,8 @@ useHead(() => ({
               −
             </UButton>
 
-            <div class="min-w-0 flex-1 text-center">
-              <div class="text-xs text-muted">
-                {{ t('product.ui.inCart') }}
-              </div>
-
-              <div class="text-base font-bold">
-                {{ currentSkuQty }}
-              </div>
+            <div class="min-w-0 flex-1 text-center text-base font-bold">
+              {{ currentSkuQty }}
             </div>
 
             <UButton
@@ -994,7 +973,7 @@ useHead(() => ({
               class="flex-1 justify-center"
               @click="addProductToCart"
             >
-              {{ selectedSizeId ? t('product.ui.addToCartShort') : t('product.size') }}
+              {{ selectedSizeId ? t('product.ui.addToCart') : t('product.size') }}
             </UButton>
 
             <UButton

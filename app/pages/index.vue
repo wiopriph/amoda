@@ -113,7 +113,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
   "pt": {
     "home": {
       "title": "Amoda - Moda feminina em Luanda ao alcance de todos",
-      "desc": "Escolha moda feminina online em Luanda, reserve sem pagar, experimente com calma e leve apenas as peças que combinam consigo.",
+      "desc": "Escolha moda feminina online em Luanda, selecione sem pagar, experimente com calma e leve apenas as peças que combinam consigo.",
       "whatsappAria": "Falar com a Amoda no WhatsApp",
       "whatsappMessage": "Olá! Preciso de ajuda para escolher peças na Amoda.",
       "newBadge": "NOVO",
@@ -127,7 +127,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
           },
           {
             "icon": "i-lucide-message-circle",
-            "title": "Reserve sem pagar",
+            "title": "Escolha sem pagar",
             "desc": "Envie o pedido com seu nome e WhatsApp. Não precisa pagar online."
           },
           {
@@ -149,7 +149,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
           {
             "icon": "i-lucide-wallet",
             "title": "Sem pagamento online",
-            "desc": "Você reserva primeiro e paga só quando decidir levar."
+            "desc": "Você seleciona primeiro e paga só quando decidir levar."
           },
           {
             "icon": "i-lucide-shield-check",
@@ -159,7 +159,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
           {
             "icon": "i-simple-icons-whatsapp",
             "title": "Atendimento no WhatsApp",
-            "desc": "A nossa equipa ajuda com reserva, tamanho e ponto de experimentação."
+            "desc": "A nossa equipa ajuda com escolha, tamanho e ponto de experimentação."
           }
         ]
       },
@@ -167,7 +167,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
         "title": "Loja online de roupa feminina em Luanda",
         "text": [
           "A Amoda é uma loja online de roupa feminina em Angola feita para quem quer comprar com mais segurança.",
-          "Você escolhe as peças online, reserva sem pagamento antecipado e experimenta antes de decidir.",
+          "Você escolhe as peças online, seleciona sem pagamento antecipado e experimenta antes de decidir.",
           "Se gostar, leva e paga. Se não gostar, não precisa comprar."
         ]
       }
@@ -176,7 +176,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
   "en": {
     "home": {
       "title": "Amoda - Women's fashion in Luanda, easy to shop online",
-      "desc": "Choose women's fashion online in Luanda, reserve with no payment, try it on at your pace, and keep only the pieces you love.",
+      "desc": "Choose women's fashion online in Luanda, select with no payment, try it on at your pace, and keep only the pieces you love.",
       "whatsappAria": "Chat with Amoda on WhatsApp",
       "whatsappMessage": "Hello! I need help choosing pieces at Amoda.",
       "newBadge": "NEW",
@@ -190,7 +190,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
           },
           {
             "icon": "i-lucide-message-circle",
-            "title": "Reserve without paying",
+            "title": "Select without paying",
             "desc": "Send your request with your name and WhatsApp. No online payment needed."
           },
           {
@@ -212,7 +212,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
           {
             "icon": "i-lucide-wallet",
             "title": "No online payment",
-            "desc": "Reserve first and pay only when you decide to keep it."
+            "desc": "Select first and pay only when you decide to keep it."
           },
           {
             "icon": "i-lucide-shield-check",
@@ -222,7 +222,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
           {
             "icon": "i-simple-icons-whatsapp",
             "title": "WhatsApp support",
-            "desc": "Our team helps with reservation, size and try-on point."
+            "desc": "Our team helps with selection, size and try-on point."
           }
         ]
       },
@@ -230,7 +230,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
         "title": "Online women’s clothing store in Luanda",
         "text": [
           "Amoda is an online women’s clothing store in Angola built for safer shopping.",
-          "Choose items online, reserve with no advance payment, and try before deciding.",
+          "Choose items online, select with no advance payment, and try before deciding.",
           "If you like it, keep it and pay. If you do not like it, no need to buy."
         ]
       }
