@@ -75,8 +75,8 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
         "returns": "Trocas e devoluções"
       },
       "meta": {
-        "title": "Contactos | Amoda",
-        "description": "Contacte a Amoda: WhatsApp, TikTok e Facebook para reservas e novidades, email para informação oficial."
+        "title": "Contactos da Amoda {'|'} WhatsApp, reservas e pontos em Luanda",
+        "description": "Fale com a Amoda pelo WhatsApp para reservas, tamanhos e pontos de experimentação em Luanda. Veja também TikTok, Facebook, email e endereço."
       }
     }
   },
@@ -120,8 +120,8 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
         "returns": "Exchange & return policy"
       },
       "meta": {
-        "title": "Contacts | Amoda",
-        "description": "Contact Amoda: WhatsApp, TikTok and Facebook for reservations and updates, email for official information."
+        "title": "Amoda contacts {'|'} WhatsApp, reservations and Luanda points",
+        "description": "Contact Amoda on WhatsApp for reservations, sizes and try-on points in Luanda. Find TikTok, Facebook, email and address details too."
       }
     }
   }

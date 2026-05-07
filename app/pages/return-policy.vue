@@ -104,8 +104,8 @@ useHead(() => ({
         "button": "Escrever no WhatsApp"
       },
       "meta": {
-        "title": "Trocas e Devoluções | Amoda",
-        "description": "Entenda as regras de troca e devolução da Amoda. Experimente antes de pagar e leve apenas o que gostar."
+        "title": "Trocas e devoluções na Amoda {'|'} Experimente antes de pagar",
+        "description": "Conheça a política de trocas e devoluções da Amoda em Luanda. Experimente antes de pagar, leve só o que gostar e veja as regras após a compra."
       }
     }
   },
@@ -174,8 +174,8 @@ useHead(() => ({
         "button": "Message on WhatsApp"
       },
       "meta": {
-        "title": "Exchanges and Returns | Amoda",
-        "description": "Understand Amoda exchange and return rules. Try before paying and keep only what you like."
+        "title": "Amoda exchanges and returns {'|'} Try before you pay",
+        "description": "Learn Amoda exchange and return rules in Luanda. Try before paying, keep only what you love, and see the policy after purchase."
       }
     }
   }

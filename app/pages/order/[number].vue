@@ -93,7 +93,7 @@ useHead(() => ({
         "step3": "Você experimenta e decide com calma."
       },
       "meta": {
-        "description": "Detalhes da sua reserva #{number}: contacto, ponto de experimentação e itens reservados. Sem pagamento online."
+        "description": "Veja os detalhes da sua reserva #{number} na Amoda: contacto, ponto de experimentação, itens reservados e valor apenas se decidir levar."
       }
     }
   },
@@ -124,7 +124,7 @@ useHead(() => ({
         "step3": "You try and decide calmly."
       },
       "meta": {
-        "description": "Details of your reservation #{number}: contact, try-on point and reserved items. No online payment."
+        "description": "View your Amoda reservation #{number}: contact details, try-on point, reserved items and total only if you decide to keep them."
       }
     }
   }

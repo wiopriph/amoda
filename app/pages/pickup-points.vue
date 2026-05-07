@@ -130,8 +130,8 @@ const getMapUrl = (office: Office) => {
       "phone": "Ligar",
       "map": "Abrir no Google Maps",
       "meta": {
-        "title": "Pontos de experimentação Amoda em Luanda",
-        "description": "Veja os pontos de experimentação Amoda em Luanda: endereço, horário, contacto e localização no mapa."
+        "title": "Pontos de experimentação da Amoda em Luanda {'|'} Horários e mapas",
+        "description": "Encontre pontos de experimentação da Amoda em Luanda: veja endereço, horário, contacto e localização para provar antes de pagar."
       },
       "days": {
         "mon": "Seg",
@@ -157,8 +157,8 @@ const getMapUrl = (office: Office) => {
       "phone": "Call",
       "map": "Open in Google Maps",
       "meta": {
-        "title": "Amoda try-on points in Luanda",
-        "description": "See Amoda try-on points in Luanda: address, opening hours, contact and map location."
+        "title": "Amoda try-on points in Luanda {'|'} Hours and maps",
+        "description": "Find Amoda try-on points in Luanda: check address, opening hours, contact details and map location before you try and pay."
       },
       "days": {
         "mon": "Mon",

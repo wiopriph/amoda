@@ -30,6 +30,12 @@ const sections = computed(() =>
 
 useHead(() => ({
   title: t('terms.meta.title'),
+  meta: [
+    { name: 'description', content: t('terms.meta.description') },
+    { name: 'robots', content: 'index, follow' },
+    { property: 'og:title', content: t('terms.meta.title') },
+    { property: 'og:description', content: t('terms.meta.description') },
+  ],
 }));
 </script>
 
@@ -107,7 +113,8 @@ useHead(() => ({
         "button": "Falar no WhatsApp"
       },
       "meta": {
-        "title": "Termos de Uso | Amoda"
+        "title": "Termos de Uso da Amoda {'|'} Reservas online sem pagamento antecipado",
+        "description": "Leia os termos de uso da Amoda para reservar roupa online em Luanda, experimentar antes de pagar e confirmar pedidos pelo WhatsApp."
       }
     }
   },
@@ -183,7 +190,8 @@ useHead(() => ({
         "button": "Chat on WhatsApp"
       },
       "meta": {
-        "title": "Terms of Use | Amoda"
+        "title": "Amoda Terms of Use {'|'} Online reservations with no prepayment",
+        "description": "Read Amoda terms for reserving clothes online in Luanda, trying before paying, and confirming requests through WhatsApp."
       }
     }
   }

@@ -377,8 +377,8 @@ const submit = async () => {
         "pickupRequired": "Escolha um ponto de experimentação."
       },
       "meta": {
-        "title": "Confirmar reserva | Amoda Angola",
-        "description": "Confirme a sua reserva grátis na Amoda. Sem pagamento online: experimente primeiro e pague apenas pelo que gostar."
+        "title": "Confirmar reserva grátis {'|'} Amoda",
+        "description": "Confirme a sua reserva grátis na Amoda, escolha o ponto de experimentação em Luanda e pague apenas depois de provar as peças."
       }
     }
   },
@@ -452,8 +452,8 @@ const submit = async () => {
         "pickupRequired": "Choose a try-on point."
       },
       "meta": {
-        "title": "Confirm reservation | Amoda Angola",
-        "description": "Confirm your free reservation at Amoda. No online payment: try first and pay only for what you like."
+        "title": "Confirm free reservation {'|'} Amoda",
+        "description": "Confirm your free Amoda reservation, choose a try-on point in Luanda, and pay only after trying the pieces."
       }
     }
   }

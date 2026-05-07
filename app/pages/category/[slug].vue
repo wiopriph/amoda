@@ -198,8 +198,8 @@ useHead(() => ({
       "emptyDescription": "Veja outras categorias ou volte em breve. Você pode reservar online, experimentar primeiro e pagar apenas pelo que gostar.",
       "allCategories": "Ver categorias",
       "newBadge": "NOVO",
-      "seoTitle": "{category} | Experimente antes de pagar",
-      "seoDescription": "Veja {category} na Amoda. Reserve online sem pagamento, experimente antes e pague apenas pelo que gostar."
+      "seoTitle": "{category} em Luanda {'|'} Reserve e experimente antes de pagar",
+      "seoDescription": "Encontre {category} na Amoda em Luanda. Reserve online sem pagar, experimente primeiro e leve apenas o que gostar."
     }
   },
   "en": {
@@ -209,8 +209,8 @@ useHead(() => ({
       "emptyDescription": "Browse other categories or come back soon. You can reserve online, try first, and pay only for what you like.",
       "allCategories": "View categories",
       "newBadge": "NEW",
-      "seoTitle": "{category} | Try before you pay",
-      "seoDescription": "Explore {category} at Amoda. Reserve online with no payment, try first, and pay only for what you like."
+      "seoTitle": "{category} in Luanda {'|'} Reserve and try before paying",
+      "seoDescription": "Explore {category} at Amoda in Luanda. Reserve online with no payment, try first, and keep only what you love."
     }
   }
 }

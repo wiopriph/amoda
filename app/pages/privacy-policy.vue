@@ -143,8 +143,8 @@ useHead(() => ({
         "button": "Falar no WhatsApp"
       },
       "meta": {
-        "title": "Política de Privacidade | Amoda",
-        "description": "Entenda como a Amoda recolhe e usa os seus dados pessoais para reservas, WhatsApp e apoio ao cliente."
+        "title": "Política de Privacidade da Amoda {'|'} Dados de reservas e WhatsApp",
+        "description": "Veja como a Amoda usa dados pessoais para reservas online, confirmação pelo WhatsApp, pontos de experimentação e apoio ao cliente."
       }
     }
   },
@@ -248,8 +248,8 @@ useHead(() => ({
         "button": "Chat on WhatsApp"
       },
       "meta": {
-        "title": "Privacy Policy | Amoda",
-        "description": "Understand how Amoda collects and uses your personal data for reservations, WhatsApp, and customer support."
+        "title": "Amoda Privacy Policy {'|'} Reservation and WhatsApp data",
+        "description": "See how Amoda uses personal data for online reservations, WhatsApp confirmation, try-on points and customer support."
       }
     }
   }

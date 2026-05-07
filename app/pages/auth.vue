@@ -3,7 +3,15 @@ definePageMeta({ name: 'auth' });
 
 const { t, tm, rt } = useI18n();
 
-useHead({ title: t('auth.metaTitle') });
+useHead(() => ({
+  title: t('auth.metaTitle'),
+  meta: [
+    { name: 'description', content: t('auth.metaDescription') },
+    { property: 'og:title', content: t('auth.metaTitle') },
+    { property: 'og:description', content: t('auth.metaDescription') },
+    { name: 'robots', content: 'noindex, nofollow' },
+  ],
+}));
 
 const route = useRoute();
 const localeRoute = useLocaleRoute();
@@ -69,11 +77,12 @@ const onMagic = async () => {
       "magicTitle": "Entrada rápida",
       "magicDesc": "Receba um link seguro no e-mail.",
       "magic": "Enviar link",
-      "checkEmail": "Verifique o seu e-mail — enviámos um link de acesso seguro.",
+      "checkEmail": "Verifique o seu e-mail - enviámos um link de acesso seguro.",
       "welcomeBack": "Bem-vindo de volta à Amoda!",
       "confirmEmail": "Confirme o seu e-mail para ativar a conta.",
       "logout": "Sair",
-      "metaTitle": "Entrar ou criar conta | Amoda Angola",
+      "metaTitle": "Entrar na Amoda {'|'} Conta para reservas de moda feminina",
+      "metaDescription": "Entre ou crie conta na Amoda para guardar a sua seleção, acompanhar reservas e comprar moda feminina sem pagamento antecipado.",
       "magicSent": "Link mágico enviado",
       "accountTitle": "A sua conta",
       "accountDesc": "Você já está autenticado.",
@@ -105,11 +114,12 @@ const onMagic = async () => {
       "magicTitle": "Quick access",
       "magicDesc": "Get a secure login link by email.",
       "magic": "Send link",
-      "checkEmail": "Check your inbox — we’ve sent a secure login link.",
+      "checkEmail": "Check your inbox - we’ve sent a secure login link.",
       "welcomeBack": "Welcome back to Amoda!",
       "confirmEmail": "Please confirm your email to activate your account.",
       "logout": "Sign out",
-      "metaTitle": "Sign in or create account | Amoda Angola",
+      "metaTitle": "Sign in to Amoda {'|'} Account for fashion reservations",
+      "metaDescription": "Sign in or create an Amoda account to save your selection, manage reservations and shop women's fashion with no prepayment.",
       "magicSent": "Magic link sent",
       "accountTitle": "Your account",
       "accountDesc": "You are already signed in.",

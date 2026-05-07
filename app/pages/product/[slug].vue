@@ -298,7 +298,7 @@ const officesPageTo = computed(() => localeRoute({ name: 'pickup-points' }));
 
 // ===== SEO =====
 const seoTitle = computed(() => `${productData.value?.title || ''} | ${t('product.meta.titleSuffix')}`);
-const seoDescription = computed(() => productData.value?.description || t('product.meta.description'));
+const seoDescription = computed(() => productData.value?.description || t('product.meta.description', { title: productTitle.value }));
 const seoImage = computed(() => galleryImages.value?.[0]?.url || '/placeholder.webp');
 
 const productSchema = computed(() => ({
@@ -362,8 +362,8 @@ useHead(() => ({
       "color": "Cor",
       "description": "Descrição",
       "meta": {
-        "titleSuffix": "Amoda Angola",
-        "description": "Reserve grátis na Amoda: escolha o tamanho, confirme no WhatsApp e experimente no ponto."
+        "titleSuffix": "Reserve sem pagar {'|'} Amoda",
+        "description": "Reserve {title} na Amoda em Luanda. Escolha o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar."
       },
       "ui": {
         "chooseSize": "Escolha um tamanho",
@@ -403,9 +403,9 @@ useHead(() => ({
         ]
       },
       "seo": {
-        "imageMainAlt": "{title} — imagem",
-        "thumbAlt": "{title} — foto {index}",
-        "variantAlt": "{title} — cor {color}"
+        "imageMainAlt": "{title} - imagem",
+        "thumbAlt": "{title} - foto {index}",
+        "variantAlt": "{title} - cor {color}"
       },
       "reco": {
         "title": "Você também pode gostar"
@@ -423,8 +423,8 @@ useHead(() => ({
       "color": "Color",
       "description": "Description",
       "meta": {
-        "titleSuffix": "Amoda Angola",
-        "description": "Free reservation at Amoda: choose your size, confirm on WhatsApp and try before paying."
+        "titleSuffix": "Reserve with no payment {'|'} Amoda",
+        "description": "Reserve {title} at Amoda in Luanda. Choose your size, confirm on WhatsApp, try first, and pay only if you love it."
       },
       "ui": {
         "chooseSize": "Choose a size",
@@ -464,9 +464,9 @@ useHead(() => ({
         ]
       },
       "seo": {
-        "imageMainAlt": "{title} — image",
-        "thumbAlt": "{title} — photo {index}",
-        "variantAlt": "{title} — color {color}"
+        "imageMainAlt": "{title} - image",
+        "thumbAlt": "{title} - photo {index}",
+        "variantAlt": "{title} - color {color}"
       },
       "reco": {
         "title": "You may also like"

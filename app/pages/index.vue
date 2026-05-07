@@ -109,8 +109,8 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
 {
   "pt": {
     "home": {
-      "title": "Amoda — roupa feminina em Luanda com prova antes de pagar",
-      "desc": "Escolha roupa feminina online em Luanda, reserve sem pagar, experimente primeiro e pague apenas pelo que gostar.",
+      "title": "Amoda - Moda feminina em Luanda ao alcance de todos",
+      "desc": "Escolha moda feminina online em Luanda, reserve sem pagar, experimente com calma e leve apenas as peças que combinam consigo.",
       "newBadge": "NOVO",
       "how": {
         "title": "Como comprar na Amoda",
@@ -170,8 +170,8 @@ const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
   },
   "en": {
     "home": {
-      "title": "Amoda — women’s fashion in Luanda with try before you pay",
-      "desc": "Choose women’s clothing online in Luanda, reserve with no payment, try first, and pay only for what you like.",
+      "title": "Amoda - Women's fashion in Luanda, easy to shop online",
+      "desc": "Choose women's fashion online in Luanda, reserve with no payment, try it on at your pace, and keep only the pieces you love.",
       "newBadge": "NEW",
       "how": {
         "title": "How to buy on Amoda",

@@ -143,8 +143,8 @@ const goCheckout = () => {
         ]
       },
       "meta": {
-        "title": "A sua seleção | Amoda Angola",
-        "description": "Reserve peças para experimentar na Amoda. Sem pagamento online: escolha, confirme e pague apenas pelo que gostar."
+        "title": "Seleção para experimentar {'|'} Amoda",
+        "description": "Revise as peças reservadas na Amoda antes de confirmar. Você não paga online: experimenta primeiro e paga apenas pelo que gostar."
       }
     }
   },
@@ -210,8 +210,8 @@ const goCheckout = () => {
         ]
       },
       "meta": {
-        "title": "Your selection | Amoda Angola",
-        "description": "Reserve items to try on at Amoda. No online payment: choose, confirm and pay only for what you like."
+        "title": "Try-on selection {'|'} Amoda",
+        "description": "Review your reserved pieces at Amoda before confirming. No online payment: try first and pay only for what you love."
       }
     }
   }

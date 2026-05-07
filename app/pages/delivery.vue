@@ -70,8 +70,8 @@ useHead(() => {
       "title": "Escolha online. Experimente antes de pagar.",
       "intro": "Na Amoda você reserva as peças pelo site, recebe a confirmação no WhatsApp e experimenta antes de decidir. Pague apenas pelo que gostar.",
       "meta": {
-        "title": "Como comprar na Amoda | Experimente antes de pagar em Luanda",
-        "description": "Veja como funciona a Amoda: escolha roupa online, reserve sem pagar, confirme no WhatsApp, experimente e pague apenas pelo que gostar."
+        "title": "Como comprar roupa online na Amoda {'|'} Experimente antes de pagar",
+        "description": "Veja como comprar moda feminina online em Luanda na Amoda: reserve sem pagar, confirme no WhatsApp, experimente e pague só pelo que gostar."
       },
       "badges": {
         "try": "Sem pagamento online",
@@ -197,8 +197,8 @@ useHead(() => {
       "title": "Choose online. Try before you pay.",
       "intro": "With Amoda, you reserve items on the website, get confirmation on WhatsApp, and try before deciding. Pay only for what you like.",
       "meta": {
-        "title": "How to buy on Amoda | Try before you pay in Luanda",
-        "description": "Learn how Amoda works: choose clothes online, reserve with no payment, confirm on WhatsApp, try on, and pay only for what you like."
+        "title": "How to shop online at Amoda {'|'} Try before you pay",
+        "description": "Learn how to shop women's fashion online in Luanda with Amoda: reserve with no payment, confirm on WhatsApp, try first, and pay only for what you love."
       },
       "badges": {
         "try": "No online payment",
