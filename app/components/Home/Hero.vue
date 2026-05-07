@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CONTACT_PHONE, TIKTOK_LINK } from '~/constants/contacts';
+import { TIKTOK_LINK } from '~/constants/contacts';
 
 
 type HeroProps = {
@@ -10,7 +10,6 @@ type HeroProps = {
   tiktokTitle?: string
   tiktokSubtitle?: string
   ctaPrimary?: string
-  whatsappLabel?: string
   isTiktokLive?: boolean
   imageUrl?: string
 };
@@ -22,19 +21,9 @@ const localeRoute = useLocaleRoute();
 
 const WOMEN_SLUG = 'mulheres';
 
-const startShoppingTo = computed(() =>
-  localeRoute({ name: 'category-slug', params: { slug: WOMEN_SLUG } }),
-);
+const startShoppingTo = computed(() => localeRoute({ name: 'category-slug', params: { slug: WOMEN_SLUG } }));
 
-const whatsappHref = computed(() => {
-  const text = encodeURIComponent('Olá! Preciso de ajuda com um pedido na Amoda.');
-
-  return `https://wa.me/${CONTACT_PHONE}?text=${text}`;
-});
-
-const fallbackBullets = computed(() =>
-  tm('hero.bullets').map((item: any) => rt(item)),
-);
+const fallbackBullets = computed(() => tm('hero.bullets').map((item: any) => rt(item)));
 
 const heroTitle = computed(() => props.title || t('hero.title'));
 const heroSubtitle = computed(() => props.subtitle || t('hero.subtitle'));
@@ -43,7 +32,6 @@ const heroBullets = computed(() => props.bullets?.length ? props.bullets : fallb
 const heroTiktokTitle = computed(() => props.tiktokTitle || t('hero.tiktokTitle'));
 const heroTiktokSubtitle = computed(() => props.tiktokSubtitle || t('hero.tiktokSubtitle'));
 const heroCtaPrimary = computed(() => props.ctaPrimary || t('hero.ctaPrimary'));
-const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp'));
 </script>
 
 <i18n lang="json">
@@ -53,7 +41,6 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
       "title": "Seja a mais linda da festa",
       "subtitle": "Escolha o seu look, experimente antes de pagar e fique apenas com o que amar.",
       "ctaPrimary": "Escolher meu look",
-      "whatsapp": "Falar no WhatsApp",
       "socialProof": "Mais de 3.000 meninas já confiaram na Amoda",
       "bullets": [
         "Experimente antes de pagar",
@@ -70,7 +57,6 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
       "title": "Be the most beautiful girl at the party",
       "subtitle": "Choose your look, try before you pay, and keep only what you love.",
       "ctaPrimary": "Choose my look",
-      "whatsapp": "Chat on WhatsApp",
       "socialProof": "Trusted by 3,000+ girls",
       "bullets": [
         "Try before you pay",
@@ -86,7 +72,9 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
 </i18n>
 
 <template>
-  <section class="relative overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+  <section
+    class="relative overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8"
+  >
     <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
       <div>
         <UButton
@@ -109,7 +97,7 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
           {{ heroSubtitle }}
         </p>
 
-        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+        <div class="mt-6">
           <UButton
             size="xl"
             color="primary"
@@ -117,17 +105,6 @@ const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp
             icon="i-lucide-shopping-bag"
           >
             {{ heroCtaPrimary }}
-          </UButton>
-
-          <UButton
-            size="xl"
-            color="neutral"
-            variant="soft"
-            icon="i-simple-icons-whatsapp"
-            :to="whatsappHref"
-            target="_blank"
-          >
-            {{ heroWhatsappLabel }}
           </UButton>
         </div>
 
