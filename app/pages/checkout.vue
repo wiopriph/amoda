@@ -1,6 +1,5 @@
 <script setup lang="ts">
 /* eslint-disable camelcase */
-import type { SelectMenuItem } from '@nuxt/ui';
 import { vMaska } from 'maska/vue';
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { makeGa4Item } from '~/utils/ga4';
@@ -33,6 +32,7 @@ const {
 const { trackPurchase } = useAnalyticsEvent();
 const localeRoute = useLocaleRoute();
 const CONTACT_SYNC_DEBOUNCE_MS = 900;
+const DEFAULT_PICKUP_OFFICE_ID = 1;
 
 let contactSyncTimer: ReturnType<typeof setTimeout> | null = null;
 let applyingContactSnapshot = false;
@@ -52,30 +52,17 @@ if (process.client) {
   watch(isLoading, redirectIfEmpty);
 }
 
-const { data: officesData } = await useFetch('/api/offices/list');
-const offices = computed(() => officesData.value?.items || []);
-
-const officeItems = computed<SelectMenuItem[]>(() =>
-  offices.value.map((o: any) => ({
-    label: o.name,
-    value: o.id,
-    address: o.address,
-  })),
-);
-
 const form = reactive({
-  name: '',
   phone: '',
-  pickupOfficeId: offices.value?.[0]?.id ?? null,
 });
 
 const getContactSnapshot = () => ({
-  name: form.name.trim(),
+  name: '',
   phone: form.phone.trim(),
-  pickupOfficeId: form.pickupOfficeId,
+  pickupOfficeId: DEFAULT_PICKUP_OFFICE_ID,
 });
 
-const hasContactData = () => Boolean(form.name.trim() || form.phone.trim());
+const hasContactData = () => Boolean(form.phone.trim());
 
 const syncContactSnapshot = () => {
   if (!import.meta.client || applyingContactSnapshot || !hasContactData()) {
@@ -102,16 +89,8 @@ if (import.meta.client) {
 
       applyingContactSnapshot = true;
 
-      if (typeof snapshot.name === 'string') {
-        form.name = snapshot.name;
-      }
-
       if (typeof snapshot.phone === 'string') {
         form.phone = snapshot.phone;
-      }
-
-      if (snapshot.pickupOfficeId) {
-        form.pickupOfficeId = snapshot.pickupOfficeId;
       }
 
       nextTick(() => {
@@ -122,7 +101,7 @@ if (import.meta.client) {
   );
 
   watch(
-    () => [form.name, form.phone, form.pickupOfficeId] as const,
+    () => form.phone,
     () => {
       syncContactSnapshot();
     },
@@ -163,35 +142,8 @@ const trustItems = computed(() =>
   })),
 );
 
-const selectedOffice = computed(() =>
-  offices.value.find((office: any) => office.id === form.pickupOfficeId),
-);
-
-const toTel = (phone?: string | null) => {
-  if (!phone) {
-    return '';
-  }
-
-  return phone.replace(/[^\d+]/g, '');
-};
-
-const selectedOfficeMapUrl = computed(() => {
-  const office = selectedOffice.value;
-
-  if (!office) {
-    return null;
-  }
-
-  if (office.map_url) {
-    return office.map_url;
-  }
-
-  if (office.location_lat && office.location_lng) {
-    return `https://www.google.com/maps?q=${office.location_lat},${office.location_lng}`;
-  }
-
-  return null;
-});
+const { makeWhatsappHref } = useWhatsappLink();
+const whatsappHref = makeWhatsappHref(() => t('checkout.whatsappMessage'));
 
 const phoneInputRef = ref<any>(null);
 
@@ -232,15 +184,6 @@ const submit = async () => {
     return;
   }
 
-  if (!form.pickupOfficeId) {
-    toast.add({
-      title: t('checkout.errors.pickupRequired'),
-      color: 'error',
-    });
-
-    return;
-  }
-
   pending.value = true;
 
   try {
@@ -263,10 +206,10 @@ const submit = async () => {
         items: dtoItems,
         totals: { total: unref(totalAOA), currency: 'AOA' },
         contact: {
-          name: form.name,
+          name: '',
           phone: form.phone,
         },
-        pickupOfficeId: form.pickupOfficeId,
+        pickupOfficeId: DEFAULT_PICKUP_OFFICE_ID,
       },
     });
 
@@ -288,7 +231,7 @@ const submit = async () => {
             categoryName: i.categoryName ?? undefined,
           }),
         ),
-        pickup_office_id: form.pickupOfficeId,
+        pickup_office_id: DEFAULT_PICKUP_OFFICE_ID,
       } as any);
     }
 
@@ -309,26 +252,22 @@ const submit = async () => {
 {
   "pt": {
     "checkout": {
-      "title": "Confirmar escolha",
-      "subtitle": "Não paga agora. Só precisamos dos seus dados para preparar as peças para experimentar.",
+      "title": "Finalizar escolha",
+      "subtitle": "Não paga agora. Pode confirmar a escolha pelo WhatsApp ou deixar o seu número para a nossa equipa escrever ou ligar.",
       "badge": "Escolha grátis",
-      "name": "O seu nome",
       "phone": "WhatsApp",
-      "submit": "Confirmar escolha",
-      "backToCart": "Voltar à seleção",
-      "formTitle": "Os seus dados",
-      "formDesc": "Vamos usar estes dados apenas para confirmar a sua escolha no WhatsApp.",
-      "pickup": {
-        "title": "Onde quer experimentar?",
-        "label": "Ponto de experimentação",
-        "placeholder": "Escolha um ponto",
-        "help": "Vamos preparar os itens neste ponto. Depois confirmamos tudo pelo WhatsApp."
+      "submit": "Enviar número",
+      "or": "ou",
+      "whatsapp": {
+        "title": "Confirmar pelo WhatsApp",
+        "desc": "Abra a conversa com a Amoda e confirme diretamente com a nossa equipa.",
+        "cta": "Confirmar no WhatsApp"
       },
-      "office": {
-        "selectedTitle": "Ponto escolhido",
-        "call": "Ligar",
-        "map": "Abrir no Google Maps"
+      "callback": {
+        "title": "Deixar o meu número",
+        "desc": "Digite o seu número e a nossa equipa vai escrever ou ligar para confirmar a sua escolha."
       },
+      "whatsappMessage": "Olá! Quero confirmar a minha escolha na Amoda.",
       "summary": {
         "title": "Resumo",
         "items": "{count} item(ns)",
@@ -370,40 +309,34 @@ const submit = async () => {
         ]
       },
       "errors": {
-        "nameRequired": "Por favor, indique o seu nome.",
         "phoneRequired": "Por favor, indique o seu número de WhatsApp.",
         "empty": "A sua seleção está vazia.",
-        "common": "Não foi possível enviar a sua escolha. Tente novamente em alguns instantes.",
-        "pickupRequired": "Escolha um ponto de experimentação."
+        "common": "Não foi possível enviar a sua escolha. Tente novamente em alguns instantes."
       },
       "meta": {
         "title": "Confirmar escolha {'|'} Amoda",
-        "description": "Confirme a sua escolha na Amoda, selecione o ponto de experimentação em Luanda e pague apenas depois de provar as peças."
+        "description": "Confirme a sua escolha na Amoda pelo WhatsApp ou deixe o seu número para a nossa equipa entrar em contacto."
       }
     }
   },
   "en": {
     "checkout": {
-      "title": "Confirm selection",
-      "subtitle": "You do not pay now. We only need your details to prepare the items for try-on.",
+      "title": "Finalize your selection",
+      "subtitle": "You do not pay now. Confirm your selection on WhatsApp or leave your number so our team can message or call you.",
       "badge": "Free selection",
-      "name": "Your name",
       "phone": "WhatsApp",
-      "submit": "Confirm selection",
-      "backToCart": "Back to selection",
-      "formTitle": "Your details",
-      "formDesc": "We will use these details only to confirm your selection on WhatsApp.",
-      "pickup": {
-        "title": "Where do you want to try?",
-        "label": "Try-on point",
-        "placeholder": "Choose a point",
-        "help": "We will prepare your items at this point. Then we confirm everything on WhatsApp."
+      "submit": "Send number",
+      "or": "or",
+      "whatsapp": {
+        "title": "Confirm on WhatsApp",
+        "desc": "Open a chat with Amoda and confirm directly with our team.",
+        "cta": "Confirm on WhatsApp"
       },
-      "office": {
-        "selectedTitle": "Selected point",
-        "call": "Call",
-        "map": "Open in Google Maps"
+      "callback": {
+        "title": "Leave my number",
+        "desc": "Enter your number and our team will message or call you to confirm your selection."
       },
+      "whatsappMessage": "Hello! I want to confirm my Amoda selection.",
       "summary": {
         "title": "Summary",
         "items": "{count} item(s)",
@@ -445,15 +378,13 @@ const submit = async () => {
         ]
       },
       "errors": {
-        "nameRequired": "Please enter your name.",
         "phoneRequired": "Please enter your WhatsApp number.",
         "empty": "Your selection is empty.",
-        "common": "We could not send your selection. Please try again shortly.",
-        "pickupRequired": "Choose a try-on point."
+        "common": "We could not send your selection. Please try again shortly."
       },
       "meta": {
         "title": "Confirm selection {'|'} Amoda",
-        "description": "Confirm your Amoda selection, choose a try-on point in Luanda, and pay only after trying the pieces."
+        "description": "Confirm your Amoda selection on WhatsApp or leave your number so our team can contact you."
       }
     }
   }
@@ -496,130 +427,61 @@ const submit = async () => {
         </div>
       </section>
 
-      <div
-        v-if="isLoading"
-        class="mt-5 grid min-w-0 gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start"
-      >
-        <section class="min-w-0 space-y-4 overflow-hidden">
-          <UCard>
-            <USkeleton class="h-7 w-full max-w-[180px]" />
-
-            <USkeleton class="mt-3 h-4 w-full max-w-[260px]" />
-
-            <div class="mt-5 grid gap-4">
+      <div class="mt-5 grid gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start">
+        <section class="space-y-4">
+          <UCard class="border-green-200 bg-green-50/70">
+            <div class="flex flex-col gap-4">
               <div>
-                <USkeleton class="mb-2 h-4 w-full max-w-[96px]" />
+                <div class="flex items-center gap-2">
+                  <UIcon
+                    name="i-simple-icons-whatsapp"
+                    class="size-5 text-green-600"
+                  />
 
-                <USkeleton class="h-11 w-full rounded-xl" />
+                  <h3 class="text-lg font-black text-highlighted">
+                    {{ t('checkout.whatsapp.title') }}
+                  </h3>
+                </div>
+
+                <p class="mt-2 text-sm leading-6 text-muted">
+                  {{ t('checkout.whatsapp.desc') }}
+                </p>
               </div>
 
-              <div>
-                <USkeleton class="mb-2 h-4 w-full max-w-[96px]" />
-
-                <USkeleton class="h-11 w-full rounded-xl" />
-              </div>
+              <UButton
+                :to="whatsappHref"
+                target="_blank"
+                size="xl"
+                color="success"
+                icon="i-simple-icons-whatsapp"
+                class="w-full justify-center sm:w-fit"
+              >
+                {{ t('checkout.whatsapp.cta') }}
+              </UButton>
             </div>
           </UCard>
 
-          <UCard>
-            <USkeleton class="h-7 w-full max-w-[220px]" />
+          <div class="flex items-center gap-3">
+            <div class="h-px flex-1 bg-gray-200" />
 
-            <div class="mt-5">
-              <USkeleton class="mb-2 h-4 w-full max-w-[160px]" />
+            <span class="text-xs font-bold uppercase tracking-wide text-muted">
+              {{ t('checkout.or') }}
+            </span>
 
-              <USkeleton class="h-11 w-full rounded-xl" />
-
-              <USkeleton class="mt-2 h-4 w-full max-w-[260px]" />
-
-              <div class="mt-4 overflow-hidden rounded-2xl border border-primary/15 bg-primary/5 p-4">
-                <USkeleton class="h-4 w-full max-w-[128px]" />
-
-                <USkeleton class="mt-3 h-5 w-full max-w-[190px]" />
-
-                <USkeleton class="mt-3 h-4 w-full" />
-
-                <USkeleton class="mt-2 h-4 w-full max-w-[220px]" />
-
-                <div class="mt-4 grid gap-2 sm:flex">
-                  <USkeleton class="h-9 w-full rounded-xl sm:w-28" />
-
-                  <USkeleton class="h-9 w-full rounded-xl sm:w-44" />
-                </div>
-              </div>
-            </div>
-          </UCard>
-        </section>
-
-        <aside class="hidden lg:block">
-          <div class="sticky top-24 space-y-4">
-            <UCard class="border-primary/20 bg-primary/5">
-              <USkeleton class="h-6 w-28" />
-
-              <div class="mt-4 space-y-3">
-                <div class="flex justify-between">
-                  <USkeleton class="h-4 w-24" />
-
-                  <USkeleton class="h-4 w-8" />
-                </div>
-
-                <div class="flex justify-between border-t border-primary/10 pt-3">
-                  <USkeleton class="h-5 w-32" />
-
-                  <USkeleton class="h-6 w-28" />
-                </div>
-
-                <USkeleton class="h-4 w-full" />
-
-                <USkeleton class="h-4 w-3/4" />
-              </div>
-
-              <USkeleton class="mt-5 h-12 w-full rounded-xl" />
-
-              <USkeleton class="mt-2 h-10 w-full rounded-xl" />
-            </UCard>
-
-            <UCard>
-              <USkeleton class="h-5 w-40" />
-
-              <div class="mt-4 space-y-3">
-                <div
-                  v-for="i in 3"
-                  :key="i"
-                  class="flex gap-3"
-                >
-                  <USkeleton class="size-7 shrink-0 rounded-full" />
-
-                  <div class="min-w-0 flex-1">
-                    <USkeleton class="h-4 w-36" />
-
-                    <USkeleton class="mt-2 h-4 w-full" />
-                  </div>
-                </div>
-              </div>
-            </UCard>
+            <div class="h-px flex-1 bg-gray-200" />
           </div>
-        </aside>
-      </div>
 
-      <div
-        v-else
-        class="mt-5 grid gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start"
-      >
-        <section>
-          <UForm
-            class="space-y-4"
-            @submit.prevent="submit"
-          >
+          <UForm @submit.prevent="submit">
             <UCard>
-              <h2 class="text-xl font-black text-highlighted">
-                {{ t('checkout.formTitle') }}
-              </h2>
+              <h3 class="text-lg font-black text-highlighted">
+                {{ t('checkout.callback.title') }}
+              </h3>
 
-              <p class="mt-1 text-sm leading-6 text-muted">
-                {{ t('checkout.formDesc') }}
+              <p class="mt-2 text-sm leading-6 text-muted">
+                {{ t('checkout.callback.desc') }}
               </p>
 
-              <div class="mt-5 grid gap-4">
+              <div class="mt-5 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
                 <UFormField
                   :label="t('checkout.phone')"
                   :error="errors.phone ? t('checkout.errors.phoneRequired') : undefined"
@@ -633,109 +495,21 @@ const submit = async () => {
                     name="phone"
                     placeholder="+244 XXX XXX XXX"
                     type="tel"
-                    size="lg"
+                    size="xl"
                     class="w-full"
                   />
                 </UFormField>
 
-                <UFormField :label="t('checkout.name')">
-                  <UInput
-                    v-model="form.name"
-                    name="name"
-                    placeholder="Ex: Maria Silva"
-                    size="lg"
-                    class="w-full"
-                  />
-                </UFormField>
-              </div>
-            </UCard>
-
-            <UCard>
-              <h2 class="text-xl font-black text-highlighted">
-                {{ t('checkout.pickup.title') }}
-              </h2>
-
-              <div class="mt-5">
-                <UFormField :label="t('checkout.pickup.label')">
-                  <USelectMenu
-                    v-model="form.pickupOfficeId"
-                    :items="officeItems"
-                    valueKey="value"
-                    :placeholder="t('checkout.pickup.placeholder')"
-                    size="lg"
-                    class="w-full"
-                  >
-                    <template #item-label="{ item }">
-                      <div class="flex flex-col">
-                        <span class="font-medium">
-                          {{ item.label }}
-                        </span>
-
-                        <span class="text-xs text-muted">
-                          {{ item.address }}
-                        </span>
-                      </div>
-                    </template>
-                  </USelectMenu>
-
-                  <p class="mt-2 text-xs leading-5 text-muted">
-                    {{ t('checkout.pickup.help') }}
-                  </p>
-                </UFormField>
-
-                <div
-                  v-if="selectedOffice"
-                  class="mt-4 rounded-2xl border border-primary/15 bg-primary/5 p-4"
+                <UButton
+                  :loading="pending"
+                  :disabled="!items.length || errors.phone"
+                  size="lg"
+                  color="primary"
+                  type="submit"
+                  class="mt-0 justify-center sm:mt-6"
                 >
-                  <div class="text-sm font-semibold text-primary">
-                    {{ t('checkout.office.selectedTitle') }}
-                  </div>
-
-                  <div class="mt-2 font-bold text-highlighted">
-                    {{ selectedOffice.name }}
-                  </div>
-
-                  <p
-                    v-if="selectedOffice.description"
-                    class="mt-2 text-sm leading-6 text-toned"
-                  >
-                    {{ selectedOffice.description }}
-                  </p>
-
-                  <p
-                    v-if="selectedOffice.address"
-                    class="mt-2 text-sm leading-6 text-muted"
-                  >
-                    {{ selectedOffice.address }}
-                  </p>
-
-                  <div class="mt-4 grid gap-2 sm:flex">
-                    <UButton
-                      v-if="selectedOffice.phone"
-                      :to="`tel:${toTel(selectedOffice.phone)}`"
-                      icon="i-lucide-phone"
-                      color="neutral"
-                      variant="soft"
-                      size="md"
-                      class="justify-center"
-                    >
-                      {{ t('checkout.office.call') }}
-                    </UButton>
-
-                    <UButton
-                      v-if="selectedOfficeMapUrl"
-                      :to="selectedOfficeMapUrl"
-                      icon="i-lucide-map-pin"
-                      target="_blank"
-                      color="primary"
-                      variant="soft"
-                      size="md"
-                      class="justify-center"
-                    >
-                      {{ t('checkout.office.map') }}
-                    </UButton>
-                  </div>
-                </div>
+                  {{ t('checkout.submit') }}
+                </UButton>
               </div>
             </UCard>
           </UForm>
@@ -743,7 +517,7 @@ const submit = async () => {
 
         <aside>
           <div class="sticky top-24 space-y-4">
-            <UCard class="border-primary/20 bg-primary/5">
+            <UCard class="border-primary/20 bg-primary/5 hidden lg:block">
               <h2 class="text-lg font-black text-highlighted">
                 {{ t('checkout.summary.title') }}
               </h2>
@@ -769,28 +543,6 @@ const submit = async () => {
                   {{ t('checkout.summary.note') }}
                 </p>
               </div>
-
-              <UButton
-                :loading="pending"
-                :disabled="!items.length || errors.phone"
-                size="xl"
-                color="primary"
-                type="button"
-                class="mt-5 w-full justify-center"
-                @click="submit"
-              >
-                {{ t('checkout.submit') }}
-              </UButton>
-
-              <UButton
-                size="lg"
-                color="neutral"
-                variant="ghost"
-                class="mt-2 w-full justify-center"
-                :to="localeRoute({ name: 'cart' })"
-              >
-                {{ t('checkout.backToCart') }}
-              </UButton>
             </UCard>
 
             <UCard>

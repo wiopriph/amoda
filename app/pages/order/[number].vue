@@ -60,13 +60,13 @@ useHead(() => ({
 {
   "pt": {
     "order": {
-      "title": "Escolha",
-      "loading": "A carregar escolha...",
-      "notFound": "Escolha não encontrada",
-      "successTitle": "Escolha criada com sucesso",
-      "number": "Número da escolha",
+      "title": "Reserva",
+      "loading": "A carregar reserva...",
+      "notFound": "Reserva não encontrada",
+      "successTitle": "Reserva criada com sucesso",
+      "number": "Número da reserva",
       "contact": "Os seus dados",
-      "summary": "Itens selecionados",
+      "summary": "Itens reservados",
       "total": "Total se levar tudo",
       "size": "Tamanho",
       "color": "Cor",
@@ -86,19 +86,19 @@ useHead(() => ({
         "step3": "Você experimenta e decide com calma."
       },
       "meta": {
-        "description": "Veja os detalhes da sua escolha #{number} na Amoda: contacto, ponto de experimentação, itens selecionados e valor apenas se decidir levar."
+        "description": "Detalhes da sua reserva #{number}: contacto, ponto de experimentação e itens reservados. Sem pagamento online."
       }
     }
   },
   "en": {
     "order": {
-      "title": "Selection",
-      "loading": "Loading selection...",
-      "notFound": "Selection not found",
-      "successTitle": "Selection created successfully",
-      "number": "Selection number",
+      "title": "Reservation",
+      "loading": "Loading reservation...",
+      "notFound": "Reservation not found",
+      "successTitle": "Reservation created successfully",
+      "number": "Reservation number",
       "contact": "Your details",
-      "summary": "Selected items",
+      "summary": "Reserved items",
       "total": "Total if you keep everything",
       "size": "Size",
       "color": "Color",
@@ -118,7 +118,7 @@ useHead(() => ({
         "step3": "You try and decide calmly."
       },
       "meta": {
-        "description": "View your Amoda selection #{number}: contact details, try-on point, selected items and total only if you decide to keep them."
+        "description": "Details of your reservation #{number}: contact, try-on point and reserved items. No online payment."
       }
     }
   }

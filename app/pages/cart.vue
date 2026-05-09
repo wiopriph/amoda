@@ -94,7 +94,6 @@ const goCheckout = () => {
         "variant": "Cor",
         "size": "Tamanho",
         "qty": "Qtd.",
-        "priceEach": "Preço por item",
         "remove": "Remover"
       },
       "summary": {
@@ -107,7 +106,6 @@ const goCheckout = () => {
         "error": "Não foi possível atualizar a escolha. Tente novamente."
       },
       "checkout": "Confirmar escolha",
-      "continue": "Continuar a escolher",
       "trust": {
         "title": "Entrega gratuita",
         "items": [
@@ -161,7 +159,6 @@ const goCheckout = () => {
         "variant": "Color",
         "size": "Size",
         "qty": "Qty.",
-        "priceEach": "Price per item",
         "remove": "Remove"
       },
       "summary": {
@@ -174,7 +171,6 @@ const goCheckout = () => {
         "error": "Could not update the selection. Please try again."
       },
       "checkout": "Confirm selection",
-      "continue": "Continue choosing",
       "trust": {
         "title": "Free delivery",
         "items": [
@@ -255,76 +251,7 @@ const goCheckout = () => {
       </section>
 
       <section
-        v-if="isLoading"
-        class="mt-5 grid min-w-0 gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start"
-      >
-        <!-- ITEMS -->
-        <section class="min-w-0 space-y-3">
-          <UCard
-            v-for="i in 3"
-            :key="i"
-          >
-            <div class="flex min-w-0 gap-3 sm:gap-4">
-              <!-- image -->
-              <USkeleton class="h-24 w-20 shrink-0 rounded-2xl sm:h-28 sm:w-24" />
-
-              <!-- content -->
-              <div class="min-w-0 flex-1 overflow-hidden">
-                <USkeleton class="h-5 w-full max-w-[220px]" />
-
-                <USkeleton class="mt-3 h-4 w-full max-w-[160px]" />
-
-                <USkeleton class="mt-2 h-4 w-full max-w-[120px]" />
-
-                <div class="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                  <!-- qty -->
-                  <div class="flex shrink-0 items-center gap-2">
-                    <USkeleton class="h-8 w-8 rounded-lg" />
-
-                    <USkeleton class="h-8 w-14 rounded-lg sm:w-16" />
-
-                    <USkeleton class="h-8 w-8 rounded-lg" />
-                  </div>
-
-                  <!-- price -->
-                  <div class="flex min-w-0 flex-row items-center gap-2 sm:flex-col sm:items-end">
-                    <USkeleton class="h-5 w-20 sm:w-24" />
-
-                    <USkeleton class="h-4 w-14 sm:w-16" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </UCard>
-        </section>
-
-        <aside class="hidden lg:block">
-          <UCard class="border-primary/20 bg-primary/5">
-            <USkeleton class="h-6 w-44" />
-
-            <div class="mt-5 space-y-4">
-              <div class="flex justify-between">
-                <USkeleton class="h-4 w-24" />
-
-                <USkeleton class="h-4 w-10" />
-              </div>
-
-              <div class="flex justify-between border-t border-primary/10 pt-4">
-                <USkeleton class="h-5 w-32" />
-
-                <USkeleton class="h-6 w-28" />
-              </div>
-
-              <USkeleton class="h-10 w-full rounded-xl" />
-
-              <USkeleton class="h-10 w-full rounded-xl" />
-            </div>
-          </UCard>
-        </aside>
-      </section>
-
-      <section
-        v-else-if="!items.length"
+        v-if="!items.length"
         class="mt-5 sm:mt-6"
       >
         <UCard>
@@ -392,12 +319,7 @@ const goCheckout = () => {
                     <span>{{ t('cart.item.size') }}: {{ cartItem.sizeLabel || '—' }}</span>
                   </div>
 
-                  <div class="mt-2 text-xs text-muted sm:text-sm">
-                    {{ t('cart.item.priceEach') }}:
-                    <span class="font-semibold text-toned">{{ fmtAOA(cartItem.price) }}</span>
-                  </div>
-
-                  <div class="mt-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div class="mt-2 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <div class="mb-1 text-xs font-medium text-muted">
                         {{ t('cart.item.qty') }}
@@ -456,7 +378,7 @@ const goCheckout = () => {
 
           <aside>
             <div class="sticky top-24 space-y-4">
-              <UCard class="border-primary/20 bg-primary/5">
+              <UCard class="border-primary/20 bg-primary/5 hidden lg:block">
                 <h2 class="text-lg font-black text-highlighted">
                   {{ t('cart.summary.title') }}
                 </h2>
@@ -521,16 +443,6 @@ const goCheckout = () => {
                 >
                   {{ t('cart.checkout') }}
                 </UButton>
-
-                <UButton
-                  size="lg"
-                  color="neutral"
-                  variant="ghost"
-                  class="mt-2 w-full justify-center"
-                  :to="localeRoute({ name: 'index' })"
-                >
-                  {{ t('cart.continue') }}
-                </UButton>
               </UCard>
 
               <UCard>
@@ -562,6 +474,37 @@ const goCheckout = () => {
               </UCard>
             </div>
           </aside>
+        </div>
+
+        <!-- MOBILE STICKY SUMMARY -->
+        <div class="fixed bottom-0 left-0 right-0 z-60 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] lg:hidden">
+          <div class="mx-auto max-w-5xl">
+            <div class="mb-2 flex items-center justify-between gap-3">
+              <div>
+                <div class="text-xs text-muted">
+                  {{ t('cart.summary.total') }}
+                </div>
+
+                <div class="text-lg font-black text-primary">
+                  {{ fmtAOA(totalAOA) }}
+                </div>
+              </div>
+
+              <div class="text-right text-xs leading-5 text-muted">
+                {{ t('cart.summary.items', { count: totalCount }) }}
+              </div>
+            </div>
+
+            <UButton
+              size="xl"
+              color="primary"
+              class="w-full justify-center"
+              :disabled="!items.length"
+              @click="goCheckout"
+            >
+              {{ t('cart.checkout') }}
+            </UButton>
+          </div>
         </div>
       </template>
     </UPageBody>

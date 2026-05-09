@@ -829,7 +829,9 @@ useHead(() => ({
           {{ t('product.reco.title') }}
         </h2>
 
-        <UBlogPosts class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4">
+        <UBlogPosts
+          class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
+        >
           <UBlogPost
             v-for="item in recItems"
             :key="item.id"
@@ -933,6 +935,15 @@ useHead(() => ({
       <!-- MOBILE STICKY CTA -->
       <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 sm:hidden">
         <div class="mx-auto flex max-w-(--ui-container) items-center gap-2 px-1">
+          <UButton
+            :to="whatsappHref"
+            size="xl"
+            variant="outline"
+            target="_blank"
+            icon="i-simple-icons-whatsapp"
+            class="shrink-0"
+          />
+
           <template v-if="canAdd && currentSkuQty > 0">
             <UButton
               :disabled="!currentSkuKey"
