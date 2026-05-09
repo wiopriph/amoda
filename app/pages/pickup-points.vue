@@ -16,6 +16,9 @@ type Office = {
 };
 
 const { t } = useI18n();
+const { makeWhatsappHref } = useWhatsappLink();
+
+const whatsappHref = makeWhatsappHref(() => t('offices.contact.whatsappMessage'));
 
 const weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
@@ -129,6 +132,12 @@ const getMapUrl = (office: Office) => {
       "closed": "Fechado",
       "phone": "Ligar",
       "map": "Abrir no Google Maps",
+      "contact": {
+        "title": "Precisa de ajuda?",
+        "text": "Fale connosco no WhatsApp para escolher o melhor ponto ou tirar dúvidas antes de visitar.",
+        "button": "Falar no WhatsApp",
+        "whatsappMessage": "Olá! Quero ajuda com os pontos de experimentação da Amoda."
+      },
       "meta": {
         "title": "Pontos de experimentação da Amoda em Luanda {'|'} Horários e mapas",
         "description": "Encontre pontos de experimentação da Amoda em Luanda: veja endereço, horário, contacto e localização para provar antes de pagar."
@@ -156,6 +165,12 @@ const getMapUrl = (office: Office) => {
       "closed": "Closed",
       "phone": "Call",
       "map": "Open in Google Maps",
+      "contact": {
+        "title": "Need help?",
+        "text": "Message us on WhatsApp to choose the best point or ask questions before visiting.",
+        "button": "Chat on WhatsApp",
+        "whatsappMessage": "Hello! I need help with Amoda try-on points."
+      },
       "meta": {
         "title": "Amoda try-on points in Luanda {'|'} Hours and maps",
         "description": "Find Amoda try-on points in Luanda: check address, opening hours, contact details and map location before you try and pay."
@@ -316,6 +331,26 @@ const getMapUrl = (office: Office) => {
             </div>
           </div>
         </UCard>
+      </section>
+
+      <section class="mt-6">
+        <UAlert
+          color="success"
+          variant="soft"
+          icon="i-simple-icons-whatsapp"
+          :title="t('offices.contact.title')"
+          :description="t('offices.contact.text')"
+        >
+          <template #actions>
+            <UButton
+              :to="whatsappHref"
+              target="_blank"
+              color="success"
+            >
+              {{ t('offices.contact.button') }}
+            </UButton>
+          </template>
+        </UAlert>
       </section>
     </UPageBody>
   </UPage>

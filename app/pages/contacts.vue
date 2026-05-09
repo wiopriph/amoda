@@ -221,7 +221,7 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
         </UCard>
 
         <!-- Facebook -->
-        <UCard>
+        <UCard class="border-blue-200 bg-blue-50/60">
           <div class="flex h-full flex-col gap-4">
             <div class="flex items-center gap-2">
               <UIcon
@@ -241,8 +241,7 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
             <UButton
               :to="FACEBOOK_LINK"
               target="_blank"
-              color="neutral"
-              variant="soft"
+              color="info"
               size="lg"
               class="mt-auto w-full justify-center sm:w-fit"
             >

@@ -3,6 +3,9 @@ definePageMeta({ name: 'delivery' });
 
 const { t, tm, rt } = useI18n();
 const localeRoute = useLocaleRoute();
+const { makeWhatsappHref } = useWhatsappLink();
+
+const whatsappHref = makeWhatsappHref(() => t('delivery.contact.whatsappMessage'));
 
 const seoTitle = computed(() => t('delivery.meta.title'));
 const seoDescription = computed(() => t('delivery.meta.description'));
@@ -189,6 +192,12 @@ useHead(() => {
             "a": "Na página de pontos de experimentação, com endereço, horário e contactos."
           }
         ]
+      },
+      "contact": {
+        "title": "Quer falar com a Amoda?",
+        "text": "Envie uma mensagem no WhatsApp para tirar dúvidas sobre escolhas, tamanhos e pontos de experimentação.",
+        "button": "Falar no WhatsApp",
+        "whatsappMessage": "Olá! Quero falar com a Amoda sobre como experimentar antes de pagar."
       }
     }
   },
@@ -316,6 +325,12 @@ useHead(() => {
             "a": "On the try-on points page, with address, opening hours, and contacts."
           }
         ]
+      },
+      "contact": {
+        "title": "Want to talk to Amoda?",
+        "text": "Send us a WhatsApp message to ask about selections, sizes, and try-on points.",
+        "button": "Chat on WhatsApp",
+        "whatsappMessage": "Hello! I want to talk to Amoda about trying before paying."
       }
     }
   }
@@ -525,6 +540,26 @@ useHead(() => {
 
           <UAccordion :items="faqs" />
         </UCard>
+      </section>
+
+      <section class="mt-6">
+        <UAlert
+          color="success"
+          variant="soft"
+          icon="i-simple-icons-whatsapp"
+          :title="t('delivery.contact.title')"
+          :description="t('delivery.contact.text')"
+        >
+          <template #actions>
+            <UButton
+              :to="whatsappHref"
+              target="_blank"
+              color="success"
+            >
+              {{ t('delivery.contact.button') }}
+            </UButton>
+          </template>
+        </UAlert>
       </section>
     </UPageBody>
   </UPage>
