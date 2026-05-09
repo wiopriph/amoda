@@ -166,13 +166,23 @@ const sizeOptions = computed(() =>
     const p = productData.value;
     const v = currentVariant.value;
     const inCartQty = p?.id && v?.id ? getQty(p.id, v.id, size.id) : 0;
+    const stock = Number(size.stock ?? 0);
 
     return {
       id: size.id,
       label: size.size,
+      stock,
+      isLowStock: stock > 0 && stock <= 2,
       inCartQty,
     };
   }),
+);
+
+const lowStockText = (stock: number) =>
+  t(stock === 1 ? 'product.stock.lowOne' : 'product.stock.lowMany', { count: stock });
+
+const selectedSizeOption = computed(() =>
+  sizeOptions.value.find((sizeOption) => sizeOption.id === selectedSizeId.value) || null,
 );
 
 // ===== MINI CART (Drawer) =====
@@ -374,6 +384,10 @@ useHead(() => ({
         },
         "howReceiveTitle": "Como funciona"
       },
+      "stock": {
+        "lowOne": "Só resta 1",
+        "lowMany": "Só restam {count}"
+      },
       "cartNudge": {
         "title": "Selecionado",
         "subtitle": "{qty} item(s) selecionado(s)",
@@ -433,6 +447,10 @@ useHead(() => ({
           "whatsapp": "Decide later"
         },
         "howReceiveTitle": "How it works"
+      },
+      "stock": {
+        "lowOne": "Only 1 left",
+        "lowMany": "Only {count} left"
       },
       "cartNudge": {
         "title": "Selected",
@@ -606,8 +624,11 @@ useHead(() => ({
 
           <!-- OPTIONS -->
           <UCard>
-            <div class="space-y-5">
-              <div v-if="variantOptions.length > 1">
+            <div>
+              <div
+                v-if="variantOptions.length > 1"
+                class="mb-3"
+              >
                 <div class="mb-2 flex items-center justify-between gap-3">
                   <div class="text-sm font-semibold text-highlighted">
                     {{ t('product.color') }}
@@ -667,6 +688,18 @@ useHead(() => ({
                 </div>
 
                 <p
+                  v-if="selectedSizeOption?.isLowStock"
+                  class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-600"
+                >
+                  <UIcon
+                    name="i-lucide-flame"
+                    class="size-3.5"
+                  />
+
+                  {{ lowStockText(selectedSizeOption.stock) }}
+                </p>
+
+                <p
                   v-if="!selectedSizeId"
                   class="mt-2 text-sm text-red-600"
                 >
@@ -675,7 +708,7 @@ useHead(() => ({
               </div>
 
               <!-- DESKTOP CTA -->
-              <div class="hidden space-y-3 sm:block">
+              <div class="hidden space-y-3 sm:block mt-3">
                 <!-- если SKU уже в корзине — показываем степпер -->
                 <div
                   v-if="canAdd && currentSkuQty > 0"
@@ -938,8 +971,7 @@ useHead(() => ({
           <UButton
             :to="whatsappHref"
             size="xl"
-            variant="outline"
-            target="_blank"
+            color="success"
             icon="i-simple-icons-whatsapp"
             class="shrink-0"
           />
