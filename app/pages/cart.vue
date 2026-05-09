@@ -51,7 +51,7 @@ const steps = computed(() =>
   })),
 );
 
-const goCheckout = () => {
+const trackCheckoutIntent = () => {
   if (!items.value.length) {
     return;
   }
@@ -74,6 +74,13 @@ const goCheckout = () => {
         })),
     });
   }
+};
+
+const { makeWhatsappHref } = useWhatsappLink();
+const whatsappHref = makeWhatsappHref(() => t('cart.actions.whatsappMessage'));
+
+const goCheckout = () => {
+  trackCheckoutIntent();
 
   navigateTo(localeRoute({ name: 'checkout' }));
 };
@@ -100,12 +107,18 @@ const goCheckout = () => {
         "title": "Resumo da escolha",
         "items": "{count} item(ns)",
         "total": "Total se levar tudo",
-        "note": "Você não paga agora. Este valor é apenas uma referência caso decida levar todos os itens depois de experimentar.",
         "code": "Código do carrinho",
         "saving": "A guardar escolha...",
         "error": "Não foi possível atualizar a escolha. Tente novamente."
       },
-      "checkout": "Confirmar escolha",
+      "checkout": "Deixar número",
+      "actions": {
+        "hint": "Se tiver WhatsApp, envie a escolha agora. Se preferir, deixe o seu número e a nossa equipa escreve ou liga para si.",
+        "mobileHint": "WhatsApp é mais rápido. Sem WhatsApp? Deixe o número e falamos consigo.",
+        "whatsappCta": "Enviar no WhatsApp",
+        "phoneCta": "Deixar número",
+        "whatsappMessage": "Olá! Quero confirmar a minha escolha na Amoda."
+      },
       "trust": {
         "title": "Entrega gratuita",
         "items": [
@@ -165,12 +178,18 @@ const goCheckout = () => {
         "title": "Selection summary",
         "items": "{count} item(s)",
         "total": "Total if you keep everything",
-        "note": "You do not pay now. This amount is only a reference if you decide to keep all items after trying them.",
         "code": "Cart code",
         "saving": "Saving selection...",
         "error": "Could not update the selection. Please try again."
       },
-      "checkout": "Confirm selection",
+      "checkout": "Leave number",
+      "actions": {
+        "hint": "If you have WhatsApp, send your selection now. If you prefer, leave your number and our team will message or call you.",
+        "mobileHint": "WhatsApp is faster. No WhatsApp? Leave your number and we will contact you.",
+        "whatsappCta": "Send on WhatsApp",
+        "phoneCta": "Leave number",
+        "whatsappMessage": "Hello! I want to confirm my Amoda selection."
+      },
       "trust": {
         "title": "Free delivery",
         "items": [
@@ -401,7 +420,7 @@ const goCheckout = () => {
                   </div>
 
                   <p class="text-xs leading-5 text-muted">
-                    {{ t('cart.summary.note') }}
+                    {{ t('cart.actions.hint') }}
                   </p>
 
                   <div
@@ -436,12 +455,26 @@ const goCheckout = () => {
 
                 <UButton
                   size="xl"
-                  color="primary"
+                  color="success"
+                  icon="i-simple-icons-whatsapp"
                   class="mt-5 w-full justify-center"
+                  :to="whatsappHref"
+                  target="_blank"
+                  :disabled="!items.length"
+                  @click="trackCheckoutIntent"
+                >
+                  {{ t('cart.actions.whatsappCta') }}
+                </UButton>
+
+                <UButton
+                  size="lg"
+                  color="neutral"
+                  variant="ghost"
+                  class="mt-2 w-full justify-center"
                   :disabled="!items.length"
                   @click="goCheckout"
                 >
-                  {{ t('cart.checkout') }}
+                  {{ t('cart.actions.phoneCta') }}
                 </UButton>
               </UCard>
 
@@ -495,14 +528,32 @@ const goCheckout = () => {
               </div>
             </div>
 
+            <p class="mb-2 text-xs leading-5 text-muted">
+              {{ t('cart.actions.mobileHint') }}
+            </p>
+
             <UButton
               size="xl"
-              color="primary"
+              color="success"
+              icon="i-simple-icons-whatsapp"
               class="w-full justify-center"
+              :to="whatsappHref"
+              target="_blank"
+              :disabled="!items.length"
+              @click="trackCheckoutIntent"
+            >
+              {{ t('cart.actions.whatsappCta') }}
+            </UButton>
+
+            <UButton
+              size="sm"
+              color="neutral"
+              variant="ghost"
+              class="mt-1 w-full justify-center"
               :disabled="!items.length"
               @click="goCheckout"
             >
-              {{ t('cart.checkout') }}
+              {{ t('cart.actions.phoneCta') }}
             </UButton>
           </div>
         </div>
