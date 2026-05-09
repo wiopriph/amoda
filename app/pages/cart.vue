@@ -101,7 +101,7 @@ const goCheckout = () => {
         "items": "{count} item(ns)",
         "total": "Total se levar tudo",
         "note": "Você não paga agora. Este valor é apenas uma referência caso decida levar todos os itens depois de experimentar.",
-        "code": "Cart code",
+        "code": "Código do carrinho",
         "saving": "A guardar escolha...",
         "error": "Não foi possível atualizar a escolha. Tente novamente."
       },

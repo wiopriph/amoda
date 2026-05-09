@@ -10,7 +10,7 @@ export const useWhatsappLink = () => {
     const lines = [message.trim()];
 
     if (publicCode.value) {
-      lines.push(`Cart code: ${publicCode.value}`);
+      lines.push(`Código do carrinho: ${publicCode.value}`);
     }
 
     return lines.filter(Boolean).join('\n');
