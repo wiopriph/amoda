@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TIKTOK_LINK } from '~/constants/contacts';
+import { CONTACT_PHONE, TIKTOK_LINK } from '~/constants/contacts';
 
 
 type HeroProps = {
@@ -10,6 +10,7 @@ type HeroProps = {
   tiktokTitle?: string
   tiktokSubtitle?: string
   ctaPrimary?: string
+  whatsappLabel?: string
   isTiktokLive?: boolean
   imageUrl?: string
 };
@@ -23,6 +24,12 @@ const WOMEN_SLUG = 'mulheres';
 
 const startShoppingTo = computed(() => localeRoute({ name: 'category-slug', params: { slug: WOMEN_SLUG } }));
 
+
+const { makeWhatsappHref } = useWhatsappLink();
+
+const waLink = makeWhatsappHref(() => t('hero.whatsappMessage'));
+
+
 const fallbackBullets = computed(() => tm('hero.bullets').map((item: any) => rt(item)));
 
 const heroTitle = computed(() => props.title || t('hero.title'));
@@ -32,6 +39,7 @@ const heroBullets = computed(() => props.bullets?.length ? props.bullets : fallb
 const heroTiktokTitle = computed(() => props.tiktokTitle || t('hero.tiktokTitle'));
 const heroTiktokSubtitle = computed(() => props.tiktokSubtitle || t('hero.tiktokSubtitle'));
 const heroCtaPrimary = computed(() => props.ctaPrimary || t('hero.ctaPrimary'));
+const heroWhatsappLabel = computed(() => props.whatsappLabel || t('hero.whatsapp'));
 </script>
 
 <i18n lang="json">
@@ -41,6 +49,8 @@ const heroCtaPrimary = computed(() => props.ctaPrimary || t('hero.ctaPrimary'));
       "title": "Seja a mais linda da festa",
       "subtitle": "Escolha o seu look, experimente antes de pagar e fique apenas com o que amar.",
       "ctaPrimary": "Escolher meu look",
+      "whatsapp": "Comprar pelo WhatsApp",
+      "whatsappMessage": "Olá! Quero comprar alguma coisa na vossa loja.",
       "socialProof": "Mais de 3.000 meninas já confiaram na Amoda",
       "bullets": [
         "Experimente antes de pagar",
@@ -57,6 +67,8 @@ const heroCtaPrimary = computed(() => props.ctaPrimary || t('hero.ctaPrimary'));
       "title": "Be the most beautiful girl at the party",
       "subtitle": "Choose your look, try before you pay, and keep only what you love.",
       "ctaPrimary": "Choose my look",
+      "whatsapp": "Shop on WhatsApp",
+      "whatsappMessage": "Hello! I want to buy something in your store.",
       "socialProof": "Trusted by 3,000+ girls",
       "bullets": [
         "Try before you pay",
@@ -97,7 +109,7 @@ const heroCtaPrimary = computed(() => props.ctaPrimary || t('hero.ctaPrimary'));
           {{ heroSubtitle }}
         </p>
 
-        <div class="mt-6">
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
           <UButton
             size="xl"
             color="primary"
@@ -105,6 +117,16 @@ const heroCtaPrimary = computed(() => props.ctaPrimary || t('hero.ctaPrimary'));
             icon="i-lucide-shopping-bag"
           >
             {{ heroCtaPrimary }}
+          </UButton>
+
+          <UButton
+            size="xl"
+            color="success"
+            icon="i-simple-icons-whatsapp"
+            :to="waLink"
+            target="_blank"
+          >
+            {{ heroWhatsappLabel }}
           </UButton>
         </div>
 
