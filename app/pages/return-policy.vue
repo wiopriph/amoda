@@ -1,182 +1,65 @@
 <script setup lang="ts">
 definePageMeta({ name: 'return-policy' });
 
-const { t, tm, rt } = useI18n();
-const { makeWhatsappHref } = useWhatsappLink();
-
-const highlights = computed(() =>
-  (tm('returnPolicy.highlights.items') as any[]).map((item) => ({
-    icon: rt(item.icon),
-    title: rt(item.title),
-  })),
-);
-
-const rules = computed(() =>
-  (tm('returnPolicy.rules.items') as any[]).map((item) => ({
-    icon: rt(item.icon),
-    title: rt(item.title),
-    text: rt(item.text),
-  })),
-);
-
-const whatsappHref = makeWhatsappHref(() => t('returnPolicy.whatsappMessage'));
+const title = 'Trocas e devoluções na Amoda | Experimente antes de pagar';
+const description = 'Conheça a política de trocas e devoluções da Amoda em Luanda. Experimente antes de pagar, leve só o que gostar e veja as regras após a compra.';
 
 useHead(() => ({
-  title: t('returnPolicy.meta.title'),
+  title,
   meta: [
-    { name: 'description', content: t('returnPolicy.meta.description') },
-    { property: 'og:title', content: t('returnPolicy.meta.title') },
-    { property: 'og:description', content: t('returnPolicy.meta.description') },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { name: 'description', content: description },
   ],
 }));
-</script>
 
-<i18n lang="json">
-{
-  "pt": {
-    "returnPolicy": {
-      "title": "Trocas e devoluções",
-      "intro": "Na Amoda, você pode experimentar antes de pagar. Se não gostar no ponto, não leva e não paga.",
-      "badge": "Sem pagamento antes de experimentar",
-      "whatsappMessage": "Olá! Preciso de ajuda com troca ou devolução na Amoda.",
-      "highlights": {
-        "items": [
-          {
-            "icon": "i-lucide-shirt",
-            "title": "Experimente primeiro"
-          },
-          {
-            "icon": "i-lucide-wallet",
-            "title": "Pague só o que levar"
-          },
-          {
-            "icon": "i-lucide-refresh-ccw",
-            "title": "Troca possível em até 7 dias"
-          }
-        ]
-      },
-      "main": {
-        "title": "O mais importante",
-        "text": "Antes de pagar, você pode ver, tocar e experimentar as peças. Se não servir, não ficar bem ou não gostar, basta recusar no local."
-      },
-      "rules": {
-        "title": "Regras depois da compra",
-        "items": [
-          {
-            "icon": "i-lucide-calendar-days",
-            "title": "Prazo de 7 dias",
-            "text": "Depois de levar a peça, você pode pedir troca ou devolução em até 7 dias."
-          },
-          {
-            "icon": "i-lucide-tags",
-            "title": "Produto sem uso",
-            "text": "A peça precisa estar sem uso, em condição original, com etiqueta, embalagem e acessórios."
-          },
-          {
-            "icon": "i-lucide-ban",
-            "title": "Itens que não aceitamos",
-            "text": "Não aceitamos devolução de roupa interior, itens de higiene pessoal, produtos Final Sale, peças usadas, danificadas ou alteradas."
-          },
-          {
-            "icon": "i-lucide-banknote",
-            "title": "Reembolso",
-            "text": "Se a devolução for aprovada, o valor será devolvido conforme o método usado no ponto. O prazo normal é de 5 a 10 dias úteis."
-          },
-          {
-            "icon": "i-lucide-alert-circle",
-            "title": "Produto errado ou com defeito",
-            "text": "Se receber algo errado ou com defeito, contacte-nos em até 24 horas após o levantamento e envie fotos."
-          }
-        ]
-      },
-      "how": {
-        "title": "Como pedir troca ou devolução",
-        "text": "Entre em contacto e informe o número da escolha. A nossa equipa vai orientar os próximos passos."
-      },
-      "contact": {
-        "title": "Precisa de ajuda?",
-        "text": "Fale connosco no WhatsApp. Vamos orientar sobre troca, devolução ou qualquer dúvida.",
-        "button": "Escrever no WhatsApp"
-      },
-      "meta": {
-        "title": "Trocas e devoluções na Amoda {'|'} Experimente antes de pagar",
-        "description": "Conheça a política de trocas e devoluções da Amoda em Luanda. Experimente antes de pagar, leve só o que gostar e veja as regras após a compra."
-      }
-    }
+const highlights = [
+  {
+    icon: 'i-lucide-shirt',
+    title: 'Experimente primeiro',
   },
-  "en": {
-    "returnPolicy": {
-      "title": "Exchanges and returns",
-      "intro": "At Amoda, you can try before paying. If you do not like it at the point, do not take it and do not pay.",
-      "badge": "No payment before trying",
-      "whatsappMessage": "Hello! I need help with an exchange or return at Amoda.",
-      "highlights": {
-        "items": [
-          {
-            "icon": "i-lucide-shirt",
-            "title": "Try first"
-          },
-          {
-            "icon": "i-lucide-wallet",
-            "title": "Pay only for what you keep"
-          },
-          {
-            "icon": "i-lucide-refresh-ccw",
-            "title": "Exchange possible within 7 days"
-          }
-        ]
-      },
-      "main": {
-        "title": "Most important",
-        "text": "Before paying, you can see, touch and try the items. If it does not fit, does not look good, or you do not like it, simply refuse it at the point."
-      },
-      "rules": {
-        "title": "Rules after purchase",
-        "items": [
-          {
-            "icon": "i-lucide-calendar-days",
-            "title": "7-day window",
-            "text": "After taking the item, you can request an exchange or return within 7 days."
-          },
-          {
-            "icon": "i-lucide-tags",
-            "title": "Unused item",
-            "text": "The item must be unused, in original condition, with tags, packaging and accessories."
-          },
-          {
-            "icon": "i-lucide-ban",
-            "title": "Items we cannot accept",
-            "text": "We do not accept returns for underwear, personal hygiene items, Final Sale products, used, damaged or altered items."
-          },
-          {
-            "icon": "i-lucide-banknote",
-            "title": "Refund",
-            "text": "If the return is approved, the amount will be refunded according to the method used at the point. Normal processing time is 5 to 10 business days."
-          },
-          {
-            "icon": "i-lucide-alert-circle",
-            "title": "Wrong or defective item",
-            "text": "If you receive a wrong or defective item, contact us within 24 hours after pickup and send photos."
-          }
-        ]
-      },
-      "how": {
-        "title": "How to request exchange or return",
-        "text": "Contact us and provide your selection number. Our team will guide you through the next steps."
-      },
-      "contact": {
-        "title": "Need help?",
-        "text": "Message us on WhatsApp. We’ll help with exchanges, returns, or any questions.",
-        "button": "Message on WhatsApp"
-      },
-      "meta": {
-        "title": "Amoda exchanges and returns {'|'} Try before you pay",
-        "description": "Learn Amoda exchange and return rules in Luanda. Try before paying, keep only what you love, and see the policy after purchase."
-      }
-    }
-  }
-}
-</i18n>
+  {
+    icon: 'i-lucide-wallet',
+    title: 'Pague só o que levar',
+  },
+  {
+    icon: 'i-lucide-refresh-ccw',
+    title: 'Troca possível em até 7 dias',
+  },
+];
+
+const rules = [
+  {
+    icon: 'i-lucide-calendar-days',
+    title: 'Prazo de 7 dias',
+    text: 'Depois de levar a peça, você pode pedir troca ou devolução em até 7 dias.',
+  },
+  {
+    icon: 'i-lucide-tags',
+    title: 'Produto sem uso',
+    text: 'A peça precisa estar sem uso, em condição original, com etiqueta, embalagem e acessórios.',
+  },
+  {
+    icon: 'i-lucide-ban',
+    title: 'Itens que não aceitamos',
+    text: 'Não aceitamos devolução de roupa interior, itens de higiene pessoal, produtos Final Sale, peças usadas, danificadas ou alteradas.',
+  },
+  {
+    icon: 'i-lucide-banknote',
+    title: 'Reembolso',
+    text: 'Se a devolução for aprovada, o valor será devolvido conforme o método usado no ponto. O prazo normal é de 5 a 10 dias úteis.',
+  },
+  {
+    icon: 'i-lucide-alert-circle',
+    title: 'Produto errado ou com defeito',
+    text: 'Se receber algo errado ou com defeito, contacte-nos em até 24 horas após o levantamento e envie fotos.',
+  },
+];
+
+const { makeWhatsappHref } = useWhatsappLink();
+
+const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda com troca ou devolução na Amoda.');
+</script>
 
 <template>
   <UPage>
@@ -187,15 +70,15 @@ useHead(() => ({
           variant="soft"
           class="mb-4"
         >
-          {{ t('returnPolicy.badge') }}
+          Sem pagamento antes de experimentar
         </UBadge>
 
         <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-          {{ t('returnPolicy.title') }}
+          Trocas e devoluções
         </h1>
 
         <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-          {{ t('returnPolicy.intro') }}
+          Na Amoda, você pode experimentar antes de pagar. Se não gostar no ponto, não leva e não paga.
         </p>
 
         <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-toned">
@@ -209,7 +92,7 @@ useHead(() => ({
               class="size-4 text-primary"
             />
 
-            <span>{{ item.title }}</span>
+            <span v-text="item.title" />
           </div>
         </div>
       </section>
@@ -217,11 +100,11 @@ useHead(() => ({
       <section class="mt-5 sm:mt-6">
         <UCard class="border-primary/20 bg-primary/5">
           <h2 class="text-xl font-black text-highlighted">
-            {{ t('returnPolicy.main.title') }}
+            O mais importante
           </h2>
 
           <p class="mt-3 text-sm leading-7 text-muted sm:text-base">
-            {{ t('returnPolicy.main.text') }}
+            Antes de pagar, você pode ver, tocar e experimentar as peças. Se não servir, não ficar bem ou não gostar, basta recusar no local.
           </p>
         </UCard>
       </section>
@@ -229,7 +112,7 @@ useHead(() => ({
       <section class="mt-5 sm:mt-6">
         <UCard>
           <h2 class="text-xl font-black text-highlighted">
-            {{ t('returnPolicy.rules.title') }}
+            Regras depois da compra
           </h2>
 
           <div class="mt-5 divide-y divide-gray-100">
@@ -244,14 +127,16 @@ useHead(() => ({
                   class="size-5 text-primary"
                 />
 
-                <h3 class="font-bold text-highlighted">
-                  {{ rule.title }}
-                </h3>
+                <h3
+                  class="font-bold text-highlighted"
+                  v-text="rule.title"
+                />
               </div>
 
-              <p class="mt-2 text-sm leading-6 text-muted">
-                {{ rule.text }}
-              </p>
+              <p
+                class="mt-2 text-sm leading-6 text-muted"
+                v-text="rule.text"
+              />
             </div>
           </div>
         </UCard>
@@ -260,11 +145,11 @@ useHead(() => ({
       <section class="mt-5 sm:mt-6">
         <UCard>
           <h2 class="text-xl font-black text-highlighted">
-            {{ t('returnPolicy.how.title') }}
+            Como pedir troca ou devolução
           </h2>
 
           <p class="mt-3 text-sm leading-7 text-muted sm:text-base">
-            {{ t('returnPolicy.how.text') }}
+            Entre em contacto e informe o número da escolha. A nossa equipa vai orientar os próximos passos.
           </p>
         </UCard>
       </section>
@@ -274,8 +159,8 @@ useHead(() => ({
           color="success"
           variant="soft"
           icon="i-simple-icons-whatsapp"
-          :title="t('returnPolicy.contact.title')"
-          :description="t('returnPolicy.contact.text')"
+          title="Precisa de ajuda?"
+          description="Fale connosco no WhatsApp. Vamos orientar sobre troca, devolução ou qualquer dúvida."
         >
           <template #actions>
             <UButton
@@ -285,7 +170,7 @@ useHead(() => ({
               variant="solid"
               size="sm"
             >
-              {{ t('returnPolicy.contact.button') }}
+              Escrever no WhatsApp
             </UButton>
           </template>
         </UAlert>

@@ -1,69 +1,41 @@
 <script setup lang="ts">
-const { t } = useI18n();
-const localeRoute = useLocaleRoute();
-
-const navItems = computed(() => [
+const MENU_LIST = [
   {
-    label: t('admin.offices'),
+    label: 'Pontos de levantamento',
     icon: 'i-lucide-store',
-    to: localeRoute({ name: 'admin-offices' }),
+    to: { name: 'admin-offices' },
   },
   {
-    label: t('admin.brands'),
+    label: 'Brands',
     icon: 'i-lucide-tag',
-    to: localeRoute({ name: 'admin-brands' }),
+    to: { name: 'admin-brands' },
   },
   {
-    label: t('admin.categories'),
+    label: 'Categories',
     icon: 'i-lucide-layers',
-    to: localeRoute({ name: 'admin-categories' }),
+    to: { name: 'admin-categories' },
   },
   {
-    label: t('admin.products'),
+    label: 'Products',
     icon: 'i-lucide-shirt',
-    to: localeRoute({ name: 'admin-products' }),
+    to: { name: 'admin-products' },
   },
   {
-    label: t('admin.orders'),
+    label: 'Pedidos',
     icon: 'i-lucide-receipt',
-    to: localeRoute({ name: 'admin-orders' }),
+    to: { name: 'admin-orders' },
   },
-]);
+];
 
 const { signOut } = useAuth();
 </script>
-
-<i18n lang="json">
-{
-  "en": {
-    "admin": {
-      "orders": "Orders",
-      "offices": "Pickup points",
-      "brands": "Brands",
-      "categories": "Categories",
-      "products": "Products",
-      "logout": "Logout"
-    }
-  },
-  "pt": {
-    "admin": {
-      "orders": "Pedidos",
-      "offices": "Pontos de levantamento",
-      "brands": "Brands",
-      "categories": "Categories",
-      "products": "Products",
-      "logout": "Sair"
-    }
-  }
-}
-</i18n>
 
 <template>
   <UApp>
     <UHeader>
       <template #left>
         <NuxtLink
-          :to="localeRoute({ name: 'admin' })"
+          :to="{ name: 'admin' }"
           class="flex items-center gap-2 font-semibold tracking-tight text-lg"
         >
           <UIcon
@@ -74,7 +46,7 @@ const { signOut } = useAuth();
         </NuxtLink>
       </template>
 
-      <UNavigationMenu :items="navItems" />
+      <UNavigationMenu :items="MENU_LIST" />
 
       <template #right>
         <UButton
@@ -86,7 +58,7 @@ const { signOut } = useAuth();
             name="i-lucide-log-out"
             class="w-4 h-4"
           />
-          {{ t('admin.logout') }}
+          Sair
         </UButton>
       </template>
     </UHeader>

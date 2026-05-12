@@ -2,22 +2,26 @@
 import type { TableColumn } from '@nuxt/ui';
 
 
-definePageMeta({ name: 'admin-products', layout: 'admin', middleware: 'admin' });
+definePageMeta({
+  name: 'admin-products',
+  layout: 'admin',
+  middleware: 'admin',
+});
 
-const { t } = useI18n();
-const localeRoute = useLocaleRoute();
+const title = 'Produtos';
+const description = 'Navegue, pesquise e visualize variantes';
 
-useHead(() => ({
-  title: `${t('products.title')} | Amoda Admin`,
+useHead({
+  title,
   meta: [
-    { name: 'description', content: t('products.description') },
-    { property: 'og:title', content: `${t('products.title')} | Amoda Admin` },
-    { property: 'og:description', content: t('products.description') },
-    { property: 'twitter:title', content: `${t('products.title')} | Amoda Admin` },
-    { property: 'twitter:description', content: t('products.description') },
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
     { name: 'robots', content: 'noindex, nofollow' },
   ],
-}));
+});
 
 type VariantImage = { url: string };
 type VariantSize = { id: number; size: string; stock?: number | null };
@@ -39,43 +43,83 @@ type Product = {
   variants: Variant[]
 };
 
+type ProductTableRow = Product & {
+  variantsCount: number
+  brandName: string
+};
+
 const route = useRoute();
-const limit = 20;
-const page = ref(Math.max(1, Number(route.query.page || 1)));
-const search = ref(String(route.query.q || ''));
+const PRODUCTS_PER_PAGE = 20;
+const currentPage = ref(Math.max(1, Number(route.query.page || 1)));
+const searchQuery = ref(String(route.query.q || ''));
+const appliedSearchQuery = ref(searchQuery.value);
+
+const getEditProductTo = (productId: number) => ({ name: 'admin-products-edit', params: { id: productId } });
+
+let isSyncingSearchQuery = false;
 
 function debounce<T extends(...args: any[]) => void>(fn: T, delay = 400) {
-  let timer: ReturnType<typeof setTimeout> | null = null;
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   return (...args: Parameters<T>) => {
-    if (timer) {
-      clearTimeout(timer);
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
     }
 
-    timer = setTimeout(() => fn(...args), delay);
+    debounceTimer = setTimeout(() => fn(...args), delay);
   };
 }
 
-const handleSearch = debounce(() => {
-  navigateTo(localeRoute({ query: { ...route.query, page: 1, q: search.value || undefined } }));
+const updateSearchQuery = debounce(() => {
+  currentPage.value = 1;
+  appliedSearchQuery.value = searchQuery.value;
+  navigateTo({ query: { ...route.query, page: undefined, q: searchQuery.value || undefined } });
 }, 400);
 
-watch(search, handleSearch);
-
-const { data, error } = await useFetch('/api/admin/products/list', {
-  query: { page, limit, q: search },
-  watch: [page],
+watch(searchQuery, () => {
+  if (!isSyncingSearchQuery) {
+    updateSearchQuery();
+  }
 });
 
-const items = computed<Product[]>(() => data.value?.items || []);
-const total = computed(() => Number(data.value?.total || 0));
+watch(
+  () => route.query.page,
+  (pageQuery) => {
+    currentPage.value = Math.max(1, Number(pageQuery || 1));
+  },
+);
 
-const expanded = ref<Record<string, boolean>>({});
+watch(
+  () => route.query.q,
+  (queryValue) => {
+    const nextSearchQuery = String(queryValue || '');
+
+    if (nextSearchQuery !== searchQuery.value) {
+      isSyncingSearchQuery = true;
+      searchQuery.value = nextSearchQuery;
+      appliedSearchQuery.value = nextSearchQuery;
+
+      nextTick(() => {
+        isSyncingSearchQuery = false;
+      });
+    }
+  },
+);
+
+const { data: productsResponse } = await useFetch('/api/admin/products/list', {
+  query: { page: currentPage, limit: PRODUCTS_PER_PAGE, q: appliedSearchQuery },
+  watch: [currentPage, appliedSearchQuery],
+});
+
+const products = computed(() => productsResponse.value?.items || []);
+const totalProducts = computed(() => Number(productsResponse.value?.total || 0));
+
+const expandedRows = ref<Record<string, boolean>>({});
 
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
 
-const columns: TableColumn<Product & { variantsCount: number; brandName: string }>[] = [
+const productColumns: TableColumn<ProductTableRow>[] = [
   {
     id: 'expand',
     cell: ({ row }) =>
@@ -96,145 +140,92 @@ const columns: TableColumn<Product & { variantsCount: number; brandName: string 
   },
   {
     accessorKey: 'id',
-    header: t('products.table.id'),
+    header: 'ID',
   },
   {
     accessorKey: 'title',
-    header: t('products.table.title'),
+    header: 'Título',
     meta: { class: { th: 'w-64', td: 'truncate max-w-64' } },
   },
   {
     accessorKey: 'brandName',
-    header: t('products.table.brand'),
+    header: 'Marca',
     meta: { class: { th: 'w-40 truncate', td: 'truncate max-w-40' } },
   },
   {
     accessorKey: 'slug',
-    header: t('products.table.slug'),
+    header: 'Slug',
     meta: { class: { th: 'w-64', td: 'truncate max-w-64' } },
   },
   {
     accessorKey: 'active',
-    header: t('products.table.active'),
+    header: 'Ativo',
     cell: ({ row }) => {
-      const val = row.getValue('active');
+      const isActive = Boolean(row.getValue('active'));
 
       return h(
         UBadge,
-        { variant: 'subtle', color: val ? 'success' : 'error' },
-        () => (val ? t('common.active') : t('common.inactive')),
+        { variant: 'subtle', color: isActive ? 'success' : 'error' },
+        () => (isActive ? 'Ativo' : 'Inativo'),
       );
     },
   },
   {
     accessorKey: 'variantsCount',
-    header: t('products.table.variants'),
+    header: 'Variantes',
   },
   {
     id: 'actions',
-    header: t('common.actions'),
+    header: 'Ações',
     meta: { class: { th: 'w-20 text-right', td: 'text-right' } },
     cell: ({ row }) =>
       h(UButton, {
         size: 'xs',
         variant: 'ghost',
         icon: 'i-lucide-pen-line',
-        title: t('common.edit'),
-        onClick: () => navigateTo(localeRoute({ name: 'admin-products-edit', params: { id: row.original.id } })),
+        title: 'Editar',
+        to: getEditProductTo(row.original.id),
       }),
   },
 ];
 
-const tableData = computed(() =>
-  (items.value ?? []).map(p => ({
-    ...p,
-    brandName: p.brand?.name || '—',
-    variantsCount: p.variants?.length || 0,
+const productRows = computed<ProductTableRow[]>(() =>
+  products.value.map(product => ({
+    ...product,
+    brandName: product.brand?.name || '—',
+    variantsCount: product.variants?.length || 0,
   })),
 );
 
-const fmtPrice = (value?: number | null) => value ? `${new Intl.NumberFormat('pt-AO').format(value)} AOA` : '—';
+const formatPrice = (price?: number | null) => price ? `${new Intl.NumberFormat('pt-AO').format(price)} AOA` : '—';
 
-
-const paginationTo = (page: number)  => ({ query: { page } });
-</script>
-
-<i18n lang="json">
-{
-  "en": {
-    "products": {
-      "title": "Products",
-      "description": "Browse, search and preview product variants",
-      "searchPlaceholder": "Search by title or slug...",
-      "preview": "Preview",
-      "noData": "No products found",
-      "variantsTitle": "Variants",
-      "sizes": "Sizes",
-      "images": "Images",
-      "table": {
-        "id": "ID",
-        "title": "Title",
-        "brand": "Brand",
-        "slug": "Slug",
-        "active": "Active",
-        "variants": "Variants"
-      }
-    },
-    "common": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "actions": "Actions",
-      "edit": "Edit"
-    }
+const getPaginationTo = (pageNumber: number) => ({
+  query: {
+    ...route.query,
+    page: pageNumber === 1 ? undefined : pageNumber,
   },
-  "pt": {
-    "products": {
-      "title": "Produtos",
-      "description": "Navegue, pesquise e visualize variantes",
-      "searchPlaceholder": "Pesquisar por título ou slug...",
-      "preview": "Pré-visualizar",
-      "noData": "Nenhum produto encontrado",
-      "variantsTitle": "Variantes",
-      "sizes": "Tamanhos",
-      "images": "Imagens",
-      "table": {
-        "id": "ID",
-        "title": "Título",
-        "brand": "Marca",
-        "slug": "Slug",
-        "active": "Ativo",
-        "variants": "Variantes"
-      }
-    },
-    "common": {
-      "active": "Ativo",
-      "inactive": "Inativo",
-      "actions": "Ações",
-      "edit": "Editar"
-    }
-  }
-}
-</i18n>
+});
+</script>
 
 <template>
   <UPage>
     <UPageHeader
-      :title="t('products.title')"
-      :description="t('products.description')"
+      :title="title"
+      :description="description"
     >
       <template #links>
         <div class="flex items-center gap-2">
           <UInput
-            v-model="search"
-            :placeholder="t('products.searchPlaceholder')"
+            v-model="searchQuery"
+            placeholder="Pesquisar por título ou slug..."
             icon="i-lucide-search"
             class="w-64"
           />
 
           <UButton
+            :to="{ name: 'admin-products-new' }"
             color="primary"
             icon="i-lucide-plus"
-            @click="navigateTo(localeRoute({ name: 'admin-products-new' }))"
           >
             New
           </UButton>
@@ -245,9 +236,9 @@ const paginationTo = (page: number)  => ({ query: { page } });
     <UPageBody>
       <UCard>
         <UTable
-          v-model:expanded="expanded"
-          :data="tableData"
-          :columns="columns"
+          v-model:expanded="expandedRows"
+          :data="productRows"
+          :columns="productColumns"
           :ui="{ tr: 'data-[expanded=true]:bg-elevated/50' }"
         >
           <template #expanded="{ row }">
@@ -268,7 +259,7 @@ const paginationTo = (page: number)  => ({ query: { page } });
                   color="error"
                   variant="subtle"
                 >
-                  {{ t('common.inactive') }}
+                  Inativo
                 </UBadge>
               </div>
 
@@ -283,14 +274,14 @@ const paginationTo = (page: number)  => ({ query: { page } });
                 >
                   <div class="shrink-0">
                     <p class="text-[11px] text-gray-500 mb-1">
-                      {{ t('products.images') }}
+                      Imagens
                     </p>
 
                     <div class="flex gap-2 overflow-x-auto max-w-full">
                       <NuxtImg
-                        v-for="(img, i) in variant.images || []"
-                        :key="i"
-                        :src="img.url"
+                        v-for="(variantImage, variantImageIndex) in variant.images || []"
+                        :key="variantImageIndex"
+                        :src="variantImage.url"
                         class="w-16 h-20 object-cover rounded border border-gray-200"
                       />
 
@@ -312,25 +303,26 @@ const paginationTo = (page: number)  => ({ query: { page } });
                         variant="subtle"
                         color="error"
                       >
-                        {{ t('common.inactive') }}
+                        Inativo
                       </UBadge>
                     </div>
 
-                    <div class="text-sm text-gray-500 mb-2">
-                      {{ fmtPrice(variant.price) }}
-                    </div>
+                    <div
+                      class="text-sm text-gray-500 mb-2"
+                      v-text="formatPrice(variant.price)"
+                    />
 
                     <p class="text-[11px] text-gray-500 mb-1">
-                      {{ t('products.sizes') }}
+                      Tamanhos
                     </p>
 
                     <div class="flex flex-wrap gap-1.5">
                       <UBadge
-                        v-for="s in variant.sizes || []"
-                        :key="s.id"
+                        v-for="variantSize in variant.sizes || []"
+                        :key="variantSize.id"
                         variant="soft"
                       >
-                        {{ s.size }} · qty: {{ s.stock ?? 0 }}
+                        {{ variantSize.size }} · qty: {{ variantSize.stock ?? 0 }}
                       </UBadge>
 
                       <span
@@ -346,7 +338,7 @@ const paginationTo = (page: number)  => ({ query: { page } });
                 v-else
                 class="text-sm text-gray-500"
               >
-                {{ t('products.noData') }}
+                Nenhum produto encontrado
               </p>
             </div>
           </template>
@@ -355,13 +347,12 @@ const paginationTo = (page: number)  => ({ query: { page } });
 
       <div class="mt-6 flex justify-center">
         <UPagination
-          v-model:page="page"
-          :itemsPerPage="limit"
-          :total="total"
-          :to="paginationTo"
+          v-model:page="currentPage"
+          :itemsPerPage="PRODUCTS_PER_PAGE"
+          :total="totalProducts"
+          :to="getPaginationTo"
         />
       </div>
     </UPageBody>
   </UPage>
 </template>
-

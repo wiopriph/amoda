@@ -2,54 +2,189 @@
 import type { TableColumn } from '@nuxt/ui';
 
 
-definePageMeta({ name: 'admin-brands', layout: 'admin', middleware: 'admin' });
+definePageMeta({
+  name: 'admin-brands',
+  layout: 'admin',
+  middleware: 'admin',
+});
 
-const { t } = useI18n();
 
-useHead(() => ({
-  title: `${t('admin.brands.title')} | Amoda Admin`,
+const title = 'Marcas';
+const description = 'Gerir marcas de produtos';
+
+useHead({
+  title,
   meta: [
-    { name: 'description', content: t('admin.brands.description') },
-    { property: 'og:title', content: `${t('admin.brands.title')} | Amoda Admin` },
-    { property: 'og:description', content: t('admin.brands.description') },
-    { property: 'twitter:title', content: `${t('admin.brands.title')} | Amoda Admin` },
-    { property: 'twitter:description', content: t('admin.brands.description') },
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
     { name: 'robots', content: 'noindex, nofollow' },
   ],
-}));
+});
 
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
 
 type Brand = {
-  id: string
+  id: number | string
   name: string
   slug?: string
   active: boolean
 };
 
-const { data: brands, refresh } = await useFetch('/api/admin/brands/list');
+type BrandForm = {
+  id: number | string | null
+  name: string
+  active: boolean
+};
+
+const { data: brandList, refresh: refreshBrandList } = await useFetch<Brand[]>('/api/admin/brands/list');
+
+const selectedBrand = ref<Brand | null>(null);
+const isBrandModalOpen = ref(false);
+const isSavingBrand = ref(false);
+
+const brandForm = reactive<BrandForm>({
+  id: null,
+  name: '',
+  active: true,
+});
+
+const brandModalTitle = computed(() => brandForm.id ? 'Editar marca' : 'Adicionar marca');
+const brandSubmitLabel = computed(() => brandForm.id ? 'Guardar alterações' : 'Adicionar');
+
+const resetBrandForm = () => {
+  Object.assign(brandForm, {
+    id: null,
+    name: '',
+    active: true,
+  });
+};
+
+const openCreateBrandModal = () => {
+  resetBrandForm();
+  selectedBrand.value = null;
+  isBrandModalOpen.value = true;
+};
+
+const openEditBrandModal = (brand: Brand) => {
+  Object.assign(brandForm, {
+    id: brand.id,
+    name: brand.name,
+    active: brand.active,
+  });
+
+  selectedBrand.value = brand;
+  isBrandModalOpen.value = true;
+};
+
+const getSaveBrandErrorText = (error: any) => {
+  const message = error?.data?.statusMessage || error?.message || '';
+
+  return message.includes('Slug already exists') ?
+    'Já existe uma marca com este nome.' :
+    'Falha ao guardar marca. Tente novamente.';
+};
+
+
+const toast = useToast();
+
+const saveBrand = async () => {
+  if (!brandForm.name.trim()) {
+    return;
+  }
+
+  isSavingBrand.value = true;
+
+  try {
+    const isEditing = !!brandForm.id;
+
+    await $fetch('/api/admin/brands/save', {
+      method: 'POST',
+      body: {
+        id: brandForm.id,
+        name: brandForm.name,
+        active: brandForm.active,
+      },
+    });
+
+    toast.add({
+      title: 'Sucesso',
+      description: isEditing ? 'Marca atualizada com sucesso.' : 'Marca criada com sucesso.',
+      color: 'success',
+    });
+
+    isBrandModalOpen.value = false;
+    await refreshBrandList();
+  } catch (error: any) {
+    toast.add({
+      title: 'Erro',
+      description: getSaveBrandErrorText(error),
+      color: 'error',
+    });
+  } finally {
+    isSavingBrand.value = false;
+  }
+};
+
+const isDeleteBrandModalOpen = ref(false);
+const deleteBrandDescription = computed(() => `Tem a certeza que deseja eliminar ${selectedBrand.value?.name || ''}?`);
+
+const openDeleteBrandModal = (brand: Brand) => {
+  selectedBrand.value = brand;
+  isDeleteBrandModalOpen.value = true;
+};
+
+const deleteBrand = async () => {
+  if (!selectedBrand.value) {
+    return;
+  }
+
+  try {
+    await $fetch('/api/admin/brands/remove', {
+      method: 'POST',
+      body: { id: selectedBrand.value.id },
+    });
+
+    toast.add({
+      title: 'Sucesso',
+      description: 'Marca eliminada com sucesso.',
+      color: 'success',
+    });
+  } catch {
+    toast.add({
+      title: 'Erro',
+      description: 'Falha ao eliminar marca. Tente novamente.',
+      color: 'error',
+    });
+  } finally {
+    isDeleteBrandModalOpen.value = false;
+    await refreshBrandList();
+  }
+};
 
 const columns: TableColumn<Brand>[] = [
-  { accessorKey: 'id', header: t('admin.brands.id') },
-  { accessorKey: 'name', header: t('admin.brands.name') },
-  { accessorKey: 'slug', header: t('admin.brands.slug') },
+  { accessorKey: 'id', header: 'ID' },
+  { accessorKey: 'name', header: 'Nome' },
+  { accessorKey: 'slug', header: 'Slug' },
   {
     accessorKey: 'active',
-    header: t('admin.brands.active'),
+    header: 'Ativa',
     cell: ({ row }) => {
-      const value = row.getValue('active');
+      const isActive = Boolean(row.getValue('active'));
 
       return h(
         UBadge,
-        { class: 'capitalize', variant: 'subtle', color: value ? 'success' : 'error' },
-        () => (value ? t('common.active') : t('common.inactive')),
+        { class: 'capitalize', variant: 'subtle', color: isActive ? 'success' : 'error' },
+        () => (isActive ? 'Ativa' : 'Inativa'),
       );
     },
   },
   {
     accessorKey: 'actions',
-    header: t('common.actions'),
+    header: 'Ações',
     meta: { class: { th: 'w-24 text-right', td: 'text-right' } },
     cell: ({ row }) => {
       const brand = row.original as Brand;
@@ -59,205 +194,36 @@ const columns: TableColumn<Brand>[] = [
           size: 'xs',
           variant: 'ghost',
           icon: 'i-lucide-pen-line',
-          title: t('common.edit'),
-          onClick: () => openEditModal(brand),
+          title: 'Editar',
+          onClick: () => openEditBrandModal(brand),
         }),
         h(UButton, {
           size: 'xs',
           variant: 'ghost',
           color: 'error',
           icon: 'i-lucide-trash-2',
-          title: t('common.delete'),
-          onClick: () => openRemoveModal(brand),
+          title: 'Eliminar',
+          onClick: () => openDeleteBrandModal(brand),
         }),
       ]);
     },
   },
 ];
-
-const selectedBrand = ref<Brand | null>(null);
-
-const brandForm = reactive({
-  id: null as number | null,
-  name: '',
-  active: true,
-});
-
-const isSaving = ref(false);
-const isModalOpen = ref(false);
-const isRemoveModalOpen = ref(false);
-
-const openCreateModal = () => {
-  Object.assign(brandForm, { id: null, name: '', active: true });
-  selectedBrand.value = null;
-  isModalOpen.value = true;
-};
-
-const openEditModal = (brand: Brand) => {
-  Object.assign(brandForm, brand);
-  selectedBrand.value = brand;
-  isModalOpen.value = true;
-};
-
-const toast = useToast();
-
-const save = async () => {
-  if (!brandForm.name.trim()) {
-    return;
-  }
-
-  isSaving.value = true;
-
-  try {
-    await $fetch('/api/admin/brands/save', {
-      method: 'POST',
-      body: { id: brandForm.id, name: brandForm.name, active: brandForm.active },
-    });
-
-    toast.add({
-      title: t('admin.brands.success'),
-      description: brandForm.id ? t('admin.brands.updated') : t('admin.brands.created'),
-      color: 'success',
-    });
-
-    isModalOpen.value = false;
-    await refresh();
-  } catch (error: any) {
-    const message = error?.data?.statusMessage || error?.message || '';
-
-    let text = t('admin.brands.errorDefault');
-
-    if (message.includes('Slug already exists')) {
-      text = t('admin.brands.errorSlug');
-    }
-
-    toast.add({ title: t('admin.brands.error'), description: text, color: 'error' });
-  } finally {
-    isSaving.value = false;
-  }
-};
-
-const openRemoveModal = (brand: Brand) => {
-  selectedBrand.value = brand;
-  isRemoveModalOpen.value = true;
-};
-
-const remove = async () => {
-  if (!selectedBrand.value) {
-    return;
-  }
-
-  try {
-    await $fetch('/api/admin/brands/remove', { method: 'POST', body: { id: selectedBrand.value.id } });
-
-    toast.add({
-      title: t('admin.brands.success'),
-      description: t('admin.brands.deleted'),
-      color: 'success',
-    });
-  } catch {
-    toast.add({
-      title: t('admin.brands.error'),
-      description: t('admin.brands.errorDefault'),
-      color: 'error',
-    });
-  } finally {
-    isRemoveModalOpen.value = false;
-    await refresh();
-  }
-};
 </script>
-
-<i18n lang="json">
-{
-  "en": {
-    "admin": {
-      "brands": {
-        "title": "Brands",
-        "description": "Manage your product brands",
-        "add": "Add brand",
-        "edit": "Edit brand",
-        "delete": "Delete brand?",
-        "id": "ID",
-        "name": "Name",
-        "slug": "Slug",
-        "active": "Active",
-        "namePlaceholder": "e.g. Zara, Nike",
-        "activeLabel": "Brand is active",
-        "slugInfo": "Slug will be generated automatically based on brand name.",
-        "confirmDelete": "Are you sure you want to delete {name}?",
-        "success": "Success",
-        "created": "Brand created successfully.",
-        "updated": "Brand updated successfully.",
-        "deleted": "Brand deleted successfully.",
-        "error": "Error",
-        "errorSlug": "A brand with this name already exists.",
-        "errorDefault": "Failed to save brand. Please try again."
-      }
-    },
-    "common": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "actions": "Actions",
-      "cancel": "Cancel",
-      "save": "Save changes",
-      "add": "Add",
-      "delete": "Delete",
-      "edit": "Edit"
-    }
-  },
-  "pt": {
-    "admin": {
-      "brands": {
-        "title": "Marcas",
-        "description": "Gerir marcas de produtos",
-        "add": "Adicionar marca",
-        "edit": "Editar marca",
-        "delete": "Eliminar marca?",
-        "id": "ID",
-        "name": "Nome",
-        "slug": "Slug",
-        "active": "Ativa",
-        "namePlaceholder": "ex.: Zara, Nike",
-        "activeLabel": "A marca está ativa",
-        "slugInfo": "O slug será gerado automaticamente com base no nome.",
-        "confirmDelete": "Tem a certeza que deseja eliminar {name}?",
-        "success": "Sucesso",
-        "created": "Marca criada com sucesso.",
-        "updated": "Marca atualizada com sucesso.",
-        "deleted": "Marca eliminada com sucesso.",
-        "error": "Erro",
-        "errorSlug": "Já existe uma marca com este nome.",
-        "errorDefault": "Falha ao guardar marca. Tente novamente."
-      }
-    },
-    "common": {
-      "active": "Ativa",
-      "inactive": "Inativa",
-      "actions": "Ações",
-      "cancel": "Cancelar",
-      "save": "Guardar alterações",
-      "add": "Adicionar",
-      "delete": "Eliminar",
-      "edit": "Editar"
-    }
-  }
-}
-</i18n>
 
 <template>
   <UPage>
     <UPageHeader
-      :title="t('admin.brands.title')"
-      :description="t('admin.brands.description')"
+      :title="title"
+      :description="description"
     >
       <template #links>
         <UButton
           icon="i-lucide-plus"
           color="primary"
-          @click="openCreateModal"
+          @click="openCreateBrandModal"
         >
-          {{ t('admin.brands.add') }}
+          Adicionar marca
         </UButton>
       </template>
     </UPageHeader>
@@ -265,56 +231,56 @@ const remove = async () => {
     <UPageBody>
       <UCard>
         <UTable
-          :data="brands"
+          :data="brandList"
           :columns="columns"
-          :loading="!brands"
+          :loading="!brandList"
         />
       </UCard>
     </UPageBody>
 
     <UModal
-      v-model:open="isModalOpen"
-      :title="brandForm.id ? t('admin.brands.edit') : t('admin.brands.add')"
+      v-model:open="isBrandModalOpen"
+      :title="brandModalTitle"
     >
       <template #body>
         <UForm class="space-y-4">
           <UFormField
-            :label="t('admin.brands.name')"
+            label="Nome"
             required
           >
             <UInput
               v-model="brandForm.name"
-              :placeholder="t('admin.brands.namePlaceholder')"
+              placeholder="ex.: Zara, Nike"
             />
           </UFormField>
 
-          <UFormField :label="t('admin.brands.active')">
+          <UFormField label="Ativa">
             <UCheckbox
               v-model="brandForm.active"
-              :label="t('admin.brands.activeLabel')"
+              label="A marca está ativa"
             />
           </UFormField>
 
           <UAlert
             icon="i-lucide-info"
             variant="soft"
-            :description="t('admin.brands.slugInfo')"
+            description="O slug será gerado automaticamente com base no nome."
           />
 
           <div class="flex justify-end gap-3 pt-2">
             <UButton
               variant="ghost"
-              @click="isModalOpen = false"
+              @click="isBrandModalOpen = false"
             >
-              {{ t('common.cancel') }}
+              Cancelar
             </UButton>
 
             <UButton
+              :loading="isSavingBrand"
               color="primary"
-              :loading="isSaving"
-              @click="save"
+              @click="saveBrand"
             >
-              {{ brandForm.id ? t('common.save') : t('common.add') }}
+              {{ brandSubmitLabel }}
             </UButton>
           </div>
         </UForm>
@@ -322,28 +288,26 @@ const remove = async () => {
     </UModal>
 
     <UModal
-      v-model:open="isRemoveModalOpen"
-      :title="t('admin.brands.delete')"
+      v-model:open="isDeleteBrandModalOpen"
+      title="Eliminar marca?"
     >
       <template #body>
         <div class="space-y-4">
-          <p>
-            {{ t('admin.brands.confirmDelete', { name: selectedBrand?.name }) }}
-          </p>
+          <p v-text="deleteBrandDescription" />
 
           <div class="flex justify-end gap-3">
             <UButton
               variant="ghost"
-              @click="isRemoveModalOpen = false"
+              @click="isDeleteBrandModalOpen = false"
             >
-              {{ t('common.cancel') }}
+              Cancelar
             </UButton>
 
             <UButton
               color="error"
-              @click="remove"
+              @click="deleteBrand"
             >
-              {{ t('common.delete') }}
+              Eliminar
             </UButton>
           </div>
         </div>

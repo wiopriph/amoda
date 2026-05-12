@@ -4,6 +4,7 @@ export default defineNuxtRouteMiddleware(() => {
   if (!user.value) {
     return navigateTo({
       path: '/auth',
+      // eslint-disable-next-line camelcase
       query: { redirected_from: useRoute().fullPath },
     });
   }

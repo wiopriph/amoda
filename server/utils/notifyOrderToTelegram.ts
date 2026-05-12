@@ -36,7 +36,7 @@ export async function notifyOrderToTelegram(
     minute: '2-digit',
   });
 
-  const adminUrl = `https://amoda.ao/en/admin/orders/${order.number}`;
+  const adminUrl = `https://amoda.ao/admin/orders/${order.number}`;
 
   const text = [
     '🛍 Новый заказ',

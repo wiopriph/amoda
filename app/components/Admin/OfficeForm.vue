@@ -14,70 +14,81 @@ type OfficePayload = {
   active: boolean;
 };
 
-const props = defineProps<{
-  mode: 'create' | 'edit';
-  initial?: Partial<OfficePayload> | null;
-  submitLabel?: string;
-}>();
+type OfficeFormProps = {
+  mode: 'create' | 'edit'
+  initial?: Partial<OfficePayload> | null
+  submitLabel?: string
+};
+
+const props = defineProps<OfficeFormProps>();
 
 const emit = defineEmits<{
-  (e: 'saved', id: number): void;
+  saved: [officeId: number]
 }>();
 
-const { t } = useI18n();
 const toast = useToast();
 
-/* ---------------- state ---------------- */
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message;
+  }
 
-const form = reactive<OfficePayload>({
-  id: props.initial?.id,
-  slug: props.initial?.slug || '',
-  name: props.initial?.name || '',
-  description: props.initial?.description ?? null,
-  address: props.initial?.address ?? null,
-  locationLat: props.initial?.locationLat ?? null,
-  locationLng: props.initial?.locationLng ?? null,
-  phone: props.initial?.phone ?? null,
-  openingHours: props.initial?.openingHours ?? null,
-  active: props.initial?.active ?? true,
+  if (typeof error === 'object' && error !== null && 'data' in error) {
+    const fetchError = error as { data?: { message?: string }; message?: string };
+
+    return fetchError.data?.message || fetchError.message || String(error);
+  }
+
+  return String(error);
+};
+
+const getInitialOfficeForm = (initial?: Partial<OfficePayload> | null): OfficePayload => ({
+  id: initial?.id,
+  slug: initial?.slug || '',
+  name: initial?.name || '',
+  description: initial?.description ?? null,
+  address: initial?.address ?? null,
+  locationLat: initial?.locationLat ?? null,
+  locationLng: initial?.locationLng ?? null,
+  phone: initial?.phone ?? null,
+  openingHours: initial?.openingHours ?? null,
+  active: initial?.active ?? true,
 });
+
+const officeForm = reactive<OfficePayload>(getInitialOfficeForm(props.initial));
+const submitButtonLabel = computed(() => props.submitLabel || (props.mode === 'create' ? 'Criar' : 'Guardar'));
+const openingHoursText = ref('');
+const openingHoursError = ref('');
+const isSavingOffice = ref(false);
+
+const updateOpeningHoursText = () => {
+  openingHoursError.value = '';
+  openingHoursText.value = officeForm.openingHours ? JSON.stringify(officeForm.openingHours, null, 2) : '';
+};
 
 watch(
   () => props.initial,
-  (val) => {
-    if (!val) {
+  (initial) => {
+    if (!initial) {
       return;
     }
 
-    Object.assign(form, {
-      id: val.id,
-      slug: val.slug || '',
-      name: val.name || '',
-      description: val.description ?? null,
-      address: val.address ?? null,
-      locationLat: val.locationLat ?? null,
-      locationLng: val.locationLng ?? null,
-      phone: val.phone ?? null,
-      openingHours: (val.openingHours as any) ?? null,
-      active: val.active ?? true,
-    });
+    Object.assign(officeForm, getInitialOfficeForm(initial));
 
-    syncOpeningHoursText();
+    updateOpeningHoursText();
   },
   { deep: true },
 );
 
-/* ---------------- helpers ---------------- */
-
-const slugify = (s: string) =>
-  s
+const slugify = (value: string) =>
+  value
     .toLowerCase()
     .trim()
     .replace(/['"]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
-const makeDefaultHours = (): OpeningHours => ({
+const createDefaultOpeningHours = (): OpeningHours => ({
   mon: [['09:00', '18:00']],
   tue: [['09:00', '18:00']],
   wed: [['09:00', '18:00']],
@@ -87,315 +98,209 @@ const makeDefaultHours = (): OpeningHours => ({
   sun: [],
 });
 
-/* ---------------- opening hours ---------------- */
+const isOpeningHours = (value: unknown): value is OpeningHours => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
 
-const openingHoursText = ref('');
-const openingHoursError = ref('');
+  for (const ranges of Object.values(value)) {
+    if (!Array.isArray(ranges)) {
+      return false;
+    }
 
-const syncOpeningHoursText = () => {
-  openingHoursError.value = '';
+    for (const range of ranges) {
+      if (!Array.isArray(range) || range.length !== 2) {
+        return false;
+      }
+    }
+  }
 
-  openingHoursText.value = form.openingHours ?
-    JSON.stringify(form.openingHours, null, 2) :
-    '';
+  return true;
 };
 
-const parseOpeningHours = (): OpeningHours | null => {
-  const raw = openingHoursText.value.trim();
+const parseOpeningHoursText = (): OpeningHours | null => {
+  const openingHoursJson = openingHoursText.value.trim();
 
-  if (!raw) {
+  if (!openingHoursJson) {
     return null;
   }
 
   try {
-    const parsed = JSON.parse(raw);
+    const parsedOpeningHours = JSON.parse(openingHoursJson);
 
-    if (typeof parsed !== 'object' || parsed === null) {
-      throw new Error('Invalid JSON');
+    if (!isOpeningHours(parsedOpeningHours)) {
+      throw new Error('Invalid opening hours');
     }
 
-    for (const ranges of Object.values(parsed)) {
-      if (!Array.isArray(ranges)) {
-        throw new Error('Invalid ranges');
-      }
-
-      for (const r of ranges as any[]) {
-        if (!Array.isArray(r) || r.length !== 2) {
-          throw new Error('Invalid time range');
-        }
-      }
-    }
-
-    return parsed as OpeningHours;
-  } catch (e: any) {
-    openingHoursError.value = e?.message || 'Invalid JSON';
+    return parsedOpeningHours;
+  } catch (error: unknown) {
+    openingHoursError.value = getErrorMessage(error) || 'Invalid JSON';
 
     return null;
   }
 };
 
-onMounted(syncOpeningHoursText);
+onMounted(updateOpeningHoursText);
 
-/* ---------------- submit ---------------- */
-
-const saving = ref(false);
-
-const submit = async () => {
+const saveOffice = async () => {
   openingHoursError.value = '';
 
-  if (!form.slug.trim()) {
-    toast.add({ title: t('officeForm.errors.slugRequired'), color: 'error' });
+  if (!officeForm.slug.trim()) {
+    toast.add({ title: 'Slug é obrigatório', color: 'error' });
 
     return;
   }
 
-  if (!form.name.trim()) {
-    toast.add({ title: t('officeForm.errors.nameRequired'), color: 'error' });
+  if (!officeForm.name.trim()) {
+    toast.add({ title: 'Nome é obrigatório', color: 'error' });
 
     return;
   }
 
-  const parsedHours = parseOpeningHours();
+  const parsedOpeningHours = parseOpeningHoursText();
 
-  if (openingHoursText.value.trim() && !parsedHours) {
-    toast.add({ title: t('officeForm.errors.openingHoursInvalid'), color: 'error' });
+  if (openingHoursText.value.trim() && !parsedOpeningHours) {
+    toast.add({ title: 'JSON inválido', color: 'error' });
 
     return;
   }
 
-  saving.value = true;
+  isSavingOffice.value = true;
 
   try {
-    const payload = {
-      slug: form.slug.trim(),
-      name: form.name.trim(),
-      description: form.description,
-      address: form.address,
-      locationLat: form.locationLat,
-      locationLng: form.locationLng,
-      phone: form.phone,
-      openingHours: parsedHours,
-      active: form.active,
+    const officePayload = {
+      slug: officeForm.slug.trim(),
+      name: officeForm.name.trim(),
+      description: officeForm.description,
+      address: officeForm.address,
+      locationLat: officeForm.locationLat,
+      locationLng: officeForm.locationLng,
+      phone: officeForm.phone,
+      openingHours: parsedOpeningHours,
+      active: officeForm.active,
     };
 
     if (props.mode === 'create') {
-      const res = await $fetch<{ id: number }>('/api/admin/offices/create', {
+      const createdOffice = await $fetch<{ id: number }>('/api/admin/offices/create', {
         method: 'POST',
-        body: payload,
+        body: officePayload,
       });
 
-      toast.add({ title: t('officeForm.toasts.created') });
-      emit('saved', res.id);
+      toast.add({ title: 'Ponto criado' });
+      emit('saved', createdOffice.id);
 
       return;
     }
 
-    if (!form.id) {
-      toast.add({ title: t('officeForm.errors.idRequired'), color: 'error' });
+    if (!officeForm.id) {
+      toast.add({ title: 'ID é obrigatório', color: 'error' });
 
       return;
     }
 
-    const res = await $fetch<{ id: number }>('/api/admin/offices/update', {
+    const updatedOffice = await $fetch<{ id: number }>('/api/admin/offices/update', {
       method: 'PATCH',
-      body: { id: form.id, ...payload },
+      body: { id: officeForm.id, ...officePayload },
     });
 
-    toast.add({ title: t('officeForm.toasts.saved') });
-    emit('saved', res.id);
-  } catch (e: any) {
+    toast.add({ title: 'Guardado' });
+    emit('saved', updatedOffice.id);
+  } catch (error: unknown) {
     toast.add({
-      title: t('officeForm.toasts.saveErrorTitle'),
-      description: e?.data?.message || e?.message || String(e),
+      title: 'Erro ao guardar',
+      description: getErrorMessage(error),
       color: 'error',
     });
   } finally {
-    saving.value = false;
+    isSavingOffice.value = false;
   }
 };
 
-const autofillSlug = () => {
-  if (!form.slug.trim()) {
-    form.slug = slugify(form.name);
+const fillSlugFromName = () => {
+  if (!officeForm.slug.trim()) {
+    officeForm.slug = slugify(officeForm.name);
   }
 };
 
-const setDefaultHours = () => {
-  form.openingHours = makeDefaultHours();
-  syncOpeningHoursText();
+const applyDefaultOpeningHours = () => {
+  officeForm.openingHours = createDefaultOpeningHours();
+  updateOpeningHoursText();
 };
 
-const prettifyHours = () => {
-  const parsed = parseOpeningHours();
+const formatOpeningHoursJson = () => {
+  const parsedOpeningHours = parseOpeningHoursText();
 
-  if (parsed) {
-    openingHoursText.value = JSON.stringify(parsed, null, 2);
+  if (parsedOpeningHours) {
+    openingHoursText.value = JSON.stringify(parsedOpeningHours, null, 2);
   }
 };
 </script>
-
-<i18n lang="json">
-{
-  "en": {
-    "officeForm": {
-      "labels": {
-        "name": "Name",
-        "slug": "Slug",
-        "description": "Description",
-        "address": "Address",
-        "phone": "Phone",
-        "active": "Active",
-        "latitude": "Latitude",
-        "longitude": "Longitude",
-        "openingHours": "Opening hours (JSON)"
-      },
-      "help": {
-        "slug": "Lowercase latin + dashes. Auto-generated from name.",
-        "openingHours": "Empty = null. day -> [[\"HH:mm\",\"HH:mm\"], ...]"
-      },
-      "actions": {
-        "default": "Default",
-        "prettify": "Prettify",
-        "create": "Create",
-        "save": "Save"
-      },
-      "placeholders": {
-        "name": "Amoda Viana",
-        "slug": "amoda-viana",
-        "description": "Optional",
-        "address": "Rua ...",
-        "phone": "+244...",
-        "openingHours": "openingHours",
-        "lat": "-8.83",
-        "lng": "13.24"
-      },
-      "errors": {
-        "slugRequired": "Slug is required",
-        "nameRequired": "Name is required",
-        "idRequired": "Office id is required",
-        "openingHoursInvalid": "Invalid opening hours JSON"
-      },
-      "toasts": {
-        "created": "Office created",
-        "saved": "Saved",
-        "saveErrorTitle": "Save error"
-      }
-    }
-  },
-  "pt": {
-    "officeForm": {
-      "labels": {
-        "name": "Nome",
-        "slug": "Slug",
-        "description": "Descrição",
-        "address": "Endereço",
-        "phone": "Telefone",
-        "active": "Ativo",
-        "latitude": "Latitude",
-        "longitude": "Longitude",
-        "openingHours": "Horário (JSON)"
-      },
-      "help": {
-        "slug": "Minúsculas + hífen. Gerado a partir do nome.",
-        "openingHours": "Vazio = null. dia -> [[\"HH:mm\",\"HH:mm\"], ...]"
-      },
-      "actions": {
-        "default": "Padrão",
-        "prettify": "Formatar",
-        "create": "Criar",
-        "save": "Guardar"
-      },
-      "placeholders": {
-        "name": "Amoda Viana",
-        "slug": "amoda-viana",
-        "description": "Opcional",
-        "address": "Rua ...",
-        "phone": "+244...",
-        "openingHours": "openingHours",
-        "lat": "-8.83",
-        "lng": "13.24"
-      },
-      "errors": {
-        "slugRequired": "Slug é obrigatório",
-        "nameRequired": "Nome é obrigatório",
-        "idRequired": "ID é obrigatório",
-        "openingHoursInvalid": "JSON inválido"
-      },
-      "toasts": {
-        "created": "Ponto criado",
-        "saved": "Guardado",
-        "saveErrorTitle": "Erro ao guardar"
-      }
-    }
-  }
-}
-</i18n>
 
 <template>
   <UCard>
     <div class="grid gap-5">
       <UFormField
-        :label="t('officeForm.labels.name')"
+        label="Nome"
         class="w-full"
         required
       >
         <UInput
-          v-model="form.name"
-          :placeholder="t('officeForm.placeholders.name')"
+          v-model="officeForm.name"
+          placeholder="Amoda Viana"
           class="w-full"
-          @blur="autofillSlug"
+          @blur="fillSlugFromName"
         />
       </UFormField>
 
       <UFormField
-        :label="t('officeForm.labels.slug')"
-        :help="t('officeForm.help.slug')"
+        label="Slug"
+        help="Minúsculas + hífen. Gerado a partir do nome."
         required
       >
         <UInput
-          v-model="form.slug"
-          :placeholder="t('officeForm.placeholders.slug')"
+          v-model="officeForm.slug"
+          placeholder="amoda-viana"
           class="w-full"
         />
       </UFormField>
 
-      <UFormField :label="t('officeForm.labels.description')">
+      <UFormField label="Descrição">
         <UTextarea
-          v-model="form.description"
+          v-model="officeForm.description"
           :rows="5"
           class="w-full"
           resize
         />
       </UFormField>
 
-      <UFormField :label="t('officeForm.labels.address')">
+      <UFormField label="Endereço">
         <UTextarea
-          v-model="form.address"
+          v-model="officeForm.address"
           :rows="5"
           class="w-full"
           resize
         />
       </UFormField>
 
-      <UFormField :label="t('officeForm.labels.phone')">
+      <UFormField label="Telefone">
         <UInput
-          v-model="form.phone"
-          :placeholder="t('officeForm.placeholders.phone')"
+          v-model="officeForm.phone"
+          placeholder="+244..."
           class="w-full"
         />
       </UFormField>
 
-      <UFormField :label="t('officeForm.labels.latitude')">
+      <UFormField label="Latitude">
         <UInput
-          v-model.number="form.locationLat"
+          v-model.number="officeForm.locationLat"
           type="number"
           class="w-full"
         />
       </UFormField>
 
-      <UFormField :label="t('officeForm.labels.longitude')">
+      <UFormField label="Longitude">
         <UInput
-          v-model.number="form.locationLng"
+          v-model.number="officeForm.locationLng"
           type="number"
           class="w-full"
         />
@@ -405,11 +310,11 @@ const prettifyHours = () => {
         <div class="flex justify-between">
           <div>
             <div class="text-sm font-medium">
-              {{ t('officeForm.labels.openingHours') }}
+              Horário (JSON)
             </div>
 
             <div class="text-xs text-gray-500">
-              {{ t('officeForm.help.openingHours') }}
+              Vazio = null. dia -&gt; [["HH:mm","HH:mm"], ...]
             </div>
           </div>
 
@@ -417,17 +322,17 @@ const prettifyHours = () => {
             <UButton
               size="xs"
               variant="soft"
-              @click="setDefaultHours"
+              @click="applyDefaultOpeningHours"
             >
-              {{ t('officeForm.actions.default') }}
+              Padrão
             </UButton>
 
             <UButton
               size="xs"
               variant="soft"
-              @click="prettifyHours"
+              @click="formatOpeningHoursJson"
             >
-              {{ t('officeForm.actions.prettify') }}
+              Formatar
             </UButton>
           </div>
         </div>
@@ -441,17 +346,17 @@ const prettifyHours = () => {
 
         <UAlert
           v-if="openingHoursError"
+          :description="openingHoursError"
           color="error"
           variant="soft"
           icon="i-heroicons-exclamation-triangle"
-          :description="openingHoursError"
         />
       </div>
 
       <UFormField>
         <UCheckbox
-          v-model="form.active"
-          :label="t('officeForm.labels.active')"
+          v-model="officeForm.active"
+          label="Ativo"
           class="w-full"
         />
       </UFormField>
@@ -459,14 +364,12 @@ const prettifyHours = () => {
 
     <div class="mt-6 flex justify-end">
       <UButton
+        :loading="isSavingOffice"
         color="primary"
         icon="i-lucide-save"
-        :loading="saving"
-        @click="submit"
+        @click="saveOffice"
       >
-        {{ submitLabel || (mode === 'create'
-          ? t('officeForm.actions.create')
-          : t('officeForm.actions.save')) }}
+        {{ submitButtonLabel }}
       </UButton>
     </div>
   </UCard>

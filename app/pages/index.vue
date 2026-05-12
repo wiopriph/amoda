@@ -5,51 +5,50 @@ import { makeGa4Item } from '~/utils/ga4';
 
 definePageMeta({ name: 'index' });
 
-const { t, tm, rt } = useI18n();
-const localeRoute = useLocaleRoute();
-const route = useRoute();
+const title = 'Amoda - Moda feminina em Luanda ao alcance de todos';
+const description = 'Escolha moda feminina online em Luanda, selecione sem pagar, experimente com calma e leve apenas as peças que combinam consigo.';
 
 useHead({
-  title: t('home.title'),
-  meta: [{ name: 'description', content: t('home.desc') }],
+  title,
+  meta: [
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { name: 'description', content: description },
+  ],
 });
 
-const { data: hero } = await useFetch('/api/home/hero');
+const route = useRoute();
 
-const { data, error } = await useFetch('/api/catalog/list', {
+const { data: heroContent } = await useFetch('/api/home/hero');
+const { data: catalogResponse, error: catalogError } = await useFetch('/api/catalog/list', {
   query: { limit: 10, sort: 'new' },
   watch: [() => route.fullPath],
 });
 
-const items = computed(() => data.value?.items || []);
+const products = computed(() => catalogResponse.value?.items || []);
 
-const WOMEN_SLUG = 'mulheres';
-
-const startShoppingTo = computed(() =>
-  localeRoute({ name: 'category-slug', params: { slug: WOMEN_SLUG } }),
-);
 
 const { trackViewItemList, trackSelectItem } = useAnalyticsEvent();
 
-const mapProductToGa4Item = (p: any, index?: number) => {
-  const variantId = Number(p.default_variant_id);
-  const sizeId = Number(p.default_size_id);
+const mapProductToGa4Item = (product: any, index?: number) => {
+  const variantId = Number(product.default_variant_id);
+  const sizeId = Number(product.default_size_id);
 
   if (!variantId || !sizeId) {
     return null;
   }
 
   return makeGa4Item({
-    productId: p.id,
-    name: p.title,
-    brand: p.brand_name ?? undefined,
-    price: p.price ?? 0,
+    productId: product.id,
+    name: product.title,
+    brand: product.brand_name ?? undefined,
+    price: product.price ?? 0,
     quantity: 1,
     variantId,
     sizeId,
-    variantLabel: p.default_variant_color ?? undefined,
-    sizeLabel: p.default_size_label ?? undefined,
-    categoryName: p.primary_category_id ? String(p.primary_category_id) : undefined,
+    variantLabel: product.default_variant_color ?? undefined,
+    sizeLabel: product.default_size_label ?? undefined,
+    categoryName: product.primary_category_id ? String(product.primary_category_id) : undefined,
     index,
   });
 };
@@ -58,14 +57,14 @@ if (import.meta.client) {
   watch(
     () => route.fullPath,
     () => {
-      const ga4Items = items.value
-        .map((p: any, i: number) => mapProductToGa4Item(p, i + 1))
+      const analyticsItems = products.value
+        .map((product: any, productIndex: number) => mapProductToGa4Item(product, productIndex + 1))
         .filter(Boolean);
 
       trackViewItemList({
         listId: 'home_new',
         listName: 'Home new arrivals',
-        items: ga4Items as any,
+        items: analyticsItems as any,
       });
     },
     { immediate: true },
@@ -73,197 +72,92 @@ if (import.meta.client) {
 }
 
 const sendSelectProductEvent = (product: any) => {
-  const item = mapProductToGa4Item(product);
+  const analyticsItem = mapProductToGa4Item(product);
 
-  if (!item) {
+  if (!analyticsItem) {
     return;
   }
 
   trackSelectItem({
     listId: 'home_new',
     listName: 'Home new arrivals',
-    items: [item],
+    items: [analyticsItem],
   });
 };
 
-const steps = computed(() =>
-  tm('home.how.steps').map((s: any) => ({
-    icon: rt(s.icon),
-    title: rt(s.title),
-    description: rt(s.desc),
-  })),
-);
+const shoppingSteps = [
+  {
+    icon: 'i-lucide-shopping-bag',
+    title: 'Escolha o look',
+    description: 'Veja os produtos no site e adicione ao pedido as peças que quer experimentar.',
+  },
+  {
+    icon: 'i-lucide-message-circle',
+    title: 'Escolha sem pagar',
+    description: 'Envie o pedido com seu nome e WhatsApp. Não precisa pagar online.',
+  },
+  {
+    icon: 'i-lucide-shirt',
+    title: 'Experimente e decida',
+    description: 'Veja as peças ao vivo, experimente e pague apenas pelo que gostar.',
+  },
+];
 
-const trustItems = computed(() =>
-  tm('home.trust.items').map((item: any) => ({
-    icon: rt(item.icon),
-    title: rt(item.title),
-    desc: rt(item.desc),
-  })),
-);
+const benefits = [
+  {
+    icon: 'i-lucide-wallet',
+    title: 'Sem pagamento online',
+    description: 'Você seleciona primeiro e paga só quando decidir levar.',
+  },
+  {
+    icon: 'i-lucide-shield-check',
+    title: 'Prova antes de comprar',
+    description: 'Veja tamanho, tecido e caimento antes de finalizar.',
+  },
+  {
+    icon: 'i-simple-icons-whatsapp',
+    title: 'Atendimento no WhatsApp',
+    description: 'A nossa equipa ajuda com escolha, tamanho e ponto de experimentação.',
+  },
+];
 
-const seoParagraphs = computed(() => tm('home.seo.text') as string[]);
+const seoDescriptionParagraphs = [
+  'A Amoda é uma loja online de roupa feminina em Angola feita para quem quer comprar com mais segurança.',
+  'Você escolhe as peças online, seleciona sem pagamento antecipado e experimenta antes de decidir.',
+  'Se gostar, leva e paga. Se não gostar, não precisa comprar.',
+] as const;
 
 const { makeWhatsappHref } = useWhatsappLink();
-const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
-</script>
+const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda para escolher peças na Amoda.');
 
-<i18n lang="json">
-{
-  "pt": {
-    "home": {
-      "title": "Amoda - Moda feminina em Luanda ao alcance de todos",
-      "desc": "Escolha moda feminina online em Luanda, selecione sem pagar, experimente com calma e leve apenas as peças que combinam consigo.",
-      "whatsappAria": "Falar com a Amoda no WhatsApp",
-      "whatsappMessage": "Olá! Preciso de ajuda para escolher peças na Amoda.",
-      "newBadge": "NOVO",
-      "how": {
-        "title": "Como comprar na Amoda",
-        "steps": [
-          {
-            "icon": "i-lucide-shopping-bag",
-            "title": "Escolha o look",
-            "desc": "Veja os produtos no site e adicione ao pedido as peças que quer experimentar."
-          },
-          {
-            "icon": "i-lucide-message-circle",
-            "title": "Escolha sem pagar",
-            "desc": "Envie o pedido com seu nome e WhatsApp. Não precisa pagar online."
-          },
-          {
-            "icon": "i-lucide-shirt",
-            "title": "Experimente e decida",
-            "desc": "Veja as peças ao vivo, experimente e pague apenas pelo que gostar."
-          }
-        ]
-      },
-      "showcase": {
-        "title": "Novidades para experimentar",
-        "desc": "Peças selecionadas para você montar o seu próximo look.",
-        "ctaAll": "Ver todos os produtos",
-        "error": "Erro ao carregar os produtos."
-      },
-      "trust": {
-        "title": "Por que comprar com a Amoda?",
-        "items": [
-          {
-            "icon": "i-lucide-wallet",
-            "title": "Sem pagamento online",
-            "desc": "Você seleciona primeiro e paga só quando decidir levar."
-          },
-          {
-            "icon": "i-lucide-shield-check",
-            "title": "Prova antes de comprar",
-            "desc": "Veja tamanho, tecido e caimento antes de finalizar."
-          },
-          {
-            "icon": "i-simple-icons-whatsapp",
-            "title": "Atendimento no WhatsApp",
-            "desc": "A nossa equipa ajuda com escolha, tamanho e ponto de experimentação."
-          }
-        ]
-      },
-      "seo": {
-        "title": "Loja online de roupa feminina em Luanda",
-        "text": [
-          "A Amoda é uma loja online de roupa feminina em Angola feita para quem quer comprar com mais segurança.",
-          "Você escolhe as peças online, seleciona sem pagamento antecipado e experimenta antes de decidir.",
-          "Se gostar, leva e paga. Se não gostar, não precisa comprar."
-        ]
-      }
-    }
-  },
-  "en": {
-    "home": {
-      "title": "Amoda - Women's fashion in Luanda, easy to shop online",
-      "desc": "Choose women's fashion online in Luanda, select with no payment, try it on at your pace, and keep only the pieces you love.",
-      "whatsappAria": "Chat with Amoda on WhatsApp",
-      "whatsappMessage": "Hello! I need help choosing pieces at Amoda.",
-      "newBadge": "NEW",
-      "how": {
-        "title": "How to buy on Amoda",
-        "steps": [
-          {
-            "icon": "i-lucide-shopping-bag",
-            "title": "Choose your look",
-            "desc": "Browse the website and add the items you want to try."
-          },
-          {
-            "icon": "i-lucide-message-circle",
-            "title": "Select without paying",
-            "desc": "Send your request with your name and WhatsApp. No online payment needed."
-          },
-          {
-            "icon": "i-lucide-shirt",
-            "title": "Try and decide",
-            "desc": "See the items in real life, try them on, and pay only for what you like."
-          }
-        ]
-      },
-      "showcase": {
-        "title": "New arrivals to try",
-        "desc": "Selected pieces to build your next look.",
-        "ctaAll": "View all products",
-        "error": "Failed to load products."
-      },
-      "trust": {
-        "title": "Why buy with Amoda?",
-        "items": [
-          {
-            "icon": "i-lucide-wallet",
-            "title": "No online payment",
-            "desc": "Select first and pay only when you decide to keep it."
-          },
-          {
-            "icon": "i-lucide-shield-check",
-            "title": "Try before buying",
-            "desc": "Check size, fabric and fit before completing the purchase."
-          },
-          {
-            "icon": "i-simple-icons-whatsapp",
-            "title": "WhatsApp support",
-            "desc": "Our team helps with selection, size and try-on point."
-          }
-        ]
-      },
-      "seo": {
-        "title": "Online women’s clothing store in Luanda",
-        "text": [
-          "Amoda is an online women’s clothing store in Angola built for safer shopping.",
-          "Choose items online, select with no advance payment, and try before deciding.",
-          "If you like it, keep it and pay. If you do not like it, no need to buy."
-        ]
-      }
-    }
-  }
-}
-</i18n>
+const startShoppingTo = { name: 'category-slug', params: { slug: 'mulheres' } } as const;
+</script>
 
 <template>
   <UPage>
     <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
       <HomeHero
-        :title="hero?.title ?? undefined"
-        :subtitle="hero?.subtitle ?? undefined"
-        :socialProof="hero?.socialProof ?? undefined"
-        :bullets="hero?.bullets?.length ? hero.bullets : undefined"
-        :ctaPrimary="hero?.ctaPrimary ?? undefined"
-        :whatsappLabel="hero?.whatsappLabel ?? undefined"
-        :tiktokTitle="hero?.tiktokTitle ?? undefined"
-        :tiktokSubtitle="hero?.tiktokSubtitle ?? undefined"
-        :isTiktokLive="hero?.isTiktokLive ?? false"
-        :imageUrl="hero?.imageUrl ?? undefined"
+        :title="heroContent?.title ?? ''"
+        :subtitle="heroContent?.subtitle ?? ''"
+        :socialProof="heroContent?.socialProof ?? ''"
+        :bullets="heroContent?.bullets?.length ? heroContent.bullets : undefined"
+        :ctaPrimary="heroContent?.ctaPrimary ?? ''"
+        :whatsappLabel="heroContent?.whatsappLabel ?? ''"
+        :tiktokTitle="heroContent?.tiktokTitle ?? ''"
+        :tiktokSubtitle="heroContent?.tiktokSubtitle ?? ''"
+        :isTiktokLive="heroContent?.isTiktokLive ?? false"
+        :imageUrl="heroContent?.imageUrl ?? ''"
       />
 
       <section class="mt-6 sm:mt-10">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
-              {{ t('home.showcase.title') }}
+              Novidades para experimentar
             </h2>
 
             <p class="mt-2 text-sm text-muted sm:text-base">
-              {{ t('home.showcase.desc') }}
+              Peças selecionadas para você montar o seu próximo look.
             </p>
           </div>
 
@@ -272,16 +166,16 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
             variant="soft"
             class="hidden sm:inline-flex"
           >
-            {{ t('home.showcase.ctaAll') }}
+            Ver todos os produtos
           </UButton>
         </div>
 
         <UAlert
-          v-if="error"
+          v-if="catalogError"
           class="mt-5"
           color="error"
           variant="soft"
-          :title="t('home.showcase.error')"
+          title="Erro ao carregar os produtos."
         />
 
         <UBlogPosts
@@ -289,12 +183,12 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
           class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
         >
           <UBlogPost
-            v-for="(product, index) in items"
+            v-for="(product, productIndex) in products"
             :key="product.id"
             :title="product.title"
             :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
             :image="product.image || 'placeholder.webp'"
-            :to="localeRoute({ name: 'product-slug', params: { slug: product.slug } })"
+            :to="{ name: 'product-slug', params: { slug: product.slug } }"
             :ui="{
               root: 'group overflow-hidden border border-gray-100 rounded-2xl hover:shadow-md transition',
               header: 'aspect-[4/5] overflow-hidden bg-gray-50',
@@ -308,12 +202,12 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
           >
             <template #badge>
               <UBadge
-                v-if="index < 3"
+                v-if="productIndex < 3"
                 color="primary"
                 variant="solid"
                 class="absolute top-2 left-2"
               >
-                {{ t('home.newBadge') }}
+                NOVO
               </UBadge>
             </template>
           </UBlogPost>
@@ -321,11 +215,11 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
 
         <div class="mt-5 sm:hidden">
           <UButton
-            size="lg"
             :to="startShoppingTo"
+            size="lg"
             class="w-full justify-center"
           >
-            {{ t('home.showcase.ctaAll') }}
+            Ver todos os produtos
           </UButton>
         </div>
       </section>
@@ -335,13 +229,13 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
           <div class="flex flex-col gap-6">
             <div>
               <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
-                {{ t('home.how.title') }}
+                Como comprar na Amoda
               </h2>
             </div>
 
             <div class="grid gap-3 md:grid-cols-3">
               <div
-                v-for="step in steps"
+                v-for="step in shoppingSteps"
                 :key="step.title"
                 class="relative rounded-2xl border border-gray-100 bg-gray-50/60 p-4"
               >
@@ -354,13 +248,15 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
                   </div>
                 </div>
 
-                <h3 class="mt-4 font-bold text-highlighted">
-                  {{ step.title }}
-                </h3>
+                <h3
+                  class="mt-4 font-bold text-highlighted"
+                  v-text="step.title"
+                />
 
-                <p class="mt-2 text-sm leading-6 text-muted">
-                  {{ step.description }}
-                </p>
+                <p
+                  class="mt-2 text-sm leading-6 text-muted"
+                  v-text="step.description"
+                />
               </div>
             </div>
           </div>
@@ -371,30 +267,32 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
         <UCard class="border-primary/20 bg-primary/5">
           <div>
             <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
-              {{ t('home.trust.title') }}
+              Por que comprar com a Amoda?
             </h2>
           </div>
 
           <div class="mt-5 grid gap-3 md:grid-cols-3">
             <div
-              v-for="item in trustItems"
-              :key="item.title"
+              v-for="benefit in benefits"
+              :key="benefit.title"
               class="rounded-2xl bg-white p-4 shadow-sm"
             >
               <div class="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <UIcon
-                  :name="item.icon"
+                  :name="benefit.icon"
                   class="size-5"
                 />
               </div>
 
-              <h3 class="mt-4 font-bold text-highlighted">
-                {{ item.title }}
-              </h3>
+              <h3
+                class="mt-4 font-bold text-highlighted"
+                v-text="benefit.title"
+              />
 
-              <p class="mt-2 text-sm leading-6 text-muted">
-                {{ item.desc }}
-              </p>
+              <p
+                class="mt-2 text-sm leading-6 text-muted"
+                v-text="benefit.description"
+              />
             </div>
           </div>
         </UCard>
@@ -403,14 +301,14 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
       <section class="mt-6 sm:mt-10">
         <div class="text-center">
           <h2 class="text-lg font-bold text-highlighted">
-            {{ t('home.seo.title') }}
+            Loja online de roupa feminina em Luanda
           </h2>
 
           <div class="mt-4 space-y-1 text-sm leading-7 text-muted">
             <p
-              v-for="(p, i) in seoParagraphs"
-              :key="i"
-              v-text="rt(p)"
+              v-for="paragraph in seoDescriptionParagraphs"
+              :key="paragraph"
+              v-text="paragraph"
             />
           </div>
         </div>
@@ -419,7 +317,7 @@ const whatsappHref = makeWhatsappHref(() => t('home.whatsappMessage'));
 
     <AppWhatsappButton
       :to="whatsappHref"
-      :aria-label="t('home.whatsappAria')"
+      aria-label="Falar com a Amoda no WhatsApp"
     />
   </UPage>
 </template>

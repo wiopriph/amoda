@@ -5,52 +5,38 @@ definePageMeta({
   middleware: 'admin',
 });
 
-const { t } = useI18n();
-const localeRoute = useLocaleRoute();
+const title = 'Novo ponto';
+const description = 'Criar ponto de levantamento';
 
-useHead(() => ({
-  title: `${t('adminOfficeNew.metaTitle')} | Amoda Admin`,
-  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
-}));
+useHead({
+  title,
+  meta: [
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
+    { name: 'robots', content: 'noindex, nofollow' },
+  ],
+});
 
-const onSaved = (id: number) => {
-  navigateTo(localeRoute({ name: 'admin-offices-edit-id', params: { id } }));
+const openCreatedOffice = (officeId: number) => {
+  navigateTo({ name: 'admin-offices-edit-id', params: { id: officeId } });
 };
 </script>
-
-<i18n lang="json">
-{
-  "en": {
-    "adminOfficeNew": {
-      "metaTitle": "New Office",
-      "title": "New office",
-      "description": "Create pickup office",
-      "create": "Create"
-    }
-  },
-  "pt": {
-    "adminOfficeNew": {
-      "metaTitle": "Novo ponto",
-      "title": "Novo ponto",
-      "description": "Criar ponto de levantamento",
-      "create": "Criar"
-    }
-  }
-}
-</i18n>
 
 <template>
   <UPage>
     <UPageHeader
-      :title="t('adminOfficeNew.title')"
-      :description="t('adminOfficeNew.description')"
+      :title="title"
+      :description="description"
     />
 
     <UPageBody class="max-w-4xl mx-auto">
       <AdminOfficeForm
         mode="create"
-        :submitLabel="t('adminOfficeNew.create')"
-        @saved="onSaved"
+        submitLabel="Criar"
+        @saved="openCreatedOffice"
       />
     </UPageBody>
   </UPage>

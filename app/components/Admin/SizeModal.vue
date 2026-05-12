@@ -1,87 +1,76 @@
 <script setup lang="ts">
-const props = defineProps({
-  open: Boolean,
-  modelValue: { type: Object, required: true },
-});
-const size = reactive({ ...props.modelValue });
-
-watch(() => props.modelValue, v => Object.assign(size, v));
-
-const isSaving = ref(false);
-
-
-const emit = defineEmits(['update:open', 'save']);
-const closeModal = () => emit('update:open', false);
-
-
-const handleSave = () => {
-  isSaving.value = true;
-
-  emit('save', size);
-
-  isSaving.value = false; //
-  closeModal(); //
+type SizeForm = {
+  id?: number | string | null
+  variant_id?: number | string | null
+  size?: string | null
+  stock?: number | string | null
+  sku?: string | null
 };
 
-const { t } = useI18n();
-</script>
+const props = withDefaults(defineProps<{
+  open?: boolean
+  modelValue: SizeForm
+}>(), {
+  open: false,
+});
 
-<i18n lang="json">
-{
-  "en": {
-    "size": {
-      "add": "Add size",
-      "edit": "Edit size",
-      "name": "Size",
-      "stock": "Stock"
-    },
-    "common": {
-      "cancel": "Cancel",
-      "add": "Add",
-      "save": "Save"
-    }
+const sizeForm = reactive<SizeForm>({ ...props.modelValue });
+
+watch(
+  () => props.modelValue,
+  (modelValue) => {
+    Object.assign(sizeForm, modelValue);
   },
-  "pt": {
-    "size": {
-      "add": "Adicionar tamanho",
-      "edit": "Editar tamanho",
-      "name": "Tamanho",
-      "stock": "Estoque"
-    },
-    "common": {
-      "cancel": "Cancelar",
-      "add": "Adicionar",
-      "save": "Guardar"
-    }
-  }
-}
-</i18n>
+);
+
+const emit = defineEmits<{
+  'update:open': [open: boolean]
+  save: [sizeForm: SizeForm]
+}>();
+
+const closeModal = () => emit('update:open', false);
+
+const modalTitle = computed(() => sizeForm.id ? 'Editar tamanho' : 'Adicionar tamanho');
+const submitLabel = computed(() => sizeForm.id ? 'Guardar' : 'Adicionar');
+
+
+const isSavingSize = ref(false);
+
+const saveSize = () => {
+  isSavingSize.value = true;
+
+  emit('save', sizeForm);
+
+  isSavingSize.value = false;
+  closeModal();
+};
+</script>
 
 <template>
   <UModal
     :open="props.open"
-    :title="size.id ? t('size.edit') : t('size.add')"
+    :title="modalTitle"
     @update:open="closeModal"
   >
     <template #body>
       <UForm class="space-y-4">
         <UFormField
-          :label="t('size.name')"
+          label="Tamanho"
           required
           class="w-full"
         >
           <UInput
-            v-model="size.size"
+            v-model="sizeForm.size"
             class="w-full"
           />
         </UFormField>
 
         <UFormField
-          :label="t('size.stock')"
+          label="Estoque"
           class="w-full"
         >
           <UInput
-            v-model="size.stock"
+            v-model="sizeForm.stock"
             type="number"
             class="w-full"
           />
@@ -92,15 +81,15 @@ const { t } = useI18n();
             variant="ghost"
             @click="closeModal"
           >
-            {{ t('common.cancel') }}
+            Cancelar
           </UButton>
 
           <UButton
+            :loading="isSavingSize"
             color="primary"
-            :loading="isSaving"
-            @click="handleSave"
+            @click="saveSize"
           >
-            {{ size.id ? t('common.save') : t('common.add') }}
+            {{ submitLabel }}
           </UButton>
         </div>
       </UForm>

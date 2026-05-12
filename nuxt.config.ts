@@ -4,6 +4,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      titleTemplate: '%s | Amoda',
+
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon-new.ico' },
 
@@ -20,6 +22,12 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', sizes: '120x120', href: '/apple-touch-icon-120x120.png' },
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
       ],
+
+      meta: [
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: 'Amoda' },
+        { name: 'apple-mobile-web-app-title', content: 'Amoda' },
+      ],
     },
   },
 
@@ -31,29 +39,9 @@ export default defineNuxtConfig({
     inlineStyles: true,
   },
 
-  i18n: {
-    baseUrl: 'https://amoda.ao',
-    defaultLocale: 'pt',
-    detectBrowserLanguage: false,
-    locales: [
-      {
-        code: 'pt',
-        language: 'pt-AO',
-        name: 'Português',
-      },
-      {
-        code: 'en',
-        language: 'en',
-        name: 'English',
-      },
-    ],
-    strategy: 'prefix_except_default',
-  },
-
   modules: [
     '@nuxt/image',
     '@nuxt/ui',
-    '@nuxtjs/i18n',
     '@nuxtjs/supabase',
     '@nuxtjs/sitemap',
   ],
@@ -94,7 +82,7 @@ export default defineNuxtConfig({
     sitemaps: {
       pages: {
         includeAppSources: true,
-        include: ['/', '/contacts', '/delivery'],
+        include: ['/', '/delivery', '/pickup-points', '/return-policy', '/privacy-policy', '/terms-of-use', '/contacts'],
       },
 
       categories: {
@@ -117,5 +105,14 @@ export default defineNuxtConfig({
 
   ui: {
     colorMode: false,
+  },
+
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+      ],
+    },
   },
 });

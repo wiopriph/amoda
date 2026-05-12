@@ -5,233 +5,112 @@ import { makeGa4Item } from '~/utils/ga4';
 
 definePageMeta({ name: 'cart' });
 
-const { t, tm, rt } = useI18n();
+const title = 'Seleção para experimentar';
+const description = 'Revise a sua seleção na Amoda antes de confirmar. Você não paga online: experimenta primeiro e paga apenas pelo que gostar.';
 
 useHead(() => ({
-  title: t('cart.meta.title'),
+  title,
   meta: [
-    { name: 'description', content: t('cart.meta.description') },
-    { property: 'og:title', content: t('cart.meta.title') },
-    { property: 'og:description', content: t('cart.meta.description') },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { name: 'description', content: description },
     { name: 'robots', content: 'noindex, nofollow' },
   ],
 }));
 
 const {
-  isLoading,
-  items,
+  items: cartItems,
   totalAOA,
   increment,
   decrement,
   setQty,
   remove,
-  publicCode,
-  isPending,
-  error,
+  publicCode: cartPublicCode,
+  isPending: isCartPending,
+  error: cartError,
 } = useCart();
 
-const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
+const priceFormatter = new Intl.NumberFormat('pt-AO');
+const formatPrice = (price: number) => `${priceFormatter.format(price)} AOA`;
 
-const localeRoute = useLocaleRoute();
 const { trackBeginCheckout } = useAnalyticsEvent();
 
-const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0));
+const totalCount = computed(() => cartItems.value.reduce((total, cartItem) => total + cartItem.qty, 0));
 
-const cartTrustItems = computed(() =>
-  (tm('cart.trust.items') as any[]).map((item) => ({
-    icon: rt(item.icon),
-    title: rt(item.title),
-  })),
-);
+const trustBadges = [
+  {
+    icon: 'i-lucide-wallet',
+    title: 'Sem pagamento online',
+  },
+  {
+    icon: 'i-lucide-shirt',
+    title: 'Experimente antes',
+  },
+  {
+    icon: 'i-lucide-check-circle-2',
+    title: 'Pague só o que gostar',
+  },
+];
 
-const steps = computed(() =>
-  (tm('cart.steps.items') as any[]).map((item) => ({
-    title: rt(item.title),
-    desc: rt(item.desc),
-  })),
+const nextSteps = [
+  {
+    title: 'Confirme a escolha',
+    description: 'Enviaremos o pedido com os itens escolhidos.',
+  },
+  {
+    title: 'Falamos consigo no WhatsApp',
+    description: 'Confirmamos disponibilidade, ponto e horário.',
+  },
+  {
+    title: 'Experimente e decida',
+    description: 'Você leva apenas o que gostar. Sem obrigação.',
+  },
+];
+
+const getProductTo = (cartItem: any) => ({
+  name: 'product-slug',
+  params: { slug: cartItem.slug },
+});
+
+const normalizeQuantity = (quantity: unknown) => Math.max(1, Number(quantity) || 1);
+
+const getAnalyticsItems = () => cartItems.value.map(cartItem =>
+  makeGa4Item({
+    productId: cartItem.productId,
+    name: cartItem.productName,
+    brand: cartItem.brand ?? undefined,
+    price: cartItem.price,
+    quantity: cartItem.qty,
+    variantId: cartItem.variantId,
+    sizeId: cartItem.sizeId,
+    variantLabel: cartItem.variantLabel ?? undefined,
+    sizeLabel: cartItem.sizeLabel ?? undefined,
+    categoryName: cartItem.categoryName ?? undefined,
+  }),
 );
 
 const trackCheckoutIntent = () => {
-  if (!items.value.length) {
+  if (!cartItems.value.length) {
     return;
   }
 
   if (import.meta.client) {
     trackBeginCheckout({
       value: totalAOA.value,
-      items: items.value.map((i) =>
-        makeGa4Item({
-          productId: i.productId,
-          name: i.productName,
-          brand: i.brand ?? undefined,
-          price: i.price,
-          quantity: i.qty,
-          variantId: i.variantId,
-          sizeId: i.sizeId,
-          variantLabel: i.variantLabel ?? undefined,
-          sizeLabel: i.sizeLabel ?? undefined,
-          categoryName: i.categoryName ?? undefined,
-        })),
+      items: getAnalyticsItems(),
     });
   }
 };
 
-const { makeWhatsappHref } = useWhatsappLink();
-const whatsappHref = makeWhatsappHref(() => t('cart.actions.whatsappMessage'));
-
-const goCheckout = () => {
+const openCheckout = () => {
   trackCheckoutIntent();
 
-  navigateTo(localeRoute({ name: 'checkout' }));
+  navigateTo({ name: 'checkout' });
 };
-</script>
 
-<i18n lang="json">
-{
-  "pt": {
-    "cart": {
-      "title": "A sua seleção para experimentar",
-      "subtitle": "Estes itens ainda não estão comprados. Esta é a sua escolha para experimentar primeiro.",
-      "empty": {
-        "title": "A sua seleção está vazia",
-        "desc": "Escolha algumas peças para experimentar. Não precisa pagar agora.",
-        "cta": "Ver produtos"
-      },
-      "item": {
-        "variant": "Cor",
-        "size": "Tamanho",
-        "qty": "Qtd.",
-        "remove": "Remover"
-      },
-      "summary": {
-        "title": "Resumo da escolha",
-        "items": "{count} item(ns)",
-        "total": "Total se levar tudo",
-        "code": "Código do carrinho",
-        "saving": "A guardar escolha...",
-        "error": "Não foi possível atualizar a escolha. Tente novamente."
-      },
-      "checkout": "Deixar número",
-      "actions": {
-        "hint": "Se tiver WhatsApp, envie a escolha agora. Se preferir, deixe o seu número e a nossa equipa escreve ou liga para si.",
-        "mobileHint": "WhatsApp é mais rápido. Sem WhatsApp? Deixe o número e falamos consigo.",
-        "whatsappCta": "Enviar no WhatsApp",
-        "phoneCta": "Deixar número",
-        "whatsappMessage": "Olá! Quero confirmar a minha escolha na Amoda."
-      },
-      "trust": {
-        "title": "Entrega gratuita",
-        "items": [
-          {
-            "icon": "i-lucide-wallet",
-            "title": "Sem pagamento online"
-          },
-          {
-            "icon": "i-lucide-shirt",
-            "title": "Experimente antes"
-          },
-          {
-            "icon": "i-lucide-check-circle-2",
-            "title": "Pague só o que gostar"
-          }
-        ]
-      },
-      "steps": {
-        "title": "O que acontece depois?",
-        "items": [
-          {
-            "title": "Confirme a escolha",
-            "desc": "Enviaremos o pedido com os itens escolhidos."
-          },
-          {
-            "title": "Falamos consigo no WhatsApp",
-            "desc": "Confirmamos disponibilidade, ponto e horário."
-          },
-          {
-            "title": "Experimente e decida",
-            "desc": "Você leva apenas o que gostar. Sem obrigação."
-          }
-        ]
-      },
-      "meta": {
-        "title": "Seleção para experimentar {'|'} Amoda",
-        "description": "Revise a sua seleção na Amoda antes de confirmar. Você não paga online: experimenta primeiro e paga apenas pelo que gostar."
-      }
-    }
-  },
-  "en": {
-    "cart": {
-      "title": "Your try-on selection",
-      "subtitle": "These items are not purchased yet. This is your selection to try first.",
-      "empty": {
-        "title": "Your selection is empty",
-        "desc": "Choose a few items to try on. No need to pay now.",
-        "cta": "View products"
-      },
-      "item": {
-        "variant": "Color",
-        "size": "Size",
-        "qty": "Qty.",
-        "remove": "Remove"
-      },
-      "summary": {
-        "title": "Selection summary",
-        "items": "{count} item(s)",
-        "total": "Total if you keep everything",
-        "code": "Cart code",
-        "saving": "Saving selection...",
-        "error": "Could not update the selection. Please try again."
-      },
-      "checkout": "Leave number",
-      "actions": {
-        "hint": "If you have WhatsApp, send your selection now. If you prefer, leave your number and our team will message or call you.",
-        "mobileHint": "WhatsApp is faster. No WhatsApp? Leave your number and we will contact you.",
-        "whatsappCta": "Send on WhatsApp",
-        "phoneCta": "Leave number",
-        "whatsappMessage": "Hello! I want to confirm my Amoda selection."
-      },
-      "trust": {
-        "title": "Free delivery",
-        "items": [
-          {
-            "icon": "i-lucide-wallet",
-            "title": "No online payment"
-          },
-          {
-            "icon": "i-lucide-shirt",
-            "title": "Try before paying"
-          },
-          {
-            "icon": "i-lucide-check-circle-2",
-            "title": "Pay only for what you like"
-          }
-        ]
-      },
-      "steps": {
-        "title": "What happens next?",
-        "items": [
-          {
-            "title": "Confirm selection",
-            "desc": "We receive your selected items."
-          },
-          {
-            "title": "We contact you on WhatsApp",
-            "desc": "We confirm availability, point and time."
-          },
-          {
-            "title": "Try and decide",
-            "desc": "Keep only what you like. No obligation."
-          }
-        ]
-      },
-      "meta": {
-        "title": "Try-on selection {'|'} Amoda",
-        "description": "Review your Amoda selection before confirming. No online payment: try first and pay only for what you love."
-      }
-    }
-  }
-}
-</i18n>
+const { makeWhatsappHref } = useWhatsappLink();
+const whatsappHref = makeWhatsappHref(() => 'Olá! Quero confirmar a minha escolha na Amoda.');
+</script>
 
 <template>
   <UPage>
@@ -242,35 +121,35 @@ const goCheckout = () => {
           variant="soft"
           class="mb-4"
         >
-          {{ t('cart.trust.title') }}
+          Entrega gratuita
         </UBadge>
 
         <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-          {{ t('cart.title') }}
+          A sua seleção para experimentar
         </h1>
 
         <p class="mt-4 text-base leading-7 text-muted sm:text-lg">
-          {{ t('cart.subtitle') }}
+          Estes itens ainda não estão comprados. Esta é a sua escolha para experimentar primeiro.
         </p>
 
         <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-toned">
           <div
-            v-for="item in cartTrustItems"
-            :key="item.title"
+            v-for="trustBadge in trustBadges"
+            :key="trustBadge.title"
             class="flex items-center gap-2"
           >
             <UIcon
-              :name="item.icon"
+              :name="trustBadge.icon"
               class="size-4 text-primary"
             />
 
-            <span>{{ item.title }}</span>
+            <span v-text="trustBadge.title" />
           </div>
         </div>
       </section>
 
       <section
-        v-if="!items.length"
+        v-if="!cartItems.length"
         class="mt-5 sm:mt-6"
       >
         <UCard>
@@ -283,20 +162,20 @@ const goCheckout = () => {
             </div>
 
             <h2 class="mt-4 text-xl font-bold text-highlighted">
-              {{ t('cart.empty.title') }}
+              A sua seleção está vazia
             </h2>
 
             <p class="mt-2 max-w-sm text-sm leading-6 text-muted">
-              {{ t('cart.empty.desc') }}
+              Escolha algumas peças para experimentar. Não precisa pagar agora.
             </p>
 
             <UButton
+              :to="{ name: 'index' }"
               color="primary"
               size="lg"
-              :to="localeRoute({ name: 'index' })"
               class="mt-5 justify-center"
             >
-              {{ t('cart.empty.cta') }}
+              Ver produtos
             </UButton>
           </div>
         </UCard>
@@ -304,15 +183,14 @@ const goCheckout = () => {
 
       <template v-else>
         <div class="mt-5 grid gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start">
-          <!-- ITEMS -->
           <section class="space-y-3">
             <UCard
-              v-for="cartItem in items"
+              v-for="cartItem in cartItems"
               :key="cartItem.key"
             >
               <div class="flex gap-3 sm:gap-4">
                 <NuxtLink
-                  :to="localeRoute({ name: 'product-slug', params: { slug: cartItem.slug } })"
+                  :to="getProductTo(cartItem)"
                   class="shrink-0"
                 >
                   <NuxtImg
@@ -326,42 +204,42 @@ const goCheckout = () => {
 
                 <div class="min-w-0 flex-1">
                   <NuxtLink
+                    :to="getProductTo(cartItem)"
                     class="line-clamp-2 text-sm font-bold text-highlighted hover:text-primary sm:text-base"
-                    :to="localeRoute({ name: 'product-slug', params: { slug: cartItem.slug } })"
                   >
                     {{ cartItem.productName }}
                   </NuxtLink>
 
                   <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted sm:text-sm">
-                    <span>{{ t('cart.item.variant') }}: {{ cartItem.variantLabel || '—' }}</span>
+                    <span>Cor: {{ cartItem.variantLabel || '—' }}</span>
 
-                    <span>{{ t('cart.item.size') }}: {{ cartItem.sizeLabel || '—' }}</span>
+                    <span>Tamanho: {{ cartItem.sizeLabel || '—' }}</span>
                   </div>
 
                   <div class="mt-2 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <div class="mb-1 text-xs font-medium text-muted">
-                        {{ t('cart.item.qty') }}
+                        Qtd.
                       </div>
 
                       <div class="flex items-center gap-2">
                         <UButton
+                          :disabled="cartItem.qty <= 1"
                           size="sm"
                           variant="outline"
-                          :disabled="cartItem.qty <= 1"
                           @click="decrement(cartItem.key)"
                         >
                           −
                         </UButton>
 
                         <UInput
+                          :modelValue="cartItem.qty"
                           type="number"
                           inputmode="numeric"
                           pattern="[0-9]*"
                           size="sm"
                           class="w-14 sm:w-16"
-                          :modelValue="cartItem.qty"
-                          @update:model-value="val => setQty(cartItem.key, Math.max(1, Number(val) || 1))"
+                          @update:model-value="quantity => setQty(cartItem.key, normalizeQuantity(quantity))"
                         />
 
                         <UButton
@@ -375,9 +253,10 @@ const goCheckout = () => {
                     </div>
 
                     <div class="flex min-w-0 items-center justify-between gap-3 sm:block sm:text-right">
-                      <div class="text-base font-black text-primary sm:text-lg">
-                        {{ fmtAOA(cartItem.price * cartItem.qty) }}
-                      </div>
+                      <div
+                        class="text-base font-black text-primary sm:text-lg"
+                        v-text="formatPrice(cartItem.price * cartItem.qty)"
+                      />
 
                       <UButton
                         variant="ghost"
@@ -386,7 +265,7 @@ const goCheckout = () => {
                         class="mt-0 shrink-0 px-0 text-muted hover:text-red-600 sm:mt-1"
                         @click="remove(cartItem.key)"
                       >
-                        {{ t('cart.item.remove') }}
+                        Remover
                       </UButton>
                     </div>
                   </div>
@@ -399,49 +278,53 @@ const goCheckout = () => {
             <div class="sticky top-24 space-y-4">
               <UCard class="border-primary/20 bg-primary/5 hidden lg:block">
                 <h2 class="text-lg font-black text-highlighted">
-                  {{ t('cart.summary.title') }}
+                  Resumo da escolha
                 </h2>
 
                 <div class="mt-4 space-y-3">
                   <div class="flex justify-between text-sm text-muted">
-                    <span>{{ t('cart.summary.items', { count: totalCount }) }}</span>
+                    <span v-text="`${totalCount} item(ns)`" />
 
-                    <span>{{ totalCount }}</span>
+                    <span v-text="totalCount" />
                   </div>
 
                   <div class="flex justify-between gap-4 border-t border-primary/10 pt-3">
                     <span class="text-sm font-semibold text-highlighted">
-                      {{ t('cart.summary.total') }}
+                      Total se levar tudo
                     </span>
 
-                    <span class="text-lg font-black text-primary">
-                      {{ fmtAOA(totalAOA) }}
-                    </span>
+                    <span
+                      class="text-lg font-black text-primary"
+                      v-text="formatPrice(totalAOA)"
+                    />
                   </div>
 
                   <p class="text-xs leading-5 text-muted">
-                    {{ t('cart.actions.hint') }}
+                    Se tiver WhatsApp, envie a escolha agora. Se preferir, deixe o seu número e a nossa equipa escreve ou liga para si.
                   </p>
 
                   <div
-                    v-if="publicCode"
+                    v-if="cartPublicCode"
                     class="rounded-xl border border-primary/15 bg-white/80 px-3 py-2 text-xs text-muted"
                   >
-                    <span>{{ t('cart.summary.code') }}:</span>
+                    <span>Código do carrinho:</span>
 
-                    <span class="ml-1 font-bold text-highlighted">{{ publicCode }}</span>
+                    <span
+                      class="ml-1 font-bold text-highlighted"
+                      v-text="cartPublicCode"
+                    />
                   </div>
 
                   <UAlert
-                    v-if="error"
+                    v-if="cartError"
                     color="warning"
                     variant="soft"
                     icon="i-lucide-cloud-off"
-                    :description="t('cart.summary.error')"
+                    description="Não foi possível atualizar a escolha. Tente novamente."
                   />
 
                   <div
-                    v-else-if="isPending"
+                    v-else-if="isCartPending"
                     class="flex items-center gap-2 text-xs text-muted"
                   >
                     <UIcon
@@ -449,58 +332,61 @@ const goCheckout = () => {
                       class="size-4 animate-spin"
                     />
 
-                    <span>{{ t('cart.summary.saving') }}</span>
+                    <span>A guardar escolha...</span>
                   </div>
                 </div>
 
                 <UButton
+                  :to="whatsappHref"
+                  :disabled="!cartItems.length"
                   size="xl"
                   color="success"
                   icon="i-simple-icons-whatsapp"
                   class="mt-5 w-full justify-center"
-                  :to="whatsappHref"
                   target="_blank"
-                  :disabled="!items.length"
                   @click="trackCheckoutIntent"
                 >
-                  {{ t('cart.actions.whatsappCta') }}
+                  Enviar no WhatsApp
                 </UButton>
 
                 <UButton
+                  :disabled="!cartItems.length"
                   size="lg"
                   color="neutral"
                   variant="ghost"
                   class="mt-2 w-full justify-center"
-                  :disabled="!items.length"
-                  @click="goCheckout"
+                  @click="openCheckout"
                 >
-                  {{ t('cart.actions.phoneCta') }}
+                  Deixar número
                 </UButton>
               </UCard>
 
               <UCard>
                 <h2 class="text-base font-bold text-highlighted">
-                  {{ t('cart.steps.title') }}
+                  O que acontece depois?
                 </h2>
 
                 <div class="mt-4 space-y-3">
                   <div
-                    v-for="(step, index) in steps"
-                    :key="step.title"
+                    v-for="(nextStep, stepIndex) in nextSteps"
+                    :key="nextStep.title"
                     class="flex gap-3"
                   >
-                    <div class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                      {{ index + 1 }}
-                    </div>
+                    <div
+                      class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white"
+                      v-text="stepIndex + 1"
+                    />
 
                     <div>
-                      <div class="text-sm font-semibold text-highlighted">
-                        {{ step.title }}
-                      </div>
+                      <div
+                        class="text-sm font-semibold text-highlighted"
+                        v-text="nextStep.title"
+                      />
 
-                      <div class="text-sm leading-6 text-muted">
-                        {{ step.desc }}
-                      </div>
+                      <div
+                        class="text-sm leading-6 text-muted"
+                        v-text="nextStep.description"
+                      />
                     </div>
                   </div>
                 </div>
@@ -509,51 +395,52 @@ const goCheckout = () => {
           </aside>
         </div>
 
-        <!-- MOBILE STICKY SUMMARY -->
         <div class="fixed bottom-0 left-0 right-0 z-60 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] lg:hidden">
           <div class="mx-auto max-w-5xl">
             <div class="mb-2 flex items-center justify-between gap-3">
               <div>
                 <div class="text-xs text-muted">
-                  {{ t('cart.summary.total') }}
+                  Total se levar tudo
                 </div>
 
-                <div class="text-lg font-black text-primary">
-                  {{ fmtAOA(totalAOA) }}
-                </div>
+                <div
+                  class="text-lg font-black text-primary"
+                  v-text="formatPrice(totalAOA)"
+                />
               </div>
 
-              <div class="text-right text-xs leading-5 text-muted">
-                {{ t('cart.summary.items', { count: totalCount }) }}
-              </div>
+              <div
+                class="text-right text-xs leading-5 text-muted"
+                v-text="`${totalCount} item(ns)`"
+              />
             </div>
 
             <p class="mb-2 text-xs leading-5 text-muted">
-              {{ t('cart.actions.mobileHint') }}
+              WhatsApp é mais rápido. Sem WhatsApp? Deixe o número e falamos consigo.
             </p>
 
             <UButton
+              :to="whatsappHref"
+              :disabled="!cartItems.length"
               size="xl"
               color="success"
               icon="i-simple-icons-whatsapp"
               class="w-full justify-center"
-              :to="whatsappHref"
               target="_blank"
-              :disabled="!items.length"
               @click="trackCheckoutIntent"
             >
-              {{ t('cart.actions.whatsappCta') }}
+              Enviar no WhatsApp
             </UButton>
 
             <UButton
+              :disabled="!cartItems.length"
               size="sm"
               color="neutral"
               variant="ghost"
               class="mt-1 w-full justify-center"
-              :disabled="!items.length"
-              @click="goCheckout"
+              @click="openCheckout"
             >
-              {{ t('cart.actions.phoneCta') }}
+              Deixar número
             </UButton>
           </div>
         </div>

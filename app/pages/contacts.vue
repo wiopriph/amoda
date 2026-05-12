@@ -10,120 +10,21 @@ import {
 
 definePageMeta({ name: 'contacts' });
 
-const { t } = useI18n();
-const localeRoute = useLocaleRoute();
-const { makeWhatsappHref } = useWhatsappLink();
+const title = 'Contactos da Amoda | WhatsApp, escolhas e pontos em Luanda';
+const description = 'Fale com a Amoda pelo WhatsApp para escolhas, tamanhos e pontos de experimentação em Luanda. Veja também TikTok, Facebook, email e endereço.';
 
 useHead(() => ({
-  title: t('contacts.meta.title'),
+  title,
   meta: [
-    { name: 'description', content: t('contacts.meta.description') },
-    { property: 'og:title', content: t('contacts.meta.title') },
-    { property: 'og:description', content: t('contacts.meta.description') },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { name: 'description', content: description },
   ],
 }));
 
-const waLink = makeWhatsappHref(() => t('contacts.whatsappMessage'));
-
-const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
+const { makeWhatsappHref } = useWhatsappLink();
+const waLink = makeWhatsappHref(() => 'Olá! Preciso de ajuda com uma escolha na Amoda.');
 </script>
-
-<i18n lang="json">
-{
-  "pt": {
-    "contacts": {
-      "title": "Como podemos ajudar?",
-      "intro": "Fale connosco para confirmar escolhas, tirar dúvidas ou encontrar o ponto de experimentação mais próximo.",
-      "whatsappMessage": "Olá! Preciso de ajuda com uma escolha na Amoda.",
-      "hero": {
-        "badge": "Atendimento rápido",
-        "secondary": "Ver pontos"
-      },
-      "cards": {
-        "whatsapp": {
-          "title": "WhatsApp",
-          "desc": "Melhor opção para confirmar escolhas, tamanhos e pontos de experimentação.",
-          "cta": "Abrir WhatsApp"
-        },
-        "tiktok": {
-          "title": "TikTok",
-          "desc": "Veja looks, novidades e inspirações da Amoda.",
-          "cta": "Seguir no TikTok"
-        },
-        "facebook": {
-          "title": "Facebook",
-          "desc": "Novidades, coleções e mensagens diretas.",
-          "cta": "Abrir Facebook"
-        },
-        "email": {
-          "title": "Email",
-          "desc": "Para questões gerais e informação oficial.",
-          "cta": "Enviar email"
-        },
-        "address": {
-          "title": "Endereço",
-          "desc": "Informação legal da empresa.",
-          "mapCta": "Abrir no Google Maps"
-        }
-      },
-      "links": {
-        "pickup": "Pontos para experimentar",
-        "returns": "Trocas e devoluções"
-      },
-      "meta": {
-        "title": "Contactos da Amoda {'|'} WhatsApp, escolhas e pontos em Luanda",
-        "description": "Fale com a Amoda pelo WhatsApp para escolhas, tamanhos e pontos de experimentação em Luanda. Veja também TikTok, Facebook, email e endereço."
-      }
-    }
-  },
-  "en": {
-    "contacts": {
-      "title": "How can we help?",
-      "intro": "Contact us to confirm selections, ask questions, or find the nearest try-on point.",
-      "whatsappMessage": "Hello! I need help with a selection at Amoda.",
-      "hero": {
-        "badge": "Fast support",
-        "secondary": "See points"
-      },
-      "cards": {
-        "whatsapp": {
-          "title": "WhatsApp",
-          "desc": "Best option to confirm selections, sizes and try-on points.",
-          "cta": "Open WhatsApp"
-        },
-        "tiktok": {
-          "title": "TikTok",
-          "desc": "See looks, new arrivals and Amoda inspiration.",
-          "cta": "Open TikTok"
-        },
-        "facebook": {
-          "title": "Facebook",
-          "desc": "Updates, collections and direct messages.",
-          "cta": "Open Facebook"
-        },
-        "email": {
-          "title": "Email",
-          "desc": "For general inquiries and official information.",
-          "cta": "Send email"
-        },
-        "address": {
-          "title": "Address",
-          "desc": "Company legal information.",
-          "mapCta": "Open in Google Maps"
-        }
-      },
-      "links": {
-        "pickup": "Try-on points",
-        "returns": "Exchange & return policy"
-      },
-      "meta": {
-        "title": "Amoda contacts {'|'} WhatsApp, selections and Luanda points",
-        "description": "Contact Amoda on WhatsApp for selections, sizes and try-on points in Luanda. Find TikTok, Facebook, email and address details too."
-      }
-    }
-  }
-}
-</i18n>
 
 <template>
   <UPage>
@@ -134,33 +35,31 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
           variant="soft"
           class="mb-4"
         >
-          {{ t('contacts.hero.badge') }}
+          Atendimento rápido
         </UBadge>
 
         <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-          {{ t('contacts.title') }}
+          Como podemos ajudar?
         </h1>
 
         <p class="mt-4 max-w-2xl text-base text-muted sm:text-lg">
-          {{ t('contacts.intro') }}
+          Fale connosco para confirmar escolhas, tirar dúvidas ou encontrar o ponto de experimentação mais próximo.
         </p>
 
         <div class="mt-6 grid gap-3 sm:flex sm:flex-wrap">
           <UButton
+            :to="{ name: 'pickup-points' }"
             size="xl"
             color="primary"
             variant="soft"
             icon="i-lucide-map-pin"
-            :to="localeRoute({ name: 'pickup-points' })"
           >
-            {{ t('contacts.hero.secondary') }}
+            Ver pontos
           </UButton>
         </div>
       </section>
 
-      <!-- CONTACTS -->
       <section class="mt-5 grid gap-4 sm:mt-6 md:grid-cols-2">
-        <!-- WhatsApp -->
         <UCard class="border-green-200 bg-green-50/60">
           <div class="flex h-full flex-col gap-4">
             <div class="flex items-center gap-2">
@@ -170,12 +69,12 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
               />
 
               <h2 class="text-lg font-bold text-highlighted">
-                {{ t('contacts.cards.whatsapp.title') }}
+                WhatsApp
               </h2>
             </div>
 
             <p class="text-sm text-muted">
-              {{ t('contacts.cards.whatsapp.desc') }}
+              Melhor opção para confirmar escolhas, tamanhos e pontos de experimentação.
             </p>
 
             <UButton
@@ -185,12 +84,11 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
               size="lg"
               class="mt-auto w-full justify-center sm:w-fit"
             >
-              {{ t('contacts.cards.whatsapp.cta') }}
+              Abrir WhatsApp
             </UButton>
           </div>
         </UCard>
 
-        <!-- TikTok -->
         <UCard class="border-pink-200 bg-pink-50/60">
           <div class="flex h-full flex-col gap-4">
             <div class="flex items-center gap-2">
@@ -200,12 +98,12 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
               />
 
               <h2 class="text-lg font-bold text-highlighted">
-                {{ t('contacts.cards.tiktok.title') }}
+                TikTok
               </h2>
             </div>
 
             <p class="text-sm text-muted">
-              {{ t('contacts.cards.tiktok.desc') }}
+              Veja looks, novidades e inspirações da Amoda.
             </p>
 
             <UButton
@@ -215,12 +113,11 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
               size="lg"
               class="mt-auto w-full justify-center sm:w-fit"
             >
-              {{ t('contacts.cards.tiktok.cta') }}
+              Seguir no TikTok
             </UButton>
           </div>
         </UCard>
 
-        <!-- Facebook -->
         <UCard class="border-blue-200 bg-blue-50/60">
           <div class="flex h-full flex-col gap-4">
             <div class="flex items-center gap-2">
@@ -230,12 +127,12 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
               />
 
               <h2 class="text-lg font-bold text-highlighted">
-                {{ t('contacts.cards.facebook.title') }}
+                Facebook
               </h2>
             </div>
 
             <p class="text-sm text-muted">
-              {{ t('contacts.cards.facebook.desc') }}
+              Novidades, coleções e mensagens diretas.
             </p>
 
             <UButton
@@ -245,12 +142,11 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
               size="lg"
               class="mt-auto w-full justify-center sm:w-fit"
             >
-              {{ t('contacts.cards.facebook.cta') }}
+              Abrir Facebook
             </UButton>
           </div>
         </UCard>
 
-        <!-- Email -->
         <UCard>
           <div class="flex h-full flex-col gap-4">
             <div class="flex items-center gap-2">
@@ -260,28 +156,27 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
               />
 
               <h2 class="text-lg font-bold text-highlighted">
-                {{ t('contacts.cards.email.title') }}
+                Email
               </h2>
             </div>
 
             <p class="text-sm text-muted">
-              {{ t('contacts.cards.email.desc') }}
+              Para questões gerais e informação oficial.
             </p>
 
             <UButton
-              :to="emailLink"
+              :to="`mailto:${CONTACT_EMAIL}`"
               color="neutral"
               variant="soft"
               size="lg"
               class="mt-auto w-full justify-center sm:w-fit"
             >
-              {{ t('contacts.cards.email.cta') }}
+              Enviar email
             </UButton>
           </div>
         </UCard>
       </section>
 
-      <!-- ADDRESS -->
       <section class="mt-5 sm:mt-6">
         <UCard>
           <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -293,17 +188,18 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
                 />
 
                 <h2 class="text-lg font-bold text-highlighted">
-                  {{ t('contacts.cards.address.title') }}
+                  Endereço
                 </h2>
               </div>
 
               <p class="text-sm text-muted">
-                {{ t('contacts.cards.address.desc') }}
+                Informação legal da empresa.
               </p>
 
-              <p class="mt-3 text-sm leading-7 text-toned">
-                {{ COMPANY_ADDRESS }}
-              </p>
+              <p
+                class="mt-3 text-sm leading-7 text-toned"
+                v-text="COMPANY_ADDRESS"
+              />
             </div>
 
             <UButton
@@ -314,7 +210,7 @@ const emailLink = computed(() => `mailto:${CONTACT_EMAIL}`);
               size="lg"
               class="w-full justify-center sm:w-auto"
             >
-              {{ t('contacts.cards.address.mapCta') }}
+              Abrir no Google Maps
             </UButton>
           </div>
         </UCard>

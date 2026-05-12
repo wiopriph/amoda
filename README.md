@@ -2,7 +2,7 @@
 
 A modern e-commerce application built with [Nuxt 4](https://nuxt.com/).\
 This project provides a minimal, production-ready starting point for
-online stores, supporting multiple locales, SEO, cart, checkout, and
+online stores, supporting Portuguese content, SEO, cart, checkout, and
 product catalog features.
 
 ------------------------------------------------------------------------

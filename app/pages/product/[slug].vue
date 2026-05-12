@@ -5,14 +5,9 @@ import { makeGa4Item } from '~/utils/ga4';
 
 definePageMeta({ name: 'product-slug' });
 
-const { t, tm, rt } = useI18n();
+const fallbackImage = '/placeholder.webp';
+
 const route = useRoute();
-const requestURL = useRequestURL();
-const localeRoute = useLocaleRoute();
-
-const { trackViewItem, trackSelectItem } = useAnalyticsEvent();
-
-// ===== PRODUCT FETCH =====
 const { data: productResponse, error: productError } = await useFetch('/api/catalog/item', {
   query: { slug: route.params.slug },
   watch: [() => route.fullPath],
@@ -22,114 +17,108 @@ if (productError.value || !productResponse.value) {
   throw createError({ statusCode: 404 });
 }
 
-const productData = computed(() => productResponse.value?.product);
-const productTitle = computed(() => productData.value?.title || '');
+const product = computed(() => productResponse.value?.product);
+const productName = computed(() => product.value?.title || '');
 
 const breadcrumbs = computed(() =>
   (productResponse.value?.breadcrumbs || []).map((crumb: any) => ({
     label: crumb.label,
-    to: localeRoute(crumb.to),
+    to: crumb.to,
   })),
 );
 
-const recItems = computed(() => productResponse.value?.recommendations || []);
+const recommendedProducts = computed(() => productResponse.value?.recommendations || []);
 
-// ===== VARIANTS / SIZES =====
-const productVariants = computed(() => productData.value?.variants || []);
+const variants = computed(() => product.value?.variants || []);
 
 const selectedVariantId = ref<number | null>(null);
 const selectedSizeId = ref<number | null>(null);
 
-const currentVariant = computed(
-  () => productVariants.value.find(v => v.id === selectedVariantId.value) || productVariants.value[0] || null,
+const activeVariant = computed(
+  () => variants.value.find(variant => variant.id === selectedVariantId.value) || variants.value[0] || null,
 );
 
 watch(
-  productData,
-  (product) => {
-    if (!product?.variants?.length) return;
+  product,
+  (loadedProduct) => {
+    if (!loadedProduct?.variants?.length) return;
 
-    selectedVariantId.value = product.variants[0].id;
-    selectedSizeId.value = product.variants[0].sizes?.[0]?.id ?? null;
+    selectedVariantId.value = loadedProduct.variants[0].id;
+    selectedSizeId.value = loadedProduct.variants[0].sizes?.[0]?.id ?? null;
   },
   { immediate: true },
 );
 
 watch(selectedVariantId, () => {
-  selectedSizeId.value = currentVariant.value?.sizes?.[0]?.id ?? null;
+  selectedSizeId.value = activeVariant.value?.sizes?.[0]?.id ?? null;
 });
 
-const selectedVariantLabel = computed(() => currentVariant.value?.color || '—');
+const selectedVariantLabel = computed(() => activeVariant.value?.color || '—');
 
 const variantOptions = computed(() =>
-  productVariants.value.map((variant: any) => ({
+  variants.value.map((variant: any) => ({
     id: variant.id,
-    url: variant.images?.[0]?.url || productData.value?.images?.[0]?.url || '/placeholder.webp',
+    url: variant.images?.[0]?.url || product.value?.images?.[0]?.url || fallbackImage,
     label: variant.color || '—',
   })),
 );
 
-// ===== local cart key (same format as useCart) =====
-const makeKey = (productId: number, variantId: number, sizeId: number) => `p${productId}-v${variantId}-s${sizeId}`;
-
-// ===== GALLERY =====
 const galleryImages = computed(() => {
-  const variantImages = currentVariant.value?.images || [];
-  const productImages = productData.value?.images || [];
+  const variantImages = activeVariant.value?.images || [];
+  const productImages = product.value?.images || [];
+  const images = variantImages.length ? variantImages : productImages;
 
-  return [...(variantImages.length ? variantImages : productImages)].sort((a: any, b: any) => (a.sort ?? 0) - (b.sort ?? 0));
+  return [...images].sort((firstImage: any, secondImage: any) => (firstImage.sort ?? 0) - (secondImage.sort ?? 0));
 });
 
-const hasGalleryImages = computed(() => (galleryImages.value?.length || 0) > 0);
+const hasGalleryImages = computed(() => galleryImages.value.length > 0);
 
-// ===== CAROUSEL (Nuxt UI) =====
-const carousel = useTemplateRef('carousel');
-const activeIndex = ref(0);
 
-const carouselItems = computed(() => {
-  const imgs = galleryImages.value || [];
+const carouselRef = useTemplateRef('carousel');
+const activeImageIndex = ref(0);
 
-  return imgs.map((img: any, idx: number) => ({
-    url: img.url,
-    alt: t('product.seo.thumbAlt', { title: productTitle.value, index: idx + 1 }),
-    idx,
-  }));
-});
+const carouselSlides = computed(() => galleryImages.value.map((image: any, imageIndex: number) => ({
+  url: image.url,
+  alt: `${productName.value} - foto ${imageIndex + 1}`,
+  index: imageIndex,
+})));
 
 watch(
-  carouselItems,
+  carouselSlides,
   () => {
-    activeIndex.value = 0;
-    carousel.value?.emblaApi?.scrollTo(0);
+    activeImageIndex.value = 0;
+    carouselRef.value?.emblaApi?.scrollTo(0);
   },
   { flush: 'post' },
 );
 
-function onClickPrev() {
-  activeIndex.value = Math.max(0, activeIndex.value - 1);
+function showPreviousImage() {
+  activeImageIndex.value = Math.max(0, activeImageIndex.value - 1);
 }
 
-function onClickNext() {
-  activeIndex.value = Math.min(carouselItems.value.length - 1, activeIndex.value + 1);
+function showNextImage() {
+  activeImageIndex.value = Math.min(carouselSlides.value.length - 1, activeImageIndex.value + 1);
 }
 
-function onSelect(index: number) {
-  activeIndex.value = index;
+function setActiveImage(index: number) {
+  activeImageIndex.value = index;
 }
 
-function select(index: number) {
-  activeIndex.value = index;
-  carousel.value?.emblaApi?.scrollTo(index);
+function selectImage(index: number) {
+  activeImageIndex.value = index;
+  carouselRef.value?.emblaApi?.scrollTo(index);
 }
 
-// ===== PRICE =====
-const formattedPriceAOA = computed(() => {
-  const price = currentVariant.value?.price ?? productData.value?.price ?? 0;
 
-  return `${new Intl.NumberFormat('pt-AO').format(price)} AOA`;
+const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price)} AOA`;
+
+const formattedPrice = computed(() => {
+  const price = activeVariant.value?.price ?? product.value?.price ?? 0;
+
+  return formatPrice(price);
 });
 
-// ===== CART =====
+
 const {
   add: addToCart,
   getQty,
@@ -138,34 +127,35 @@ const {
   isEmpty: isEmptyCart,
 } = useCart();
 
-const canAdd = computed(() => !!selectedSizeId.value);
+const buildCartItemKey = (productId: number, variantId: number, sizeId: number) => `p${productId}-v${variantId}-s${sizeId}`;
 
-const currentSkuQty = computed(() => {
-  const p = productData.value;
-  const v = currentVariant.value;
-  const sid = selectedSizeId.value;
+const selectedSkuQuantity = computed(() => {
+  const currentProduct = product.value;
+  const selectedVariant = activeVariant.value;
+  const selectedSize = selectedSizeId.value;
 
-  if (!p?.id || !v?.id || !sid) return 0;
+  if (!currentProduct?.id || !selectedVariant?.id || !selectedSize) return 0;
 
-  return getQty(p.id, v.id, sid);
+  return getQty(currentProduct.id, selectedVariant.id, selectedSize);
 });
 
-const currentSkuKey = computed(() => {
-  const p = productData.value;
-  const v = currentVariant.value;
-  const sid = selectedSizeId.value;
+const selectedSkuKey = computed(() => {
+  const currentProduct = product.value;
+  const selectedVariant = activeVariant.value;
+  const selectedSize = selectedSizeId.value;
 
-  if (!p?.id || !v?.id || !sid) return '';
+  if (!currentProduct?.id || !selectedVariant?.id || !selectedSize) {
+    return '';
+  }
 
-  return makeKey(p.id, v.id, sid);
+  return buildCartItemKey(currentProduct.id, selectedVariant.id, selectedSize);
 });
 
-// size options с “в корзине”
 const sizeOptions = computed(() =>
-  (currentVariant.value?.sizes || []).map((size: any) => {
-    const p = productData.value;
-    const v = currentVariant.value;
-    const inCartQty = p?.id && v?.id ? getQty(p.id, v.id, size.id) : 0;
+  (activeVariant.value?.sizes || []).map((size: any) => {
+    const currentProduct = product.value;
+    const selectedVariant = activeVariant.value;
+    const inCartQty = currentProduct?.id && selectedVariant?.id ? getQty(currentProduct.id, selectedVariant.id, size.id) : 0;
     const stock = Number(size.stock ?? 0);
 
     return {
@@ -178,80 +168,90 @@ const sizeOptions = computed(() =>
   }),
 );
 
-const lowStockText = (stock: number) =>
-  t(stock === 1 ? 'product.stock.lowOne' : 'product.stock.lowMany', { count: stock });
+const lowStockText = (stock: number) => stock === 1 ? 'Só resta 1' : `Só restam ${stock}`;
+
+const purchaseFlowSteps = [
+  {
+    title: 'Escolha em segundos',
+    description: 'Selecione o tamanho sem pagar agora.',
+  },
+  {
+    title: 'Experimente no ponto',
+    description: 'Veja ao vivo e experimente com calma.',
+  },
+  {
+    title: 'Decida na hora',
+    description: 'Leve só o que gostar.',
+  },
+];
 
 const selectedSizeOption = computed(() =>
   sizeOptions.value.find((sizeOption) => sizeOption.id === selectedSizeId.value) || null,
 );
 
-// ===== MINI CART (Drawer) =====
-const cartDrawerOpen = ref(false);
+const isCartDrawerOpen = ref(false);
 
-const cartPageTo = computed(() => localeRoute({ name: 'cart' }));
+const cartTo = { name: 'cart' } as const;
 
 const openCartDrawer = () => {
-  cartDrawerOpen.value = true;
+  isCartDrawerOpen.value = true;
 };
 
 const closeCartDrawer = () => {
-  cartDrawerOpen.value = false;
+  isCartDrawerOpen.value = false;
 };
 
 const addProductToCart = () => {
-  const product = productData.value;
-  const variant = currentVariant.value;
-  const selectedSize = variant?.sizes?.find((s: any) => s.id === selectedSizeId.value);
+  const currentProduct = product.value;
+  const selectedVariant = activeVariant.value;
+  const selectedSize = selectedVariant?.sizes?.find((size: any) => size.id === selectedSizeId.value);
 
-  if (!product || !variant || !selectedSize) return;
+  if (!currentProduct || !selectedVariant || !selectedSize) return;
 
-  addToCart(product, variant, selectedSize, 1);
+  addToCart(currentProduct, selectedVariant, selectedSize, 1);
   openCartDrawer();
 };
 
-// ===== ANALYTICS (GA4 ecommerce) =====
-const selectedSizeObj = computed(() =>
-  currentVariant.value?.sizes?.find((s: any) => s.id === selectedSizeId.value) || null,
-);
+
+const { trackViewItem, trackSelectItem } = useAnalyticsEvent();
 
 watch(
-  () => [productData.value?.id, currentVariant.value?.id, selectedSizeId.value] as const,
-  ([pid, vid, sid]) => {
+  () => [product.value?.id, activeVariant.value?.id, selectedSizeId.value] as const,
+  ([productId, variantId, sizeId]) => {
     if (!import.meta.client) {
       return;
     }
 
-    const product = productData.value;
-    const variant = currentVariant.value;
+    const currentProduct = product.value;
+    const selectedVariant = activeVariant.value;
 
-    if (!pid || !product || !variant) {
+    if (!productId || !variantId || !currentProduct || !selectedVariant) {
       return;
     }
 
-    // size обязателен, но на первом рендере может быть null — не шлём пока не выберется
-    if (!sid) {
+    if (!sizeId) {
       return;
     }
 
-    const size = selectedSizeObj.value;
+    const selectedSize = selectedSizeOption.value;
 
-    if (!size) {
+    if (!selectedSize) {
       return;
     }
 
     trackViewItem({
       items: [
         makeGa4Item({
-          productId: product.id,
-          name: product.title,
-          brand: product.brand_name,
-          price: variant.price ?? 0,
+          productId: currentProduct.id,
+          name: currentProduct.title,
+          brand: currentProduct.brand_name,
+          price: selectedVariant.price ?? 0,
           quantity: 1,
-          variantId: variant.id,
-          sizeId: size.id,
-          variantLabel: variant.color ?? undefined,
-          sizeLabel: size.size ?? String(size.id),
-          categoryName: product.primary_category_id ? String(product.primary_category_id) : undefined,
+          variantId: selectedVariant.id,
+          sizeId: selectedSize.id,
+          variantLabel: selectedVariant.color ?? undefined,
+          sizeLabel: selectedSize.label ?? String(selectedSize.id),
+          categoryName: currentProduct.primary_category_id ? String(currentProduct.primary_category_id) : undefined,
         }),
       ],
     });
@@ -259,11 +259,11 @@ watch(
   { immediate: true },
 );
 
-const sendSelectProductEvent = (product: any) => {
-  const v = product?.variants?.[0] ?? null;
-  const s = v?.sizes?.[0] ?? null;
+const trackRecommendationSelect = (recommendedProduct: any) => {
+  const recommendationVariant = recommendedProduct?.variants?.[0] ?? null;
+  const recommendationSize = recommendationVariant?.sizes?.[0] ?? null;
 
-  if (!v?.id || !s?.id) {
+  if (!recommendationVariant?.id || !recommendationSize?.id) {
     return;
   }
 
@@ -272,52 +272,52 @@ const sendSelectProductEvent = (product: any) => {
     listName: 'Recommendations',
     items: [
       makeGa4Item({
-        productId: product.id,
-        name: product.title,
-        brand: product.brand_name,
-        price: v.price ?? product.price ?? 0,
+        productId: recommendedProduct.id,
+        name: recommendedProduct.title,
+        brand: recommendedProduct.brand_name,
+        price: recommendationVariant.price ?? recommendedProduct.price ?? 0,
         quantity: 1,
-        variantId: v.id,
-        sizeId: s.id,
-        variantLabel: v.color ?? undefined,
-        sizeLabel: s.size ?? String(s.id),
-        categoryName: product.primary_category_id ? String(product.primary_category_id) : undefined,
+        variantId: recommendationVariant.id,
+        sizeId: recommendationSize.id,
+        variantLabel: recommendationVariant.color ?? undefined,
+        sizeLabel: recommendationSize.size ?? String(recommendationSize.id),
+        categoryName: recommendedProduct.primary_category_id ? String(recommendedProduct.primary_category_id) : undefined,
       }),
     ],
   });
 };
 
-// ===== WHATSAPP =====
-const productFullUrl = computed(() => {
-  const localized = localeRoute({ name: 'product-slug', params: { slug: productData.value?.slug } });
-  const path = localized?.fullPath || '/';
 
-  return new URL(path, requestURL.origin).href;
+const router = useRouter();
+const requestUrl = useRequestURL();
+
+const productUrl = computed(() => {
+  const path = router.resolve({ name: 'product-slug', params: { slug: product.value?.slug } }).fullPath || '/';
+
+  return new URL(path, requestUrl.origin).href;
 });
 
 const { makeWhatsappHref } = useWhatsappLink();
-const whatsappHref = makeWhatsappHref(() => t('product.whatsappMessage', { url: productFullUrl.value }));
+const whatsappHref = makeWhatsappHref(() => `Olá! Tenho uma pergunta sobre este produto: ${productUrl.value}`);
 
-const officesPageTo = computed(() => localeRoute({ name: 'pickup-points' }));
 
-// ===== SEO =====
-const seoTitle = computed(() => `${productData.value?.title || ''} | ${t('product.meta.titleSuffix')}`);
-const seoDescription = computed(() => productData.value?.description || t('product.meta.description', { title: productTitle.value }));
-const seoImage = computed(() => galleryImages.value?.[0]?.url || '/placeholder.webp');
+const title = computed(() => `${product.value?.title || ''} | Escolha sem pagar`);
+const description = computed(() => product.value?.description || `Escolha ${productName.value} na Amoda em Luanda. Selecione o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar.`);
+const seoImage = computed(() => galleryImages.value?.[0]?.url || fallbackImage);
 
 const productSchema = computed(() => ({
   '@context': 'https://schema.org/',
   '@type': 'Product',
-  name: productData.value?.title,
-  image: galleryImages.value.map((img: any) => img.url),
-  description: productData.value?.description || '',
-  sku: productData.value?.variants?.[0]?.id || productData.value?.id,
-  brand: { '@type': 'Brand', name: productData.value?.brand_name || '' },
+  name: product.value?.title,
+  image: galleryImages.value.map((image: any) => image.url),
+  description: product.value?.description || '',
+  sku: product.value?.variants?.[0]?.id || product.value?.id,
+  brand: { '@type': 'Brand', name: product.value?.brand_name || '' },
   offers: {
     '@type': 'Offer',
-    url: productFullUrl.value,
+    url: productUrl.value,
     priceCurrency: 'AOA',
-    price: currentVariant.value?.price ?? productData.value?.price ?? 0,
+    price: activeVariant.value?.price ?? product.value?.price ?? 0,
     availability: 'https://schema.org/InStock',
     itemCondition: 'https://schema.org/NewCondition',
   },
@@ -326,165 +326,32 @@ const productSchema = computed(() => ({
 const breadcrumbSchema = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
-  itemListElement: breadcrumbs.value.map((item: any, index: number) => ({
+  itemListElement: breadcrumbs.value.map((breadcrumbItem: any, breadcrumbIndex: number) => ({
     '@type': 'ListItem',
-    position: index + 1,
-    name: item.label,
-    item: new URL(item.to?.fullPath, requestURL.origin).href,
+    position: breadcrumbIndex + 1,
+    name: breadcrumbItem.label,
+    item: new URL(router.resolve(breadcrumbItem.to).fullPath, requestUrl.origin).href,
   })),
 }));
 
 useHead(() => ({
-  title: seoTitle.value,
+  title: title.value,
   meta: [
-    { name: 'description', content: seoDescription.value },
-    { property: 'og:title', content: seoTitle.value },
-    { property: 'og:description', content: seoDescription.value },
+    { property: 'og:title', content: title.value },
+    { property: 'og:description', content: description.value },
     { property: 'og:image', content: seoImage.value },
-    { property: 'twitter:title', content: seoTitle.value },
-    { property: 'twitter:description', content: seoDescription.value },
+    { property: 'twitter:title', content: title.value },
+    { property: 'twitter:description', content: description.value },
     { property: 'twitter:image', content: seoImage.value },
+    { name: 'description', content: description.value },
   ],
-  link: [{ rel: 'canonical', href: productFullUrl.value }],
+  link: [{ rel: 'canonical', href: productUrl.value }],
   script: [
     { type: 'application/ld+json', innerHTML: JSON.stringify(productSchema.value) },
     { type: 'application/ld+json', innerHTML: JSON.stringify(breadcrumbSchema.value) },
   ],
 }));
 </script>
-
-<i18n lang="json">
-{
-  "pt": {
-    "offices": {
-      "title": "Pontos para experimentar",
-      "subtitle": "Escolha online e experimente no ponto mais conveniente."
-    },
-    "product": {
-      "price": "Preço",
-      "size": "Tamanho",
-      "color": "Cor",
-      "description": "Descrição",
-      "whatsappMessage": "Olá! Tenho uma pergunta sobre este produto:\n{url}",
-      "meta": {
-        "titleSuffix": "Escolha sem pagar {'|'} Amoda",
-        "description": "Escolha {title} na Amoda em Luanda. Selecione o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar."
-      },
-      "ui": {
-        "chooseSize": "Escolha um tamanho",
-        "addToCart": "Escolher",
-        "inCart": "Selecionado",
-        "checkout": "Ver selecionados",
-        "pickupCta": "Ver pontos",
-        "supportCta": "Falar no WhatsApp",
-        "ctaNote": {
-          "wallet": "Sem pagamento online",
-          "shirt": "Experimente primeiro",
-          "whatsapp": "Decida na hora"
-        },
-        "howReceiveTitle": "Como funciona"
-      },
-      "stock": {
-        "lowOne": "Só resta 1",
-        "lowMany": "Só restam {count}"
-      },
-      "cartNudge": {
-        "title": "Selecionado",
-        "subtitle": "{qty} item(s) selecionado(s)",
-        "continue": "Continuar"
-      },
-      "howReceive": {
-        "items": [
-          {
-            "title": "Escolha em segundos",
-            "desc": "Selecione o tamanho sem pagar agora."
-          },
-          {
-            "title": "Experimente no ponto",
-            "desc": "Veja ao vivo e experimente com calma."
-          },
-          {
-            "title": "Decida na hora",
-            "desc": "Leve só o que gostar."
-          }
-        ]
-      },
-      "seo": {
-        "imageMainAlt": "{title} - imagem",
-        "thumbAlt": "{title} - foto {index}",
-        "variantAlt": "{title} - cor {color}"
-      },
-      "reco": {
-        "title": "Você também pode gostar"
-      }
-    }
-  },
-  "en": {
-    "offices": {
-      "title": "Try-on points",
-      "subtitle": "Choose online and try it at the most convenient location."
-    },
-    "product": {
-      "price": "Price",
-      "size": "Size",
-      "color": "Color",
-      "description": "Description",
-      "whatsappMessage": "Hello! I have a question about this product:\n{url}",
-      "meta": {
-        "titleSuffix": "Select with no payment {'|'} Amoda",
-        "description": "Select {title} at Amoda in Luanda. Choose your size, confirm on WhatsApp, try first, and pay only if you love it."
-      },
-      "ui": {
-        "chooseSize": "Choose a size",
-        "addToCart": "Select",
-        "inCart": "Selected",
-        "checkout": "View selected",
-        "pickupCta": "View points",
-        "supportCta": "Chat on WhatsApp",
-        "ctaNote": {
-          "wallet": "No online payment",
-          "shirt": "Try first",
-          "whatsapp": "Decide later"
-        },
-        "howReceiveTitle": "How it works"
-      },
-      "stock": {
-        "lowOne": "Only 1 left",
-        "lowMany": "Only {count} left"
-      },
-      "cartNudge": {
-        "title": "Selected",
-        "subtitle": "{qty} item(s) selected",
-        "continue": "Continue"
-      },
-      "howReceive": {
-        "items": [
-          {
-            "title": "Select in seconds",
-            "desc": "Choose your size with no payment now."
-          },
-          {
-            "title": "Try at the point",
-            "desc": "See it in real life and try it on."
-          },
-          {
-            "title": "Decide on the spot",
-            "desc": "Take only what you like."
-          }
-        ]
-      },
-      "seo": {
-        "imageMainAlt": "{title} - image",
-        "thumbAlt": "{title} - photo {index}",
-        "variantAlt": "{title} - color {color}"
-      },
-      "reco": {
-        "title": "You may also like"
-      }
-    }
-  }
-}
-</i18n>
 
 <template>
   <UPage>
@@ -494,24 +361,24 @@ useHead(() => ({
           <div class="relative overflow-hidden rounded-3xl bg-gray-50">
             <UCarousel
               v-if="hasGalleryImages"
+              v-slot="{ item: slide }"
               ref="carousel"
-              v-slot="{ item }"
-              fade
-              loop
-              :items="carouselItems"
-              :prev="{ onClick: onClickPrev }"
-              :next="{ onClick: onClickNext }"
-              class="w-full overflow-hidden"
+              :items="carouselSlides"
+              :prev="{ onClick: showPreviousImage }"
+              :next="{ onClick: showNextImage }"
               :ui="{
                 container: 'flex w-full ms-0',
                 item: 'basis-full shrink-0 ps-0'
               }"
-              @select="onSelect"
+              fade
+              loop
+              class="w-full overflow-hidden"
+              @select="setActiveImage"
             >
               <div class="aspect-[4/5] w-full overflow-hidden bg-gray-50">
                 <NuxtImg
-                  :src="item.url"
-                  :alt="item.alt"
+                  :src="slide.url"
+                  :alt="slide.alt"
                   class="h-full w-full object-cover"
                 />
               </div>
@@ -522,37 +389,37 @@ useHead(() => ({
               class="aspect-[4/5] w-full overflow-hidden bg-gray-50"
             >
               <NuxtImg
-                src="/placeholder.webp"
-                :alt="t('product.seo.imageMainAlt', { title: productTitle })"
+                :alt="`${productName} - imagem`"
+                :src="fallbackImage"
                 class="h-full w-full object-cover"
               />
             </div>
 
             <div
-              v-if="hasGalleryImages && carouselItems.length > 1"
+              v-if="hasGalleryImages && carouselSlides.length > 1"
               class="absolute bottom-3 right-3 rounded-full bg-black/60 px-2 py-1 text-xs text-white backdrop-blur-sm"
             >
-              {{ activeIndex + 1 }} / {{ carouselItems.length }}
+              {{ activeImageIndex + 1 }} / {{ carouselSlides.length }}
             </div>
           </div>
 
           <div
-            v-if="hasGalleryImages && carouselItems.length > 1"
+            v-if="hasGalleryImages && carouselSlides.length > 1"
             class="mt-3 hidden gap-2 overflow-x-auto md:flex"
           >
             <button
-              v-for="(thumb, index) in carouselItems"
-              :key="thumb.idx"
-              type="button"
-              class="size-14 flex-none overflow-hidden rounded-xl border transition"
-              :class="activeIndex === index
+              v-for="(thumbnail, thumbnailIndex) in carouselSlides"
+              :key="thumbnail.index"
+              :class="activeImageIndex === thumbnailIndex
                 ? 'border-primary opacity-100 ring-1 ring-primary'
                 : 'border-gray-200 opacity-50 hover:opacity-100'"
-              @click="select(index)"
+              type="button"
+              class="size-14 flex-none overflow-hidden rounded-xl border transition"
+              @click="selectImage(thumbnailIndex)"
             >
               <NuxtImg
-                :src="thumb.url"
-                :alt="thumb.alt"
+                :src="thumbnail.url"
+                :alt="thumbnail.alt"
                 class="h-full w-full object-cover"
                 loading="lazy"
               />
@@ -560,12 +427,10 @@ useHead(() => ({
           </div>
         </section>
 
-        <!-- PRODUCT INFO -->
         <section class="flex flex-col gap-5 px-2">
           <div>
             <UBreadcrumb
               :items="breadcrumbs"
-              class="hidden md:block"
               :ui="{
                 root: 'mb-4',
                 list: 'flex items-center gap-1 min-w-0',
@@ -574,25 +439,26 @@ useHead(() => ({
                 linkLabel: 'block whitespace-nowrap overflow-hidden text-ellipsis truncate aria-[current=page]:font-medium',
                 separator: 'mx-1 text-gray-400'
               }"
+              class="hidden md:block"
             />
 
-            <h1 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
-              {{ productData?.title }}
-            </h1>
+            <h1
+              class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl"
+              v-text="product?.title"
+            />
 
             <p
-              v-if="productData?.brand_name"
+              v-if="product?.brand_name"
               class="mt-2 text-sm text-muted"
-            >
-              {{ productData.brand_name }}
-            </p>
+              v-text="product?.brand_name"
+            />
 
-            <div class="mt-4 text-3xl font-black text-primary">
-              {{ formattedPriceAOA }}
-            </div>
+            <div
+              class="mt-4 text-3xl font-black text-primary"
+              v-text="formattedPrice"
+            />
           </div>
 
-          <!-- TRUST STRIP -->
           <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-toned">
             <div class="flex items-center gap-2">
               <UIcon
@@ -600,7 +466,7 @@ useHead(() => ({
                 class="size-4 text-primary"
               />
 
-              <span v-text="t('product.ui.ctaNote.wallet')" />
+              <span>Sem pagamento online</span>
             </div>
 
             <div class="flex items-center gap-2">
@@ -609,7 +475,7 @@ useHead(() => ({
                 class="size-4 text-primary"
               />
 
-              <span v-text="t('product.ui.ctaNote.shirt')" />
+              <span>Experimente primeiro</span>
             </div>
 
             <div class="flex items-center gap-2">
@@ -618,11 +484,10 @@ useHead(() => ({
                 class="size-4 text-primary"
               />
 
-              <span v-text="t('product.ui.ctaNote.whatsapp')" />
+              <span>Decida na hora</span>
             </div>
           </div>
 
-          <!-- OPTIONS -->
           <UCard>
             <div>
               <div
@@ -631,28 +496,29 @@ useHead(() => ({
               >
                 <div class="mb-2 flex items-center justify-between gap-3">
                   <div class="text-sm font-semibold text-highlighted">
-                    {{ t('product.color') }}
+                    Cor
                   </div>
 
-                  <div class="text-sm text-muted">
-                    {{ selectedVariantLabel }}
-                  </div>
+                  <div
+                    class="text-sm text-muted"
+                    v-text="selectedVariantLabel"
+                  />
                 </div>
 
                 <div class="flex flex-wrap gap-2">
                   <button
                     v-for="variantOption in variantOptions"
                     :key="variantOption.id"
-                    type="button"
-                    class="relative size-14 overflow-hidden rounded-2xl border transition"
                     :class="selectedVariantId === variantOption.id
                       ? 'border-primary ring-2 ring-primary/30'
                       : 'border-gray-200 hover:border-primary/50'"
+                    type="button"
+                    class="relative size-14 overflow-hidden rounded-2xl border transition"
                     @click="selectedVariantId = variantOption.id"
                   >
                     <NuxtImg
                       :src="variantOption.url"
-                      :alt="t('product.seo.variantAlt', { title: productTitle, color: variantOption.label })"
+                      :alt="`${productName} - cor ${variantOption.label}`"
                       class="h-full w-full object-cover"
                       loading="lazy"
                     />
@@ -662,27 +528,27 @@ useHead(() => ({
 
               <div v-if="sizeOptions.length">
                 <div class="mb-2 text-sm font-semibold text-highlighted">
-                  {{ t('product.size') }}
+                  Tamanho
                 </div>
 
                 <div class="flex flex-wrap gap-2">
                   <button
                     v-for="sizeOption in sizeOptions"
                     :key="sizeOption.id"
-                    type="button"
-                    class="inline-flex min-w-12 items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition"
                     :class="selectedSizeId === sizeOption.id
                       ? 'border-primary bg-primary/10 text-primary'
                       : 'border-gray-200 bg-white hover:border-primary/50'"
+                    type="button"
+                    class="inline-flex min-w-12 items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition"
                     @click="selectedSizeId = sizeOption.id"
                   >
                     {{ sizeOption.label }}
 
                     <UBadge
                       v-if="sizeOption.inCartQty > 0"
+                      :label="String(sizeOption.inCartQty)"
                       size="xs"
                       variant="solid"
-                      :label="String(sizeOption.inCartQty)"
                     />
                   </button>
                 </div>
@@ -703,136 +569,131 @@ useHead(() => ({
                   v-if="!selectedSizeId"
                   class="mt-2 text-sm text-red-600"
                 >
-                  {{ t('product.ui.chooseSize') }}
+                  Escolha um tamanho
                 </p>
               </div>
 
-              <!-- DESKTOP CTA -->
               <div class="hidden space-y-3 sm:block mt-3">
-                <!-- если SKU уже в корзине — показываем степпер -->
                 <div
-                  v-if="canAdd && currentSkuQty > 0"
+                  v-if="selectedSkuQuantity > 0"
                   class="space-y-3"
                 >
                   <div class="flex items-center gap-3 rounded-2xl bg-gray-50 p-3">
                     <UButton
+                      :disabled="!selectedSkuKey"
                       variant="outline"
-                      :disabled="!currentSkuKey"
-                      @click="decrement(currentSkuKey)"
+                      @click="decrement(selectedSkuKey)"
                     >
                       −
                     </UButton>
 
                     <div class="flex-1 text-center">
                       <div class="text-xs text-muted">
-                        {{ t('product.ui.inCart') }}
+                        Selecionado
                       </div>
 
-                      <div class="text-xl font-bold text-highlighted">
-                        {{ currentSkuQty }}
-                      </div>
+                      <div
+                        class="text-xl font-bold text-highlighted"
+                        v-text="selectedSkuQuantity"
+                      />
                     </div>
 
                     <UButton
+                      :disabled="!selectedSkuKey"
                       variant="outline"
-                      :disabled="!currentSkuKey"
-                      @click="increment(currentSkuKey)"
+                      @click="increment(selectedSkuKey)"
                     >
                       +
                     </UButton>
                   </div>
 
                   <UButton
+                    :to="cartTo"
                     size="xl"
                     color="primary"
                     class="w-full justify-center"
-                    :to="cartPageTo"
                   >
-                    {{ t('product.ui.checkout') }}
+                    Ver selecionados
                   </UButton>
                 </div>
 
                 <UButton
                   v-else
+                  :disabled="!selectedSizeId"
                   size="xl"
                   color="primary"
                   class="w-full justify-center"
-                  :disabled="!selectedSizeId"
                   @click="addProductToCart"
                 >
-                  {{ selectedSizeId ? t('product.ui.addToCart') : t('product.ui.chooseSize') }}
+                  {{ selectedSizeId ? "Escolher" : "Escolha um tamanho" }}
                 </UButton>
               </div>
             </div>
           </UCard>
 
-          <!-- DESCRIPTION -->
-          <UCard v-if="productData?.description">
+          <UCard v-if="product?.description">
             <h2 class="text-base font-bold text-highlighted">
-              {{ t('product.description') }}
+              Descrição
             </h2>
 
-            <p class="mt-3 text-sm leading-7 text-toned">
-              {{ productData.description }}
-            </p>
+            <p
+              class="mt-3 text-sm leading-7 text-toned"
+              v-text="product.description"
+            />
           </UCard>
 
-          <!-- HOW IT WORKS -->
           <UCard class="border-primary/20 bg-primary/5">
             <h2 class="text-base font-bold text-highlighted">
-              {{ t('product.ui.howReceiveTitle') }}
+              Como funciona
             </h2>
 
             <div class="mt-4 space-y-3">
               <div
-                v-for="(x, index) in tm('product.howReceive.items')"
-                :key="rt(x.title)"
+                v-for="(purchaseStep, stepIndex) in purchaseFlowSteps"
+                :key="purchaseStep.title"
                 class="flex gap-3"
               >
                 <div
                   class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white"
-                >
-                  {{ index + 1 }}
-                </div>
+                  v-text="stepIndex + 1"
+                />
 
                 <div>
-                  <div class="text-sm font-semibold text-highlighted">
-                    {{ rt(x.title) }}
-                  </div>
+                  <div
+                    class="text-sm font-semibold text-highlighted"
+                    v-text="purchaseStep.title"
+                  />
 
-                  <div class="text-sm leading-6 text-muted">
-                    {{ rt(x.desc) }}
-                  </div>
+                  <div
+                    class="text-sm leading-6 text-muted"
+                    v-text="purchaseStep.description"
+                  />
                 </div>
               </div>
             </div>
           </UCard>
 
-          <!-- PICKUP / SUPPORT -->
           <UCard>
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 class="text-base font-bold text-highlighted">
-                  {{ t('offices.title') }}
+                  Pontos para experimentar
                 </h2>
 
                 <p class="mt-1 text-sm text-muted">
-                  {{ t('offices.subtitle') }}
+                  Escolha online e experimente no ponto mais conveniente.
                 </p>
               </div>
 
               <div class="grid gap-2 sm:flex">
                 <UButton
-                  :to="officesPageTo"
+                  :to="{ name: 'pickup-points' }"
                   variant="outline"
                   size="xl"
-                  icon="i-lucide:map-pin"
+                  icon="i-lucide-map-pin"
                   class="justify-center"
                 >
-                  <span
-                    class="sm:hidden"
-                    v-text="t('product.ui.pickupCta')"
-                  />
+                  <span class="sm:hidden">Ver pontos</span>
                 </UButton>
 
                 <UButton
@@ -842,10 +703,7 @@ useHead(() => ({
                   icon="i-simple-icons-whatsapp"
                   class="justify-center"
                 >
-                  <span
-                    class="sm:hidden"
-                    v-text="t('product.ui.supportCta')"
-                  />
+                  <span class="sm:hidden">Falar no WhatsApp</span>
                 </UButton>
               </div>
             </div>
@@ -853,25 +711,24 @@ useHead(() => ({
         </section>
       </div>
 
-      <!-- RECOMMENDATIONS -->
       <section
-        v-if="recItems.length"
+        v-if="recommendedProducts.length"
         class="mt-10"
       >
         <h2 class="text-2xl font-black tracking-tight text-highlighted">
-          {{ t('product.reco.title') }}
+          Você também pode gostar
         </h2>
 
         <UBlogPosts
           class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
         >
           <UBlogPost
-            v-for="item in recItems"
-            :key="item.id"
-            :title="item.title"
-            :description="`${new Intl.NumberFormat('pt-AO').format(item.price)} AOA`"
-            :image="item.images?.[0]?.url || '/placeholder.webp'"
-            :to="localeRoute({ name: 'product-slug', params: { slug: item.slug } })"
+            v-for="recommendedProduct in recommendedProducts"
+            :key="recommendedProduct.id"
+            :title="recommendedProduct.title"
+            :description="formatPrice(recommendedProduct.price)"
+            :image="recommendedProduct.images?.[0]?.url || fallbackImage"
+            :to="{ name: 'product-slug', params: { slug: recommendedProduct.slug } }"
             :ui="{
               root: 'group overflow-hidden border border-gray-100 rounded-2xl hover:shadow-md transition',
               header: 'aspect-[4/5] overflow-hidden bg-gray-50',
@@ -881,19 +738,18 @@ useHead(() => ({
               description: 'mt-2 text-sm font-bold text-primary'
             }"
             variant="outline"
-            @click="sendSelectProductEvent(item)"
+            @click="trackRecommendationSelect(recommendedProduct)"
           />
         </UBlogPosts>
       </section>
 
-      <!-- DRAWER -->
       <UDrawer
-        v-model:open="cartDrawerOpen"
-        title=" "
+        v-model:open="isCartDrawerOpen"
         :ui="{
           container: 'mx-auto max-w-6xl gap-3 sm:px-6 lg:px-8',
           body: 'p-0'
         }"
+        title=" "
       >
         <span class="hidden" />
 
@@ -901,12 +757,13 @@ useHead(() => ({
           <div class="flex items-start justify-between gap-3">
             <div>
               <div class="text-sm font-semibold">
-                {{ t('product.cartNudge.title') }}
+                Selecionado
               </div>
 
-              <div class="text-xs text-muted">
-                {{ t('product.cartNudge.subtitle', { qty: currentSkuQty }) }}
-              </div>
+              <div
+                class="text-xs text-muted"
+                v-text="`${selectedSkuQuantity} item(s) selecionado(s)`"
+              />
             </div>
 
             <UButton
@@ -919,36 +776,38 @@ useHead(() => ({
         </template>
 
         <template #body>
-          <div class="b-5">
+          <div class="p-5">
             <div class="flex gap-3">
               <div class="size-16 shrink-0 overflow-hidden rounded-xl bg-gray-50">
                 <NuxtImg
-                  :src="galleryImages?.[0]?.url || '/placeholder.webp'"
-                  :alt="productTitle"
+                  :src="galleryImages[0]?.url || fallbackImage"
+                  :alt="productName"
                   class="h-full w-full object-cover"
                 />
               </div>
 
               <div class="min-w-0 flex-1">
-                <div class="line-clamp-2 text-sm font-semibold">
-                  {{ productTitle }}
-                </div>
+                <div
+                  class="line-clamp-2 text-sm font-semibold"
+                  v-text="productName"
+                />
 
-                <div class="mt-1 text-sm font-bold text-primary">
-                  {{ formattedPriceAOA }}
-                </div>
+                <div
+                  class="mt-1 text-sm font-bold text-primary"
+                  v-text="formattedPrice"
+                />
               </div>
             </div>
 
             <div class="mt-4 grid gap-2">
               <UButton
-                :to="cartPageTo"
+                :to="cartTo"
                 size="xl"
                 color="primary"
                 class="w-full justify-center"
                 @click="closeCartDrawer"
               >
-                {{ t('product.ui.checkout') }}
+                Ver selecionados
               </UButton>
 
               <UButton
@@ -958,14 +817,13 @@ useHead(() => ({
                 class="w-full justify-center"
                 @click="closeCartDrawer"
               >
-                {{ t('product.cartNudge.continue') }}
+                Continuar
               </UButton>
             </div>
           </div>
         </template>
       </UDrawer>
 
-      <!-- MOBILE STICKY CTA -->
       <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 sm:hidden">
         <div class="mx-auto flex max-w-(--ui-container) items-center gap-2 px-1">
           <UButton
@@ -976,35 +834,36 @@ useHead(() => ({
             class="shrink-0"
           />
 
-          <template v-if="canAdd && currentSkuQty > 0">
+          <template v-if="selectedSkuQuantity > 0">
             <UButton
-              :disabled="!currentSkuKey"
+              :disabled="!selectedSkuKey"
               size="xl"
               variant="outline"
-              @click="decrement(currentSkuKey)"
+              @click="decrement(selectedSkuKey)"
             >
               −
             </UButton>
 
-            <div class="min-w-0 flex-1 text-center text-base font-bold">
-              {{ currentSkuQty }}
-            </div>
+            <div
+              class="min-w-0 flex-1 text-center text-base font-bold"
+              v-text="selectedSkuQuantity"
+            />
 
             <UButton
-              :disabled="!currentSkuKey"
+              :disabled="!selectedSkuKey"
               size="xl"
               variant="outline"
-              @click="increment(currentSkuKey)"
+              @click="increment(selectedSkuKey)"
             >
               +
             </UButton>
 
             <UButton
-              :to="cartPageTo"
+              :to="cartTo"
               size="xl"
               color="primary"
             >
-              {{ t('product.ui.checkout') }}
+              Ver selecionados
             </UButton>
           </template>
 
@@ -1016,16 +875,16 @@ useHead(() => ({
               class="flex-1 justify-center"
               @click="addProductToCart"
             >
-              {{ selectedSizeId ? t('product.ui.addToCart') : t('product.size') }}
+              {{ selectedSizeId ? "Escolher" : "Tamanho" }}
             </UButton>
 
             <UButton
               v-if="!isEmptyCart"
-              :to="cartPageTo"
+              :to="cartTo"
               size="xl"
               variant="outline"
             >
-              {{ t('product.ui.checkout') }}
+              Ver selecionados
             </UButton>
           </template>
         </div>

@@ -2,243 +2,248 @@
 import type { TableColumn } from '@nuxt/ui';
 
 
-definePageMeta({ name: 'admin-orders', layout: 'admin', middleware: 'admin' });
+definePageMeta({
+  name: 'admin-orders',
+  layout: 'admin',
+  middleware: 'admin',
+});
 
-const { t } = useI18n();
-const localeRoute = useLocaleRoute();
-const route = useRoute();
+const title = 'Pedidos';
+const description = 'Ver e gerenciar pedidos';
 
-useHead(() => ({
-  title: `${t('orders.title')} | Amoda Admin`,
-  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
-}));
+useHead({
+  title,
+  meta: [
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
+    { name: 'robots', content: 'noindex, nofollow' },
+  ],
+});
 
 type Office = { id: number; name: string } | null;
+type OrderStatus = 'PLACED' | 'CONFIRMED' | 'DELIVERED' | 'CANCELLED';
+type PaymentStatus = 'UNPAID' | 'PAID' | 'REFUND_PARTIAL' | 'REFUND_FULL';
 
 type OrderRow = {
   id: number;
   number: string;
-  status: 'PLACED' | 'CONFIRMED' | 'DELIVERED' | 'CANCELLED';
-  payment_status: 'UNPAID' | 'PAID' | 'REFUND_PARTIAL' | 'REFUND_FULL';
+  status: OrderStatus;
+  payment_status: PaymentStatus;
   totals: any;
   guest_contact: any;
   created_at: string;
   pickup_office: Office;
 };
 
-const limit = 20;
-const page = ref(Math.max(1, Number(route.query.page || 1)));
-const search = ref(String(route.query.q || ''));
+const ordersPerPage = 20;
+const route = useRoute();
+
+const currentPage = ref(Math.max(1, Number(route.query.page || 1)));
+const searchQuery = ref(String(route.query.q || ''));
+const appliedSearchQuery = ref(searchQuery.value);
+
+let isSyncingSearchQuery = false;
 
 function debounce<T extends(...args: any[]) => void>(fn: T, delay = 400) {
-  let timer: ReturnType<typeof setTimeout> | null = null;
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   return (...args: Parameters<T>) => {
-    if (timer) clearTimeout(timer);
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
 
-    timer = setTimeout(() => fn(...args), delay);
+    debounceTimer = setTimeout(() => fn(...args), delay);
   };
 }
 
-const handleSearch = debounce(() => {
-  navigateTo(localeRoute({ query: { ...route.query, page: 1, q: search.value || undefined } }));
+const updateSearchQuery = debounce(() => {
+  currentPage.value = 1;
+  appliedSearchQuery.value = searchQuery.value;
+  navigateTo({ query: { ...route.query, page: undefined, q: searchQuery.value || undefined } });
 }, 400);
 
-watch(search, handleSearch);
-
-const { data } = await useFetch('/api/admin/orders/list', {
-  query: { page, limit, q: search },
-  watch: [page],
+watch(searchQuery, () => {
+  if (!isSyncingSearchQuery) {
+    updateSearchQuery();
+  }
 });
 
-const items = computed<OrderRow[]>(() => data.value?.items || []);
-const total = computed(() => Number(data.value?.total || 0));
+watch(
+  () => route.query.page,
+  (pageQuery) => {
+    currentPage.value = Math.max(1, Number(pageQuery || 1));
+  },
+);
+
+watch(
+  () => route.query.q,
+  (queryValue) => {
+    const nextSearchQuery = String(queryValue || '');
+
+    if (nextSearchQuery !== searchQuery.value) {
+      isSyncingSearchQuery = true;
+      searchQuery.value = nextSearchQuery;
+      appliedSearchQuery.value = nextSearchQuery;
+
+      nextTick(() => {
+        isSyncingSearchQuery = false;
+      });
+    }
+  },
+);
+
+const { data: ordersResponse } = await useFetch('/api/admin/orders/list', {
+  query: { page: currentPage, limit: ordersPerPage, q: appliedSearchQuery },
+  watch: [currentPage, appliedSearchQuery],
+});
+
+const orders = computed<OrderRow[]>(() => ordersResponse.value?.items || []);
+const totalOrders = computed(() => Number(ordersResponse.value?.total || 0));
 
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
+const ClientOnly = resolveComponent('ClientOnly');
 
-const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
+const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price)} AOA`;
 
-const getTotal = (totals: any) => {
-  const v = totals?.total ?? totals?.grandTotal ?? totals?.amount ?? null;
+const getOrderTotal = (totals: any) => {
+  const orderTotal = totals?.total ?? totals?.grandTotal ?? totals?.amount ?? null;
 
-  return typeof v === 'number' ? fmtAOA(v) : '—';
+  return typeof orderTotal === 'number' ? formatPrice(orderTotal) : '—';
 };
 
-const getPhone = (guest: any) => String(guest?.phone || '').trim() || '—';
+const getGuestPhone = (guestContact: any) => String(guestContact?.phone || '').trim() || '—';
+const getOrderTo = (orderNumber: string) => ({ name: 'admin-orders-number', params: { number: orderNumber } });
 
-// ---- актуальные статусы ----
-const statusColor = (s: OrderRow['status']) => {
-  switch (s) {
-    case 'DELIVERED': return 'success';
-    case 'CANCELLED': return 'error';
-    case 'CONFIRMED': return 'warning';
+const getStatusColor = (status: OrderStatus) => {
+  switch (status) {
+    case 'DELIVERED':
+      return 'success';
+    case 'CANCELLED':
+      return 'error';
+    case 'CONFIRMED':
+      return 'warning';
     case 'PLACED':
-    default: return 'neutral';
+    default:
+      return 'neutral';
   }
 };
 
-const payColor = (s: OrderRow['payment_status']) => {
-  switch (s) {
-    case 'PAID': return 'success';
-    case 'REFUND_PARTIAL': return 'warning';
-    case 'REFUND_FULL': return 'error';
+const getPaymentColor = (paymentStatus: PaymentStatus) => {
+  switch (paymentStatus) {
+    case 'PAID':
+      return 'success';
+    case 'REFUND_PARTIAL':
+      return 'warning';
+    case 'REFUND_FULL':
+      return 'error';
     case 'UNPAID':
-    default: return 'neutral';
+    default:
+      return 'neutral';
   }
 };
 
-const statusLabel = (s: OrderRow['status']) => t(`orderStatus.${s}`);
-const paymentLabel = (s: OrderRow['payment_status']) => t(`paymentStatus.${s}`);
+const statusLabels: Record<OrderStatus, string> = {
+  PLACED: 'Novo',
+  CONFIRMED: 'Confirmado',
+  DELIVERED: 'Pronto para levantamento',
+  CANCELLED: 'Cancelado',
+};
 
-const fmtDate = (iso: string) =>
-  new Intl.DateTimeFormat('pt-PT', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).format(new Date(iso));
+const paymentLabels: Record<PaymentStatus, string> = {
+  UNPAID: 'Não pago',
+  PAID: 'Pago',
+  REFUND_PARTIAL: 'Reembolso parcial',
+  REFUND_FULL: 'Reembolso total',
+};
 
+const dateFormatter = new Intl.DateTimeFormat('pt-PT', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+});
 
-const columns: TableColumn<any>[] = [
+const formatDate = (date: string) => dateFormatter.format(new Date(date));
+
+const orderColumns: TableColumn<OrderRow>[] = [
   {
     accessorKey: 'number',
-    header: t('orders.table.number'),
+    header: 'Número',
     meta: { class: { th: 'w-40', td: 'font-mono' } },
   },
   {
     accessorKey: 'created_at',
-    header: t('orders.table.created'),
+    header: 'Criado',
     cell: ({ row }) =>
       h('span', [
-        h(resolveComponent('ClientOnly'), {}, {
-          default: () => fmtDate(row.original.created_at),
+        h(ClientOnly, {}, {
+          default: () => formatDate(row.original.created_at),
           fallback: () => '—',
         }),
       ]),
   },
   {
     accessorKey: 'status',
-    header: t('orders.table.status'),
+    header: 'Status',
     cell: ({ row }) =>
       h(
         UBadge,
-        { variant: 'subtle', color: statusColor(row.original.status) },
-        () => statusLabel(row.original.status),
+        { variant: 'subtle', color: getStatusColor(row.original.status) },
+        () => statusLabels[row.original.status],
       ),
   },
   {
     accessorKey: 'payment_status',
-    header: t('orders.table.payment'),
+    header: 'Pagamento',
     cell: ({ row }) =>
       h(
         UBadge,
-        { variant: 'subtle', color: payColor(row.original.payment_status) },
-        () => paymentLabel(row.original.payment_status),
+        { variant: 'subtle', color: getPaymentColor(row.original.payment_status) },
+        () => paymentLabels[row.original.payment_status],
       ),
   },
-  { id: 'total', header: t('orders.table.total'), cell: ({ row }) => getTotal(row.original.totals) },
-  { id: 'phone', header: t('orders.table.phone'), cell: ({ row }) => getPhone(row.original.guest_contact) },
-  { id: 'office', header: t('orders.table.office'), cell: ({ row }) => row.original.pickup_office?.name || '—' },
+  { id: 'total', header: 'Total', cell: ({ row }) => getOrderTotal(row.original.totals) },
+  { id: 'phone', header: 'Telefone', cell: ({ row }) => getGuestPhone(row.original.guest_contact) },
+  { id: 'office', header: 'Ponto de retirada', cell: ({ row }) => row.original.pickup_office?.name || '—' },
   {
     id: 'actions',
-    header: t('common.actions'),
+    header: 'Ações',
     meta: { class: { th: 'w-20 text-right', td: 'text-right' } },
     cell: ({ row }) =>
       h(UButton, {
         size: 'xs',
         variant: 'ghost',
         icon: 'i-lucide-arrow-right',
-        title: t('common.view'),
-        onClick: () => navigateTo(localeRoute({ name: 'admin-orders-number', params: { number: row.original.number } })),
+        title: 'Ver',
+        to: getOrderTo(row.original.number),
       }),
   },
 ];
 
-const paginationTo = (p: number) => ({ query: { ...route.query, page: p } });
-</script>
-
-<i18n lang="json">
-{
-  "en": {
-    "orders": {
-      "title": "Orders",
-      "description": "Browse and manage orders",
-      "searchPlaceholder": "Search by order number or phone...",
-      "table": {
-        "number": "Number",
-        "created": "Created",
-        "status": "Status",
-        "payment": "Payment",
-        "total": "Total",
-        "phone": "Phone",
-        "office": "Pickup office"
-      }
-    },
-    "common": {
-      "actions": "Actions",
-      "view": "View"
-    },
-    "orderStatus": {
-      "PLACED": "Placed",
-      "CONFIRMED": "Confirmed",
-      "DELIVERED": "Delivered",
-      "CANCELLED": "Cancelled"
-    },
-    "paymentStatus": {
-      "UNPAID": "Unpaid",
-      "PAID": "Paid",
-      "REFUND_PARTIAL": "Partial refund",
-      "REFUND_FULL": "Full refund"
-    }
+const getPaginationTo = (pageNumber: number) => ({
+  query: {
+    ...route.query,
+    page: pageNumber === 1 ? undefined : pageNumber,
   },
-  "pt": {
-    "orders": {
-      "title": "Pedidos",
-      "description": "Ver e gerenciar pedidos",
-      "searchPlaceholder": "Pesquisar por número ou telefone...",
-      "table": {
-        "number": "Número",
-        "created": "Criado",
-        "status": "Status",
-        "payment": "Pagamento",
-        "total": "Total",
-        "phone": "Telefone",
-        "office": "Ponto de retirada"
-      }
-    },
-    "common": {
-      "actions": "Ações",
-      "view": "Ver"
-    },
-    "orderStatus": {
-      "PLACED": "Novo",
-      "CONFIRMED": "Confirmado",
-      "DELIVERED": "Pronto para levantamento",
-      "CANCELLED": "Cancelado"
-    },
-    "paymentStatus": {
-      "UNPAID": "Não pago",
-      "PAID": "Pago",
-      "REFUND_PARTIAL": "Reembolso parcial",
-      "REFUND_FULL": "Reembolso total"
-    }
-  }
-}
-</i18n>
+});
+</script>
 
 <template>
   <UPage>
     <UPageHeader
-      :title="t('orders.title')"
-      :description="t('orders.description')"
+      :title="title"
+      :description="description"
     >
       <template #links>
         <UInput
-          v-model="search"
-          :placeholder="t('orders.searchPlaceholder')"
+          v-model="searchQuery"
+          placeholder="Pesquisar por número ou telefone..."
           icon="i-lucide-search"
           class="w-72"
         />
@@ -248,17 +253,17 @@ const paginationTo = (p: number) => ({ query: { ...route.query, page: p } });
     <UPageBody>
       <UCard>
         <UTable
-          :data="items"
-          :columns="columns"
+          :data="orders"
+          :columns="orderColumns"
         />
       </UCard>
 
       <div class="mt-6 flex justify-center">
         <UPagination
-          v-model:page="page"
-          :itemsPerPage="limit"
-          :total="total"
-          :to="paginationTo"
+          v-model:page="currentPage"
+          :itemsPerPage="ordersPerPage"
+          :total="totalOrders"
+          :to="getPaginationTo"
         />
       </div>
     </UPageBody>

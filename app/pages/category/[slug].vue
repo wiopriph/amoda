@@ -6,19 +6,17 @@ import { makeGa4Item } from '~/utils/ga4';
 definePageMeta({ name: 'category-slug' });
 
 const route = useRoute();
-const localeRoute = useLocaleRoute();
-
-const limit = 24;
-const page = ref(Math.max(1, Number(route.query.page || 1)));
+const currentPage = ref(Math.max(1, Number(route.query.page || 1)));
+const PRODUCTS_PER_PAGE = 24;
 
 const [
-  { data, error },
-  { data: navigation },
+  { data: catalogResponse, error: catalogError },
+  { data: categoryNavigation },
 ] = await Promise.all([
   useFetch('/api/catalog/list', {
     query: {
       slug: route.params.slug,
-      page,
+      page: currentPage.value,
       q: route.query.q,
       sort: route.query.sort,
     },
@@ -30,61 +28,62 @@ const [
   }),
 ]);
 
-if (error.value || !data.value) {
+if (catalogError.value || !catalogResponse.value) {
   throw createError({ statusCode: 404 });
 }
 
-const products = computed(() => data.value!.items || []);
-const total = computed(() => data.value!.total || 0);
-const pages = computed(() => Math.max(1, Math.ceil(total.value / limit)));
+const totalProducts = computed(() => catalogResponse.value!.total || 0);
+const pageCount = computed(() => Math.max(1, Math.ceil(totalProducts.value / PRODUCTS_PER_PAGE)));
 
-const makePaginationTo = (pageNum: number) => ({
+const getPaginationTo = (pageNumber: number) => ({
   query: {
     ...route.query,
-    page: pageNum === 1 ? undefined : pageNum,
+    page: pageNumber === 1 ? undefined : pageNumber,
   },
 });
 
 if (import.meta.client) {
   watch(
     () => route.query.page,
-    async () => {
+    async (pageQuery) => {
+      currentPage.value = Math.max(1, Number(pageQuery || 1));
+
       await nextTick();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
   );
 }
 
-
-const category = computed(() => data.value!.category);
+const category = computed(() => catalogResponse.value!.category);
 const categoryTitle = computed(() => category.value?.name || '');
+const categoryProducts = computed(() => catalogResponse.value!.items || []);
 
-const breadcrumbItems = computed(() => (data.value!.breadcrumbs || []).map((c: any) => ({
-  label: c.label,
-  to: localeRoute(c.to),
+const breadcrumbItems = computed(() => (catalogResponse.value!.breadcrumbs || []).map((breadcrumb: any) => ({
+  label: breadcrumb.label,
+  to: breadcrumb.to,
 })));
 
 const { trackViewItemList, trackSelectItem } = useAnalyticsEvent();
 
-const mapProductToGa4Item = (p: any, index?: number) => {
-  const variantId = Number(p.default_variant_id);
-  const sizeId = Number(p.default_size_id);
+const mapProductToGa4Item = (product: any, index?: number) => {
+  const variantId = Number(product.default_variant_id);
+  const sizeId = Number(product.default_size_id);
 
   if (!variantId || !sizeId) {
     return null;
   }
 
   return makeGa4Item({
-    productId: p.id,
-    name: p.title,
-    brand: p.brand_name ?? undefined,
-    price: p.price ?? 0,
+    productId: product.id,
+    name: product.title,
+    brand: product.brand_name ?? undefined,
+    price: product.price ?? 0,
     quantity: 1,
     variantId,
     sizeId,
-    variantLabel: p.default_variant_color ?? undefined,
-    sizeLabel: p.default_size_label ?? undefined,
-    categoryName: p.primary_category_id ? String(p.primary_category_id) : undefined,
+    variantLabel: product.default_variant_color ?? undefined,
+    sizeLabel: product.default_size_label ?? undefined,
+    categoryName: product.primary_category_id ? String(product.primary_category_id) : undefined,
     index,
   });
 };
@@ -93,8 +92,8 @@ if (import.meta.client) {
   watch(
     () => route.fullPath,
     () => {
-      const ga4Items = products.value
-        .map((p: any, i: number) => mapProductToGa4Item(p, i + 1))
+      const ga4Items = categoryProducts.value
+        .map((product: any, productIndex: number) => mapProductToGa4Item(product, productIndex + 1))
         .filter(Boolean);
 
       trackViewItemList({
@@ -107,121 +106,90 @@ if (import.meta.client) {
   );
 }
 
-const sendSelectProductEvent = (product: any) => {
-  const item = mapProductToGa4Item(product);
+const trackProductSelect = (product: any) => {
+  const ga4Item = mapProductToGa4Item(product);
 
-  if (!item) {
+  if (!ga4Item) {
     return;
   }
 
   trackSelectItem({
     listId: category.value?.id ? String(category.value.id) : undefined,
     listName: categoryTitle.value || undefined,
-    items: [item],
+    items: [ga4Item],
   });
 };
 
-const { t } = useI18n();
-const requestURL = useRequestURL();
-
-const pageTitle = computed(() => t('category.seoTitle', { category: categoryTitle.value }));
-const pageDescription = computed(() => t('category.seoDescription', { category: categoryTitle.value }));
+const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price || 0)} AOA`;
 
 const { makeWhatsappHref } = useWhatsappLink();
-const whatsappHref = makeWhatsappHref(() => t('category.whatsappMessage', { category: categoryTitle.value }));
+const whatsappHref = makeWhatsappHref(() => `Olá! Preciso de ajuda com a categoria ${categoryTitle.value} na Amoda.`);
+
+const router = useRouter();
+const requestUrl = useRequestURL();
+
+const title = computed(() => `${categoryTitle.value} em Luanda | Escolha e experimente antes de pagar`);
+const description = computed(() => `Encontre ${categoryTitle.value} na Amoda em Luanda. Escolha online sem pagar, experimente primeiro e leve apenas o que gostar.`);
+
+const breadcrumbSchema = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: (catalogResponse.value!.breadcrumbs || []).map((breadcrumb: any, breadcrumbIndex: number) => ({
+    '@type': 'ListItem',
+    position: breadcrumbIndex + 1,
+    name: breadcrumb.label,
+    item: new URL(router.resolve(breadcrumb.to).fullPath || '/', requestUrl.origin).href,
+  })),
+}));
+
+const itemListSchema = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: title.value,
+  numberOfItems: categoryProducts.value.length,
+  itemListOrder: 'http://schema.org/ItemListOrderAscending',
+  itemListElement: categoryProducts.value.map((product: any, productIndex: number) => {
+    const productUrl = new URL(
+      router.resolve({ name: 'product-slug', params: { slug: product.slug } }).fullPath || '/',
+      requestUrl.origin,
+    ).href;
+
+    return {
+      '@type': 'ListItem',
+      position: productIndex + 1,
+      url: productUrl,
+      item: {
+        '@type': 'Product',
+        name: product.title,
+        image: product.image || 'https://amoda.ao/placeholder.webp',
+        brand: product.brand_name || undefined,
+        offers: {
+          '@type': 'Offer',
+          url: productUrl,
+          priceCurrency: 'AOA',
+          price: product.price || 0,
+          availability: 'https://schema.org/InStock',
+        },
+      },
+    };
+  }),
+}));
 
 useHead(() => ({
-  title: `${pageTitle.value} | Amoda`,
+  title: title.value,
   meta: [
-    { name: 'description', content: pageDescription.value },
-    { property: 'og:title', content: `${pageTitle.value} | Amoda` },
-    { property: 'og:description', content: pageDescription.value },
-    { property: 'twitter:title', content: `${pageTitle.value} | Amoda` },
-    { property: 'twitter:description', content: pageDescription.value },
+    { name: 'description', content: description.value },
+    { property: 'og:title', content: title.value },
+    { property: 'og:description', content: description.value },
+    { property: 'twitter:title', content: title.value },
+    { property: 'twitter:description', content: description.value },
   ],
   script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: (data.value!.breadcrumbs || []).map((bc: any, i: number) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: bc.label,
-          item: new URL(localeRoute(bc.to)?.fullPath || '/', requestURL.origin).href,
-        })),
-      }),
-    },
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'ItemList',
-        name: pageTitle.value,
-        numberOfItems: products.value.length,
-        itemListOrder: 'http://schema.org/ItemListOrderAscending',
-        itemListElement: products.value.map((p: any, i: number) => {
-          const url = new URL(
-            localeRoute({ name: 'product-slug', params: { slug: p.slug } })?.fullPath || '/',
-            requestURL.origin,
-          ).href;
-
-          return {
-            '@type': 'ListItem',
-            position: i + 1,
-            url,
-            item: {
-              '@type': 'Product',
-              name: p.title,
-              image: p.image || 'https://amoda.ao/placeholder.webp',
-              brand: p.brand_name || undefined,
-              offers: {
-                '@type': 'Offer',
-                url,
-                priceCurrency: 'AOA',
-                price: p.price || 0,
-                availability: 'https://schema.org/InStock',
-              },
-            },
-          };
-        }),
-      }),
-    },
+    { type: 'application/ld+json', innerHTML: JSON.stringify(breadcrumbSchema.value) },
+    { type: 'application/ld+json', innerHTML: JSON.stringify(itemListSchema.value) },
   ],
 }));
 </script>
-
-<i18n lang="json">
-{
-  "pt": {
-    "category": {
-      "count": "{count} produtos disponíveis",
-      "empty": "Ainda não há itens nesta categoria.",
-      "emptyDescription": "Veja outras categorias ou volte em breve. Você pode escolher online, experimentar primeiro e pagar apenas pelo que gostar.",
-      "allCategories": "Ver categorias",
-      "newBadge": "NOVO",
-      "whatsappAria": "Falar com a Amoda no WhatsApp",
-      "whatsappMessage": "Olá! Preciso de ajuda com a categoria {category} na Amoda.",
-      "seoTitle": "{category} em Luanda {'|'} Escolha e experimente antes de pagar",
-      "seoDescription": "Encontre {category} na Amoda em Luanda. Escolha online sem pagar, experimente primeiro e leve apenas o que gostar."
-    }
-  },
-  "en": {
-    "category": {
-      "count": "{count} products available",
-      "empty": "No items in this category yet.",
-      "emptyDescription": "Browse other categories or come back soon. You can select online, try first, and pay only for what you like.",
-      "allCategories": "View categories",
-      "newBadge": "NEW",
-      "whatsappAria": "Chat with Amoda on WhatsApp",
-      "whatsappMessage": "Hello! I need help with the {category} category at Amoda.",
-      "seoTitle": "{category} in Luanda {'|'} Select and try before paying",
-      "seoDescription": "Explore {category} at Amoda in Luanda. Select online with no payment, try first, and keep only what you love."
-    }
-  }
-}
-</i18n>
 
 <template>
   <UPage>
@@ -237,38 +205,40 @@ useHead(() => ({
             color="primary"
             variant="soft"
           >
-            {{ t('category.count', { count: total }) }}
+            {{ `${totalProducts} produtos disponíveis` }}
           </UBadge>
 
-          <h1 class="mt-4 text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-            {{ categoryTitle }}
-          </h1>
+          <h1
+            class="mt-4 text-3xl font-black tracking-tight text-highlighted sm:text-5xl"
+            v-text="categoryTitle"
+          />
 
-          <p class="mt-4 text-base leading-7 text-muted sm:text-lg">
-            {{ pageDescription }}
-          </p>
+          <p
+            class="mt-4 text-base leading-7 text-muted sm:text-lg"
+            v-text="description"
+          />
         </div>
 
         <div
-          v-if="navigation?.length"
+          v-if="categoryNavigation?.length"
           class="mt-5"
         >
-          <CategoriesPills :list="navigation" />
+          <CategoriesPills :list="categoryNavigation" />
         </div>
       </section>
 
       <UEmpty
-        v-if="!products.length"
+        v-if="!categoryProducts.length"
         class="mt-6"
-        :title="t('category.empty')"
-        :description="t('category.emptyDescription')"
+        title="Ainda não há itens nesta categoria."
+        description="Veja outras categorias ou volte em breve. Você pode escolher online, experimentar primeiro e pagar apenas pelo que gostar."
       >
         <template #actions>
           <UButton
-            :to="localeRoute({ name: 'index' })"
+            :to="{ name: 'index' }"
             color="primary"
           >
-            {{ t('category.allCategories') }}
+            Ver categorias
           </UButton>
         </template>
       </UEmpty>
@@ -279,12 +249,12 @@ useHead(() => ({
       >
         <UBlogPosts class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4">
           <UBlogPost
-            v-for="(product, index) in products"
-            :key="product.id"
-            :title="product.title"
-            :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
-            :image="product.image || 'placeholder.webp'"
-            :to="localeRoute({ name: 'product-slug', params: { slug: product.slug } })"
+            v-for="(categoryProduct, index) in categoryProducts"
+            :key="categoryProduct.id"
+            :title="categoryProduct.title"
+            :description="formatPrice(categoryProduct.price)"
+            :image="categoryProduct.image || '/placeholder.webp'"
+            :to="{ name: 'product-slug', params: { slug: categoryProduct.slug } }"
             :ui="{
               root: 'group overflow-hidden border border-gray-100 rounded-2xl hover:shadow-md transition',
               header: 'aspect-[4/5] overflow-hidden bg-gray-50',
@@ -294,7 +264,7 @@ useHead(() => ({
               description: 'mt-2 text-sm font-bold text-primary'
             }"
             variant="outline"
-            @click="sendSelectProductEvent(product)"
+            @click="trackProductSelect(categoryProduct)"
           >
             <template #badge>
               <UBadge
@@ -303,21 +273,21 @@ useHead(() => ({
                 variant="solid"
                 class="absolute left-2 top-2"
               >
-                {{ t('category.newBadge') }}
+                NOVO
               </UBadge>
             </template>
           </UBlogPost>
         </UBlogPosts>
 
         <div
-          v-if="pages > 1"
+          v-if="pageCount > 1"
           class="mt-8 flex justify-center"
         >
           <UPagination
-            v-model:page="page"
-            :itemsPerPage="limit"
-            :total="total"
-            :to="makePaginationTo"
+            v-model:page="currentPage"
+            :itemsPerPage="PRODUCTS_PER_PAGE"
+            :total="totalProducts"
+            :to="getPaginationTo"
           />
         </div>
       </section>
@@ -325,7 +295,7 @@ useHead(() => ({
 
     <AppWhatsappButton
       :to="whatsappHref"
-      :aria-label="t('category.whatsappAria')"
+      aria-label="Falar com a Amoda no WhatsApp"
     />
   </UPage>
 </template>

@@ -1,102 +1,90 @@
 <script setup lang="ts">
-const props = defineProps({
-  modelValue: { type: Object, required: true },
-  open: { type: Boolean, default: false },
+type VariantForm = {
+  id?: number | string | null
+  product_id?: number | string | null
+  color?: string | null
+  price?: number | string | null
+  active?: boolean
+};
+
+const props = withDefaults(defineProps<{
+  modelValue: VariantForm
+  open?: boolean
+}>(), {
+  open: false,
 });
 
-const variant = reactive({ ...props.modelValue });
+const variantForm = reactive<VariantForm>({ ...props.modelValue });
 
-watch(() => props.modelValue, v => Object.assign(variant, v));
+watch(
+  () => props.modelValue,
+  (modelValue) => {
+    Object.assign(variantForm, modelValue);
+  },
+);
 
+const emit = defineEmits<{
+  'update:open': [open: boolean]
+  save: [variantForm: VariantForm]
+}>();
 
-const emit = defineEmits(['update:open', 'save']);
+const isSavingVariant = ref(false);
+const modalTitle = computed(() => variantForm.id ? 'Editar variante' : 'Adicionar variante');
+const submitLabel = computed(() => variantForm.id ? 'Guardar' : 'Adicionar');
 
+watch(
+  () => props.open,
+  () => {
+    isSavingVariant.value = false;
+  },
+);
 
-const isSaving = ref(false);
+const saveVariant = () => {
+  isSavingVariant.value = true;
 
-watch(() => props.open, () => isSaving.value = false);
-
-const handleSave = () => {
-  isSaving.value = true;
-
-  emit('save', variant);
+  emit('save', variantForm);
 };
 
 const closeModal = () => emit('update:open', false);
-
-const { t } = useI18n();
 </script>
-
-<i18n lang="json">
-{
-  "en": {
-    "variant": {
-      "add": "Add variant",
-      "edit": "Edit variant",
-      "color": "Color",
-      "price": "Price (AOA)",
-      "active": "Active"
-    },
-    "common": {
-      "cancel": "Cancel",
-      "add": "Add",
-      "save": "Save"
-    }
-  },
-  "pt": {
-    "variant": {
-      "add": "Adicionar variante",
-      "edit": "Editar variante",
-      "color": "Cor",
-      "price": "Preço (AOA)",
-      "active": "Ativa"
-    },
-    "common": {
-      "cancel": "Cancelar",
-      "add": "Adicionar",
-      "save": "Guardar"
-    }
-  }
-}
-</i18n>
 
 <template>
   <UModal
     :open="props.open"
-    :title="variant.id ? t('variant.edit') : t('variant.add')"
+    :title="modalTitle"
     @update:open="closeModal"
   >
     <template #body>
       <UForm class="space-y-4">
         <UFormField
-          :label="t('variant.color')"
+          label="Cor"
           class="w-full"
         >
           <UInput
-            v-model="variant.color"
+            v-model="variantForm.color"
             class="w-full"
           />
         </UFormField>
 
         <UFormField
-          :label="t('variant.price')"
+          label="Preço (AOA)"
           required
           class="w-full"
         >
           <UInput
-            v-model="variant.price"
+            v-model="variantForm.price"
             type="number"
             class="w-full"
           />
         </UFormField>
 
         <UFormField
-          :label="t('variant.active')"
+          label="Ativa"
           class="w-full"
         >
           <UCheckbox
-            v-model="variant.active"
-            :label="t('variant.active')"
+            v-model="variantForm.active"
+            label="Ativa"
             class="w-full"
           />
         </UFormField>
@@ -106,15 +94,15 @@ const { t } = useI18n();
             variant="ghost"
             @click="closeModal"
           >
-            {{ t('common.cancel') }}
+            Cancelar
           </UButton>
 
           <UButton
+            :loading="isSavingVariant"
             color="primary"
-            :loading="isSaving"
-            @click="handleSave"
+            @click="saveVariant"
           >
-            {{ variant.id ? t('common.save') : t('common.add') }}
+            {{ submitLabel }}
           </UButton>
         </div>
       </UForm>

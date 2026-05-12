@@ -1,29 +1,22 @@
 <script setup lang="ts">
 definePageMeta({ name: 'order-number' });
 
-const { t } = useI18n();
 const route = useRoute();
-const localeRoute = useLocaleRoute();
-const { makeWhatsappHref } = useWhatsappLink();
+const orderNumber = String(route.params.number);
 
-const { data: orderData, error: orderError, pending: isPending } = await useFetch('/api/orders/get', {
-  query: { number: route.params.number },
-});
 
-const order = computed(() => orderData.value as any || null);
+const {
+  data: order,
+  error: orderError,
+  pending: isOrderPending,
+} = await useFetch<any>('/api/orders/get', { query: { number: orderNumber } });
 
-const formatAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val || 0)} AOA`;
+const orderItems = computed(() => order.value?.items || []);
+const orderTotal = computed(() => order.value?.totals?.total ?? 0);
 
-const toTel = (phone?: string | null) => {
-  if (!phone) {
-    return '';
-  }
-
-  return phone.replace(/[^\d+]/g, '');
-};
-
+const pickupOffice = computed(() => order.value?.pickupOffice || null);
 const pickupMapUrl = computed(() => {
-  const office = order.value?.pickupOffice;
+  const office = pickupOffice.value;
 
   if (!office) {
     return null;
@@ -40,100 +33,44 @@ const pickupMapUrl = computed(() => {
   return null;
 });
 
-const whatsappHref = makeWhatsappHref(() => t('order.whatsappMessage', { number: String(route.params.number) }));
+const guestContact = computed(() => order.value?.guestContact || null);
 
-const pageTitle = computed(() => `${t('order.title')} #${route.params.number} | Amoda`);
-const pageDescription = computed(() => t('order.meta.description', { number: String(route.params.number) }));
+const nextSteps = [
+  'Preparamos os seus itens.',
+  'Entramos em contacto no WhatsApp.',
+  'Você experimenta e decide com calma.',
+];
 
-useHead(() => ({
-  title: pageTitle.value,
+const { makeWhatsappHref } = useWhatsappLink();
+const whatsappHref = makeWhatsappHref(() => `Olá! Quero confirmar a minha escolha #${orderNumber}.`);
+
+
+const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price || 0)} AOA`;
+const normalizePhoneNumber = (phone?: string | null) => phone?.replace(/[^\d+]/g, '') || '';
+
+
+const title = `Reserva #${orderNumber} | Amoda`;
+const description = `Detalhes da sua reserva #${orderNumber}: contacto, ponto de experimentação e itens reservados. Sem pagamento online.`;
+
+useHead({
+  title,
   meta: [
-    { name: 'description', content: pageDescription.value },
-    { property: 'og:title', content: pageTitle.value },
-    { property: 'og:description', content: pageDescription.value },
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
     { name: 'robots', content: 'noindex, nofollow' },
   ],
-}));
+});
 </script>
-
-<i18n lang="json">
-{
-  "pt": {
-    "order": {
-      "title": "Reserva",
-      "loading": "A carregar reserva...",
-      "notFound": "Reserva não encontrada",
-      "successTitle": "Reserva criada com sucesso",
-      "number": "Número da reserva",
-      "contact": "Os seus dados",
-      "summary": "Itens reservados",
-      "total": "Total se levar tudo",
-      "size": "Tamanho",
-      "color": "Cor",
-      "call": "Ligar",
-      "map": "Abrir no Google Maps",
-      "whatsapp": "Falar connosco no WhatsApp",
-      "whatsappMessage": "Olá! Quero confirmar a minha escolha #{number}.",
-      "note": "Você ainda não pagou nada. O valor é apenas uma referência. Pague apenas depois de experimentar e só pelo que decidir levar.",
-      "pickup": {
-        "title": "Ponto para experimentar",
-        "notSelected": "O ponto não foi selecionado."
-      },
-      "next": {
-        "title": "O que acontece agora?",
-        "step1": "Preparamos os seus itens.",
-        "step2": "Entramos em contacto no WhatsApp.",
-        "step3": "Você experimenta e decide com calma."
-      },
-      "meta": {
-        "description": "Detalhes da sua reserva #{number}: contacto, ponto de experimentação e itens reservados. Sem pagamento online."
-      }
-    }
-  },
-  "en": {
-    "order": {
-      "title": "Reservation",
-      "loading": "Loading reservation...",
-      "notFound": "Reservation not found",
-      "successTitle": "Reservation created successfully",
-      "number": "Reservation number",
-      "contact": "Your details",
-      "summary": "Reserved items",
-      "total": "Total if you keep everything",
-      "size": "Size",
-      "color": "Color",
-      "call": "Call",
-      "map": "Open in Google Maps",
-      "whatsapp": "Chat with us on WhatsApp",
-      "whatsappMessage": "Hello! I want to confirm my selection #{number}.",
-      "note": "You have not paid anything yet. The amount is only a reference. Pay only after trying and only for what you decide to keep.",
-      "pickup": {
-        "title": "Try-on point",
-        "notSelected": "Pickup point was not selected."
-      },
-      "next": {
-        "title": "What happens next?",
-        "step1": "We prepare your items.",
-        "step2": "We contact you on WhatsApp.",
-        "step3": "You try and decide calmly."
-      },
-      "meta": {
-        "description": "Details of your reservation #{number}: contact, try-on point and reserved items. No online payment."
-      }
-    }
-  }
-}
-</i18n>
 
 <template>
   <UPage>
     <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
-      >
       <UCard
-        v-if="isPending"
+        v-if="isOrderPending"
         class="py-10 text-center text-muted"
       >
-        {{ t('order.loading') }}
+        A carregar reserva...
       </UCard>
 
       <UAlert
@@ -141,11 +78,11 @@ useHead(() => ({
         color="error"
         variant="soft"
         icon="i-heroicons-exclamation-triangle"
-        :description="t('order.notFound')"
+        description="Reserva não encontrada"
       />
 
       <template v-else>
-        <section class="overflow-hidden  mb-2 sm:mb-2 rounded-3xl border border-green-100 bg-gradient-to-br from-green-50 via-white to-primary/5 p-5 text-center shadow-sm sm:p-8">
+        <section class="mb-2 overflow-hidden rounded-3xl border border-green-100 bg-gradient-to-br from-green-50 via-white to-primary/5 p-5 text-center shadow-sm sm:p-8">
           <div class="mx-auto flex size-14 items-center justify-center rounded-full bg-green-100 text-green-700">
             <UIcon
               name="i-lucide-check"
@@ -154,29 +91,29 @@ useHead(() => ({
           </div>
 
           <h1 class="mt-4 text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-            {{ t('order.successTitle') }}
+            Reserva criada com sucesso
           </h1>
 
           <div class="mt-5 rounded-2xl bg-white/80 px-4 py-3">
             <div class="text-sm text-muted">
-              {{ t('order.number') }}
+              Número da reserva
             </div>
 
             <div class="text-2xl font-black text-primary">
-              #{{ route.params.number }}
+              #{{ orderNumber }}
             </div>
           </div>
 
           <div class="mt-5 grid gap-3 sm:flex sm:justify-center">
             <UButton
+              :to="whatsappHref"
               size="xl"
               color="success"
-              :to="whatsappHref"
               target="_blank"
               icon="i-simple-icons-whatsapp"
               class="justify-center"
             >
-              {{ t('order.whatsapp') }}
+              Falar connosco no WhatsApp
             </UButton>
           </div>
         </section>
@@ -185,33 +122,33 @@ useHead(() => ({
           <div class="space-y-5">
             <UCard>
               <h2 class="text-lg font-black text-highlighted">
-                {{ t('order.pickup.title') }}
+                Ponto para experimentar
               </h2>
 
-              <template v-if="order.pickupOffice">
+              <template v-if="pickupOffice">
                 <div class="mt-4 rounded-2xl border border-primary/15 bg-primary/5 p-4">
                   <div class="font-bold text-highlighted">
-                    {{ order.pickupOffice.name }}
+                    {{ pickupOffice.name }}
                   </div>
 
                   <p
-                    v-if="order.pickupOffice.address"
+                    v-if="pickupOffice.address"
                     class="mt-2 text-sm leading-6"
                   >
-                    {{ order.pickupOffice.address }}
+                    {{ pickupOffice.address }}
                   </p>
 
                   <div class="mt-4 grid gap-2 sm:flex">
                     <UButton
-                      v-if="order.pickupOffice.phone"
-                      :to="`tel:${toTel(order.pickupOffice.phone)}`"
+                      v-if="pickupOffice.phone"
+                      :to="`tel:${normalizePhoneNumber(pickupOffice?.phone)}`"
                       icon="i-lucide-phone"
                       color="neutral"
                       variant="soft"
                       size="md"
                       class="justify-center"
                     >
-                      {{ t('order.call') }}
+                      Ligar
                     </UButton>
 
                     <UButton
@@ -224,7 +161,7 @@ useHead(() => ({
                       size="md"
                       class="justify-center"
                     >
-                      {{ t('order.map') }}
+                      Abrir no Google Maps
                     </UButton>
                   </div>
                 </div>
@@ -234,47 +171,47 @@ useHead(() => ({
                 v-else
                 class="mt-3 text-sm italic text-muted"
               >
-                {{ t('order.pickup.notSelected') }}
+                O ponto não foi selecionado.
               </p>
             </UCard>
 
             <UCard>
               <h2 class="text-lg font-black text-highlighted">
-                {{ t('order.summary') }}
+                Itens reservados
               </h2>
 
               <div class="mt-4 divide-y divide-gray-100">
                 <div
-                  v-for="item in order.items"
-                  :key="item.id"
+                  v-for="orderItem in orderItems"
+                  :key="orderItem.id"
                   class="flex gap-3 py-3 first:pt-0 last:pb-0"
                 >
                   <NuxtImg
-                    :src="item.image || '/placeholder.webp'"
-                    :alt="item.title"
+                    :src="orderItem.image || '/placeholder.webp'"
+                    :alt="orderItem.title"
                     class="h-20 w-16 shrink-0 rounded-2xl object-cover"
                   />
 
                   <div class="min-w-0 flex-1">
                     <NuxtLink
+                      :to="{ name: 'product-slug', params: { slug: orderItem.slug } }"
                       class="line-clamp-2 text-sm font-bold text-highlighted hover:text-primary"
-                      :to="localeRoute({ name: 'product-slug', params: { slug: item.slug } })"
                     >
-                      {{ item.title }}
+                      {{ orderItem.title }}
                     </NuxtLink>
 
                     <div class="mt-1 text-xs text-muted">
-                      {{ t('order.size') }}: {{ item.variant?.size || '—' }} ·
-                      {{ t('order.color') }}: {{ item.variant?.color || '—' }}
+                      Tamanho: {{ orderItem.variant?.size || '—' }} ·
+                      Cor: {{ orderItem.variant?.color || '—' }}
                     </div>
 
                     <div class="mt-2 flex items-center justify-between gap-3">
                       <div class="text-xs text-muted">
-                        {{ item.qty }} × {{ formatAOA(item.unitPrice) }}
+                        {{ orderItem.qty }} × {{ formatPrice(orderItem.unitPrice) }}
                       </div>
 
                       <div class="text-sm font-black text-primary">
-                        {{ formatAOA(item.totalPrice) }}
+                        {{ formatPrice(orderItem.totalPrice) }}
                       </div>
                     </div>
                   </div>
@@ -284,16 +221,16 @@ useHead(() => ({
               <div class="mt-4 border-t pt-4">
                 <div class="flex items-center justify-between gap-4">
                   <span class="text-sm font-semibold text-highlighted">
-                    {{ t('order.total') }}
+                    Total se levar tudo
                   </span>
 
                   <span class="text-lg font-black text-primary">
-                    {{ formatAOA(order.totals.total) }}
+                    {{ formatPrice(orderTotal) }}
                   </span>
                 </div>
 
                 <p class="mt-2 text-xs leading-5 text-muted">
-                  {{ t('order.note') }}
+                  Você ainda não pagou nada. O valor é apenas uma referência. Pague apenas depois de experimentar e só pelo que decidir levar.
                 </p>
               </div>
             </UCard>
@@ -302,37 +239,21 @@ useHead(() => ({
           <aside class="space-y-5">
             <UCard>
               <h2 class="text-base font-bold text-highlighted">
-                {{ t('order.next.title') }}
+                O que acontece agora?
               </h2>
 
               <div class="mt-4 space-y-3">
-                <div class="flex gap-3">
+                <div
+                  v-for="(nextStep, nextStepIndex) in nextSteps"
+                  :key="nextStep"
+                  class="flex gap-3"
+                >
                   <div class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                    1
+                    {{ nextStepIndex + 1 }}
                   </div>
 
                   <p class="text-sm leading-6 text-muted">
-                    {{ t('order.next.step1') }}
-                  </p>
-                </div>
-
-                <div class="flex gap-3">
-                  <div class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                    2
-                  </div>
-
-                  <p class="text-sm leading-6 text-muted">
-                    {{ t('order.next.step2') }}
-                  </p>
-                </div>
-
-                <div class="flex gap-3">
-                  <div class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                    3
-                  </div>
-
-                  <p class="text-sm leading-6 text-muted">
-                    {{ t('order.next.step3') }}
+                    {{ nextStep }}
                   </p>
                 </div>
               </div>
@@ -340,22 +261,22 @@ useHead(() => ({
 
             <UCard>
               <h2 class="text-base font-bold text-highlighted">
-                {{ t('order.contact') }}
+                Os seus dados
               </h2>
 
               <div class="mt-3 text-sm leading-6">
                 <div
-                  v-if="order.guestContact?.name"
+                  v-if="guestContact?.name"
                   class="font-semibold text-highlighted"
-                  v-text="order.guestContact?.name"
+                  v-text="guestContact.name"
                 />
 
                 <a
-                  v-if="order.guestContact?.phone"
-                  :href="`tel:${toTel(order.guestContact.phone)}`"
+                  v-if="guestContact?.phone"
+                  :href="`tel:${normalizePhoneNumber(guestContact?.phone)}`"
                   class="text-primary underline underline-offset-4"
                 >
-                  {{ order.guestContact.phone }}
+                  {{ guestContact.phone }}
                 </a>
               </div>
             </UCard>

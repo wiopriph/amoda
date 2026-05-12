@@ -1,76 +1,78 @@
 <script setup lang="ts">
-definePageMeta({ name: 'admin-products-new', layout: 'admin', middleware: 'admin' });
+definePageMeta({
+  name: 'admin-products-new',
+  layout: 'admin',
+  middleware: 'admin',
+});
 
-const { t } = useI18n();
+const title = 'Criar produto';
+const description = 'Adicionar detalhes do novo produto';
 
-useHead(() => ({
-  title: `${t('productNew.title')} | Amoda Admin`,
+useHead({
+  title,
   meta: [
-    { name: 'description', content: t('productNew.description') },
-    { property: 'og:title', content: `${t('productNew.title')} | Amoda Admin` },
-    { property: 'og:description', content: t('productNew.description') },
-    { property: 'twitter:title', content: `${t('productNew.title')} | Amoda Admin` },
-    { property: 'twitter:description', content: t('productNew.description') },
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
     { name: 'robots', content: 'noindex, nofollow' },
   ],
-}));
+});
 
-const { data: brands } = await useFetch('/api/admin/brands/list');
-const { data: categories } = await useFetch('/api/admin/categories/list');
+type ProductForm = {
+  title: string
+  brand_id: number | null
+  primary_category_id: number | null
+  description: string
+  active: boolean
+};
 
-const form = reactive({
+const [
+  { data: brandOptions },
+  { data: categoryOptions },
+] = await Promise.all([
+  useFetch('/api/admin/brands/list'),
+  useFetch('/api/admin/categories/list'),
+]);
+
+const brands = computed(() => brandOptions.value || []);
+const categories = computed(() => categoryOptions.value || []);
+
+const productForm = reactive<ProductForm>({
   title: '',
-  brand_id: null as number | null,
-  primary_category_id: null as number | null,
+  brand_id: null,
+  primary_category_id: null,
   description: '',
   active: true,
 });
 
-const localeRoute = useLocaleRoute();
-
-const saveProduct = async (product: any) => {
-  const res = await $fetch('/api/admin/products/save', {
+const saveProduct = async (productPayload: ProductForm) => {
+  const savedProduct = await $fetch<{ id: number | string }>('/api/admin/products/save', {
     method: 'POST',
-    body: product,
+    body: productPayload,
   });
 
-  navigateTo(localeRoute({
+  navigateTo({
     name: 'admin-products-edit',
-    params: { id: res.id },
-  }));
+    params: { id: savedProduct.id },
+  });
 };
 </script>
-
-<i18n lang="json">
-{
-  "en": {
-    "productNew": {
-      "title": "Create product",
-      "description": "Add new product details"
-    }
-  },
-  "pt": {
-    "productNew": {
-      "title": "Criar produto",
-      "description": "Adicionar detalhes do novo produto"
-    }
-  }
-}
-</i18n>
 
 <template>
   <UPage>
     <UPageHeader
-      :title="t('productNew.title')"
-      :description="t('productNew.description')"
+      :title="title"
+      :description="description"
     />
 
     <UPageBody>
       <UCard>
         <AdminProductForm
-          v-model="form"
-          :brands="brands || []"
-          :categories="categories || []"
+          v-model="productForm"
+          :brands="brands"
+          :categories="categories"
           @save="saveProduct"
         />
       </UCard>

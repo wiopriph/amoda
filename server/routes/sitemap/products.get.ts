@@ -26,20 +26,11 @@ export default defineSitemapEventHandler(async (event) => {
     return [];
   }
 
-  const locales = ['', 'en'];
-  const CHANGEFREQ = 'weekly';
-  const PRIORITY = 0.7;
 
-  return products.flatMap((product) =>
-    locales.map((locale) => {
-      const prefix = locale ? `/${locale}` : '';
-
-      return {
-        loc: `${prefix}/product/${product.slug}`,
-        lastmod: product.created_at ? new Date(product.created_at).toISOString() : undefined,
-        changefreq: CHANGEFREQ,
-        priority: PRIORITY,
-      };
-    }),
-  );
+  return products.map((product) => ({
+    loc: `/product/${product.slug}`,
+    lastmod: product.created_at ? new Date(product.created_at).toISOString() : undefined,
+    changefreq: 'weekly',
+    priority: 0.7,
+  }));
 });

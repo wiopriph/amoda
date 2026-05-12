@@ -1,37 +1,58 @@
 <script setup lang="ts">
-const { t } = useI18n();
+type ProductOption = {
+  id: number | string
+  name: string
+};
+
+type ProductForm = {
+  id?: number | string | null
+  title?: string
+  slug?: string
+  primary_category_id?: number | string | null
+  brand_id?: number | string | null
+  description?: string | null
+  active?: boolean
+};
 
 const props = defineProps<{
-  modelValue: any
-  brands: { id: number; name: string }[]
-  categories: { id: number; name: string }[]
+  modelValue: ProductForm
+  brands: ProductOption[]
+  categories: ProductOption[]
 }>();
 
-const emit = defineEmits(['update:modelValue', 'save']);
+const emit = defineEmits<{
+  'update:modelValue': [productForm: ProductForm]
+  save: [productForm: ProductForm]
+}>();
 
-const product = ref({ ...props.modelValue });
+const productForm = ref<ProductForm>({ ...props.modelValue });
 
 watch(
   () => props.modelValue,
-  v => Object.assign(product.value, v),
+  (modelValue) => {
+    Object.assign(productForm.value, modelValue);
+  },
   { deep: true },
 );
 
-const isEdit = computed(() => !!product.value.id);
+const isEditingProduct = computed(() => !!productForm.value.id);
+const submitLabel = computed(() => isEditingProduct.value ? 'Guardar alterações' : 'Criar produto');
+const brandOptions = computed(() => props.brands.map(brand => ({ label: brand.name, value: brand.id })));
+const categoryOptions = computed(() => props.categories.map(category => ({ label: category.name, value: category.id })));
 
-const handleInput = (key: string, val: any) => {
-  product.value[key] = val;
-  emit('update:modelValue', product.value);
+const updateProductField = <Field extends keyof ProductForm>(field: Field, value: ProductForm[Field]) => {
+  productForm.value[field] = value;
+  emit('update:modelValue', productForm.value);
 };
 
-const isSaving = ref(false);
+const isSavingProduct = ref(false);
 
-const handleSave = async () => {
-  isSaving.value = true;
+const saveProduct = async () => {
+  isSavingProduct.value = true;
 
-  await emit('save', product.value);
+  emit('save', productForm.value);
 
-  isSaving.value = false;
+  isSavingProduct.value = false;
 };
 
 const slugTouched = ref(false);
@@ -45,140 +66,115 @@ const slugify = (value: string) => value
   .substring(0, 120);
 
 watch(
-  () => product.value.title,
+  () => productForm.value.title,
   (title) => {
-    if (isEdit.value) return;
+    if (isEditingProduct.value) {
+      return;
+    }
 
-    if (slugTouched.value) return;
+    if (slugTouched.value) {
+      return;
+    }
 
-    const nextSlug = title ? slugify(title) : '';
-
-    product.value.slug = nextSlug;
-    emit('update:modelValue', product.value);
+    productForm.value.slug = title ? slugify(title) : '';
+    emit('update:modelValue', productForm.value);
   },
 );
 
-const onSlugInput = (val: string) => {
-  if (isEdit.value) return;
+const updateSlug = (slug: string) => {
+  if (isEditingProduct.value) {
+    return;
+  }
 
   slugTouched.value = true;
-  handleInput('slug', val);
+  updateProductField('slug', slug);
 };
 </script>
-
-<i18n lang="json">
-{
-  "en": {
-    "productForm": {
-      "title": "Title",
-      "slug": "Slug",
-      "brand": "Brand",
-      "category": "Category",
-      "description": "Description",
-      "active": "Product active",
-      "create": "Create product",
-      "save": "Save changes"
-    }
-  },
-  "pt": {
-    "productForm": {
-      "title": "Título",
-      "slug": "Slug",
-      "brand": "Marca",
-      "category": "Categoria",
-      "description": "Descrição",
-      "active": "Produto ativo",
-      "create": "Criar produto",
-      "save": "Guardar alterações"
-    }
-  }
-}
-</i18n>
 
 <template>
   <UForm class="space-y-4">
     <UFormField
-      :label="t('productForm.title')"
+      label="Título"
       required
       class="w-full"
     >
       <UInput
-        v-model="product.title"
-        :placeholder="t('productForm.title')"
+        v-model="productForm.title"
+        placeholder="Título"
         class="w-full"
-        @input="handleInput('title', $event)"
+        @input="updateProductField('title', $event)"
       />
     </UFormField>
 
     <UFormField
-      :label="t('productForm.slug')"
+      label="Slug"
       class="w-full"
     >
       <UInput
-        v-model="product.slug"
-        :placeholder="t('productForm.slug')"
+        v-model="productForm.slug"
+        :disabled="isEditingProduct"
+        placeholder="Slug"
         class="w-full"
-        :disabled="isEdit"
-        @input="onSlugInput($event)"
+        @input="updateSlug($event)"
       />
     </UFormField>
 
     <UFormField
-      :label="t('productForm.category')"
+      label="Categoria"
       class="w-full"
     >
       <USelect
-        v-model="product.primary_category_id"
-        :items="categories.map(c => ({ label: c.name, value: c.id }))"
-        :placeholder="t('productForm.category')"
+        v-model="productForm.primary_category_id"
+        :items="categoryOptions"
+        placeholder="Categoria"
         class="w-full"
-        @update:model-value="handleInput('primary_category_id', $event)"
+        @update:model-value="updateProductField('primary_category_id', $event)"
       />
     </UFormField>
 
     <UFormField
-      :label="t('productForm.brand')"
+      label="Marca"
       class="w-full"
     >
       <USelect
-        v-model="product.brand_id"
-        :items="brands.map(b => ({ label: b.name, value: b.id }))"
-        :placeholder="t('productForm.brand')"
+        v-model="productForm.brand_id"
+        :items="brandOptions"
+        placeholder="Marca"
         class="w-full"
-        @update:model-value="handleInput('brand_id', $event)"
+        @update:model-value="updateProductField('brand_id', $event)"
       />
     </UFormField>
 
     <UFormField
-      :label="t('productForm.description')"
+      label="Descrição"
       class="w-full"
     >
       <UTextarea
-        v-model="product.description"
+        v-model="productForm.description"
         :rows="6"
         class="w-full"
-        @update:model-value="handleInput('description', $event)"
+        @update:model-value="updateProductField('description', $event)"
       />
     </UFormField>
 
     <UFormField
-      :label="t('productForm.active')"
+      label="Produto ativo"
       class="w-full"
     >
       <UCheckbox
-        v-model="product.active"
-        :label="t('productForm.active')"
-        @update:model-value="handleInput('active', $event)"
+        v-model="productForm.active"
+        label="Produto ativo"
+        @update:model-value="updateProductField('active', $event)"
       />
     </UFormField>
 
     <div class="flex justify-end gap-2 pt-4">
       <UButton
-        :loading="isSaving"
+        :loading="isSavingProduct"
         color="primary"
-        @click="handleSave"
+        @click="saveProduct"
       >
-        {{ isEdit ? t('productForm.save') : t('productForm.create') }}
+        {{ submitLabel }}
       </UButton>
     </div>
   </UForm>

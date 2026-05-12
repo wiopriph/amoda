@@ -2,12 +2,6 @@
 import type { NavigationMenuItem } from '@nuxt/ui';
 
 
-const { t } = useI18n();
-const localeRoute = useLocaleRoute();
-const { count } = useCart();
-
-const isCategoriesOpen = ref(false);
-
 type NavCategory = {
   slug: string
   name: string
@@ -15,53 +9,34 @@ type NavCategory = {
   parent_id?: number | null
 };
 
-const { data: categories } = await useFetch<NavCategory[]>('/api/categories/list');
+const { data: categoryResponse } = await useFetch<NavCategory[]>('/api/categories/list');
 
-const topCategories = computed<NavCategory[]>(() =>
-  categories.value?.filter(cat => !cat.parent_id) ?? [],
-);
-
-const hasCategories = computed(() => topCategories.value.length > 0);
+const mobileCategories = computed(() => categoryResponse.value || []);
+const navigationCategories = computed<NavCategory[]>(() => mobileCategories.value.filter(category => !category.parent_id));
 
 const menuItems = computed<NavigationMenuItem[]>(() =>
-  topCategories.value.slice(0, 6).map(cat => ({
-    label: cat.name,
-    to: localeRoute({ name: 'category-slug', params: { slug: cat.slug } }),
-  })),
+  navigationCategories.value
+    .slice(0, 6)
+    .map(category => ({
+      label: category.name,
+      to: { name: 'category-slug', params: { slug: category.slug } },
+    })),
 );
-</script>
 
-<i18n lang="json">
-{
-  "pt": {
-    "header": {
-      "tagline": "Experimente antes de pagar · Pague só o que gostar",
-      "cart": "Escolha",
-      "cartCount": "Itens selecionados: {count}",
-      "categories": "Categorias",
-      "categoriesDesc": "Escolha o que quer experimentar",
-      "close": "Fechar",
-      "new": "Novidades"
-    }
-  },
-  "en": {
-    "header": {
-      "tagline": "Try before you pay · Pay only for what you like",
-      "cart": "Selection",
-      "cartCount": "Selected items: {count}",
-      "categories": "Categories",
-      "categoriesDesc": "Choose what you want to try",
-      "close": "Close",
-      "new": "New arrivals"
-    }
-  }
-}
-</i18n>
+
+const isCategoriesOpen = ref(false);
+
+const closeCategories = () => {
+  isCategoriesOpen.value = false;
+};
+
+const { count } = useCart();
+</script>
 
 <template>
   <div class="sticky top-0 z-50">
     <div class="bg-primary px-4 py-1.5 text-center text-xs font-semibold text-white">
-      {{ t('header.tagline') }}
+      Experimente antes de pagar · Pague só o que gostar
     </div>
 
     <UHeader
@@ -72,7 +47,7 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
       <template #left>
         <div class="flex items-center gap-2">
           <USlideover
-            v-if="hasCategories"
+            v-if="navigationCategories.length"
             v-model:open="isCategoriesOpen"
             side="left"
             class="md:hidden"
@@ -90,11 +65,11 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
                   <div class="flex items-center justify-between gap-3">
                     <div>
                       <div class="text-lg font-black text-highlighted">
-                        {{ t('header.categories') }}
+                        Categorias
                       </div>
 
                       <div class="mt-1 text-sm text-muted">
-                        {{ t('header.categoriesDesc') }}
+                        Escolha o que quer experimentar
                       </div>
                     </div>
 
@@ -103,8 +78,8 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
                       color="neutral"
                       size="sm"
                       icon="i-heroicons-x-mark"
-                      :aria-label="t('header.close')"
-                      @click="isCategoriesOpen = false"
+                      aria-label="Fechar"
+                      @click="closeCategories"
                     />
                   </div>
                 </div>
@@ -112,11 +87,11 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
                 <div class="flex-1 overflow-y-auto px-4 py-3">
                   <div class="grid gap-2">
                     <NuxtLink
-                      v-for="category in categories || []"
+                      v-for="category in mobileCategories"
                       :key="category.slug"
-                      :to="localeRoute({ name: 'category-slug', params: { slug: category.slug } })"
+                      :to="{ name: 'category-slug', params: { slug: category.slug } }"
                       class="group flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 transition hover:border-primary/30 hover:bg-primary/5"
-                      @click="isCategoriesOpen = false"
+                      @click="closeCategories"
                     >
                       <div
                         class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100"
@@ -152,7 +127,7 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
           </USlideover>
 
           <NuxtLink
-            :to="localeRoute({ name: 'index' })"
+            :to="{ name: 'index' }"
             class="font-montserrat text-[22px] font-black tracking-tight text-highlighted transition hover:opacity-70"
           >
             <svg
@@ -189,31 +164,31 @@ const menuItems = computed<NavigationMenuItem[]>(() =>
       <template #right>
         <div class="flex items-center gap-1 sm:gap-2">
           <UButton
-            :to="localeRoute({ name: 'category-slug', params: { slug: 'mulheres' } })"
+            :to="{ name: 'category-slug', params: { slug: 'mulheres' } }"
             variant="soft"
             color="primary"
             size="sm"
             class="hidden sm:inline-flex"
           >
-            {{ t('header.new') }}
+            Novidades
           </UButton>
 
           <UButton
-            :to="localeRoute({ name: 'cart' })"
+            :to="{ name: 'cart' }"
             variant="ghost"
             color="neutral"
             icon="i-heroicons-shopping-bag"
-            :aria-label="t('header.cart')"
+            aria-label="Escolha"
             class="relative hover:text-primary"
           >
             <span class="hidden sm:inline">
-              {{ t('header.cart') }}
+              Escolha
             </span>
 
             <span
               v-if="count"
+              :aria-label="`Itens selecionados: ${count}`"
               class="absolute -right-1 -top-1 rounded-full bg-primary px-1.5 py-0.5 text-[11px] font-bold leading-none text-white"
-              :aria-label="t('header.cartCount', { count })"
             >
               {{ count }}
             </span>

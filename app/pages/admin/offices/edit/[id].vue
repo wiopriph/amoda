@@ -5,104 +5,102 @@ definePageMeta({
   middleware: 'admin',
 });
 
-const { t } = useI18n();
 const route = useRoute();
+const officeId = computed(() => Number(route.params.id));
+const title = computed(() => `Editar ponto #${officeId.value}`);
+const description = 'Atualizar ponto de levantamento';
+
+type OfficeResponse = {
+  id: number
+  slug: string
+  name: string
+  description?: string | null
+  address?: string | null
+  location_lat?: number | null
+  location_lng?: number | null
+  phone?: string | null
+  opening_hours?: string | null
+  active: boolean
+};
 
 useHead(() => ({
-  title: `${t('adminOfficeEdit.metaTitle', { id: String(route.params.id) })} | Amoda Admin`,
-  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
+  title: title.value,
+  meta: [
+    { name: 'description', content: description },
+    { property: 'og:title', content: title.value },
+    { property: 'og:description', content: description },
+    { property: 'twitter:title', content: title.value },
+    { property: 'twitter:description', content: description },
+    { name: 'robots', content: 'noindex, nofollow' },
+  ],
 }));
 
-const id = computed(() => Number(route.params.id));
-
-const { data, pending, error, refresh } = await useFetch('/api/admin/offices/get', {
-  query: { id },
-  watch: [id],
+const {
+  data: officeResponse,
+  pending: isOfficePending,
+  error: officeError,
+  refresh: refreshOffice,
+} = await useFetch<OfficeResponse>('/api/admin/offices/get', {
+  query: { id: officeId },
+  watch: [officeId],
 });
 
-const initial = computed(() => {
-  const o: any = data.value;
+const officeInitialValues = computed(() => {
+  const office = officeResponse.value;
 
-  if (!o) {
+  if (!office) {
     return null;
   }
 
   return {
-    id: o.id,
-    slug: o.slug,
-    name: o.name,
-    description: o.description ?? null,
-    address: o.address ?? null,
-    locationLat: o.location_lat ?? null,
-    locationLng: o.location_lng ?? null,
-    phone: o.phone ?? null,
-    openingHours: o.opening_hours ?? null,
-    active: !!o.active,
+    id: office.id,
+    slug: office.slug,
+    name: office.name,
+    description: office.description ?? null,
+    address: office.address ?? null,
+    locationLat: office.location_lat ?? null,
+    locationLng: office.location_lng ?? null,
+    phone: office.phone ?? null,
+    openingHours: office.opening_hours ?? null,
+    active: !!office.active,
   };
 });
 
-const onSaved = async () => {
-  await refresh();
+const refreshSavedOffice = async () => {
+  await refreshOffice();
 };
 </script>
-
-<i18n lang="json">
-{
-  "en": {
-    "adminOfficeEdit": {
-      "metaTitle": "Edit Office #{id}",
-      "title": "Edit office #{id}",
-      "description": "Update pickup office",
-      "loading": "Loading…",
-      "errorTitle": "Error",
-      "notFound": "Office not found",
-      "save": "Save"
-    }
-  },
-  "pt": {
-    "adminOfficeEdit": {
-      "metaTitle": "Editar ponto #{id}",
-      "title": "Editar ponto #{id}",
-      "description": "Atualizar ponto de levantamento",
-      "loading": "A carregar…",
-      "errorTitle": "Erro",
-      "notFound": "Ponto não encontrado",
-      "save": "Guardar"
-    }
-  }
-}
-</i18n>
 
 <template>
   <UPage>
     <UPageHeader
-      :title="t('adminOfficeEdit.title', { id: String(route.params.id) })"
-      :description="t('adminOfficeEdit.description')"
+      :title="title"
+      :description="description"
     />
 
     <UPageBody class="max-w-4xl mx-auto">
       <UCard
-        v-if="pending"
+        v-if="isOfficePending"
         class="p-6 text-center text-gray-500"
       >
-        {{ t('adminOfficeEdit.loading') }}
+        A carregar…
       </UCard>
 
       <UAlert
-        v-else-if="error || !initial"
+        v-else-if="officeError || !officeInitialValues"
+        :description="String(officeError?.message || 'Ponto não encontrado')"
         color="error"
         variant="soft"
         icon="i-heroicons-exclamation-triangle"
-        :title="t('adminOfficeEdit.errorTitle')"
-        :description="String(error?.message || t('adminOfficeEdit.notFound'))"
+        title="Erro"
       />
 
       <AdminOfficeForm
         v-else
+        :initial="officeInitialValues"
         mode="edit"
-        :initial="initial"
-        :submitLabel="t('adminOfficeEdit.save')"
-        @saved="onSaved"
+        submitLabel="Guardar"
+        @saved="refreshSavedOffice"
       />
     </UPageBody>
   </UPage>

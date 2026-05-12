@@ -7,15 +7,15 @@ import { makeGa4Item } from '~/utils/ga4';
 
 definePageMeta({ name: 'checkout' });
 
-const { t } = useI18n();
-const toast = useToast();
+const title = 'Deixar número | Amoda';
+const description = 'Deixe o seu número para a equipa da Amoda entrar em contacto e confirmar a sua escolha.';
 
 useHead(() => ({
-  title: t('checkout.meta.title'),
+  title,
   meta: [
-    { name: 'description', content: t('checkout.meta.description') },
-    { property: 'og:title', content: t('checkout.meta.title') },
-    { property: 'og:description', content: t('checkout.meta.description') },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { name: 'description', content: description },
     { name: 'robots', content: 'noindex, nofollow' },
   ],
 }));
@@ -29,13 +29,11 @@ const {
   contactSnapshot,
 } = useCart();
 
+
 const { trackPurchase } = useAnalyticsEvent();
-const localeRoute = useLocaleRoute();
-const CONTACT_SYNC_DEBOUNCE_MS = 900;
-const DEFAULT_PICKUP_OFFICE_ID = 1;
 
 let contactSyncTimer: ReturnType<typeof setTimeout> | null = null;
-let applyingContactSnapshot = false;
+let isApplyingContactSnapshot = false;
 
 const redirectIfEmpty = () => {
   if (isLoading.value) {
@@ -43,7 +41,7 @@ const redirectIfEmpty = () => {
   }
 
   if (!items.value.length) {
-    navigateTo(localeRoute({ name: 'cart' }));
+    navigateTo({ name: 'cart' });
   }
 };
 
@@ -52,20 +50,21 @@ if (process.client) {
   watch(isLoading, redirectIfEmpty);
 }
 
-const form = reactive({
-  phone: '',
-});
+const checkoutForm = reactive({ phone: '' });
 
-const getContactSnapshot = () => ({
-  name: '',
-  phone: form.phone.trim(),
+
+const DEFAULT_PICKUP_OFFICE_ID = 1;
+
+const buildContactSnapshot = () => ({
+  phone: checkoutForm.phone.trim(),
   pickupOfficeId: DEFAULT_PICKUP_OFFICE_ID,
+  name: '',
 });
 
-const hasContactData = () => Boolean(form.phone.trim());
+const hasContactPhone = () => Boolean(checkoutForm.phone.trim());
 
 const syncContactSnapshot = () => {
-  if (!import.meta.client || applyingContactSnapshot || !hasContactData()) {
+  if (!import.meta.client || isApplyingContactSnapshot || !hasContactPhone()) {
     return;
   }
 
@@ -75,83 +74,119 @@ const syncContactSnapshot = () => {
 
   contactSyncTimer = setTimeout(() => {
     contactSyncTimer = null;
-    startCheckout(getContactSnapshot()).catch(() => {});
-  }, CONTACT_SYNC_DEBOUNCE_MS);
+    startCheckout(buildContactSnapshot()).catch(() => {});
+  }, 900);
 };
 
 if (import.meta.client) {
   watch(
     contactSnapshot,
     (snapshot) => {
-      if (!snapshot || hasContactData()) {
+      if (!snapshot || hasContactPhone()) {
         return;
       }
 
-      applyingContactSnapshot = true;
+      isApplyingContactSnapshot = true;
 
       if (typeof snapshot.phone === 'string') {
-        form.phone = snapshot.phone;
+        checkoutForm.phone = snapshot.phone;
       }
 
       nextTick(() => {
-        applyingContactSnapshot = false;
+        isApplyingContactSnapshot = false;
       });
     },
     { immediate: true },
   );
 
   watch(
-    () => form.phone,
+    () => checkoutForm.phone,
     () => {
       syncContactSnapshot();
     },
   );
 }
 
-const errors = reactive({
+const formErrors = reactive({
   phone: false,
 });
 
-const validateForm = () => {
-  errors.phone = !form.phone.trim() || form.phone.replace(/\D/g, '').length < 12;
+const PHONE_DIGITS_MIN_LENGTH = 12;
 
-  return !errors.phone;
+const validateForm = () => {
+  formErrors.phone = !checkoutForm.phone.trim() || checkoutForm.phone.replace(/\D/g, '').length < PHONE_DIGITS_MIN_LENGTH;
+
+  return !formErrors.phone;
 };
 
-watch(() => form.phone, () => {
-  if (errors.phone && form.phone.trim()) errors.phone = false;
+watch(() => checkoutForm.phone, () => {
+  if (formErrors.phone && checkoutForm.phone.trim()) {
+    formErrors.phone = false;
+  }
 });
 
-const pending = ref(false);
+const isSubmitting = ref(false);
 
-const fmtAOA = (val: number) => `${new Intl.NumberFormat('pt-AO').format(val)} AOA`;
+const priceFormatter = new Intl.NumberFormat('pt-AO');
+const formatPrice = (price: number) => `${priceFormatter.format(price)} AOA`;
 
-const totalCount = computed(() => items.value.reduce((sum, i) => sum + i.qty, 0));
+const totalCount = computed(() => items.value.reduce((total, cartItem) => total + cartItem.qty, 0));
 
 const phoneInputRef = ref<any>(null);
+
+
+const PHONE_FOCUS_DELAY_MS = 300;
 
 const scrollToPhoneInput = async () => {
   await nextTick();
 
-  const inputEl = phoneInputRef.value?.inputRef ||
+  const phoneInputElement = phoneInputRef.value?.inputRef ||
     phoneInputRef.value?.$el?.querySelector?.('input') ||
     document.querySelector('input[name="phone"]');
 
-  if (!inputEl) {
+  if (!phoneInputElement) {
     return;
   }
 
-  inputEl.scrollIntoView({
+  phoneInputElement.scrollIntoView({
     behavior: 'smooth',
     block: 'center',
   });
 
   setTimeout(() => {
-    inputEl.focus();
-  }, 300);
+    phoneInputElement.focus();
+  }, PHONE_FOCUS_DELAY_MS);
 };
 
-const submit = async () => {
+const getOrderItems = () => items.value.map(cartItem => ({
+  productId: cartItem.productId,
+  variantId: cartItem.variantId,
+  sizeId: cartItem.sizeId,
+  title: cartItem.productName,
+  price: cartItem.price,
+  qty: cartItem.qty,
+  slug: cartItem.slug,
+  image: cartItem.image ?? null,
+}));
+
+const getAnalyticsItems = () => items.value.map(cartItem =>
+  makeGa4Item({
+    productId: cartItem.productId,
+    name: cartItem.productName,
+    brand: cartItem.brand ?? undefined,
+    price: cartItem.price,
+    quantity: cartItem.qty,
+    variantId: cartItem.variantId,
+    sizeId: cartItem.sizeId,
+    variantLabel: cartItem.variantLabel ?? undefined,
+    sizeLabel: cartItem.sizeLabel ?? undefined,
+    categoryName: cartItem.categoryName ?? undefined,
+  }),
+);
+
+const toast = useToast();
+
+const submitCheckout = async () => {
   if (!validateForm()) {
     await scrollToPhoneInput();
 
@@ -160,37 +195,26 @@ const submit = async () => {
 
   if (!items.value.length) {
     toast.add({
-      title: t('checkout.errors.empty'),
+      title: 'A sua seleção está vazia.',
       color: 'error',
     });
 
     return;
   }
 
-  pending.value = true;
+  isSubmitting.value = true;
 
   try {
-    await startCheckout(getContactSnapshot());
-
-    const dtoItems = items.value.map(i => ({
-      productId: i.productId,
-      variantId: i.variantId,
-      sizeId: i.sizeId,
-      title: i.productName,
-      price: i.price,
-      qty: i.qty,
-      slug: i.slug,
-      image: i.image ?? null,
-    }));
+    await startCheckout(buildContactSnapshot());
 
     const { number } = await $fetch('/api/checkout/place-order', {
       method: 'POST',
       body: {
-        items: dtoItems,
+        items: getOrderItems(),
         totals: { total: unref(totalAOA), currency: 'AOA' },
         contact: {
           name: '',
-          phone: form.phone,
+          phone: checkoutForm.phone,
         },
         pickupOfficeId: DEFAULT_PICKUP_OFFICE_ID,
       },
@@ -200,97 +224,23 @@ const submit = async () => {
       trackPurchase({
         transaction_id: String(number),
         value: totalAOA.value,
-        items: items.value.map(i =>
-          makeGa4Item({
-            productId: i.productId,
-            name: i.productName,
-            brand: i.brand ?? undefined,
-            price: i.price,
-            quantity: i.qty,
-            variantId: i.variantId,
-            sizeId: i.sizeId,
-            variantLabel: i.variantLabel ?? undefined,
-            sizeLabel: i.sizeLabel ?? undefined,
-            categoryName: i.categoryName ?? undefined,
-          }),
-        ),
+        items: getAnalyticsItems(),
         pickup_office_id: DEFAULT_PICKUP_OFFICE_ID,
       } as any);
     }
 
     await clear();
-    await navigateTo(localeRoute({ name: 'order-number', params: { number } }));
-  } catch (error: any) {
+    await navigateTo({ name: 'order-number', params: { number } });
+  } catch (checkoutError: any) {
     toast.add({
-      title: error?.data?.message || t('checkout.errors.common'),
+      title: checkoutError?.data?.message || 'Não foi possível enviar a sua escolha. Tente novamente em alguns instantes.',
       color: 'error',
     });
   } finally {
-    pending.value = false;
+    isSubmitting.value = false;
   }
 };
 </script>
-
-<i18n lang="json">
-{
-  "pt": {
-    "checkout": {
-      "title": "Deixe o seu número",
-      "subtitle": "Use esta opção se preferir que a equipa da Amoda fale consigo. Podemos escrever ou ligar para confirmar a sua escolha.",
-      "badge": "Sem pagamento agora",
-      "phone": "Número de telefone",
-      "submit": "Enviar número",
-      "callback": {
-        "title": "Nós falamos consigo",
-        "desc": "Digite um número válido em Angola para podermos escrever ou ligar."
-      },
-      "summary": {
-        "title": "Resumo",
-        "items": "{count} item(ns)",
-        "total": "Total se levar tudo",
-        "note": "Este valor é apenas uma referência. Você só paga depois de experimentar e apenas pelo que decidir levar."
-      },
-      "errors": {
-        "phoneRequired": "Por favor, indique o seu número de telefone.",
-        "empty": "A sua seleção está vazia.",
-        "common": "Não foi possível enviar a sua escolha. Tente novamente em alguns instantes."
-      },
-      "meta": {
-        "title": "Deixar número {'|'} Amoda",
-        "description": "Deixe o seu número para a equipa da Amoda entrar em contacto e confirmar a sua escolha."
-      }
-    }
-  },
-  "en": {
-    "checkout": {
-      "title": "Leave your number",
-      "subtitle": "Use this option if you prefer the Amoda team to contact you. We can message or call you to confirm your selection.",
-      "badge": "No payment now",
-      "phone": "Phone number",
-      "submit": "Send number",
-      "callback": {
-        "title": "We contact you",
-        "desc": "Enter a valid Angola number so we can message or call you."
-      },
-      "summary": {
-        "title": "Summary",
-        "items": "{count} item(s)",
-        "total": "Total if you keep everything",
-        "note": "This amount is only a reference. You pay only after trying and only for what you decide to keep."
-      },
-      "errors": {
-        "phoneRequired": "Please enter your phone number.",
-        "empty": "Your selection is empty.",
-        "common": "We could not send your selection. Please try again shortly."
-      },
-      "meta": {
-        "title": "Leave number {'|'} Amoda",
-        "description": "Leave your number so the Amoda team can contact you and confirm your selection."
-      }
-    }
-  }
-}
-</i18n>
 
 <template>
   <UPage>
@@ -301,40 +251,40 @@ const submit = async () => {
           variant="soft"
           class="mb-3"
         >
-          {{ t('checkout.badge') }}
+          Sem pagamento agora
         </UBadge>
 
         <h1 class="text-2xl font-black tracking-tight text-highlighted sm:text-4xl">
-          {{ t('checkout.title') }}
+          Deixe o seu número
         </h1>
 
         <p class="mt-3 text-sm leading-6 text-muted sm:text-base">
-          {{ t('checkout.subtitle') }}
+          Use esta opção se preferir que a equipa da Amoda fale consigo. Podemos escrever ou ligar para confirmar a sua escolha.
         </p>
       </section>
 
       <UForm
         class="mt-5"
-        @submit.prevent="submit"
+        @submit.prevent="submitCheckout"
       >
         <UCard>
           <h2 class="text-lg font-black text-highlighted">
-            {{ t('checkout.callback.title') }}
+            Nós falamos consigo
           </h2>
 
           <p class="mt-2 text-sm leading-6 text-muted">
-            {{ t('checkout.callback.desc') }}
+            Digite um número válido em Angola para podermos escrever ou ligar.
           </p>
 
           <div class="mt-5 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
             <UFormField
-              :label="t('checkout.phone')"
-              :error="errors.phone ? t('checkout.errors.phoneRequired') : undefined"
+              :error="formErrors.phone ? 'Por favor, indique o seu número de telefone.' : undefined"
+              label="Número de telefone"
               required
             >
               <UInput
                 ref="phoneInputRef"
-                v-model="form.phone"
+                v-model="checkoutForm.phone"
                 v-maska="'+244 ### ### ###'"
                 required
                 name="phone"
@@ -346,14 +296,14 @@ const submit = async () => {
             </UFormField>
 
             <UButton
-              :loading="pending"
-              :disabled="!items.length || errors.phone"
+              :loading="isSubmitting"
+              :disabled="!items.length || formErrors.phone"
               size="xl"
               color="primary"
               type="submit"
               class="w-full justify-center sm:mt-6 sm:w-fit"
             >
-              {{ t('checkout.submit') }}
+              Enviar número
             </UButton>
           </div>
         </UCard>
@@ -363,27 +313,29 @@ const submit = async () => {
         <div class="flex items-center justify-between gap-4">
           <div>
             <h2 class="text-base font-black text-highlighted">
-              {{ t('checkout.summary.title') }}
+              Resumo
             </h2>
 
-            <p class="mt-1 text-xs leading-5 text-muted">
-              {{ t('checkout.summary.items', { count: totalCount }) }}
-            </p>
+            <p
+              class="mt-1 text-xs leading-5 text-muted"
+              v-text="`${totalCount} item(ns)`"
+            />
           </div>
 
           <div class="shrink-0 text-right">
             <div class="text-xs text-muted">
-              {{ t('checkout.summary.total') }}
+              Total se levar tudo
             </div>
 
-            <div class="text-lg font-black text-primary">
-              {{ fmtAOA(totalAOA) }}
-            </div>
+            <div
+              class="text-lg font-black text-primary"
+              v-text="formatPrice(totalAOA)"
+            />
           </div>
         </div>
 
         <p class="mt-3 border-t border-primary/10 pt-3 text-xs leading-5 text-muted">
-          {{ t('checkout.summary.note') }}
+          Este valor é apenas uma referência. Você só paga depois de experimentar e apenas pelo que decidir levar.
         </p>
       </UCard>
     </UPageBody>

@@ -1,13 +1,17 @@
 <script setup lang="ts">
-const props = defineProps<{ error: { statusCode?: number; message?: string } }>();
-
-const { t } = useI18n();
+const props = defineProps<{
+  error: {
+    statusCode?: number;
+    message?: string
+  }
+}>();
 
 const statusCode = computed(() => props.error?.statusCode ?? 500);
 
 const is404 = computed(() => statusCode.value === 404);
-const title = computed(() => (is404.value ? t('error.404.title') : t('error.generic.title')));
-const description = computed(() => (is404.value ? t('error.404.text') : props.error?.message || t('error.generic.description')));
+
+const title = computed(() => (is404.value ? 'Página não encontrada' : 'Ocorreu um erro'));
+const description = computed(() => (is404.value ? 'A página pode ter sido removida ou o endereço está incorreto.' : props.error?.message || 'Algo correu mal. Atualize a página ou tente novamente mais tarde.'));
 
 useHead(() => ({
   title: title.value,
@@ -18,55 +22,15 @@ useHead(() => ({
     { name: 'robots', content: 'noindex, nofollow' },
   ],
 }));
-
-const localeRoute = useLocaleRoute();
-const homePage = computed(() => localeRoute({ name: 'index' }));
 </script>
-
-<i18n lang="json">
-{
-  "en": {
-    "error": {
-      "404": {
-        "title": "Page not found",
-        "text": "The page may have been removed or the URL is incorrect."
-      },
-      "generic": {
-        "title": "An error occurred",
-        "description": "Something went wrong. Please refresh or try again later."
-      },
-      "actions": {
-        "home": "Go to homepage",
-        "back": "Go back"
-      }
-    }
-  },
-  "pt": {
-    "error": {
-      "404": {
-        "title": "Página não encontrada",
-        "text": "A página pode ter sido removida ou o endereço está incorreto."
-      },
-      "generic": {
-        "title": "Ocorreu um erro",
-        "description": "Algo correu mal. Atualize a página ou tente novamente mais tarde."
-      },
-      "actions": {
-        "home": "Ir para a página inicial",
-        "back": "Voltar"
-      }
-    }
-  }
-}
-</i18n>
 
 <template>
   <UError
-    :redirect="homePage.fullPath"
     :error="{
       statusCode: statusCode,
       statusMessage: title,
       message: description
     }"
+    redirect="/"
   />
 </template>

@@ -1,7 +1,33 @@
 <script setup lang="ts">
 definePageMeta({ name: 'pickup-points' });
 
+const title = 'Pontos de experimentação da Amoda em Luanda | Horários e mapas';
+const description = 'Encontre pontos de experimentação da Amoda em Luanda: veja endereço, horário, contacto e localização para provar antes de pagar.';
+
+useHead({
+  title,
+  meta: [
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
+    { name: 'description', content: description },
+  ],
+});
+
+const WEEKDAY_LABELS = {
+  mon: 'Seg',
+  tue: 'Ter',
+  wed: 'Qua',
+  thu: 'Qui',
+  fri: 'Sex',
+  sat: 'Sáb',
+  sun: 'Dom',
+} as const;
+
 type OpeningHours = Record<string, [string, string][]>;
+
+type WeekDay = keyof typeof WEEKDAY_LABELS;
 
 type Office = {
   id: number
@@ -15,30 +41,25 @@ type Office = {
   map_url?: string | null
 };
 
-const { t } = useI18n();
-const { makeWhatsappHref } = useWhatsappLink();
+type ScheduleGroup = {
+  label: string
+  value: string
+};
 
-const whatsappHref = makeWhatsappHref(() => t('offices.contact.whatsappMessage'));
+type PickupPoint = Office & {
+  isOpen: boolean
+  mapUrl: string | null
+  phoneHref: string | null
+  schedule: ScheduleGroup[]
+};
 
-const weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+const closedLabel = 'Fechado';
+const openNowLabel = 'Aberto agora';
 
-const { data, error } = await useFetch<{ items: Office[] }>('/api/offices/list');
+const weekDays = Object.keys(WEEKDAY_LABELS) as WeekDay[];
 
-const offices = computed(() => data.value?.items ?? []);
 
-const seoTitle = computed(() => t('offices.meta.title'));
-const seoDescription = computed(() => t('offices.meta.description'));
-
-useHead(() => ({
-  title: seoTitle.value,
-  meta: [
-    { name: 'description', content: seoDescription.value },
-    { property: 'og:title', content: seoTitle.value },
-    { property: 'og:description', content: seoDescription.value },
-    { property: 'twitter:title', content: seoTitle.value },
-    { property: 'twitter:description', content: seoDescription.value },
-  ],
-}));
+const { data: officesResponse, error } = await useFetch<{ items: Office[] }>('/api/offices/list');
 
 const toTel = (phone?: string | null) => {
   if (!phone) {
@@ -48,64 +69,66 @@ const toTel = (phone?: string | null) => {
   return phone.replace(/[^\d+]/g, '');
 };
 
-const formatRanges = (ranges?: [string, string][]) => {
-  if (!ranges?.length) {
+const toMinutes = (time: string) => {
+  const [hours = 0, minutes = 0] = time.split(':').map(Number);
+
+  return hours * 60 + minutes;
+};
+
+const formatTimeRanges = (timeRanges?: [string, string][]) => {
+  if (!timeRanges?.length) {
     return '';
   }
 
-  return ranges
-    .filter((r) => r?.[0] && r?.[1])
-    .map((r) => `${r[0]}–${r[1]}`)
+  return timeRanges
+    .filter(([startTime, endTime]) => startTime && endTime)
+    .map(([startTime, endTime]) => `${startTime}–${endTime}`)
     .join(', ');
 };
 
 const getTodayKey = () => {
-  const day = new Date().getDay();
+  const dayIndex = new Date().getDay();
 
-  return weekDays[day === 0 ? 6 : day - 1];
+  return weekDays[dayIndex === 0 ? 6 : dayIndex - 1];
 };
-
-const todayKey = getTodayKey();
 
 const isOpenNow = (hours?: OpeningHours | null) => {
   const todayHours = hours?.[todayKey];
 
-  if (!todayHours?.length) return false;
+  if (!todayHours?.length) {
+    return false;
+  }
 
   const now = new Date();
-  const current = now.getHours() * 60 + now.getMinutes();
+  const currentTime = now.getHours() * 60 + now.getMinutes();
 
-  return todayHours.some(([from, to]) => {
-    const [fromHours = 0, fromMinutes = 0] = from.split(':').map(Number);
-    const [toHours = 0, toMinutes = 0] = to.split(':').map(Number);
+  return todayHours.some(([startTime, endTime]) => {
+    const opensAt = toMinutes(startTime);
+    const closesAt = toMinutes(endTime);
 
-    const start = fromHours * 60 + fromMinutes;
-    const end = toHours * 60 + toMinutes;
-
-    return current >= start && current <= end;
+    return currentTime >= opensAt && currentTime <= closesAt;
   });
 };
 
-const getCompactHours = (hours?: OpeningHours | null) => weekDays.reduce<{
-  label: string,
-  value: string
-}[]>((acc, day) => {
-  const value = formatRanges(hours?.[day]) || t('offices.closed');
-  const prev = acc[acc.length - 1];
+const todayKey = getTodayKey();
 
-  if (prev?.value === value) {
-    prev.label = `${prev.label.split('–')[0]}–${t(`offices.days.${day}`)}`;
+const getCompactSchedule = (hours?: OpeningHours | null) => weekDays.reduce<ScheduleGroup[]>((groups, day) => {
+  const value = formatTimeRanges(hours?.[day]) || closedLabel;
+  const previousGroup = groups[groups.length - 1];
+
+  if (previousGroup?.value === value) {
+    previousGroup.label = `${previousGroup.label.split('–')[0]}–${WEEKDAY_LABELS[day]}`;
   } else {
-    acc.push({
-      label: t(`offices.days.${day}`),
+    groups.push({
+      label: WEEKDAY_LABELS[day],
       value,
     });
   }
 
-  return acc;
+  return groups;
 }, []);
 
-const getMapUrl = (office: Office) => {
+const resolveMapUrl = (office: Office) => {
   if (office.map_url) {
     return office.map_url;
   }
@@ -116,78 +139,25 @@ const getMapUrl = (office: Office) => {
 
   return null;
 };
-</script>
 
-<i18n lang="json">
-{
-  "pt": {
-    "offices": {
-      "title": "Pontos de experimentação",
-      "subtitle": "Escolha um ponto, veja o horário e abra a localização no mapa.",
-      "error": "Erro ao carregar os pontos.",
-      "empty": "Ainda não há pontos disponíveis.",
-      "today": "Hoje",
-      "hours": "Horário",
-      "openNow": "Aberto agora",
-      "closed": "Fechado",
-      "phone": "Ligar",
-      "map": "Abrir no Google Maps",
-      "contact": {
-        "title": "Precisa de ajuda?",
-        "text": "Fale connosco no WhatsApp para escolher o melhor ponto ou tirar dúvidas antes de visitar.",
-        "button": "Falar no WhatsApp",
-        "whatsappMessage": "Olá! Quero ajuda com os pontos de experimentação da Amoda."
-      },
-      "meta": {
-        "title": "Pontos de experimentação da Amoda em Luanda {'|'} Horários e mapas",
-        "description": "Encontre pontos de experimentação da Amoda em Luanda: veja endereço, horário, contacto e localização para provar antes de pagar."
-      },
-      "days": {
-        "mon": "Seg",
-        "tue": "Ter",
-        "wed": "Qua",
-        "thu": "Qui",
-        "fri": "Sex",
-        "sat": "Sáb",
-        "sun": "Dom"
-      }
-    }
-  },
-  "en": {
-    "offices": {
-      "title": "Try-on points",
-      "subtitle": "Choose a point, check opening hours, and open the location on the map.",
-      "error": "Failed to load points.",
-      "empty": "No points available yet.",
-      "today": "Today",
-      "hours": "Hours",
-      "openNow": "Open now",
-      "closed": "Closed",
-      "phone": "Call",
-      "map": "Open in Google Maps",
-      "contact": {
-        "title": "Need help?",
-        "text": "Message us on WhatsApp to choose the best point or ask questions before visiting.",
-        "button": "Chat on WhatsApp",
-        "whatsappMessage": "Hello! I need help with Amoda try-on points."
-      },
-      "meta": {
-        "title": "Amoda try-on points in Luanda {'|'} Hours and maps",
-        "description": "Find Amoda try-on points in Luanda: check address, opening hours, contact details and map location before you try and pay."
-      },
-      "days": {
-        "mon": "Mon",
-        "tue": "Tue",
-        "wed": "Wed",
-        "thu": "Thu",
-        "fri": "Fri",
-        "sat": "Sat",
-        "sun": "Sun"
-      }
-    }
-  }
-}
-</i18n>
+const toPickupPoint = (office: Office): PickupPoint => {
+  const phoneNumber = toTel(office.phone);
+
+  return {
+    ...office,
+    isOpen: isOpenNow(office.opening_hours),
+    mapUrl: resolveMapUrl(office),
+    phoneHref: phoneNumber ? `tel:${phoneNumber}` : null,
+    schedule: getCompactSchedule(office.opening_hours),
+  };
+};
+
+const pickupPoints = computed(() => (officesResponse.value?.items ?? []).map(toPickupPoint));
+const firstPickupPoint = computed(() => pickupPoints.value[0] ?? null);
+
+const { makeWhatsappHref } = useWhatsappLink();
+const whatsappHref = makeWhatsappHref(() => 'Olá! Quero ajuda com os pontos de experimentação da Amoda.');
+</script>
 
 <template>
   <UPage>
@@ -196,23 +166,21 @@ const getMapUrl = (office: Office) => {
         class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8"
       >
         <UBadge
-          v-if="offices[0]"
-          :color="isOpenNow(offices[0].opening_hours) ? 'success' : 'error'"
+          v-if="firstPickupPoint"
+          :color="firstPickupPoint.isOpen ? 'success' : 'error'"
           variant="soft"
           class="mb-4"
         >
-          {{ isOpenNow(offices[0].opening_hours) ? t('offices.openNow') : t('offices.closed') }}
+          {{ firstPickupPoint.isOpen ? openNowLabel : closedLabel }}
         </UBadge>
 
-        <h1
-          class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl"
-          v-text="t('offices.title')"
-        />
+        <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
+          Pontos de experimentação
+        </h1>
 
-        <p
-          class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg"
-          v-text="t('offices.subtitle')"
-        />
+        <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
+          Escolha um ponto, veja o horário e abra a localização no mapa.
+        </p>
       </section>
 
       <UAlert
@@ -221,15 +189,15 @@ const getMapUrl = (office: Office) => {
         variant="soft"
         color="error"
         icon="i-lucide-alert-triangle"
-        :title="t('offices.error')"
+        title="Erro ao carregar os pontos."
       />
 
       <UAlert
-        v-else-if="offices.length === 0"
+        v-else-if="pickupPoints.length === 0"
         class="mt-5 sm:mt-6"
         variant="soft"
         icon="i-lucide-map-pin"
-        :title="t('offices.empty')"
+        title="Ainda não há pontos disponíveis."
       />
 
       <section
@@ -237,8 +205,8 @@ const getMapUrl = (office: Office) => {
         class="mt-5 grid gap-4 sm:mt-6"
       >
         <UCard
-          v-for="office in offices"
-          :key="office.id"
+          v-for="point in pickupPoints"
+          :key="point.id"
         >
           <div class="flex flex-col gap-5">
             <div>
@@ -246,29 +214,29 @@ const getMapUrl = (office: Office) => {
                 <div class="min-w-0">
                   <h2
                     class="text-xl font-bold text-highlighted"
-                    v-text="office.name"
+                    v-text="point.name"
                   />
                 </div>
 
                 <UBadge
-                  :color="isOpenNow(office.opening_hours) ? 'success' : 'error'"
+                  :color="point.isOpen ? 'success' : 'error'"
                   variant="soft"
                   class="shrink-0"
                 >
-                  {{ isOpenNow(office.opening_hours) ? t('offices.openNow') : t('offices.closed') }}
+                  {{ point.isOpen ? openNowLabel : closedLabel }}
                 </UBadge>
               </div>
 
               <p
-                v-if="office.address"
+                v-if="point.address"
                 class="mt-2 text-sm leading-6 text-muted"
-                v-text="office.address"
+                v-text="point.address"
               />
 
               <p
-                v-if="office.description"
+                v-if="point.description"
                 class="mt-3 text-sm leading-6 text-toned"
-                v-text="office.description "
+                v-text="point.description"
               />
             </div>
 
@@ -279,15 +247,14 @@ const getMapUrl = (office: Office) => {
                   class="size-4 text-primary"
                 />
 
-                <h3
-                  class="text-sm font-semibold text-highlighted"
-                  v-text="t('offices.hours')"
-                />
+                <h3 class="text-sm font-semibold text-highlighted">
+                  Horário
+                </h3>
               </div>
 
               <div class="grid gap-2 text-sm sm:grid-cols-2">
                 <div
-                  v-for="group in getCompactHours(office.opening_hours)"
+                  v-for="group in point.schedule"
                   :key="`${group.label}-${group.value}`"
                   class="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2"
                 >
@@ -306,27 +273,27 @@ const getMapUrl = (office: Office) => {
 
             <div class="grid gap-3 sm:flex sm:flex-wrap">
               <UButton
-                v-if="getMapUrl(office)"
-                :to="getMapUrl(office)!"
+                v-if="point.mapUrl"
+                :to="point.mapUrl"
                 target="_blank"
                 color="primary"
                 size="lg"
                 icon="i-lucide-map-pin"
                 class="justify-center"
               >
-                {{ t('offices.map') }}
+                Abrir no Google Maps
               </UButton>
 
               <UButton
-                v-if="office.phone"
-                :to="`tel:${toTel(office.phone)}`"
+                v-if="point.phoneHref"
+                :to="point.phoneHref"
                 color="neutral"
                 variant="soft"
                 size="lg"
                 icon="i-lucide-phone"
                 class="justify-center"
               >
-                {{ t('offices.phone') }}
+                Ligar
               </UButton>
             </div>
           </div>
@@ -338,8 +305,8 @@ const getMapUrl = (office: Office) => {
           color="success"
           variant="soft"
           icon="i-simple-icons-whatsapp"
-          :title="t('offices.contact.title')"
-          :description="t('offices.contact.text')"
+          title="Precisa de ajuda?"
+          description="Fale connosco no WhatsApp para escolher o melhor ponto ou tirar dúvidas antes de visitar."
         >
           <template #actions>
             <UButton
@@ -347,7 +314,7 @@ const getMapUrl = (office: Office) => {
               target="_blank"
               color="success"
             >
-              {{ t('offices.contact.button') }}
+              Falar no WhatsApp
             </UButton>
           </template>
         </UAlert>
