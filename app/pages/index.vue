@@ -315,7 +315,7 @@ const startShoppingTo = { name: 'category-slug', params: { slug: 'mulheres' } } 
       </section>
     </UPageBody>
 
-    <AppWhatsappButton
+    <WhatsappButton
       :to="whatsappHref"
       aria-label="Falar com a Amoda no WhatsApp"
     />

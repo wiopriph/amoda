@@ -178,7 +178,7 @@ const deleteCategory = async () => {
         </div>
 
         <template v-else>
-          <CategoryTree
+          <AdminCategoryTree
             :items="categoryTree"
             @edit="openEditCategoryModal"
             @add="openCreateCategoryModal"

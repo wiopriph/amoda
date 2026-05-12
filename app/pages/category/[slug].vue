@@ -223,7 +223,7 @@ useHead(() => ({
           v-if="categoryNavigation?.length"
           class="mt-5"
         >
-          <CategoriesPills :list="categoryNavigation" />
+          <CategoryPills :list="categoryNavigation" />
         </div>
       </section>
 
@@ -293,7 +293,7 @@ useHead(() => ({
       </section>
     </UPageBody>
 
-    <AppWhatsappButton
+    <WhatsappButton
       :to="whatsappHref"
       aria-label="Falar com a Amoda no WhatsApp"
     />

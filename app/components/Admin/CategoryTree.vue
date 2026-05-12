@@ -79,7 +79,7 @@ const emitRemove = (category: Category) => emit('remove', category);
         </div>
       </div>
 
-      <CategoryTree
+      <AdminCategoryTree
         v-if="category.children?.length"
         :items="category.children"
         @edit="emitEdit"
