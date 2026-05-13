@@ -48,6 +48,7 @@ const selectedCategory = ref<Category | null>(null);
 const categoryForm = reactive<CategoryForm>({
   id: null,
   name: '',
+  // eslint-disable-next-line camelcase
   parent_id: null,
   active: true,
 });
@@ -59,6 +60,7 @@ const resetCategoryForm = (parentCategory: Category | null = null) => {
   Object.assign(categoryForm, {
     id: null,
     name: '',
+    // eslint-disable-next-line camelcase
     parent_id: parentCategory?.id ?? null,
     active: true,
   });
@@ -74,6 +76,7 @@ const openEditCategoryModal = (category: Category) => {
   Object.assign(categoryForm, {
     id: category.id,
     name: category.name,
+    // eslint-disable-next-line camelcase
     parent_id: category.parent_id,
     active: category.active,
   });
