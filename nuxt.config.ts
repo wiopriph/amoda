@@ -1,10 +1,14 @@
+const image = 'https://amoda.ao/logo.webp';
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   css: ['~/assets/css/main.css'],
 
   app: {
     head: {
-      titleTemplate: '%s | Amoda',
+      htmlAttrs: {
+        lang: 'pt-AO',
+      },
 
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon-new.ico' },
@@ -26,7 +30,20 @@ export default defineNuxtConfig({
       meta: [
         { property: 'og:type', content: 'website' },
         { property: 'og:site_name', content: 'Amoda' },
+        { property: 'og:locale', content: 'pt_AO' },
+        { property: 'og:image', content: image },
+        { property: 'og:image:secure_url', content: image },
+        { property: 'og:image:width', content: '2048' },
+        { property: 'og:image:height', content: '2048' },
+        { property: 'og:image:type', content: 'image/webp' },
+        { property: 'og:image:alt', content: 'Amoda - moda feminina em Luanda' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:image', content: image },
+        { name: 'twitter:image:alt', content: 'Amoda - moda feminina em Luanda' },
+        { name: 'application-name', content: 'Amoda' },
         { name: 'apple-mobile-web-app-title', content: 'Amoda' },
+        { name: 'theme-color', content: '#f6339a' },
+        { name: 'format-detection', content: 'telephone=no' },
       ],
     },
   },

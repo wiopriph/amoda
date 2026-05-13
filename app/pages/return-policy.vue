@@ -7,9 +7,11 @@ const description = 'Conheça a política de trocas e devoluções da Amoda em L
 useHead(() => ({
   title,
   meta: [
+    { name: 'description', content: description },
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
-    { name: 'description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
   ],
 }));
 

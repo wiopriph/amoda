@@ -178,11 +178,11 @@ const itemListSchema = computed(() => ({
 useHead(() => ({
   title: title.value,
   meta: [
-    { name: 'description', content: description.value },
-    { property: 'og:title', content: title.value },
-    { property: 'og:description', content: description.value },
-    { property: 'twitter:title', content: title.value },
-    { property: 'twitter:description', content: description.value },
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
   ],
   script: [
     { type: 'application/ld+json', innerHTML: JSON.stringify(breadcrumbSchema.value) },

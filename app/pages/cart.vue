@@ -11,9 +11,11 @@ const description = 'Revise a sua seleção na Amoda antes de confirmar. Você n
 useHead(() => ({
   title,
   meta: [
+    { name: 'description', content: description },
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
-    { name: 'description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
     { name: 'robots', content: 'noindex, nofollow' },
   ],
 }));

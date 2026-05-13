@@ -10,9 +10,11 @@ const description = 'Veja como a Amoda usa dados pessoais para escolhas online, 
 useHead(() => ({
   title,
   meta: [
+    { name: 'description', content: description },
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
-    { name: 'description', content: description },
+    { property: 'twitter:title', content: title },
+    { property: 'twitter:description', content: description },
   ],
 }));
 
