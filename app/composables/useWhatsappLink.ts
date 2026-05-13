@@ -3,13 +3,18 @@ import { CONTACT_PHONE } from '~/constants/contacts';
 
 export const useWhatsappLink = () => {
   const { publicCode } = useCart();
+  const isMounted = ref(false);
 
   const phone = String(CONTACT_PHONE).replace(/\D/g, '');
+
+  onMounted(() => {
+    isMounted.value = true;
+  });
 
   const withCartCode = (message: string) => {
     const lines = [message.trim()];
 
-    if (publicCode.value) {
+    if (isMounted.value && publicCode.value) {
       lines.push(`Código do carrinho: ${publicCode.value}`);
     }
 
