@@ -73,7 +73,6 @@ const mapCart = (cart: any) => ({
   userId: cart.user_id ?? null,
   sessionId: cart.session_id,
   status: cart.status,
-  currency: cart.currency,
   publicCode: cart.public_code,
   updatedAt: cart.updated_at,
   expiresAt: cart.expires_at,
@@ -179,7 +178,6 @@ const insertCart = async (client: SupabaseClient, sessionId: string) => {
       .insert({
         session_id: sessionId,
         status: 'DRAFT',
-        currency: 'AOA',
         public_code: generatePublicCode(),
         updated_at: now,
         expires_at: expiresAt,

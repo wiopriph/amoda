@@ -25,6 +25,11 @@ const MENU_LIST = [
     icon: 'i-lucide-receipt',
     to: { name: 'admin-orders' },
   },
+  {
+    label: 'Carrinhos',
+    icon: 'i-lucide-shopping-cart',
+    to: { name: 'admin-carts' },
+  },
 ];
 
 const { signOut } = useAuth();
