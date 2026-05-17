@@ -91,6 +91,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero comprar alguma coisa na
           </UButton>
 
           <UButton
+            v-if="false"
             :to="whatsappHref"
             size="xl"
             color="success"

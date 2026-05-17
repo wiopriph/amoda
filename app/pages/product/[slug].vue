@@ -827,6 +827,7 @@ useHead(() => ({
       <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 sm:hidden">
         <div class="mx-auto flex max-w-(--ui-container) items-center gap-2 px-1">
           <UButton
+            v-if="false"
             :to="whatsappHref"
             size="xl"
             color="success"
