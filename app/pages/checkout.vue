@@ -2,6 +2,7 @@
 /* eslint-disable camelcase */
 import { vMaska } from 'maska/vue';
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 
 
@@ -25,7 +26,7 @@ useHead(() => ({
 const {
   isLoading,
   items,
-  totalAOA,
+  totalKz,
   clear,
   startCheckout,
   contactSnapshot,
@@ -129,9 +130,6 @@ watch(() => checkoutForm.phone, () => {
 
 const isSubmitting = ref(false);
 
-const priceFormatter = new Intl.NumberFormat('pt-AO');
-const formatPrice = (price: number) => `${priceFormatter.format(price)} AOA`;
-
 const totalCount = computed(() => items.value.reduce((total, cartItem) => total + cartItem.qty, 0));
 
 const phoneInputRef = ref<any>(null);
@@ -213,7 +211,7 @@ const submitCheckout = async () => {
       method: 'POST',
       body: {
         items: getOrderItems(),
-        totals: { total: unref(totalAOA), currency: 'AOA' },
+        totals: { total: unref(totalKz) },
         contact: {
           name: '',
           phone: checkoutForm.phone,
@@ -225,7 +223,7 @@ const submitCheckout = async () => {
     if (import.meta.client) {
       trackPurchase({
         transaction_id: String(number),
-        value: totalAOA.value,
+        value: totalKz.value,
         items: getAnalyticsItems(),
         pickup_office_id: DEFAULT_PICKUP_OFFICE_ID,
       } as any);
@@ -331,7 +329,7 @@ const submitCheckout = async () => {
 
             <div
               class="text-lg font-black text-primary"
-              v-text="formatPrice(totalAOA)"
+              v-text="formatPrice(totalKz)"
             />
           </div>
         </div>

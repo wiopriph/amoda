@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 
 
@@ -22,7 +23,7 @@ useHead(() => ({
 
 const {
   items: cartItems,
-  totalAOA,
+  totalKz,
   increment,
   decrement,
   setQty,
@@ -31,9 +32,6 @@ const {
   isPending: isCartPending,
   error: cartError,
 } = useCart();
-
-const priceFormatter = new Intl.NumberFormat('pt-AO');
-const formatPrice = (price: number) => `${priceFormatter.format(price)} AOA`;
 
 const { trackBeginCheckout } = useAnalyticsEvent();
 
@@ -98,7 +96,7 @@ const trackCheckoutIntent = () => {
 
   if (import.meta.client) {
     trackBeginCheckout({
-      value: totalAOA.value,
+      value: totalKz.value,
       items: getAnalyticsItems(),
     });
   }
@@ -297,7 +295,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero confirmar a minha escol
 
                     <span
                       class="text-lg font-black text-primary"
-                      v-text="formatPrice(totalAOA)"
+                      v-text="formatPrice(totalKz)"
                     />
                   </div>
 
@@ -407,7 +405,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero confirmar a minha escol
 
                 <div
                   class="text-lg font-black text-primary"
-                  v-text="formatPrice(totalAOA)"
+                  v-text="formatPrice(totalKz)"
                 />
               </div>
 

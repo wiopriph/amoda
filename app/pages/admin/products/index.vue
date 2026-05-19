@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
+import { formatPrice } from '~/utils/formatPrice';
 
 
 definePageMeta({
@@ -196,8 +197,6 @@ const productRows = computed<ProductTableRow[]>(() =>
     variantsCount: product.variants?.length || 0,
   })),
 );
-
-const formatPrice = (price?: number | null) => price ? `${new Intl.NumberFormat('pt-AO').format(price)} AOA` : '—';
 
 const getPaginationTo = (pageNumber: number) => ({
   query: {

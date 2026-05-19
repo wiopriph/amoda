@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { formatPrice } from '~/utils/formatPrice';
+
+
 definePageMeta({ name: 'admin-orders-number', layout: 'admin', middleware: 'admin' });
 
 
@@ -103,7 +106,6 @@ watchEffect(() => {
   selectedPaymentStatus.value = order.value.paymentStatus || 'UNPAID';
 });
 
-const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price)} AOA`;
 const normalizePhoneNumber = (phone: string) => String(phone || '').replace(/[^\d+]/g, '');
 
 const guestContact = computed(() => order.value?.guestContact || null);

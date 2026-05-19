@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { formatPrice } from '~/utils/formatPrice';
+
+
 definePageMeta({
   name: 'admin-products-edit',
   layout: 'admin',
@@ -187,8 +190,6 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
     uploadingImagesByVariantId.value[variantId] = false;
   }
 };
-
-const formatPrice = (price?: number | null) => price ? `${new Intl.NumberFormat('pt-AO').format(price)} AOA` : '—';
 </script>
 
 <template>

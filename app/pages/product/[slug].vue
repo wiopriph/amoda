@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
+import { CURRENCY } from '~/constants/currency';
 
 
 definePageMeta({ name: 'product-slug' });
@@ -109,8 +111,6 @@ function selectImage(index: number) {
   carouselRef.value?.emblaApi?.scrollTo(index);
 }
 
-
-const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price)} AOA`;
 
 const formattedPrice = computed(() => {
   const price = activeVariant.value?.price ?? product.value?.price ?? 0;
@@ -316,7 +316,7 @@ const productSchema = computed(() => ({
   offers: {
     '@type': 'Offer',
     url: productUrl.value,
-    priceCurrency: 'AOA',
+    priceCurrency: CURRENCY,
     price: activeVariant.value?.price ?? product.value?.price ?? 0,
     availability: 'https://schema.org/InStock',
     itemCondition: 'https://schema.org/NewCondition',

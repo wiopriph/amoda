@@ -1,3 +1,6 @@
+import { CURRENCY } from '~/constants/currency';
+
+
 export const ANALYTICS_EVENTS = {
   VIEW_ITEM_LIST: 'view_item_list',
   SELECT_ITEM: 'select_item',
@@ -33,8 +36,6 @@ export type Ga4Item = {
   variant_id?: number;
   size_id?: number;
 };
-
-const CURRENCY = 'AOA' as const;
 
 type ViewItemListPayload = {
   listId?: string;

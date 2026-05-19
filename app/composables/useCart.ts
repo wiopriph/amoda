@@ -445,7 +445,7 @@ export function useCart() {
 
   const items = computed(() => itemsState.value);
   const count = computed(() => itemsState.value.reduce((acc, item) => acc + item.qty, 0));
-  const totalAOA = computed(() => itemsState.value.reduce((sum, item) => sum + item.price * item.qty, 0));
+  const totalKz = computed(() => itemsState.value.reduce((sum, item) => sum + item.price * item.qty, 0));
   const isEmpty = computed(() => itemsState.value.length === 0);
 
   const getQty = (productId: number, variantId: number, sizeId: number) =>
@@ -458,7 +458,7 @@ export function useCart() {
   return {
     items,
     count,
-    totalAOA,
+    totalKz,
     isEmpty,
     isLoading,
     publicCode,

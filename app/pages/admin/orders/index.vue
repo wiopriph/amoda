@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
+import { formatPrice } from '~/utils/formatPrice';
 
 
 definePageMeta({
@@ -106,8 +107,6 @@ const totalOrders = computed(() => Number(ordersResponse.value?.total || 0));
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
 const ClientOnly = resolveComponent('ClientOnly');
-
-const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price)} AOA`;
 
 const getOrderTotal = (totals: any) => {
   const orderTotal = totals?.total ?? totals?.grandTotal ?? totals?.amount ?? null;

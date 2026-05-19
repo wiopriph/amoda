@@ -67,7 +67,7 @@ const closeModal = () => emit('update:open', false);
         </UFormField>
 
         <UFormField
-          label="Preço (AOA)"
+          label="Preço"
           required
           class="w-full"
         >

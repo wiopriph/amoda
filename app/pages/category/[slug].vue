@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
+import { CURRENCY } from '~/constants/currency';
 
 
 definePageMeta({ name: 'category-slug' });
@@ -125,8 +127,6 @@ const trackProductSelect = (product: any) => {
   });
 };
 
-const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price || 0)} AOA`;
-
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => `Olá! Preciso de ajuda com a categoria ${categoryTitle.value} na Amoda.`);
 
@@ -171,7 +171,7 @@ const itemListSchema = computed(() => ({
         offers: {
           '@type': 'Offer',
           url: productUrl,
-          priceCurrency: 'AOA',
+          priceCurrency: CURRENCY,
           price: product.price || 0,
           availability: 'https://schema.org/InStock',
         },

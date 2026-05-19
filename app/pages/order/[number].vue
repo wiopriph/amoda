@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { formatPrice } from '~/utils/formatPrice';
+
+
 definePageMeta({ name: 'order-number' });
 
 const route = useRoute();
@@ -45,7 +48,6 @@ const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => `Olá! Quero confirmar a minha escolha #${orderNumber}.`);
 
 
-const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price || 0)} AOA`;
 const normalizePhoneNumber = (phone?: string | null) => phone?.replace(/[^\d+]/g, '') || '';
 
 

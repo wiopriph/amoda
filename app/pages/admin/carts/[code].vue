@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { formatPrice } from '~/utils/formatPrice';
+
+
 definePageMeta({ name: 'admin-carts-code', layout: 'admin', middleware: 'admin' });
 
 
@@ -91,7 +94,6 @@ const dateFormatter = new Intl.DateTimeFormat('pt-PT', {
 });
 
 const formatDate = (date?: string | null) => date ? dateFormatter.format(new Date(date)) : '—';
-const formatPrice = (price: number) => `${new Intl.NumberFormat('pt-AO').format(price)} AOA`;
 const normalizePhoneNumber = (phone: string) => String(phone || '').replace(/[^\d+]/g, '');
 
 const contact = computed(() => cart.value?.contactSnapshot || null);

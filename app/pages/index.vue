@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
+import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 
 
@@ -188,7 +189,7 @@ const startShoppingTo = { name: 'category-slug', params: { slug: 'mulheres' } } 
             v-for="(product, productIndex) in products"
             :key="product.id"
             :title="product.title"
-            :description="`${new Intl.NumberFormat('pt-AO').format(product.price)} AOA`"
+            :description="formatPrice(product.price)"
             :image="product.image || 'placeholder.webp'"
             :to="{ name: 'product-slug', params: { slug: product.slug } }"
             :ui="{

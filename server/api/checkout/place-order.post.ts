@@ -13,7 +13,7 @@ type CartItem = {
   image?: string | null
 };
 
-type Totals = { total: number; currency: string };
+type Totals = { total: number };
 type Contact = { name: string; phone: string; };
 
 function generateOrderNumber() {
@@ -47,10 +47,6 @@ export default defineEventHandler(async (event) => {
 
   if (!Number.isInteger(body.totals?.total) || body.totals.total < 0) {
     throw createError({ statusCode: 400, statusMessage: 'Invalid totals.total' });
-  }
-
-  if (body.totals?.currency && body.totals.currency !== 'AOA') {
-    throw createError({ statusCode: 400, statusMessage: 'Unsupported currency' });
   }
 
   let pickupOfficeId: number | null = null;
