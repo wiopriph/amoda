@@ -6,19 +6,25 @@ import { makeGa4Item } from '~/utils/ga4';
 definePageMeta({ name: 'category-slug' });
 
 const route = useRoute();
-const currentPage = ref(Math.max(1, Number(route.query.page || 1)));
-const PRODUCTS_PER_PAGE = 24;
+const page = ref(Math.max(1, Number(route.query.page || 1)));
+const productsSection = ref<HTMLElement | null>(null);
+const PRODUCTS_PER_PAGE = 20;
 
 const [
-  { data: catalogResponse, error: catalogError },
+  {
+    data: catalogResponse,
+    error: catalogError,
+    pending: isCatalogPending,
+  },
   { data: categoryNavigation },
 ] = await Promise.all([
   useFetch('/api/catalog/list', {
     query: {
       slug: route.params.slug,
-      page: currentPage.value,
+      page,
       q: route.query.q,
       sort: route.query.sort,
+      limit: PRODUCTS_PER_PAGE,
     },
     watch: [() => route.fullPath],
   }),
@@ -34,6 +40,7 @@ if (catalogError.value || !catalogResponse.value) {
 
 const totalProducts = computed(() => catalogResponse.value!.total || 0);
 const pageCount = computed(() => Math.max(1, Math.ceil(totalProducts.value / PRODUCTS_PER_PAGE)));
+const productSkeletons = Array.from({ length: PRODUCTS_PER_PAGE }, (_, index) => index);
 
 const getPaginationTo = (pageNumber: number) => ({
   query: {
@@ -45,11 +52,9 @@ const getPaginationTo = (pageNumber: number) => ({
 if (import.meta.client) {
   watch(
     () => route.query.page,
-    async (pageQuery) => {
-      currentPage.value = Math.max(1, Number(pageQuery || 1));
-
+    async () => {
       await nextTick();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      productsSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     },
   );
 }
@@ -194,7 +199,9 @@ useHead(() => ({
 <template>
   <UPage>
     <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
-      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+      <section
+        class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8"
+      >
         <UBreadcrumb
           :items="breadcrumbItems"
           class="hidden md:block"
@@ -228,7 +235,7 @@ useHead(() => ({
       </section>
 
       <UEmpty
-        v-if="!categoryProducts.length"
+        v-if="!isCatalogPending && !categoryProducts.length"
         class="mt-6"
         title="Ainda não há itens nesta categoria."
         description="Veja outras categorias ou volte em breve. Você pode escolher online, experimentar primeiro e pagar apenas pelo que gostar."
@@ -245,9 +252,35 @@ useHead(() => ({
 
       <section
         v-else
-        class="mt-6"
+        ref="productsSection"
+        class="mt-6 scroll-mt-24"
       >
-        <UBlogPosts class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4">
+        <div
+          v-if="isCatalogPending"
+          class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
+        >
+          <UCard
+            v-for="skeletonIndex in productSkeletons"
+            :key="skeletonIndex"
+            :ui="{ body: 'sm:p-3' }"
+            class="overflow-hidden border border-gray-100"
+          >
+            <USkeleton class="aspect-[4/5] w-full rounded-t-lg" />
+
+            <div class="space-y-3 pt-3">
+              <USkeleton class="h-4 w-full" />
+
+              <USkeleton class="h-4 w-4/5" />
+
+              <USkeleton class="h-5 w-24" />
+            </div>
+          </UCard>
+        </div>
+
+        <UBlogPosts
+          v-else
+          class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
+        >
           <UBlogPost
             v-for="(categoryProduct, index) in categoryProducts"
             :key="categoryProduct.id"
@@ -282,9 +315,10 @@ useHead(() => ({
         <div
           v-if="pageCount > 1"
           class="mt-8 flex justify-center"
+          :class="{ 'pointer-events-none opacity-60': isCatalogPending }"
         >
           <UPagination
-            v-model:page="currentPage"
+            v-model:page="page"
             :itemsPerPage="PRODUCTS_PER_PAGE"
             :total="totalProducts"
             :to="getPaginationTo"
