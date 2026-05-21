@@ -679,7 +679,7 @@ useHead(() => ({
             </div>
           </UCard>
 
-          <UCard>
+          <UCard v-if="false">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 class="text-base font-bold text-highlighted">
