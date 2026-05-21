@@ -112,11 +112,9 @@ function selectImage(index: number) {
 }
 
 
-const formattedPrice = computed(() => {
-  const price = activeVariant.value?.price ?? product.value?.price ?? 0;
+const unitPrice = computed(() => activeVariant.value?.price ?? product.value?.price ?? 0);
 
-  return formatPrice(price);
-});
+const formattedPrice = computed(() => formatPrice(unitPrice.value));
 
 
 const {
@@ -149,6 +147,14 @@ const selectedSkuKey = computed(() => {
   }
 
   return buildCartItemKey(currentProduct.id, selectedVariant.id, selectedSize);
+});
+
+const mobilePriceLabel = computed(() => selectedSkuQuantity.value > 0 ? 'Subtotal da seleção' : 'Preço');
+
+const formattedMobilePrice = computed(() => {
+  const quantity = selectedSkuQuantity.value || 1;
+
+  return formatPrice(unitPrice.value * quantity);
 });
 
 const sizeOptions = computed(() =>
@@ -355,7 +361,7 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
+    <UPageBody class="mx-auto max-w-6xl pb-32 sm:px-6 sm:pb-0 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-3">
         <section class="flex-1 w-full">
           <div class="relative overflow-hidden rounded-3xl bg-gray-50">
@@ -776,7 +782,7 @@ useHead(() => ({
         </template>
 
         <template #body>
-          <div class="p-5">
+          <div>
             <div class="flex gap-3">
               <div class="size-16 shrink-0 overflow-hidden rounded-xl bg-gray-50">
                 <NuxtImg
@@ -824,70 +830,83 @@ useHead(() => ({
         </template>
       </UDrawer>
 
-      <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 sm:hidden">
-        <div class="mx-auto flex max-w-(--ui-container) items-center gap-2 px-1">
-          <UButton
-            v-if="false"
-            :to="whatsappHref"
-            size="xl"
-            color="success"
-            icon="i-simple-icons-whatsapp"
-            class="shrink-0"
-          />
-
-          <template v-if="selectedSkuQuantity > 0">
-            <UButton
-              :disabled="!selectedSkuKey"
-              size="xl"
-              variant="outline"
-              @click="decrement(selectedSkuKey)"
-            >
-              −
-            </UButton>
+      <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] sm:hidden">
+        <div class="mx-auto max-w-(--ui-container) px-1">
+          <div class="mb-2 flex items-center justify-between gap-3">
+            <div class="text-xs font-medium text-muted">
+              {{ mobilePriceLabel }}
+            </div>
 
             <div
-              class="min-w-0 flex-1 text-center text-base font-bold"
-              v-text="selectedSkuQuantity"
+              class="text-xl font-black text-primary"
+              v-text="formattedMobilePrice"
+            />
+          </div>
+
+          <div class="flex items-center gap-2">
+            <UButton
+              v-if="false"
+              :to="whatsappHref"
+              size="xl"
+              color="success"
+              icon="i-simple-icons-whatsapp"
+              class="shrink-0"
             />
 
-            <UButton
-              :disabled="!selectedSkuKey"
-              size="xl"
-              variant="outline"
-              @click="increment(selectedSkuKey)"
-            >
-              +
-            </UButton>
+            <template v-if="selectedSkuQuantity > 0">
+              <UButton
+                :disabled="!selectedSkuKey"
+                size="xl"
+                variant="outline"
+                @click="decrement(selectedSkuKey)"
+              >
+                −
+              </UButton>
 
-            <UButton
-              :to="cartTo"
-              size="xl"
-              color="primary"
-            >
-              Ver selecionados
-            </UButton>
-          </template>
+              <div
+                class="min-w-0 flex-1 text-center text-base font-bold"
+                v-text="selectedSkuQuantity"
+              />
 
-          <template v-else>
-            <UButton
-              :disabled="!selectedSizeId"
-              size="xl"
-              color="primary"
-              class="flex-1 justify-center"
-              @click="addProductToCart"
-            >
-              {{ selectedSizeId ? "Escolher" : "Tamanho" }}
-            </UButton>
+              <UButton
+                :disabled="!selectedSkuKey"
+                size="xl"
+                variant="outline"
+                @click="increment(selectedSkuKey)"
+              >
+                +
+              </UButton>
 
-            <UButton
-              v-if="!isEmptyCart"
-              :to="cartTo"
-              size="xl"
-              variant="outline"
-            >
-              Ver selecionados
-            </UButton>
-          </template>
+              <UButton
+                :to="cartTo"
+                size="xl"
+                color="primary"
+              >
+                Ver selecionados
+              </UButton>
+            </template>
+
+            <template v-else>
+              <UButton
+                :disabled="!selectedSizeId"
+                size="xl"
+                color="primary"
+                class="flex-1 justify-center"
+                @click="addProductToCart"
+              >
+                {{ selectedSizeId ? "Escolher" : "Tamanho" }}
+              </UButton>
+
+              <UButton
+                v-if="!isEmptyCart"
+                :to="cartTo"
+                size="xl"
+                variant="outline"
+              >
+                Ver selecionados
+              </UButton>
+            </template>
+          </div>
         </div>
       </div>
     </UPageBody>
