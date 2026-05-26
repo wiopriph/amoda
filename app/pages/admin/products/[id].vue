@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ProductBadge } from '~/utils/productBadges';
 import { formatPrice } from '~/utils/formatPrice';
 
 
@@ -62,6 +63,12 @@ type EditableProductVariant = Partial<ProductVariant> & {
 type Product = {
   id: number | string
   title: string
+  slug?: string
+  brand_id?: number | string | null
+  primary_category_id?: number | string | null
+  description?: string | null
+  active?: boolean
+  badges?: ProductBadge[]
   variants?: ProductVariant[]
 };
 

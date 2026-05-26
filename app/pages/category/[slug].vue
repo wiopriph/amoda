@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getProductBadgeColor, getProductBadgeLabel } from '~/utils/productBadges';
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
@@ -282,7 +283,7 @@ useHead(() => ({
           class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
         >
           <UBlogPost
-            v-for="(categoryProduct, index) in categoryProducts"
+            v-for="categoryProduct in categoryProducts"
             :key="categoryProduct.id"
             :title="categoryProduct.title"
             :description="formatPrice(categoryProduct.price)"
@@ -300,14 +301,19 @@ useHead(() => ({
             @click="trackProductSelect(categoryProduct)"
           >
             <template #badge>
-              <UBadge
-                v-if="index < 3"
-                color="primary"
-                variant="solid"
-                class="absolute left-2 top-2"
+              <div
+                v-if="categoryProduct.badges?.length"
+                class="absolute left-2 top-2 flex flex-wrap gap-1"
               >
-                NOVO
-              </UBadge>
+                <UBadge
+                  v-for="badge in categoryProduct.badges"
+                  :key="badge"
+                  :color="getProductBadgeColor(badge)"
+                  variant="solid"
+                >
+                  {{ getProductBadgeLabel(badge) }}
+                </UBadge>
+              </div>
             </template>
           </UBlogPost>
         </UBlogPosts>

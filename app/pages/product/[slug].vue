@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getProductBadgeColor, getProductBadgeLabel } from '~/utils/productBadges';
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
@@ -745,7 +746,23 @@ useHead(() => ({
             }"
             variant="outline"
             @click="trackRecommendationSelect(recommendedProduct)"
-          />
+          >
+            <template #badge>
+              <div
+                v-if="recommendedProduct.badges?.length"
+                class="absolute left-2 top-2 flex flex-wrap gap-1"
+              >
+                <UBadge
+                  v-for="badge in recommendedProduct.badges"
+                  :key="badge"
+                  :color="getProductBadgeColor(badge)"
+                  variant="solid"
+                >
+                  {{ getProductBadgeLabel(badge) }}
+                </UBadge>
+              </div>
+            </template>
+          </UBlogPost>
         </UBlogPosts>
       </section>
 

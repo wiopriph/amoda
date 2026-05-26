@@ -20,6 +20,73 @@ type VariantSizeRow = {
   stock: number | null
 };
 
+type CategoryClosureRow = {
+  descendant_id: number
+};
+
+type CategoryAncestorRow = {
+  depth: number
+  categories: CategoryRow
+};
+
+type BrandRow = {
+  id?: number
+  name: string
+  slug?: string
+};
+
+type ProductVariantRow = {
+  id: number
+  color: string | null
+  price: number
+  active?: boolean | null
+  images?: VariantImageRow[] | null
+  sizes?: VariantSizeRow[] | null
+};
+
+type ProductRow = {
+  id: number
+  title: string
+  slug: string
+  description: string | null
+  active: boolean | null
+  badges: string[]
+  created_at: string | null
+  brand: BrandRow | null
+  category: CategoryRow | null
+  variants?: ProductVariantRow[] | null
+};
+
+type RecommendedVariantRow = {
+  id: number
+  color: string | null
+  price: number | null
+  product_variant_images?: VariantImageRow[] | null
+};
+
+type RecommendedProductRow = {
+  id: number
+  slug: string
+  title: string
+  badges: string[]
+  primary_category_id: number | null
+  brand: Pick<BrandRow, 'name'> | null
+  variants?: RecommendedVariantRow[] | null
+};
+
+type RecommendedProduct = {
+  id: number
+  slug: string
+  title: string
+  badges: string[]
+  primary_category_id: number | null
+  brand_name: string | null
+  price: number
+  variant_id: number | null
+  color: string | null
+  images: VariantImageRow[]
+};
+
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseClient(event);
   const { slug } = getQuery(event) as { slug?: string };
@@ -54,9 +121,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Not found' });
   }
 
+  const product = productRow as ProductRow;
+
   let parentChain: CategoryRow[] = [];
 
-  const currentCat = (productRow.category as CategoryRow | null) ?? null;
+  const currentCat = product.category ?? null;
 
   if (currentCat) {
     const { data: ancestors, error: ancErr } = await supabase
@@ -69,9 +138,9 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 500, statusMessage: ancErr.message });
     }
 
-    parentChain = (ancestors || [])
-      .filter((r: any) => r.depth > 0)
-      .map((r: any) => r.categories as CategoryRow);
+    parentChain = ((ancestors || []) as CategoryAncestorRow[])
+      .filter(r => r.depth > 0)
+      .map(r => r.categories);
   }
 
   const trail: CategoryRow[] = currentCat ?
@@ -85,15 +154,9 @@ export default defineEventHandler(async (event) => {
 
   const categoriesTrail = [...parentChain, ...trail];
 
-  const normalizedVariants = (productRow.variants || [])
-    .filter((v: any) => v.active !== false)
-    .map((v: {
-      id: number
-      color: string | null
-      price: number
-      images?: VariantImageRow[] | null
-      sizes?: VariantSizeRow[] | null
-    }) => {
+  const normalizedVariants = (product.variants || [])
+    .filter(v => v.active !== false)
+    .map((v) => {
       const imagesSorted = Array.isArray(v.images) ?
         [...v.images].sort((a, b) => (a?.position ?? 0) - (b?.position ?? 0)) :
         [];
@@ -120,12 +183,12 @@ export default defineEventHandler(async (event) => {
       to: { name: 'category-slug', params: { slug: c.slug } },
     })),
     {
-      label: productRow.title,
-      to: { name: 'product-slug', params: { slug: productRow.slug } },
+      label: product.title,
+      to: { name: 'product-slug', params: { slug: product.slug } },
     },
   ];
 
-  let recommendations: any[] = [];
+  let recommendations: RecommendedProduct[] = [];
 
   if (currentCat?.id) {
     const { data: desc, error: descErr } = await supabase
@@ -137,12 +200,12 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 500, statusMessage: descErr.message });
     }
 
-    const ids = (desc || []).map((r) => r.descendant_id);
+    const ids = ((desc || []) as CategoryClosureRow[]).map(r => r.descendant_id);
 
     const { data: recsA, error: recErrA } = await supabase
       .from('products')
       .select(`
-        id, slug, title, primary_category_id,
+        id, slug, title, badges, primary_category_id,
         brand:brands(name),
         variants:product_variants(
           id, color, price,
@@ -150,7 +213,7 @@ export default defineEventHandler(async (event) => {
         )
       `)
       .in('primary_category_id', ids)
-      .neq('id', productRow.id)
+      .neq('id', product.id)
       .eq('active', true)
       .limit(10);
 
@@ -158,13 +221,13 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 500, statusMessage: recErrA.message });
     }
 
-    let recs = recsA || [];
+    let recs = (recsA || []) as RecommendedProductRow[];
 
     if (!recs.length && currentCat.parent_id) {
       const { data: recsB, error: recErrB } = await supabase
         .from('products')
         .select(`
-          id, slug, title, primary_category_id,
+          id, slug, title, badges, primary_category_id,
           brand:brands(name),
           variants:product_variants(
             id, color, price,
@@ -172,7 +235,7 @@ export default defineEventHandler(async (event) => {
           )
         `)
         .eq('primary_category_id', currentCat.parent_id)
-        .neq('id', productRow.id)
+        .neq('id', product.id)
         .eq('active', true)
         .limit(10);
 
@@ -180,10 +243,10 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 500, statusMessage: recErrB.message });
       }
 
-      recs = recsB || [];
+      recs = (recsB || []) as RecommendedProductRow[];
     }
 
-    recommendations = (recs || []).map((p: any) => {
+    recommendations = recs.map((p) => {
       const v = Array.isArray(p.variants) ? p.variants[0] : null;
       const imgs = Array.isArray(v?.product_variant_images) ?
         [...v.product_variant_images].sort(
@@ -195,6 +258,7 @@ export default defineEventHandler(async (event) => {
         id: p.id,
         slug: p.slug,
         title: p.title,
+        badges: p.badges ?? [],
         primary_category_id: p.primary_category_id,
         brand_name: p.brand?.name ?? null,
         price: v?.price ?? 0,
@@ -207,16 +271,17 @@ export default defineEventHandler(async (event) => {
 
   return {
     product: {
-      id: productRow.id,
-      title: productRow.title,
-      slug: productRow.slug,
-      description: productRow.description,
-      active: productRow.active,
-      brand_id: productRow.brand?.id ?? null,
-      brand_name: productRow.brand?.name ?? null,
+      id: product.id,
+      title: product.title,
+      slug: product.slug,
+      description: product.description,
+      active: product.active,
+      badges: product.badges ?? [],
+      brand_id: product.brand?.id ?? null,
+      brand_name: product.brand?.name ?? null,
       primary_category_id: currentCat?.id ?? null,
       variants: normalizedVariants,
-      created_at: productRow.created_at,
+      created_at: product.created_at,
     },
     breadcrumbs,
     recommendations,

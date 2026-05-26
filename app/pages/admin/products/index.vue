@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
+import { getProductBadgeColor, getProductBadgeLabel, type ProductBadge } from '~/utils/productBadges';
 import { formatPrice } from '~/utils/formatPrice';
 
 
@@ -40,6 +41,7 @@ type Product = {
   title: string
   slug: string
   active: boolean
+  badges: ProductBadge[]
   brand: Brand
   variants: Variant[]
 };
@@ -168,6 +170,29 @@ const productColumns: TableColumn<ProductTableRow>[] = [
         UBadge,
         { variant: 'subtle', color: isActive ? 'success' : 'error' },
         () => (isActive ? 'Ativo' : 'Inativo'),
+      );
+    },
+  },
+  {
+    accessorKey: 'badges',
+    header: 'Badges',
+    cell: ({ row }) => {
+      const badges = row.original.badges || [];
+
+      if (!badges.length) {
+        return '—';
+      }
+
+      return h(
+        'div',
+        { class: 'flex flex-wrap gap-1' },
+        badges.map(badge =>
+          h(
+            UBadge,
+            { key: badge, variant: 'subtle', color: getProductBadgeColor(badge) },
+            () => getProductBadgeLabel(badge),
+          ),
+        ),
       );
     },
   },

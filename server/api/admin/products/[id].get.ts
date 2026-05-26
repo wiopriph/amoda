@@ -2,6 +2,39 @@ import { serverSupabaseServiceRole } from '#supabase/server';
 import { assertAdmin } from '~~/server/utils/assertAdmin';
 
 
+type ProductImageRow = {
+  url: string
+  position: number | null
+  alt: string | null
+};
+
+type VariantSizeRow = {
+  id: number
+  size: string
+  stock: number | null
+};
+
+type ProductVariantRow = {
+  id: number
+  color: string | null
+  price: number
+  active: boolean
+  images?: ProductImageRow[] | null
+  sizes?: VariantSizeRow[] | null
+};
+
+type ProductRow = {
+  id: number
+  title: string
+  slug: string
+  brand_id: number | null
+  primary_category_id: number | null
+  description: string | null
+  active: boolean
+  badges: string[]
+  product_variants?: ProductVariantRow[] | null
+};
+
 export default defineEventHandler(async (event) => {
   await assertAdmin(event);
 
@@ -22,6 +55,7 @@ export default defineEventHandler(async (event) => {
       primary_category_id,
       description,
       active,
+      badges,
       brand:brands ( id, name, slug ),
       primary_category:categories!products_primary_category_id_fkey ( id, name, slug, parent_id ),
       product_variants:product_variants (
@@ -41,15 +75,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Product not found' });
   }
 
+  const product = data as ProductRow;
+
   return {
-    id: data.id,
-    title: data.title,
-    slug: data.slug,
-    description: data.description,
-    active: data.active,
-    brand_id: data.brand_id,
-    primary_category_id: data.primary_category_id,
-    variants: data.product_variants?.map((v: any) => ({
+    id: product.id,
+    title: product.title,
+    slug: product.slug,
+    description: product.description,
+    active: product.active,
+    badges: product.badges ?? [],
+    brand_id: product.brand_id,
+    primary_category_id: product.primary_category_id,
+    variants: product.product_variants?.map(v => ({
       id: v.id,
       color: v.color,
       price: v.price,

@@ -27,6 +27,48 @@ type Category = {
   parent_id: number | null
 };
 
+type CategoryClosureRow = {
+  descendant_id: number
+};
+
+type CategoryAncestorRow = {
+  depth: number
+  categories: Category
+};
+
+type BrandRow = {
+  name: string
+};
+
+type VariantImageRow = {
+  url: string
+  position: number | null
+};
+
+type VariantSizeRow = {
+  id: number
+  size: string
+};
+
+type ProductVariantRow = {
+  id: number
+  color: string | null
+  price: number | null
+  product_variant_images?: VariantImageRow[] | null
+  sizes?: VariantSizeRow[] | null
+};
+
+type ProductRow = {
+  id: number
+  title: string
+  slug: string
+  badges: string[]
+  brand_id: number | null
+  primary_category_id: number | null
+  brand: BrandRow | null
+  variants?: ProductVariantRow[] | null
+};
+
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseClient(event);
   const query = getQuery(event) as QueryParams;
@@ -65,7 +107,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 500, statusMessage: closureErr.message });
     }
 
-    descendantIds = (closureRows || []).map((r: any) => r.descendant_id);
+    descendantIds = ((closureRows || []) as CategoryClosureRow[]).map(r => r.descendant_id);
   }
 
   const breadcrumbs: Breadcrumb[] = [
@@ -83,9 +125,9 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 500, statusMessage: ancErr.message });
     }
 
-    const chain = (ancestors || [])
-      .filter((x: any) => x.depth > 0)
-      .map((r: any) => r.categories as Category)
+    const chain = ((ancestors || []) as CategoryAncestorRow[])
+      .filter(x => x.depth > 0)
+      .map(r => r.categories)
       .reverse();
 
     for (const c of chain) {
@@ -107,6 +149,7 @@ export default defineEventHandler(async (event) => {
       id,
       title,
       slug,
+      badges,
       brand_id,
       primary_category_id,
       brand:brands(name),
@@ -175,13 +218,13 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: listError.message });
   }
 
-  const items = (productRows || []).map((product: any) => {
+  const items = ((productRows || []) as ProductRow[]).map((product) => {
     const variants = Array.isArray(product.variants) ? product.variants.slice() : [];
 
     // детерминируем default variant:
     // 1) если сортировка по цене — берём вариант с min/max ценой
     // 2) иначе — по id
-    let defaultVariant: any | null = null;
+    let defaultVariant: ProductVariantRow | null = null;
 
     if (variants.length) {
       if (query.sort === 'price_asc') {
@@ -197,7 +240,7 @@ export default defineEventHandler(async (event) => {
 
     const sizes = Array.isArray(defaultVariant?.sizes) ? defaultVariant.sizes.slice() : [];
 
-    sizes.sort((a: any, b: any) => (a?.id ?? 0) - (b?.id ?? 0));
+    sizes.sort((a, b) => (a?.id ?? 0) - (b?.id ?? 0));
 
     const defaultSize = sizes[0] ?? null;
 
@@ -205,7 +248,7 @@ export default defineEventHandler(async (event) => {
       defaultVariant.product_variant_images.slice() :
       [];
 
-    imgs.sort((a: any, b: any) => (a?.position ?? 0) - (b?.position ?? 0));
+    imgs.sort((a, b) => (a?.position ?? 0) - (b?.position ?? 0));
 
     const imageUrl = imgs[0]?.url ?? null;
 
@@ -213,6 +256,7 @@ export default defineEventHandler(async (event) => {
       id: product.id,
       slug: product.slug,
       title: product.title,
+      badges: product.badges ?? [],
       primary_category_id: product.primary_category_id,
       brand_id: product.brand_id ?? null,
       brand_name: product.brand?.name ?? null,

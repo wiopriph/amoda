@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { PRODUCT_BADGE_LABELS, PRODUCT_BADGES, type ProductBadge } from '~/utils/productBadges';
+
+
 type ProductOption = {
   id: number | string
   name: string
@@ -12,6 +15,7 @@ type ProductForm = {
   brand_id?: number | string | null
   description?: string | null
   active?: boolean
+  badges?: ProductBadge[]
 };
 
 const props = defineProps<{
@@ -25,14 +29,18 @@ const emit = defineEmits<{
   save: [productForm: ProductForm]
 }>();
 
-const productForm = ref<ProductForm>({ ...props.modelValue });
+const cloneProductForm = (productForm: ProductForm): ProductForm => ({
+  ...productForm,
+  badges: Array.isArray(productForm.badges) ? [...productForm.badges] : [],
+});
+
+const productForm = ref<ProductForm>(cloneProductForm(props.modelValue));
 
 watch(
   () => props.modelValue,
   (modelValue) => {
-    Object.assign(productForm.value, modelValue);
+    productForm.value = cloneProductForm(modelValue);
   },
-  { deep: true },
 );
 
 const isEditingProduct = computed(() => !!productForm.value.id);
@@ -42,7 +50,23 @@ const categoryOptions = computed(() => props.categories.map(category => ({ label
 
 const updateProductField = <Field extends keyof ProductForm>(field: Field, value: ProductForm[Field]) => {
   productForm.value[field] = value;
-  emit('update:modelValue', productForm.value);
+  emit('update:modelValue', cloneProductForm(productForm.value));
+};
+
+const isProductBadgeSelected = (badge: ProductBadge) => productForm.value.badges?.includes(badge) ?? false;
+
+const updateProductBadge = (badge: ProductBadge, selected: boolean) => {
+  const currentBadges = productForm.value.badges || [];
+
+  if (currentBadges.includes(badge) === selected) {
+    return;
+  }
+
+  const badges = selected ?
+    [...new Set([...currentBadges, badge])] :
+    currentBadges.filter(currentBadge => currentBadge !== badge);
+
+  updateProductField('badges', badges);
 };
 
 const isSavingProduct = ref(false);
@@ -50,7 +74,7 @@ const isSavingProduct = ref(false);
 const saveProduct = async () => {
   isSavingProduct.value = true;
 
-  emit('save', productForm.value);
+  emit('save', cloneProductForm(productForm.value));
 
   isSavingProduct.value = false;
 };
@@ -76,8 +100,13 @@ watch(
       return;
     }
 
-    productForm.value.slug = title ? slugify(title) : '';
-    emit('update:modelValue', productForm.value);
+    const slug = title ? slugify(title) : '';
+
+    if (productForm.value.slug === slug) {
+      return;
+    }
+
+    updateProductField('slug', slug);
   },
 );
 
@@ -166,6 +195,21 @@ const updateSlug = (slug: string) => {
         label="Produto ativo"
         @update:model-value="updateProductField('active', $event)"
       />
+    </UFormField>
+
+    <UFormField
+      label="Badges"
+      class="w-full"
+    >
+      <div class="grid gap-2 sm:grid-cols-3">
+        <UCheckbox
+          v-for="badge in PRODUCT_BADGES"
+          :key="badge"
+          :modelValue="isProductBadgeSelected(badge)"
+          :label="PRODUCT_BADGE_LABELS[badge]"
+          @update:model-value="updateProductBadge(badge, Boolean($event))"
+        />
+      </div>
     </UFormField>
 
     <div class="flex justify-end gap-2 pt-4">

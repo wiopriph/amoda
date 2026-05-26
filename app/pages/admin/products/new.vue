@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { ProductBadge } from '~/utils/productBadges';
+
+
 definePageMeta({
   name: 'admin-products-new',
   layout: 'admin',
@@ -26,6 +29,7 @@ type ProductForm = {
   primary_category_id: number | null
   description: string
   active: boolean
+  badges: ProductBadge[]
 };
 
 const [
@@ -45,6 +49,7 @@ const productForm = reactive<ProductForm>({
   primary_category_id: null,
   description: '',
   active: true,
+  badges: [],
 });
 
 const saveProduct = async (productPayload: ProductForm) => {

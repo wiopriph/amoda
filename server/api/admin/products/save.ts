@@ -1,12 +1,24 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
+import { normalizeProductBadges } from '~~/app/utils/productBadges';
 import { assertAdmin } from '~~/server/utils/assertAdmin';
 
+
+type ProductSaveBody = {
+  id?: number | string
+  title?: string
+  slug?: string
+  brand_id?: number | string | null
+  primary_category_id?: number | string | null
+  description?: string | null
+  active?: boolean
+  badges?: unknown
+};
 
 export default defineEventHandler(async (event) => {
   await assertAdmin(event);
 
   const client = await serverSupabaseServiceRole(event);
-  const body = await readBody(event);
+  const body = await readBody<ProductSaveBody>(event);
 
   if (!body.title) {
     throw createError({ statusCode: 400, statusMessage: 'Title required' });
@@ -26,6 +38,7 @@ export default defineEventHandler(async (event) => {
     primary_category_id: body.primary_category_id || null,
     description: body.description || null,
     active: body.active ?? true,
+    badges: normalizeProductBadges(body.badges),
   };
 
   if (body.id) {

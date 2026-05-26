@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getProductBadgeColor, getProductBadgeLabel } from '~/utils/productBadges';
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
@@ -186,7 +187,7 @@ const startShoppingTo = { name: 'category-slug', params: { slug: 'mulheres' } } 
           class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
         >
           <UBlogPost
-            v-for="(product, productIndex) in products"
+            v-for="product in products"
             :key="product.id"
             :title="product.title"
             :description="formatPrice(product.price)"
@@ -204,14 +205,19 @@ const startShoppingTo = { name: 'category-slug', params: { slug: 'mulheres' } } 
             @click="sendSelectProductEvent(product)"
           >
             <template #badge>
-              <UBadge
-                v-if="productIndex < 3"
-                color="primary"
-                variant="solid"
-                class="absolute top-2 left-2"
+              <div
+                v-if="product.badges?.length"
+                class="absolute top-2 left-2 flex flex-wrap gap-1"
               >
-                NOVO
-              </UBadge>
+                <UBadge
+                  v-for="badge in product.badges"
+                  :key="badge"
+                  :color="getProductBadgeColor(badge)"
+                  variant="solid"
+                >
+                  {{ getProductBadgeLabel(badge) }}
+                </UBadge>
+              </div>
             </template>
           </UBlogPost>
         </UBlogPosts>
