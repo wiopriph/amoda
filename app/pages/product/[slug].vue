@@ -95,14 +95,6 @@ watch(
   { flush: 'post' },
 );
 
-function showPreviousImage() {
-  activeImageIndex.value = Math.max(0, activeImageIndex.value - 1);
-}
-
-function showNextImage() {
-  activeImageIndex.value = Math.min(carouselSlides.value.length - 1, activeImageIndex.value + 1);
-}
-
 function setActiveImage(index: number) {
   activeImageIndex.value = index;
 }
@@ -371,8 +363,9 @@ useHead(() => ({
               v-slot="{ item: slide }"
               ref="carousel"
               :items="carouselSlides"
-              :prev="{ onClick: showPreviousImage }"
-              :next="{ onClick: showNextImage }"
+              :arrows="carouselSlides.length > 1"
+              :prev="{ color: 'neutral', variant: 'soft', size: 'lg' }"
+              :next="{ color: 'neutral', variant: 'soft', size: 'lg' }"
               :ui="{
                 container: 'flex w-full ms-0',
                 item: 'basis-full shrink-0 ps-0'
