@@ -216,7 +216,12 @@ export const getOrCreateCart = async (client: SupabaseClient, sessionId: string)
 export const getVariantSnapshot = async (client: SupabaseClient, variantId: number, sizeId: number) => {
   const { data: variant, error: variantError } = await client
     .from('product_variants')
-    .select('id, price, active')
+    .select(`
+      id,
+      price,
+      active,
+      product:products!product_variants_product_id_fkey(id, active)
+    `)
     .eq('id', variantId)
     .maybeSingle();
 
@@ -224,9 +229,10 @@ export const getVariantSnapshot = async (client: SupabaseClient, variantId: numb
     throw createError({ statusCode: 500, statusMessage: variantError.message });
   }
 
-  if (!variant || variant.active === false) {
+  if (!variant || variant.active === false || variant.product?.active === false) {
     throw createError({ statusCode: 400, statusMessage: 'Variant not found' });
   }
+
 
   const { data: size, error: sizeError } = await client
     .from('product_variant_sizes')

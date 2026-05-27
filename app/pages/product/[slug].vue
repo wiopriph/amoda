@@ -16,12 +16,20 @@ const { data: productResponse, error: productError } = await useFetch('/api/cata
   watch: [() => route.fullPath],
 });
 
-if (productError.value || !productResponse.value) {
+if (productError.value) {
+  throw createError({
+    statusCode: productError.value.statusCode || 500,
+    statusMessage: productError.value.statusMessage || productError.value.message,
+  });
+}
+
+if (!productResponse.value) {
   throw createError({ statusCode: 404 });
 }
 
 const product = computed(() => productResponse.value?.product);
 const productName = computed(() => product.value?.title || '');
+const isProductAvailable = computed(() => product.value?.active !== false);
 
 const breadcrumbs = computed(() =>
   (productResponse.value?.breadcrumbs || []).map((crumb: any) => ({
@@ -201,6 +209,10 @@ const closeCartDrawer = () => {
 };
 
 const addProductToCart = () => {
+  if (!isProductAvailable.value) {
+    return;
+  }
+
   const currentProduct = product.value;
   const selectedVariant = activeVariant.value;
   const selectedSize = selectedVariant?.sizes?.find((size: any) => size.id === selectedSizeId.value);
@@ -223,6 +235,10 @@ watch(
 
     const currentProduct = product.value;
     const selectedVariant = activeVariant.value;
+
+    if (!isProductAvailable.value) {
+      return;
+    }
 
     if (!productId || !variantId || !currentProduct || !selectedVariant) {
       return;
@@ -304,23 +320,30 @@ const title = computed(() => `${product.value?.title || ''} | Escolha sem pagar`
 const description = computed(() => product.value?.description || `Escolha ${productName.value} na Amoda em Luanda. Selecione o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar.`);
 const seoImage = computed(() => galleryImages.value?.[0]?.url || fallbackImage);
 
-const productSchema = computed(() => ({
-  '@context': 'https://schema.org/',
-  '@type': 'Product',
-  name: product.value?.title,
-  image: galleryImages.value.map((image: any) => image.url),
-  description: product.value?.description || '',
-  sku: product.value?.variants?.[0]?.id || product.value?.id,
-  brand: { '@type': 'Brand', name: product.value?.brand_name || '' },
-  offers: {
-    '@type': 'Offer',
-    url: productUrl.value,
-    priceCurrency: CURRENCY,
-    price: activeVariant.value?.price ?? product.value?.price ?? 0,
-    availability: 'https://schema.org/InStock',
-    itemCondition: 'https://schema.org/NewCondition',
-  },
-}));
+const productSchema = computed(() => {
+  const schema: Record<string, any> = {
+    '@context': 'https://schema.org/',
+    '@type': 'Product',
+    name: product.value?.title,
+    image: galleryImages.value.map((image: any) => image.url),
+    description: product.value?.description || '',
+    sku: product.value?.variants?.[0]?.id || product.value?.id,
+    brand: { '@type': 'Brand', name: product.value?.brand_name || '' },
+    offers: {
+      '@type': 'Offer',
+      url: productUrl.value,
+      availability: isProductAvailable.value ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+  };
+
+  if (isProductAvailable.value) {
+    schema.offers.priceCurrency = CURRENCY;
+    schema.offers.price = activeVariant.value?.price ?? product.value?.price ?? 0;
+  }
+
+  return schema;
+});
 
 const breadcrumbSchema = computed(() => ({
   '@context': 'https://schema.org',
@@ -454,12 +477,28 @@ useHead(() => ({
             />
 
             <div
+              v-if="isProductAvailable"
               class="mt-4 text-3xl font-black text-primary"
               v-text="formattedPrice"
             />
+
+            <div
+              v-else
+              class="mt-4 inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-bold text-toned"
+            >
+              <UIcon
+                name="i-lucide-package-x"
+                class="size-4 text-muted"
+              />
+
+              <span>Não está à venda</span>
+            </div>
           </div>
 
-          <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-toned">
+          <div
+            v-if="isProductAvailable"
+            class="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-toned"
+          >
             <div class="flex items-center gap-2">
               <UIcon
                 name="i-lucide-wallet"
@@ -488,7 +527,7 @@ useHead(() => ({
             </div>
           </div>
 
-          <UCard>
+          <UCard v-if="isProductAvailable">
             <div>
               <div
                 v-if="variantOptions.length > 1"
@@ -631,6 +670,21 @@ useHead(() => ({
             </div>
           </UCard>
 
+          <UCard
+            v-else
+            class="border-gray-200 bg-gray-50"
+          >
+            <div>
+              <h2 class="text-base font-bold text-highlighted">
+                Produto indisponível
+              </h2>
+
+              <p class="mt-1 text-sm leading-6 text-muted">
+                Este produto não está à venda no momento.
+              </p>
+            </div>
+          </UCard>
+
           <UCard v-if="product?.description">
             <h2 class="text-base font-bold text-highlighted">
               Descrição
@@ -642,7 +696,10 @@ useHead(() => ({
             />
           </UCard>
 
-          <UCard class="border-primary/20 bg-primary/5">
+          <UCard
+            v-if="isProductAvailable"
+            class="border-primary/20 bg-primary/5"
+          >
             <h2 class="text-base font-bold text-highlighted">
               Como funciona
             </h2>
@@ -840,7 +897,10 @@ useHead(() => ({
         </template>
       </UDrawer>
 
-      <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] sm:hidden">
+      <div
+        v-if="isProductAvailable"
+        class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] sm:hidden"
+      >
         <div class="mx-auto max-w-(--ui-container) px-1">
           <div class="mb-2 flex items-center justify-between gap-3">
             <div class="text-xs font-medium text-muted">

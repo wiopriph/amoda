@@ -1,4 +1,5 @@
-import { serverSupabaseClient } from '#supabase/server';
+/* eslint-disable camelcase */
+import { serverSupabaseServiceRole } from '#supabase/server';
 
 
 type CategoryRow = {
@@ -88,7 +89,7 @@ type RecommendedProduct = {
 };
 
 export default defineEventHandler(async (event) => {
-  const supabase = await serverSupabaseClient(event);
+  const supabase = await serverSupabaseServiceRole(event);
   const { slug } = getQuery(event) as { slug?: string };
 
   if (!slug) {
@@ -110,7 +111,6 @@ export default defineEventHandler(async (event) => {
       )
     `)
     .eq('slug', slug)
-    .eq('active', true)
     .maybeSingle();
 
   if (productError) {
@@ -155,7 +155,7 @@ export default defineEventHandler(async (event) => {
   const categoriesTrail = [...parentChain, ...trail];
 
   const normalizedVariants = (product.variants || [])
-    .filter(v => v.active !== false)
+    .filter(v => product.active === false || v.active !== false) // product.active === false - чтобы у ыключенного товара оставить неактивные варианты как источник фото
     .map((v) => {
       const imagesSorted = Array.isArray(v.images) ?
         [...v.images].sort((a, b) => (a?.position ?? 0) - (b?.position ?? 0)) :
