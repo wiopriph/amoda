@@ -88,10 +88,30 @@ const brands = computed(() => brandOptions.value || []);
 const categories = computed(() => categoryOptions.value || []);
 const productTitle = computed(() => product.value?.title || title);
 const productVariants = computed(() => product.value?.variants || []);
+const productPublicTo = computed(() => product.value?.slug ? { name: 'product-slug', params: { slug: product.value.slug } } : undefined);
+
+const toast = useToast();
+
+const getOperationErrorText = (error: any, fallback: string) =>
+  error?.data?.statusMessage || error?.data?.message || error?.message || fallback;
 
 const saveProduct = async (productPayload: Product) => {
-  await $fetch('/api/admin/products/save', { method: 'POST', body: productPayload });
-  await refreshProduct();
+  try {
+    await $fetch('/api/admin/products/save', { method: 'POST', body: productPayload });
+    await refreshProduct();
+
+    toast.add({
+      title: 'Sucesso',
+      description: 'Produto guardado com sucesso.',
+      color: 'success',
+    });
+  } catch (error: any) {
+    toast.add({
+      title: 'Erro',
+      description: getOperationErrorText(error, 'Falha ao guardar produto. Tente novamente.'),
+      color: 'error',
+    });
+  }
 };
 
 const isVariantModalOpen = ref(false);
@@ -119,9 +139,25 @@ const openEditVariantModal = (variant: ProductVariant) => {
 };
 
 const saveVariant = async (variantPayload: ProductVariant) => {
-  await $fetch('/api/admin/products/variants/save', { method: 'POST', body: variantPayload });
-  await refreshProduct();
-  isVariantModalOpen.value = false;
+  try {
+    const isEditing = !!variantPayload.id;
+
+    await $fetch('/api/admin/products/variants/save', { method: 'POST', body: variantPayload });
+    await refreshProduct();
+    isVariantModalOpen.value = false;
+
+    toast.add({
+      title: 'Sucesso',
+      description: isEditing ? 'Variante atualizada com sucesso.' : 'Variante criada com sucesso.',
+      color: 'success',
+    });
+  } catch (error: any) {
+    toast.add({
+      title: 'Erro',
+      description: getOperationErrorText(error, 'Falha ao guardar variante. Tente novamente.'),
+      color: 'error',
+    });
+  }
 };
 
 const deleteVariant = async (variant: ProductVariant) => {
@@ -129,8 +165,22 @@ const deleteVariant = async (variant: ProductVariant) => {
     return;
   }
 
-  await $fetch('/api/admin/products/variants/remove', { method: 'POST', body: { id: variant.id } });
-  await refreshProduct();
+  try {
+    await $fetch('/api/admin/products/variants/remove', { method: 'POST', body: { id: variant.id } });
+    await refreshProduct();
+
+    toast.add({
+      title: 'Sucesso',
+      description: 'Variante eliminada com sucesso.',
+      color: 'success',
+    });
+  } catch (error: any) {
+    toast.add({
+      title: 'Erro',
+      description: getOperationErrorText(error, 'Falha ao eliminar variante. Tente novamente.'),
+      color: 'error',
+    });
+  }
 };
 
 const isSizeModalOpen = ref(false);
@@ -154,8 +204,25 @@ const openEditSizeModal = (variant: ProductVariant, size: VariantSize) => {
 };
 
 const saveSize = async (sizePayload: VariantSize) => {
-  await $fetch('/api/admin/products/variants/sizes/save', { method: 'POST', body: sizePayload });
-  await refreshProduct();
+  try {
+    const isEditing = !!sizePayload.id;
+
+    await $fetch('/api/admin/products/variants/sizes/save', { method: 'POST', body: sizePayload });
+    await refreshProduct();
+    isSizeModalOpen.value = false;
+
+    toast.add({
+      title: 'Sucesso',
+      description: isEditing ? 'Tamanho atualizado com sucesso.' : 'Tamanho criado com sucesso.',
+      color: 'success',
+    });
+  } catch (error: any) {
+    toast.add({
+      title: 'Erro',
+      description: getOperationErrorText(error, 'Falha ao guardar tamanho. Tente novamente.'),
+      color: 'error',
+    });
+  }
 };
 
 const pendingImageFilesByVariantId = reactive<Record<number, File[]>>({});
@@ -193,6 +260,18 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
     clearFiles?.();
     setPendingImageFiles(variantId, []);
     await refreshProduct();
+
+    toast.add({
+      title: 'Sucesso',
+      description: 'Imagens carregadas com sucesso.',
+      color: 'success',
+    });
+  } catch (error: any) {
+    toast.add({
+      title: 'Erro',
+      description: getOperationErrorText(error, 'Falha ao carregar imagens. Tente novamente.'),
+      color: 'error',
+    });
   } finally {
     uploadingImagesByVariantId.value[variantId] = false;
   }
@@ -204,7 +283,17 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
     <UPageHeader
       :title="productTitle"
       :description="description"
-    />
+    >
+      <template #links>
+        <UButton
+          v-if="productPublicTo"
+          :to="productPublicTo"
+          target="_blank"
+          variant="outline"
+          icon="i-lucide-external-link"
+        />
+      </template>
+    </UPageHeader>
 
     <UPageBody>
       <UCard v-if="product">
@@ -384,14 +473,14 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
 
     <AdminVariantModal
       v-model:open="isVariantModalOpen"
-      :model-value="selectedVariant"
+      :modelValue="selectedVariant"
       @save="saveVariant"
     />
 
     <AdminSizeModal
       v-model:open="isSizeModalOpen"
-      :variant-id="selectedVariantId"
-      :model-value="selectedSize"
+      :variantId="selectedVariantId"
+      :modelValue="selectedSize"
       @save="saveSize"
     />
   </UPage>

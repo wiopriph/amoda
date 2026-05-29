@@ -131,7 +131,7 @@ const updateSlug = (slug: string) => {
         v-model="productForm.title"
         placeholder="Título"
         class="w-full"
-        @input="updateProductField('title', $event)"
+        @update:model-value="updateProductField('title', String($event || ''))"
       />
     </UFormField>
 
@@ -144,7 +144,7 @@ const updateSlug = (slug: string) => {
         :disabled="isEditingProduct"
         placeholder="Slug"
         class="w-full"
-        @input="updateSlug($event)"
+        @update:model-value="updateSlug(String($event || ''))"
       />
     </UFormField>
 
