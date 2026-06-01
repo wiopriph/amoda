@@ -315,6 +315,52 @@ const productUrl = computed(() => {
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => `Olá! Tenho uma pergunta sobre este produto: ${productUrl.value}`);
 
+const shareText = computed(() => productName.value ? `Veja ${productName.value} na Amoda` : 'Veja este produto na Amoda');
+
+const encodedProductUrl = computed(() => encodeURIComponent(productUrl.value));
+const encodedShareText = computed(() => encodeURIComponent(shareText.value));
+
+const socialShareLinks = computed(() => [
+  {
+    ariaLabel: 'Partilhar no WhatsApp',
+    icon: 'i-simple-icons-whatsapp',
+    to: `https://wa.me/?text=${encodeURIComponent(`${shareText.value} ${productUrl.value}`)}`,
+  },
+  {
+    ariaLabel: 'Partilhar no Facebook',
+    icon: 'i-simple-icons-facebook',
+    to: `https://www.facebook.com/sharer/sharer.php?u=${encodedProductUrl.value}`,
+  },
+  {
+    ariaLabel: 'Partilhar no X',
+    icon: 'i-simple-icons-x',
+    to: `https://twitter.com/intent/tweet?url=${encodedProductUrl.value}&text=${encodedShareText.value}`,
+  },
+]);
+
+const toast = useToast();
+
+const copyProductLink = async () => {
+  if (!import.meta.client) {
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(productUrl.value);
+
+    toast.add({
+      title: 'Link copiado',
+      color: 'success',
+    });
+  } catch {
+    toast.add({
+      title: 'Não foi possível copiar',
+      description: 'Copie o link pela barra do navegador.',
+      color: 'error',
+    });
+  }
+};
+
 
 const title = computed(() => `${product.value?.title || ''} | Escolha sem pagar`);
 const description = computed(() => product.value?.description || `Escolha ${productName.value} na Amoda em Luanda. Selecione o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar.`);
@@ -694,6 +740,38 @@ useHead(() => ({
               class="mt-3 text-sm leading-7 text-toned"
               v-text="product.description"
             />
+          </UCard>
+
+          <UCard>
+            <h2 class="text-base font-bold text-highlighted">
+              Partilhar
+            </h2>
+
+            <div class="mt-3 flex items-center gap-2">
+              <UButton
+                v-for="shareLink in socialShareLinks"
+                :key="shareLink.icon"
+                :to="shareLink.to"
+                :aria-label="shareLink.ariaLabel"
+                :icon="shareLink.icon"
+                color="neutral"
+                variant="outline"
+                size="sm"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="size-10 justify-center rounded-xl text-toned hover:border-primary/40 hover:text-primary"
+              />
+
+              <UButton
+                aria-label="Copiar link do produto"
+                icon="i-lucide-copy"
+                color="neutral"
+                variant="outline"
+                size="sm"
+                class="size-10 justify-center rounded-xl text-toned hover:border-primary/40 hover:text-primary"
+                @click="copyProductLink"
+              />
+            </div>
           </UCard>
 
           <UCard
