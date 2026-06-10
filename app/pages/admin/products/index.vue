@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TableColumn } from '@nuxt/ui';
+import type { TableColumn, TableRow } from '@nuxt/ui';
 import { getProductBadgeColor, getProductBadgeLabel, type ProductBadge } from '~/utils/productBadges';
 import { formatPrice } from '~/utils/formatPrice';
 
@@ -26,7 +26,7 @@ useHead({
 });
 
 type VariantImage = { url: string };
-type VariantSize = { id: number; size: string; stock?: number | null };
+type VariantSize = { id: number; size: string; stock?: number | null; msCode?: string | null };
 type Variant = {
   id: number
   color: string | null
@@ -49,6 +49,7 @@ type Product = {
 type ProductTableRow = Product & {
   variantsCount: number
   brandName: string
+  missingMsCodeSizesCount: number
 };
 
 const route = useRoute();
@@ -122,6 +123,17 @@ const expandedRows = ref<Record<string, boolean>>({});
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
 
+const getMissingMsCodeSizesCount = (product: Product) =>
+  (product.variants || []).reduce((total, variant) => total + (variant.sizes || [])
+    .filter(size => !size.msCode?.trim()).length, 0);
+
+const productTableMeta = {
+  class: {
+    tr: (row: TableRow<ProductTableRow>) =>
+      row.original.missingMsCodeSizesCount ? 'bg-warning/10 hover:bg-warning/15' : '',
+  },
+};
+
 const productColumns: TableColumn<ProductTableRow>[] = [
   {
     id: 'expand',
@@ -154,11 +166,6 @@ const productColumns: TableColumn<ProductTableRow>[] = [
     accessorKey: 'brandName',
     header: 'Marca',
     meta: { class: { th: 'w-40 truncate', td: 'truncate max-w-40' } },
-  },
-  {
-    accessorKey: 'slug',
-    header: 'Slug',
-    meta: { class: { th: 'w-64', td: 'truncate max-w-64' } },
   },
   {
     accessorKey: 'active',
@@ -201,6 +208,19 @@ const productColumns: TableColumn<ProductTableRow>[] = [
     header: 'Variantes',
   },
   {
+    accessorKey: 'missingMsCodeSizesCount',
+    header: 'MS Code',
+    cell: ({ row }) => {
+      const missingCount = row.original.missingMsCodeSizesCount;
+
+      return h(
+        UBadge,
+        { variant: 'subtle', color: missingCount ? 'warning' : 'success' },
+        () => missingCount ? `${missingCount} sem código` : 'OK',
+      );
+    },
+  },
+  {
     id: 'actions',
     header: 'Ações',
     meta: { class: { th: 'w-20 text-right', td: 'text-right' } },
@@ -220,6 +240,7 @@ const productRows = computed<ProductTableRow[]>(() =>
     ...product,
     brandName: product.brand?.name || '—',
     variantsCount: product.variants?.length || 0,
+    missingMsCodeSizesCount: getMissingMsCodeSizesCount(product),
   })),
 );
 
@@ -263,107 +284,124 @@ const getPaginationTo = (pageNumber: number) => ({
           v-model:expanded="expandedRows"
           :data="productRows"
           :columns="productColumns"
+          :meta="productTableMeta"
           :ui="{ tr: 'data-[expanded=true]:bg-elevated/50' }"
         >
           <template #expanded="{ row }">
             <div class="p-3 border-t border-gray-200">
-              <div class="flex items-start justify-between mb-3">
-                <div>
-                  <h3 class="text-sm font-semibold">
-                    #{{ row.original.id }} — {{ row.original.title }}
-                  </h3>
+              <div
+                class="rounded-lg p-3"
+                :class="row.original.missingMsCodeSizesCount ? 'bg-warning/10 ring-1 ring-warning/30' : 'bg-transparent'"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 class="text-sm font-semibold">
+                      #{{ row.original.id }} — {{ row.original.title }}
+                    </h3>
 
-                  <p class="text-xs text-gray-500">
-                    {{ row.original.brand?.name || '—' }} · {{ row.original.slug }}
-                  </p>
+                    <p class="text-xs text-gray-500">
+                      {{ row.original.brand?.name || '—' }} · {{ row.original.slug }}
+                    </p>
+                  </div>
+
+                  <div class="flex flex-wrap justify-end gap-2">
+                    <UBadge
+                      v-if="row.original.missingMsCodeSizesCount"
+                      color="warning"
+                      variant="subtle"
+                    >
+                      {{ row.original.missingMsCodeSizesCount }} tamanhos sem MS code
+                    </UBadge>
+
+                    <UBadge
+                      v-if="!row.original.active"
+                      color="error"
+                      variant="subtle"
+                    >
+                      Inativo
+                    </UBadge>
+                  </div>
                 </div>
 
-                <UBadge
-                  v-if="!row.original.active"
-                  color="error"
-                  variant="subtle"
-                >
-                  Inativo
-                </UBadge>
-              </div>
-
-              <div
-                v-if="row.original.variants?.length"
-                class="space-y-4"
-              >
                 <div
-                  v-for="variant in row.original.variants"
-                  :key="variant.id"
-                  class="flex items-start gap-4 rounded-lg border border-gray-200 bg-gray-50 p-3"
+                  v-if="row.original.variants?.length"
+                  class="space-y-4"
                 >
-                  <div class="shrink-0">
-                    <p class="text-[11px] text-gray-500 mb-1">
-                      Imagens
-                    </p>
+                  <div
+                    v-for="variant in row.original.variants"
+                    :key="variant.id"
+                    class="flex items-start gap-4 rounded-lg border border-gray-200 bg-gray-50 p-3"
+                  >
+                    <div class="shrink-0">
+                      <p class="text-[11px] text-gray-500 mb-1">
+                        Imagens
+                      </p>
 
-                    <div class="flex gap-2 overflow-x-auto max-w-full">
-                      <NuxtImg
-                        v-for="(variantImage, variantImageIndex) in variant.images || []"
-                        :key="variantImageIndex"
-                        :src="variantImage.url"
-                        class="w-16 h-20 object-cover rounded border border-gray-200"
-                      />
+                      <div class="flex gap-2 overflow-x-auto max-w-full">
+                        <NuxtImg
+                          v-for="(variantImage, variantImageIndex) in variant.images || []"
+                          :key="variantImageIndex"
+                          :src="variantImage.url"
+                          class="w-16 h-20 object-cover rounded border border-gray-200"
+                        />
+
+                        <div
+                          v-if="!variant.images?.length"
+                          class="w-16 h-20 flex items-center justify-center rounded border border-gray-200 text-xs text-gray-400"
+                        >
+                          —
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2">
+                        <span class="font-medium">{{ `#${variant.id}` }} — {{ variant.color || '—' }}</span>
+
+                        <UBadge
+                          v-if="!variant.active"
+                          variant="subtle"
+                          color="error"
+                        >
+                          Inativo
+                        </UBadge>
+                      </div>
 
                       <div
-                        v-if="!variant.images?.length"
-                        class="w-16 h-20 flex items-center justify-center rounded border border-gray-200 text-xs text-gray-400"
-                      >
-                        —
+                        class="text-sm text-gray-500 mb-2"
+                        v-text="formatPrice(variant.price)"
+                      />
+
+                      <p class="text-[11px] text-gray-500 mb-1">
+                        Tamanhos
+                      </p>
+
+                      <div class="flex flex-wrap gap-1.5">
+                        <UBadge
+                          v-for="variantSize in variant.sizes || []"
+                          :key="variantSize.id"
+                          variant="soft"
+                          :color="variantSize.msCode ? 'neutral' : 'warning'"
+                        >
+                          {{ variantSize.size }} · qty: {{ variantSize.stock ?? 0 }} · code: {{ variantSize.msCode || '—' }}
+                        </UBadge>
+
+                        <span
+                          v-if="!variant.sizes?.length"
+                          class="text-xs text-gray-400"
+                        >—</span>
                       </div>
                     </div>
                   </div>
-
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2">
-                      <span class="font-medium">{{ `#${variant.id}` }} — {{ variant.color || '—' }}</span>
-
-                      <UBadge
-                        v-if="!variant.active"
-                        variant="subtle"
-                        color="error"
-                      >
-                        Inativo
-                      </UBadge>
-                    </div>
-
-                    <div
-                      class="text-sm text-gray-500 mb-2"
-                      v-text="formatPrice(variant.price)"
-                    />
-
-                    <p class="text-[11px] text-gray-500 mb-1">
-                      Tamanhos
-                    </p>
-
-                    <div class="flex flex-wrap gap-1.5">
-                      <UBadge
-                        v-for="variantSize in variant.sizes || []"
-                        :key="variantSize.id"
-                        variant="soft"
-                      >
-                        {{ variantSize.size }} · qty: {{ variantSize.stock ?? 0 }}
-                      </UBadge>
-
-                      <span
-                        v-if="!variant.sizes?.length"
-                        class="text-xs text-gray-400"
-                      >—</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
 
-              <p
-                v-else
-                class="text-sm text-gray-500"
-              >
-                Nenhum produto encontrado
-              </p>
+                <p
+                  v-else
+                  class="text-sm text-gray-500"
+                >
+                  Nenhum produto encontrado
+                </p>
+              </div>
             </div>
           </template>
         </UTable>

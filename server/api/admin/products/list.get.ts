@@ -21,6 +21,7 @@ type ProductVariantSizeRow = {
   id: number
   size: string
   stock: number | null
+  'ms_code': string | null
 };
 
 type ProductVariantRow = {
@@ -68,7 +69,7 @@ export default defineEventHandler(async (event) => {
         price,
         active,
         product_variant_images ( url ),
-        product_variant_sizes ( id, size, stock )
+        product_variant_sizes ( id, size, stock, ms_code )
       )
     `, { count: 'exact' })
     .order('id', { ascending: false });
@@ -102,6 +103,7 @@ export default defineEventHandler(async (event) => {
         id: s.id,
         size: s.size,
         stock: s.stock ?? null,
+        msCode: s['ms_code'] ?? null,
       })),
     })),
   }));

@@ -12,6 +12,7 @@ type VariantSizeRow = {
   id: number
   size: string
   stock: number | null
+  'ms_code': string | null
 };
 
 type ProductVariantRow = {
@@ -27,8 +28,8 @@ type ProductRow = {
   id: number
   title: string
   slug: string
-  brand_id: number | null
-  primary_category_id: number | null
+  'brand_id': number | null
+  'primary_category_id': number | null
   description: string | null
   active: boolean
   badges: string[]
@@ -61,7 +62,7 @@ export default defineEventHandler(async (event) => {
       product_variants:product_variants (
         id, color, price, active,
         images:product_variant_images!product_variant_images_variant_id_fkey ( url, position, alt ),
-        sizes:product_variant_sizes!product_variant_sizes_variant_id_fkey ( id, size, stock )
+        sizes:product_variant_sizes!product_variant_sizes_variant_id_fkey ( id, size, stock, ms_code )
       )
     `)
     .eq('id', id)
@@ -84,15 +85,20 @@ export default defineEventHandler(async (event) => {
     description: product.description,
     active: product.active,
     badges: product.badges ?? [],
-    brand_id: product.brand_id,
-    primary_category_id: product.primary_category_id,
+    'brand_id': product['brand_id'],
+    'primary_category_id': product['primary_category_id'],
     variants: product.product_variants?.map(v => ({
       id: v.id,
       color: v.color,
       price: v.price,
       active: v.active,
       images: v.images || [],
-      sizes: v.sizes || [],
+      sizes: (v.sizes || []).map(size => ({
+        id: size.id,
+        size: size.size,
+        stock: size.stock,
+        msCode: size['ms_code'],
+      })),
     })) || [],
   };
 });

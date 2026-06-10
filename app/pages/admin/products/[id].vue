@@ -40,15 +40,16 @@ type ProductImage = {
 
 type VariantSize = {
   id?: number
-  variant_id?: number
+  'variant_id'?: number
   size: string
   stock: number
+  msCode?: string | null
   sku?: string
 };
 
 type ProductVariant = {
   id: number
-  product_id?: number | string
+  'product_id'?: number | string
   color: string
   price: number
   active: boolean
@@ -120,7 +121,7 @@ const selectedVariant = ref<EditableProductVariant>({});
 const openCreateVariantModal = () => {
   selectedVariant.value = {
     id: '',
-    product_id: product.value?.id,
+    'product_id': product.value?.id,
     color: '',
     price: 0,
     active: true,
@@ -132,7 +133,7 @@ const openCreateVariantModal = () => {
 const openEditVariantModal = (variant: ProductVariant) => {
   selectedVariant.value = {
     ...variant,
-    product_id: product.value?.id,
+    'product_id': product.value?.id,
   };
 
   isVariantModalOpen.value = true;
@@ -184,22 +185,19 @@ const deleteVariant = async (variant: ProductVariant) => {
 };
 
 const isSizeModalOpen = ref(false);
-const selectedVariantId = ref<number | null>(null);
 const selectedSize = ref<Partial<VariantSize>>({});
 
 const openCreateSizeModal = (variant: ProductVariant) => {
   const variantId = Number(variant.id);
 
-  selectedVariantId.value = variantId;
-  selectedSize.value = { variant_id: variantId, size: '', stock: 0, sku: '' };
+  selectedSize.value = { 'variant_id': variantId, size: '', stock: 0, msCode: '', sku: '' };
   isSizeModalOpen.value = true;
 };
 
 const openEditSizeModal = (variant: ProductVariant, size: VariantSize) => {
   const variantId = Number(variant.id);
 
-  selectedVariantId.value = variantId;
-  selectedSize.value = { ...size, variant_id: size.variant_id ?? variantId };
+  selectedSize.value = { ...size, 'variant_id': size['variant_id'] ?? variantId };
   isSizeModalOpen.value = true;
 };
 
@@ -372,10 +370,11 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
                     v-for="variantSize in variant.sizes || []"
                     :key="variantSize.id"
                     variant="soft"
+                    :color="variantSize.msCode ? 'neutral' : 'warning'"
                     class="cursor-pointer transition hover:ring-1 hover:ring-primary/40"
                     @click="openEditSizeModal(variant, variantSize)"
                   >
-                    {{ variantSize.size }} · {{ variantSize.stock }}
+                    <strong>{{ variantSize.size }}</strong> · {{ variantSize.stock || 0 }} · {{ variantSize.msCode || 'sem código' }}
                   </UBadge>
 
                   <UButton
@@ -479,7 +478,6 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
 
     <AdminSizeModal
       v-model:open="isSizeModalOpen"
-      :variantId="selectedVariantId"
       :modelValue="selectedSize"
       @save="saveSize"
     />

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 type SizeForm = {
   id?: number | string | null
-  variant_id?: number | string | null
+  'variant_id'?: number | string | null
   size?: string | null
   stock?: number | string | null
+  msCode?: string | null
   sku?: string | null
 };
 
@@ -72,6 +73,17 @@ const saveSize = () => {
           <UInput
             v-model="sizeForm.stock"
             type="number"
+            class="w-full"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Código Moysklad"
+          class="w-full"
+        >
+          <UInput
+            v-model="sizeForm.msCode"
+            placeholder="code"
             class="w-full"
           />
         </UFormField>

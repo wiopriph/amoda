@@ -10,21 +10,29 @@ export default defineEventHandler(async (event) => {
 
   const {
     id,
-    variant_id,
     size,
     stock,
   } = body;
+  const variantId = body['variant_id'];
+  const hasMsCode = Object.hasOwn(body, 'msCode') || Object.hasOwn(body, 'ms_code');
+  const msCode = body.msCode ?? body['ms_code'];
 
-  if (!variant_id || !size) {
+  if (!variantId || !size) {
     throw createError({ statusCode: 400, statusMessage: 'Variant ID and size required' });
   }
 
 
   const payload = {
-    variant_id,
+    'variant_id': variantId,
     size,
     stock: stock ?? 0,
   };
+
+  if (hasMsCode) {
+    Object.assign(payload, {
+      'ms_code': msCode == null ? null : String(msCode).trim() || null,
+    });
+  }
 
   const { data, error } = id ?
     await client.from('product_variant_sizes').update(payload)
