@@ -15,13 +15,30 @@ const props = withDefaults(defineProps<{
   open: false,
 });
 
-const sizeForm = reactive<SizeForm>({ ...props.modelValue });
+const getEmptySizeForm = (): SizeForm => ({
+  id: null,
+  'variant_id': null,
+  size: '',
+  stock: 0,
+  msCode: '',
+  sku: '',
+});
+
+const sizeForm = reactive<SizeForm>(getEmptySizeForm());
+
+const setSizeForm = (modelValue: SizeForm = {}) => {
+  Object.assign(sizeForm, {
+    ...getEmptySizeForm(),
+    ...modelValue,
+  });
+};
 
 watch(
   () => props.modelValue,
   (modelValue) => {
-    Object.assign(sizeForm, modelValue);
+    setSizeForm(modelValue);
   },
+  { immediate: true },
 );
 
 const emit = defineEmits<{
@@ -40,7 +57,7 @@ const isSavingSize = ref(false);
 const saveSize = () => {
   isSavingSize.value = true;
 
-  emit('save', sizeForm);
+  emit('save', { ...sizeForm });
 
   isSavingSize.value = false;
   closeModal();
