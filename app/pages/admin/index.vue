@@ -19,12 +19,10 @@ useHead(() => ({
 type SyncStockResult = {
   success: boolean
   totalFromMoysklad: number
-  totalStockRows?: number
+  totalLinkedLocalSizes: number
   updated: number
   skippedWithoutCode: number
-  skippedWithoutStock?: number
   skippedNotFound: number
-  duplicateMsCodeMatches?: number
 };
 
 const isSyncingStock = ref(false);
@@ -34,12 +32,10 @@ const syncStockError = ref<string | null>(null);
 const syncStockResultItems = computed(() => syncStockResult.value ?
   [
     { label: 'Total no Moysklad', value: syncStockResult.value.totalFromMoysklad },
-    { label: 'Linhas de stock', value: syncStockResult.value.totalStockRows ?? 0 },
+    { label: 'Tamanhos com código', value: syncStockResult.value.totalLinkedLocalSizes },
     { label: 'Atualizados', value: syncStockResult.value.updated },
     { label: 'Ignorados sem código', value: syncStockResult.value.skippedWithoutCode },
-    { label: 'Sem stock no relatório', value: syncStockResult.value.skippedWithoutStock ?? 0 },
     { label: 'Não encontrados', value: syncStockResult.value.skippedNotFound },
-    { label: 'Códigos duplicados', value: syncStockResult.value.duplicateMsCodeMatches ?? 0 },
   ] :
   []);
 

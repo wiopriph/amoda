@@ -115,6 +115,44 @@ const saveProduct = async (productPayload: Product) => {
   }
 };
 
+const isDeletingProduct = ref(false);
+
+const deleteProduct = async () => {
+  if (!product.value?.id || !confirm(`Delete product #${product.value.id}?`)) {
+    return;
+  }
+
+  isDeletingProduct.value = true;
+
+  try {
+    const result = await $fetch<{ deleted: boolean; removedFiles: number; storageError?: string }>(
+      '/api/admin/products/remove',
+      {
+        method: 'POST',
+        body: { id: product.value.id },
+      },
+    );
+
+    toast.add({
+      title: result.storageError ? 'Produto eliminado' : 'Sucesso',
+      description: result.storageError ?
+        `Produto eliminado, mas falha ao remover ficheiros: ${result.storageError}` :
+        'Produto eliminado com sucesso.',
+      color: result.storageError ? 'warning' : 'success',
+    });
+
+    await navigateTo({ name: 'admin-products' });
+  } catch (error: any) {
+    toast.add({
+      title: 'Erro',
+      description: getOperationErrorText(error, 'Falha ao eliminar produto. Tente novamente.'),
+      color: 'error',
+    });
+  } finally {
+    isDeletingProduct.value = false;
+  }
+};
+
 const isVariantModalOpen = ref(false);
 const selectedVariant = ref<EditableProductVariant>({});
 
@@ -467,6 +505,31 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
             Sem variantes
           </p>
         </UCard>
+
+        <div class="mt-8 rounded-lg border border-error/30 bg-error/5 p-4">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 class="text-sm font-semibold text-error">
+                Eliminar produto
+              </h3>
+
+              <p class="mt-1 text-sm text-gray-600">
+                Remove o produto, variantes, tamanhos, imagens e itens pendentes no carrinho.
+              </p>
+            </div>
+
+            <UButton
+              color="error"
+              variant="soft"
+              icon="i-lucide-trash-2"
+              :loading="isDeletingProduct"
+              :disabled="isDeletingProduct"
+              @click="deleteProduct"
+            >
+              Eliminar produto
+            </UButton>
+          </div>
+        </div>
       </UCard>
     </UPageBody>
 
