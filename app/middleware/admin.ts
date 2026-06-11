@@ -1,12 +1,8 @@
-export default defineNuxtRouteMiddleware(() => {
+export default defineNuxtRouteMiddleware((to) => {
   const { user, isAdmin } = useAuth();
 
   if (!user.value) {
-    return navigateTo({
-      path: '/auth',
-      // eslint-disable-next-line camelcase
-      query: { redirected_from: useRoute().fullPath },
-    });
+    return navigateTo({ name: 'auth', query: { 'redirected_from': to.fullPath } });
   }
 
   if (!isAdmin.value) {
