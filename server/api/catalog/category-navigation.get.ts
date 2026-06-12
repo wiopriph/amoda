@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
     const { data: topCategories, error: topErr } = await supabase
       .from('categories')
       .select('id, name, slug, parent_id, image')
+      .eq('active', true)
       .is('parent_id', null)
       .order('name', { ascending: true });
 
@@ -51,6 +52,7 @@ export default defineEventHandler(async (event) => {
     .from('categories')
     .select('id, name, slug, parent_id, image')
     .eq('slug', String(query.slug))
+    .eq('active', true)
     .maybeSingle();
 
   if (catErr) {
@@ -69,6 +71,7 @@ export default defineEventHandler(async (event) => {
       .from('categories')
       .select('id, name, slug, parent_id, image')
       .eq('id', currentCategory.parent_id)
+      .eq('active', true)
       .maybeSingle();
 
     if (parentRow) parentCategory = parentRow as Category;
@@ -79,6 +82,7 @@ export default defineEventHandler(async (event) => {
     .from('categories')
     .select('id, name, slug, parent_id, image')
     .eq('parent_id', currentCategory.id)
+    .eq('active', true)
     .order('name', { ascending: true });
 
   if (children && children.length > 0) {
@@ -112,6 +116,7 @@ export default defineEventHandler(async (event) => {
         .from('categories')
         .select('id, name, slug, parent_id, image')
         .eq('parent_id', parentCategory.id)
+        .eq('active', true)
         .neq('id', currentCategory.id)
         .order('name', { ascending: true });
 
@@ -121,6 +126,7 @@ export default defineEventHandler(async (event) => {
         .from('categories')
         .select('id, name, slug, parent_id, image')
         .is('parent_id', null)
+        .eq('active', true)
         .neq('id', currentCategory.id)
         .order('name', { ascending: true });
 
