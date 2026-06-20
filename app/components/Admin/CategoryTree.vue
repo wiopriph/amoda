@@ -13,12 +13,10 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  edit: [category: Category]
   add: [category: Category]
   remove: [category: Category]
 }>();
 
-const emitEdit = (category: Category) => emit('edit', category);
 const emitAdd = (category: Category) => emit('add', category);
 const emitRemove = (category: Category) => emit('remove', category);
 </script>
@@ -53,10 +51,10 @@ const emitRemove = (category: Category) => emit('remove', category);
         <div class="flex gap-1.5">
           <UButton
             :aria-label="`Editar ${category.name}`"
+            :to="{ name: 'admin-categories-edit', params: { id: category.id } }"
             size="xs"
             variant="ghost"
             icon="i-lucide-pen-line"
-            @click="emitEdit(category)"
           />
 
           <UButton
@@ -82,7 +80,6 @@ const emitRemove = (category: Category) => emit('remove', category);
       <AdminCategoryTree
         v-if="category.children?.length"
         :items="category.children"
-        @edit="emitEdit"
         @add="emitAdd"
         @remove="emitRemove"
       />

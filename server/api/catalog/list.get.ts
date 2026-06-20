@@ -25,6 +25,11 @@ type Category = {
   name: string
   slug: string
   parent_id: number | null
+  image: string | null
+  seo_title: string | null
+  seo_description: string | null
+  seo_content: string | null
+  h1_override: string | null
 };
 
 type CategoryClosureRow = {
@@ -84,7 +89,7 @@ export default defineEventHandler(async (event) => {
   if (query.slug) {
     const { data: category, error: catErr } = await supabase
       .from('categories')
-      .select('id, name, slug, parent_id')
+      .select('id, name, slug, parent_id, image, seo_title, seo_description, seo_content, h1_override')
       .eq('slug', String(query.slug))
       .maybeSingle();
 

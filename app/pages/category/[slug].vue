@@ -64,6 +64,7 @@ if (import.meta.client) {
 
 const category = computed(() => catalogResponse.value!.category);
 const categoryTitle = computed(() => category.value?.name || '');
+const categoryH1 = computed(() => category.value?.h1_override || categoryTitle.value);
 const categoryProducts = computed(() => catalogResponse.value!.items || []);
 
 const breadcrumbItems = computed(() => (catalogResponse.value!.breadcrumbs || []).map((breadcrumb: any) => ({
@@ -134,8 +135,8 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Preciso de ajuda com a catego
 const router = useRouter();
 const requestUrl = useRequestURL();
 
-const title = computed(() => `${categoryTitle.value} em Luanda | Escolha e experimente antes de pagar`);
-const description = computed(() => `Encontre ${categoryTitle.value} na Amoda em Luanda. Escolha online sem pagar, experimente primeiro e leve apenas o que gostar.`);
+const title = computed(() => category.value?.seo_title || `${categoryTitle.value} em Luanda | Escolha e experimente antes de pagar`);
+const description = computed(() => category.value?.seo_description || `Encontre ${categoryTitle.value} na Amoda em Luanda. Escolha online sem pagar, experimente primeiro e leve apenas o que gostar.`);
 
 const breadcrumbSchema = computed(() => ({
   '@context': 'https://schema.org',
@@ -218,7 +219,7 @@ useHead(() => ({
 
           <h1
             class="mt-4 text-3xl font-black tracking-tight text-highlighted sm:text-5xl"
-            v-text="categoryTitle"
+            v-text="categoryH1"
           />
 
           <p
@@ -331,6 +332,12 @@ useHead(() => ({
           />
         </div>
       </section>
+
+      <section
+        v-if="category?.seo_content"
+        class="mt-10 rounded-2xl border border-gray-100 bg-gray-50 px-6 py-8 text-sm leading-7 text-muted prose prose-sm max-w-none"
+        v-html="category.seo_content"
+      />
     </UPageBody>
 
     <WhatsappButton

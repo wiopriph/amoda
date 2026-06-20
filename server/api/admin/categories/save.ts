@@ -5,8 +5,13 @@ import { assertAdmin } from '~~/server/utils/assertAdmin';
 type SaveBody = {
   id?: number | null
   name: string
+  slug?: string
   parent_id?: number | null
   active?: boolean
+  seo_title?: string | null
+  seo_description?: string | null
+  seo_content?: string | null
+  h1_override?: string | null
 };
 
 type CategoryPayload = {
@@ -14,6 +19,10 @@ type CategoryPayload = {
   slug: string
   parent_id: number | null
   active: boolean
+  seo_title: string | null
+  seo_description: string | null
+  seo_content: string | null
+  h1_override: string | null
 };
 
 function slugify(str: string) {
@@ -35,11 +44,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'name is required' });
   }
 
+  const name = body.name.trim();
   const payload: CategoryPayload = {
-    name: body.name.trim(),
-    slug: slugify(body.name),
+    name,
+    slug: body.slug ? slugify(body.slug) : slugify(name),
     parent_id: body.parent_id ?? null,
     active: body.active ?? true,
+    seo_title: body.seo_title?.trim() || null,
+    seo_description: body.seo_description?.trim() || null,
+    seo_content: body.seo_content?.trim() || null,
+    h1_override: body.h1_override?.trim() || null,
   };
 
   const res = body.id ?

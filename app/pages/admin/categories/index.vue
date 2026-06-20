@@ -5,7 +5,6 @@ definePageMeta({
   middleware: 'admin',
 });
 
-
 const title = 'Categorias';
 const description = 'Gerir categorias e hierarquias de produtos';
 
@@ -48,19 +47,14 @@ const selectedCategory = ref<Category | null>(null);
 const categoryForm = reactive<CategoryForm>({
   id: null,
   name: '',
-  // eslint-disable-next-line camelcase
   parent_id: null,
   active: true,
 });
-
-const categoryModalTitle = computed(() => categoryForm.id ? 'Editar categoria' : 'Adicionar categoria');
-const categorySubmitLabel = computed(() => categoryForm.id ? 'Guardar alterações' : 'Adicionar categoria');
 
 const resetCategoryForm = (parentCategory: Category | null = null) => {
   Object.assign(categoryForm, {
     id: null,
     name: '',
-    // eslint-disable-next-line camelcase
     parent_id: parentCategory?.id ?? null,
     active: true,
   });
@@ -69,19 +63,6 @@ const resetCategoryForm = (parentCategory: Category | null = null) => {
 const openCreateCategoryModal = (parentCategory: Category | null = null) => {
   resetCategoryForm(parentCategory);
   selectedCategory.value = null;
-  isCategoryModalOpen.value = true;
-};
-
-const openEditCategoryModal = (category: Category) => {
-  Object.assign(categoryForm, {
-    id: category.id,
-    name: category.name,
-    // eslint-disable-next-line camelcase
-    parent_id: category.parent_id,
-    active: category.active,
-  });
-
-  selectedCategory.value = category;
   isCategoryModalOpen.value = true;
 };
 
@@ -97,15 +78,13 @@ const toast = useToast();
 
 const saveCategory = async () => {
   try {
-    const isEditing = !!categoryForm.id;
-
     await $fetch('/api/admin/categories/save', { method: 'POST', body: categoryForm });
     isCategoryModalOpen.value = false;
     await refreshCategoryTree();
 
     toast.add({
       title: 'Sucesso',
-      description: isEditing ? 'Categoria atualizada com sucesso.' : 'Categoria criada com sucesso.',
+      description: 'Categoria criada com sucesso.',
       color: 'success',
     });
   } catch (error: any) {
@@ -183,7 +162,6 @@ const deleteCategory = async () => {
         <template v-else>
           <AdminCategoryTree
             :items="categoryTree"
-            @edit="openEditCategoryModal"
             @add="openCreateCategoryModal"
             @remove="openDeleteCategoryModal"
           />
@@ -193,7 +171,7 @@ const deleteCategory = async () => {
 
     <UModal
       v-model:open="isCategoryModalOpen"
-      :title="categoryModalTitle"
+      title="Adicionar categoria"
     >
       <template #body>
         <UForm class="space-y-4">
@@ -223,7 +201,7 @@ const deleteCategory = async () => {
               color="primary"
               @click="saveCategory"
             >
-              {{ categorySubmitLabel }}
+              Adicionar categoria
             </UButton>
           </div>
         </UForm>
