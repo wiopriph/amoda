@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {
-  CONTACT_EMAIL,
   COMPANY_ADDRESS,
   COMPANY_ADDRESS_MAP_LINK,
+  CONTACT_EMAIL,
   FACEBOOK_LINK,
   TIKTOK_LINK,
 } from '~/constants/contacts';
@@ -22,6 +22,9 @@ useHead(() => ({
     { property: 'twitter:title', content: title },
     { property: 'twitter:description', content: description },
   ],
+  link: [
+    { rel: 'canonical', href: 'https://amoda.ao/contacts' },
+  ],
 }));
 
 const { makeWhatsappHref } = useWhatsappLink();
@@ -31,7 +34,9 @@ const waLink = makeWhatsappHref(() => 'Olá! Preciso de ajuda com uma escolha na
 <template>
   <UPage>
     <UPageBody class="mx-auto max-w-4xl sm:px-6 lg:px-8">
-      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+      <section
+        class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8"
+      >
         <UBadge
           color="primary"
           variant="soft"

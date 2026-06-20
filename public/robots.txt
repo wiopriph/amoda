@@ -1,12 +1,10 @@
 User-Agent: *
 
-Disallow: *?
-
 Disallow: /cart
 Disallow: /checkout
 Disallow: /order
 Disallow: /auth
-
+Disallow: /admin
 Disallow: /_nuxt/
 
 Sitemap: https://amoda.ao/sitemap.xml

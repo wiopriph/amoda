@@ -13,6 +13,9 @@ useHead({
     { property: 'twitter:title', content: title },
     { property: 'twitter:description', content: description },
   ],
+  link: [
+    { rel: 'canonical', href: 'https://amoda.ao/pickup-points' },
+  ],
 });
 
 const WEEKDAY_LABELS = {

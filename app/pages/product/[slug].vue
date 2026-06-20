@@ -406,12 +406,14 @@ useHead(() => ({
   title: title.value,
   meta: [
     { name: 'description', content: description.value },
+    { property: 'og:type', content: 'product' },
+    { property: 'og:url', content: productUrl.value },
     { property: 'og:title', content: title.value },
     { property: 'og:description', content: description.value },
     { property: 'og:image', content: seoImage.value },
-    { property: 'twitter:title', content: title.value },
-    { property: 'twitter:description', content: description.value },
-    { property: 'twitter:image', content: seoImage.value },
+    { name: 'twitter:title', content: title.value },
+    { name: 'twitter:description', content: description.value },
+    { name: 'twitter:image', content: seoImage.value },
   ],
   link: [{ rel: 'canonical', href: productUrl.value }],
   script: [

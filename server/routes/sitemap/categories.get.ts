@@ -7,7 +7,7 @@ export default defineSitemapEventHandler(async (event) => {
 
   const { data: categories, error } = await db
     .from('categories')
-    .select('id, slug')
+    .select('slug, updated_at, created_at')
     .eq('active', true)
     .order('slug', { ascending: true });
 
@@ -21,7 +21,8 @@ export default defineSitemapEventHandler(async (event) => {
 
   return categories.map((category) => ({
     loc: `/category/${category.slug}`,
-    changefreq: 'weekly',
+    lastmod: category.updated_at ? new Date(category.updated_at).toISOString() : undefined,
+    changefreq: 'weekly' as const,
     priority: 0.6,
   }));
 });

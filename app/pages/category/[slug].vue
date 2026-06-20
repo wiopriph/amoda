@@ -137,6 +137,12 @@ const requestUrl = useRequestURL();
 
 const title = computed(() => category.value?.seo_title || `${categoryTitle.value} em Luanda | Escolha e experimente antes de pagar`);
 const description = computed(() => category.value?.seo_description || `Encontre ${categoryTitle.value} na Amoda em Luanda. Escolha online sem pagar, experimente primeiro e leve apenas o que gostar.`);
+const ogImage = computed(() => category.value?.image || 'https://amoda.ao/logo.webp');
+const canonicalUrl = computed(() => {
+  const path = router.resolve({ name: 'category-slug', params: { slug: route.params.slug } }).fullPath;
+
+  return new URL(path, requestUrl.origin).href;
+});
 
 const breadcrumbSchema = computed(() => ({
   '@context': 'https://schema.org',
@@ -185,11 +191,18 @@ const itemListSchema = computed(() => ({
 useHead(() => ({
   title: title.value,
   meta: [
-    { name: 'description', content: description },
-    { property: 'og:title', content: title },
-    { property: 'og:description', content: description },
-    { property: 'twitter:title', content: title },
-    { property: 'twitter:description', content: description },
+    { name: 'description', content: description.value },
+    { property: 'og:url', content: canonicalUrl.value },
+    { property: 'og:title', content: title.value },
+    { property: 'og:description', content: description.value },
+    { property: 'og:image', content: ogImage.value },
+    { property: 'og:image:alt', content: categoryTitle.value },
+    { name: 'twitter:title', content: title.value },
+    { name: 'twitter:description', content: description.value },
+    { name: 'twitter:image', content: ogImage.value },
+  ],
+  link: [
+    { rel: 'canonical', href: canonicalUrl.value },
   ],
   script: [
     { type: 'application/ld+json', innerHTML: JSON.stringify(breadcrumbSchema.value) },
