@@ -72,7 +72,7 @@ const syncStock = async () => {
     />
 
     <UPageBody>
-      <UCard>
+      <UCard v-if="false">
         <div class="space-y-6">
           <p class="text-gray-700">
             Gerencie marcas, categorias e produtos
