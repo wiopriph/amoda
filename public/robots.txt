@@ -6,10 +6,6 @@ Disallow: /cart
 Disallow: /checkout
 Disallow: /order
 Disallow: /auth
-Disallow: /en/cart
-Disallow: /en/checkout
-Disallow: /en/order
-Disallow: /en/auth
 
 Disallow: /_nuxt/
 
