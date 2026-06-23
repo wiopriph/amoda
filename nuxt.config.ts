@@ -76,6 +76,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     moyskladToken: process.env.MOYSKLAD_TOKEN,
+    extensionToken: process.env.EXTENSION_TOKEN,
     supabase: {
       serviceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
     },
