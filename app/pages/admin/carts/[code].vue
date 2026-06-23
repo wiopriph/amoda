@@ -153,13 +153,32 @@ const getProductTo = (item: CartItem) => item.slug ? { name: 'product-slug', par
         A carregar...
       </UCard>
 
-      <UAlert
+      <div
         v-else-if="cartError || !cart"
-        color="error"
-        variant="soft"
-        description="Carrinho não encontrado"
-        icon="i-heroicons-exclamation-triangle"
-      />
+        class="py-20 text-center"
+      >
+        <UIcon
+          name="i-lucide-shopping-cart"
+          class="mx-auto mb-4 size-12 text-gray-300"
+        />
+
+        <p class="text-lg font-semibold text-highlighted">
+          Carrinho não encontrado
+        </p>
+
+        <p class="mt-1 text-sm text-muted">
+          O código <span class="font-mono">{{ cartPublicCode }}</span> não existe ou foi removido.
+        </p>
+
+        <UButton
+          :to="{ name: 'admin-carts' }"
+          class="mt-6"
+          variant="soft"
+          icon="i-lucide-arrow-left"
+        >
+          Ver todos os carrinhos
+        </UButton>
+      </div>
 
       <template v-else>
         <UCard class="mb-6">
@@ -304,7 +323,8 @@ const getProductTo = (item: CartItem) => item.slug ? { name: 'product-slug', par
                   />
 
                   <div class="mt-1 text-xs text-gray-500">
-                    brand: {{ cartItem.brand || '—' }} · size: {{ cartItem.sizeLabel || '—' }} · color: {{ cartItem.variantLabel || '—' }}
+                    brand: {{ cartItem.brand || '—' }} · size: {{ cartItem.sizeLabel || '—' }} · color:
+                    {{ cartItem.variantLabel || '—' }}
                   </div>
                 </div>
               </div>
