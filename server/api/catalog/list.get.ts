@@ -1,4 +1,5 @@
 import { serverSupabaseClient } from '#supabase/server';
+import type { CatalogBreadcrumb as Breadcrumb, CatalogCategory as Category, CatalogListResponse } from '#shared/types/catalog';
 
 
 type QueryParams = {
@@ -13,23 +14,6 @@ type QueryParams = {
   page?: string | number
   limit?: string | number
   sort?: 'price_asc' | 'price_desc' | 'new'
-};
-
-type Breadcrumb = {
-  label: string
-  to: { name: string; params: Record<string, string> }
-};
-
-type Category = {
-  id: number
-  name: string
-  slug: string
-  parent_id: number | null
-  image: string | null
-  seo_title: string | null
-  seo_description: string | null
-  seo_content: string | null
-  h1_override: string | null
 };
 
 type CategoryClosureRow = {
@@ -74,7 +58,7 @@ type ProductRow = {
   variants?: ProductVariantRow[] | null
 };
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<CatalogListResponse> => {
   const supabase = await serverSupabaseClient(event);
   const query = getQuery(event) as QueryParams;
 

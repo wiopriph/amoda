@@ -3,6 +3,7 @@ import { getProductBadgeColor, getProductBadgeLabel } from '~/utils/productBadge
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
+import type { CatalogProductCard } from '#shared/types/catalog';
 
 
 definePageMeta({ name: 'index' });
@@ -42,7 +43,7 @@ const products = computed(() => catalogResponse.value?.items || []);
 
 const { trackViewItemList, trackSelectItem } = useAnalyticsEvent();
 
-const mapProductToGa4Item = (product: any, index?: number) => {
+const mapProductToGa4Item = (product: CatalogProductCard, index?: number) => {
   const variantId = Number(product.default_variant_id);
   const sizeId = Number(product.default_size_id);
 
@@ -70,7 +71,7 @@ if (import.meta.client) {
     () => route.fullPath,
     () => {
       const analyticsItems = products.value
-        .map((product: any, productIndex: number) => mapProductToGa4Item(product, productIndex + 1))
+        .map((product, productIndex) => mapProductToGa4Item(product, productIndex + 1))
         .filter(Boolean);
 
       trackViewItemList({
@@ -83,7 +84,7 @@ if (import.meta.client) {
   );
 }
 
-const sendSelectProductEvent = (product: any) => {
+const sendSelectProductEvent = (product: CatalogProductCard) => {
   const analyticsItem = mapProductToGa4Item(product);
 
   if (!analyticsItem) {

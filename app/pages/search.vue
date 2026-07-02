@@ -3,6 +3,7 @@ import { getProductBadgeColor, getProductBadgeLabel } from '~/utils/productBadge
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
+import type { CatalogProductCard } from '#shared/types/catalog';
 
 
 definePageMeta({ name: 'search' });
@@ -66,7 +67,7 @@ const getPaginationTo = (pageNumber: number) => ({
 
 const { trackSelectItem } = useAnalyticsEvent();
 
-const trackResultSelect = (product: any) => {
+const trackResultSelect = (product: CatalogProductCard) => {
   const variantId = Number(product.default_variant_id);
   const sizeId = Number(product.default_size_id);
 

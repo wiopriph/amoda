@@ -4,6 +4,7 @@ import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 import { CURRENCY } from '~/constants/currency';
+import type { CatalogProductCard } from '#shared/types/catalog';
 
 
 definePageMeta({ name: 'category-slug' });
@@ -102,14 +103,14 @@ const categoryTitle = computed(() => category.value?.name || '');
 const categoryH1 = computed(() => category.value?.h1_override || categoryTitle.value);
 const categoryProducts = computed(() => catalogResponse.value!.items || []);
 
-const breadcrumbItems = computed(() => (catalogResponse.value!.breadcrumbs || []).map((breadcrumb: any) => ({
+const breadcrumbItems = computed(() => (catalogResponse.value!.breadcrumbs || []).map((breadcrumb) => ({
   label: breadcrumb.label,
   to: breadcrumb.to,
 })));
 
 const { trackViewItemList, trackSelectItem } = useAnalyticsEvent();
 
-const mapProductToGa4Item = (product: any, index?: number) => {
+const mapProductToGa4Item = (product: CatalogProductCard, index?: number) => {
   const variantId = Number(product.default_variant_id);
   const sizeId = Number(product.default_size_id);
 
@@ -137,7 +138,7 @@ if (import.meta.client) {
     () => route.fullPath,
     () => {
       const ga4Items = categoryProducts.value
-        .map((product: any, productIndex: number) => mapProductToGa4Item(product, productIndex + 1))
+        .map((product, productIndex) => mapProductToGa4Item(product, productIndex + 1))
         .filter(Boolean);
 
       trackViewItemList({
@@ -150,7 +151,7 @@ if (import.meta.client) {
   );
 }
 
-const trackProductSelect = (product: any) => {
+const trackProductSelect = (product: CatalogProductCard) => {
   const ga4Item = mapProductToGa4Item(product);
 
   if (!ga4Item) {
@@ -181,7 +182,7 @@ const canonicalUrl = computed(() => {
 const breadcrumbSchema = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
-  itemListElement: (catalogResponse.value!.breadcrumbs || []).map((breadcrumb: any, breadcrumbIndex: number) => ({
+  itemListElement: (catalogResponse.value!.breadcrumbs || []).map((breadcrumb, breadcrumbIndex) => ({
     '@type': 'ListItem',
     position: breadcrumbIndex + 1,
     name: breadcrumb.label,
@@ -195,7 +196,7 @@ const itemListSchema = computed(() => ({
   name: title.value,
   numberOfItems: categoryProducts.value.length,
   itemListOrder: 'http://schema.org/ItemListOrderAscending',
-  itemListElement: categoryProducts.value.map((product: any, productIndex: number) => {
+  itemListElement: categoryProducts.value.map((product, productIndex) => {
     const productUrl = new URL(
       router.resolve({ name: 'product-slug', params: { slug: product.slug } }).fullPath || '/',
       requestUrl.origin,
