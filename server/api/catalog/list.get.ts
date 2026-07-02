@@ -148,6 +148,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // !inner required so variant-level filters (color, price, size) actually
+  // exclude products instead of just trimming the nested arrays
+  const hasVariantFilter = Boolean(query.color || query.min_price || query.max_price || query.size);
+  const variantJoin = hasVariantFilter ? 'product_variants!inner' : 'product_variants';
+  const sizeJoin = query.size ? 'product_variant_sizes!inner' : 'product_variant_sizes';
+
   let productsQuery = supabase
     .from('products')
     .select(`
@@ -158,12 +164,12 @@ export default defineEventHandler(async (event) => {
       brand_id,
       primary_category_id,
       brand:brands(name),
-      variants:product_variants(
+      variants:${variantJoin}(
         id,
         color,
         price,
         product_variant_images(url, position),
-        sizes:product_variant_sizes(id, size)
+        sizes:${sizeJoin}(id, size)
       )
     `, { count: 'exact' })
     .eq('active', true);
@@ -194,6 +200,10 @@ export default defineEventHandler(async (event) => {
     productsQuery = productsQuery.eq('product_variants.color', query.color);
   }
 
+  if (query.size) {
+    productsQuery = productsQuery.ilike('product_variants.product_variant_sizes.size', String(query.size));
+  }
+
   if (query.min_price) {
     productsQuery = productsQuery.gte('product_variants.price', Number(query.min_price));
   }
@@ -202,20 +212,17 @@ export default defineEventHandler(async (event) => {
     productsQuery = productsQuery.lte('product_variants.price', Number(query.max_price));
   }
 
-  switch (query.sort) {
-    case 'price_asc':
-      productsQuery = productsQuery.order('product_variants.price', { ascending: true });
-      break;
-    case 'price_desc':
-      productsQuery = productsQuery.order('product_variants.price', { ascending: false });
-      break;
-    case 'new':
-    default:
-      productsQuery = productsQuery.order('id', { ascending: false });
-      break;
-  }
+  // PostgREST can't order parent rows by a one-to-many embedded column,
+  // so price sorting is done in JS over the full (small) result set below
+  const isPriceSort = query.sort === 'price_asc' || query.sort === 'price_desc';
 
-  productsQuery = productsQuery.range(rangeFrom, rangeTo);
+  productsQuery = productsQuery.order('id', { ascending: false });
+
+  if (!isPriceSort) {
+    productsQuery = productsQuery.range(rangeFrom, rangeTo);
+  } else {
+    productsQuery = productsQuery.limit(1000);
+  }
 
   const { data: productRows, count: totalCount, error: listError } = await productsQuery;
 
@@ -280,10 +287,17 @@ export default defineEventHandler(async (event) => {
     };
   });
 
+  let pageItems = items;
+
+  if (isPriceSort) {
+    items.sort((a, b) => query.sort === 'price_asc' ? a.price - b.price : b.price - a.price);
+    pageItems = items.slice(rangeFrom, rangeTo + 1);
+  }
+
   return {
     breadcrumbs,
     category: currentCategory,
-    items,
+    items: pageItems,
     total: totalCount || 0,
     page,
     limit,

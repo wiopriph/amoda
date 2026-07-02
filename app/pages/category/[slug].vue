@@ -13,6 +13,9 @@ const page = ref(Math.max(1, Number(route.query.page || 1)));
 const productsSection = ref<HTMLElement | null>(null);
 const PRODUCTS_PER_PAGE = 20;
 
+const currentSort = computed(() => String(route.query.sort || 'new'));
+const currentSize = computed(() => String(route.query.size || ''));
+
 const [
   {
     data: catalogResponse,
@@ -20,13 +23,15 @@ const [
     pending: isCatalogPending,
   },
   { data: categoryNavigation },
+  { data: availableSizes },
 ] = await Promise.all([
   useFetch('/api/catalog/list', {
     query: {
       slug: route.params.slug,
       page,
-      q: route.query.q,
-      sort: route.query.sort,
+      q: computed(() => route.query.q),
+      sort: computed(() => route.query.sort),
+      size: computed(() => route.query.size),
       limit: PRODUCTS_PER_PAGE,
     },
     watch: [() => route.fullPath],
@@ -35,7 +40,37 @@ const [
     query: { slug: route.params.slug },
     watch: [() => route.fullPath],
   }),
+  useFetch<string[]>('/api/catalog/sizes'),
 ]);
+
+const router = useRouter();
+
+const updateCatalogQuery = (patch: Record<string, string | undefined>) => {
+  page.value = 1;
+
+  router.replace({
+    query: {
+      ...route.query,
+      ...patch,
+      page: undefined,
+    },
+  });
+};
+
+const sortOptions = [
+  { label: 'Novidades', value: 'new' },
+  { label: 'Preço: menor primeiro', value: 'price_asc' },
+  { label: 'Preço: maior primeiro', value: 'price_desc' },
+];
+
+const sortModel = computed({
+  get: () => currentSort.value,
+  set: (value: string) => updateCatalogQuery({ sort: value === 'new' ? undefined : value }),
+});
+
+const toggleSizeFilter = (size: string) => {
+  updateCatalogQuery({ size: currentSize.value === size ? undefined : size });
+};
 
 if (catalogError.value || !catalogResponse.value) {
   throw createError({ statusCode: 404 });
@@ -132,7 +167,6 @@ const trackProductSelect = (product: any) => {
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => `Olá! Preciso de ajuda com a categoria ${categoryTitle.value} na Amoda.`);
 
-const router = useRouter();
 const requestUrl = useRequestURL();
 
 const title = computed(() => category.value?.seo_title || `${categoryTitle.value} em Luanda | Escolha e experimente antes de pagar`);
@@ -249,13 +283,49 @@ useHead(() => ({
         </div>
       </section>
 
+      <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          v-if="availableSizes?.length"
+          class="flex flex-wrap items-center gap-1.5"
+        >
+          <button
+            v-for="sizeItem in availableSizes"
+            :key="sizeItem"
+            :class="currentSize === sizeItem
+              ? 'border-primary bg-primary text-white'
+              : 'border-gray-200 bg-white text-toned hover:border-primary/50'"
+            type="button"
+            class="inline-flex min-w-10 items-center justify-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+            @click="toggleSizeFilter(sizeItem)"
+          >
+            {{ sizeItem }}
+          </button>
+        </div>
+
+        <USelect
+          v-model="sortModel"
+          :items="sortOptions"
+          icon="i-lucide-arrow-up-down"
+          class="w-full sm:w-56 shrink-0"
+        />
+      </div>
+
       <UEmpty
         v-if="!isCatalogPending && !categoryProducts.length"
         class="mt-6"
         title="Ainda não há itens nesta categoria."
-        description="Veja outras categorias ou volte em breve. Você pode escolher online, experimentar primeiro e pagar apenas pelo que gostar."
+        description="Nenhum produto com estes filtros. Tente outro tamanho ou veja outras categorias."
       >
         <template #actions>
+          <UButton
+            v-if="currentSize"
+            color="primary"
+            variant="soft"
+            @click="toggleSizeFilter(currentSize)"
+          >
+            Limpar filtro
+          </UButton>
+
           <UButton
             :to="{ name: 'index' }"
             color="primary"
