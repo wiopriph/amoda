@@ -174,6 +174,15 @@ const { count } = useCart();
           </UButton>
 
           <UButton
+            :to="{ name: 'search' }"
+            variant="ghost"
+            color="neutral"
+            icon="i-lucide-search"
+            aria-label="Pesquisar"
+            class="hover:text-primary"
+          />
+
+          <UButton
             :to="{ name: 'cart' }"
             variant="ghost"
             color="neutral"
