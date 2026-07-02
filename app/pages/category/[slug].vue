@@ -174,7 +174,14 @@ const title = computed(() => category.value?.seo_title || `${categoryTitle.value
 const description = computed(() => category.value?.seo_description || `Encontre ${categoryTitle.value} na Amoda em Luanda. Escolha online sem pagar, experimente primeiro e leve apenas o que gostar.`);
 const ogImage = computed(() => category.value?.image || 'https://amoda.ao/logo.webp');
 const canonicalUrl = computed(() => {
-  const path = router.resolve({ name: 'category-slug', params: { slug: route.params.slug } }).fullPath;
+  // Paginated pages are self-canonical so Google indexes products beyond page 1;
+  // filter/sort params are intentionally dropped
+  const pageNumber = Math.max(1, Number(route.query.page || 1));
+  const path = router.resolve({
+    name: 'category-slug',
+    params: { slug: route.params.slug },
+    query: pageNumber > 1 ? { page: pageNumber } : {},
+  }).fullPath;
 
   return new URL(path, requestUrl.origin).href;
 });
