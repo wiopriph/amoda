@@ -97,7 +97,7 @@ const activeImageIndex = ref(0);
 
 const carouselSlides = computed(() => galleryImages.value.map((image: any, imageIndex: number) => ({
   url: image.url,
-  alt: `${productName.value} - foto ${imageIndex + 1}`,
+  alt: image.alt || `${productName.value} - foto ${imageIndex + 1}`,
   index: imageIndex,
 })));
 
