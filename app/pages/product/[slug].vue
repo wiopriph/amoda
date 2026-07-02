@@ -847,41 +847,6 @@ useHead(() => ({
             </div>
           </UCard>
 
-          <UCard v-if="false">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 class="text-base font-bold text-highlighted">
-                  Pontos para experimentar
-                </h2>
-
-                <p class="mt-1 text-sm text-muted">
-                  Escolha online e experimente no ponto mais conveniente.
-                </p>
-              </div>
-
-              <div class="grid gap-2 sm:flex">
-                <UButton
-                  :to="{ name: 'pickup-points' }"
-                  variant="outline"
-                  size="xl"
-                  icon="i-lucide-map-pin"
-                  class="justify-center"
-                >
-                  <span class="sm:hidden">Ver pontos</span>
-                </UButton>
-
-                <UButton
-                  :to="whatsappHref"
-                  size="xl"
-                  target="_blank"
-                  icon="i-simple-icons-whatsapp"
-                  class="justify-center"
-                >
-                  <span class="sm:hidden">Falar no WhatsApp</span>
-                </UButton>
-              </div>
-            </div>
-          </UCard>
         </section>
       </div>
 
@@ -1031,15 +996,6 @@ useHead(() => ({
           </div>
 
           <div class="flex items-center gap-2">
-            <UButton
-              v-if="false"
-              :to="whatsappHref"
-              size="xl"
-              color="success"
-              icon="i-simple-icons-whatsapp"
-              class="shrink-0"
-            />
-
             <template v-if="selectedSkuQuantity > 0">
               <UButton
                 :disabled="!selectedSkuKey"
