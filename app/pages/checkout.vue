@@ -48,7 +48,7 @@ const redirectIfEmpty = () => {
   }
 };
 
-if (process.client) {
+if (import.meta.client) {
   onMounted(redirectIfEmpty);
   watch(isLoading, redirectIfEmpty);
 }
