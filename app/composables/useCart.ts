@@ -117,6 +117,17 @@ export function useCart() {
   const error = useState<string | null>('cart:error', () => null);
 
   const { trackAddToCart, trackRemoveFromCart } = useAnalyticsEvent();
+  const toast = useToast();
+
+  const notifyRollback = () => {
+    if (!import.meta.client) return;
+
+    toast.add({
+      title: 'Não foi possível atualizar a escolha',
+      description: 'Verifique a ligação e tente novamente.',
+      color: 'error',
+    });
+  };
 
   const currentSessionId = () => sessionId.value || useCookie<string | null>('sid').value || null;
 
@@ -338,6 +349,7 @@ export function useCart() {
       });
     } catch {
       itemsState.value = previousItems;
+      notifyRollback();
     }
   };
 
@@ -402,6 +414,7 @@ export function useCart() {
       });
     } catch {
       itemsState.value = previousItems;
+      notifyRollback();
     }
   };
 
@@ -437,6 +450,7 @@ export function useCart() {
       await requestCart('/api/cart/clear', {});
     } catch {
       itemsState.value = previousItems;
+      notifyRollback();
     }
   };
 
