@@ -40,6 +40,13 @@ const breadcrumbs = computed(() =>
 
 const recommendedProducts = computed(() => productResponse.value?.recommendations || []);
 
+// Last crumb is the product itself; the one before is its category
+const parentCrumb = computed(() => {
+  const crumbs = breadcrumbs.value;
+
+  return crumbs.length >= 2 ? crumbs[crumbs.length - 2] : null;
+});
+
 const variants = computed(() => product.value?.variants || []);
 
 const selectedVariantId = ref<number | null>(null);
@@ -539,6 +546,19 @@ useHead(() => ({
               }"
               class="hidden md:block"
             />
+
+            <NuxtLink
+              v-if="parentCrumb"
+              :to="parentCrumb.to"
+              class="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted transition hover:text-primary md:hidden"
+            >
+              <UIcon
+                name="i-lucide-arrow-left"
+                class="size-4"
+              />
+
+              {{ parentCrumb.label }}
+            </NuxtLink>
 
             <h1
               class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl"

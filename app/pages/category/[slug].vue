@@ -256,6 +256,19 @@ useHead(() => ({
           class="hidden md:block"
         />
 
+        <NuxtLink
+          v-if="breadcrumbItems.length >= 2"
+          :to="breadcrumbItems[breadcrumbItems.length - 2]!.to"
+          class="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted transition hover:text-primary md:hidden"
+        >
+          <UIcon
+            name="i-lucide-arrow-left"
+            class="size-4"
+          />
+
+          {{ breadcrumbItems[breadcrumbItems.length - 2]!.label }}
+        </NuxtLink>
+
         <div class="mt-0 md:mt-5">
           <UBadge
             color="primary"
