@@ -74,6 +74,8 @@ const getProductTo = (cartItem: any) => ({
 
 const normalizeQuantity = (quantity: unknown) => Math.max(1, Number(quantity) || 1);
 
+const isAtStockLimit = (cartItem: any) => cartItem.stock !== null && cartItem.qty >= cartItem.stock;
+
 const getAnalyticsItems = () => cartItems.value.map(cartItem =>
   makeGa4Item({
     productId: cartItem.productId,
@@ -243,6 +245,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero confirmar a minha escol
                         />
 
                         <UButton
+                          :disabled="isAtStockLimit(cartItem)"
                           size="sm"
                           variant="outline"
                           @click="increment(cartItem.key)"
@@ -250,6 +253,13 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero confirmar a minha escol
                           +
                         </UButton>
                       </div>
+
+                      <p
+                        v-if="isAtStockLimit(cartItem)"
+                        class="mt-1 text-xs text-amber-600"
+                      >
+                        {{ cartItem.stock === 1 ? 'Só resta 1 unidade' : `Só restam ${cartItem.stock} unidades` }}
+                      </p>
                     </div>
 
                     <div class="flex min-w-0 items-center justify-between gap-3 sm:block sm:text-right">

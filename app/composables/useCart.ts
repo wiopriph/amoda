@@ -17,6 +17,8 @@ type CartItem = {
   image?: string | null;
   price: number;
   qty: number;
+  // null when stock is not tracked for this size
+  stock: number | null;
 };
 
 type ProductLike = {
@@ -38,6 +40,7 @@ type VariantLike = {
 type SizeLike = {
   id: number;
   size: string;
+  stock?: number | null;
 };
 
 type ServerCartResponse = {
@@ -103,6 +106,7 @@ const normalizeServerItem = (item: any): CartItem => {
     image: item.image ?? null,
     price: toInt(item.priceSnapshot ?? item.price_snapshot ?? item.price),
     qty: clampQty(item.qty),
+    stock: item.stock === null || item.stock === undefined ? null : toInt(item.stock),
   };
 };
 
@@ -311,7 +315,9 @@ export function useCart() {
     const previousItems = [...itemsState.value];
 
     if (existing) {
-      existing.qty = Math.min(MAX_QTY, existing.qty + safeQty);
+      const maxQty = existing.stock !== null ? Math.min(MAX_QTY, Math.max(1, existing.stock)) : MAX_QTY;
+
+      existing.qty = Math.min(maxQty, existing.qty + safeQty);
     } else {
       itemsState.value.push({
         key,
@@ -327,6 +333,7 @@ export function useCart() {
         image: pickPrimaryImage(product, variant),
         price: toInt(variant.price),
         qty: safeQty,
+        stock: size.stock === null || size.stock === undefined ? null : toInt(size.stock),
       });
     }
 
@@ -360,7 +367,18 @@ export function useCart() {
       return;
     }
 
-    const nextQty = clampQty(qty);
+    let nextQty = clampQty(qty);
+
+    if (target.stock !== null && nextQty > target.stock) {
+      nextQty = Math.max(1, target.stock);
+
+      toast.add({
+        title: 'Quantidade limitada',
+        description: `Só ${target.stock === 1 ? 'resta 1 unidade' : `restam ${target.stock} unidades`} deste tamanho.`,
+        color: 'warning',
+      });
+    }
+
     const previousQty = target.qty;
 
     if (nextQty === previousQty) {

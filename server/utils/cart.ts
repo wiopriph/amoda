@@ -104,6 +104,7 @@ export const mapCartItem = (item: any) => {
     categoryName: product?.primary_category_id ? String(product.primary_category_id) : null,
     variantLabel: variant?.color ?? null,
     sizeLabel: size?.size ?? null,
+    stock: size?.stock ?? null,
     image: images[0]?.url ?? null,
   };
 };
@@ -138,6 +139,7 @@ export const getCartItems = async (client: SupabaseClient, cartId: string) => {
       size:product_variant_sizes!cart_items_product_variant_size_id_fkey(
         id,
         size,
+        stock,
         variant_id
       )
     `)
@@ -236,7 +238,7 @@ export const getVariantSnapshot = async (client: SupabaseClient, variantId: numb
 
   const { data: size, error: sizeError } = await client
     .from('product_variant_sizes')
-    .select('id, variant_id')
+    .select('id, variant_id, stock')
     .eq('id', sizeId)
     .eq('variant_id', variantId)
     .maybeSingle();
@@ -255,7 +257,10 @@ export const getVariantSnapshot = async (client: SupabaseClient, variantId: numb
     throw createError({ statusCode: 500, statusMessage: 'Invalid variant price' });
   }
 
-  return { price };
+  // stock === null means stock is not tracked — no limit applies
+  const stock = size.stock === null || size.stock === undefined ? null : Number(size.stock);
+
+  return { price, stock };
 };
 
 export const addOrUpdateCartItem = async (
@@ -266,7 +271,13 @@ export const addOrUpdateCartItem = async (
   qty: number,
   mode: 'add' | 'set',
 ) => {
-  const { price } = await getVariantSnapshot(client, variantId, sizeId);
+  const { price, stock } = await getVariantSnapshot(client, variantId, sizeId);
+
+  if (stock !== null && stock <= 0) {
+    throw createError({ statusCode: 400, statusMessage: 'Tamanho esgotado' });
+  }
+
+  const maxQty = stock !== null ? Math.min(MAX_QTY, stock) : MAX_QTY;
 
   const { data: existing, error: existingError } = await client
     .from('cart_items')
@@ -281,7 +292,7 @@ export const addOrUpdateCartItem = async (
   }
 
   if (existing) {
-    const nextQty = Math.min(MAX_QTY, mode === 'add' ? Number(existing.qty || 0) + qty : qty);
+    const nextQty = Math.min(maxQty, mode === 'add' ? Number(existing.qty || 0) + qty : qty);
     const { error } = await client
       .from('cart_items')
       .update({ qty: nextQty, price_snapshot: price })
@@ -301,7 +312,7 @@ export const addOrUpdateCartItem = async (
         cart_id: cartId,
         variant_id: variantId,
         product_variant_size_id: sizeId,
-        qty,
+        qty: Math.min(maxQty, qty),
         price_snapshot: price,
       });
 
