@@ -1053,5 +1053,11 @@ useHead(() => ({
         </div>
       </div>
     </UPageBody>
+
+    <WhatsappButton
+      :to="whatsappHref"
+      :raised="isProductAvailable"
+      aria-label="Perguntar sobre este produto no WhatsApp"
+    />
   </UPage>
 </template>
