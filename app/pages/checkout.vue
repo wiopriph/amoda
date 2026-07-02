@@ -53,7 +53,7 @@ if (import.meta.client) {
   watch(isLoading, redirectIfEmpty);
 }
 
-const checkoutForm = reactive({ phone: '' });
+const checkoutForm = reactive({ phone: '', name: '' });
 
 
 const DEFAULT_PICKUP_OFFICE_ID = 1;
@@ -61,7 +61,7 @@ const DEFAULT_PICKUP_OFFICE_ID = 1;
 const buildContactSnapshot = () => ({
   phone: checkoutForm.phone.trim(),
   pickupOfficeId: DEFAULT_PICKUP_OFFICE_ID,
-  name: '',
+  name: checkoutForm.name.trim(),
 });
 
 const hasContactPhone = () => Boolean(checkoutForm.phone.trim());
@@ -95,6 +95,10 @@ if (import.meta.client) {
         checkoutForm.phone = snapshot.phone;
       }
 
+      if (typeof snapshot.name === 'string' && !checkoutForm.name) {
+        checkoutForm.name = snapshot.name;
+      }
+
       nextTick(() => {
         isApplyingContactSnapshot = false;
       });
@@ -103,7 +107,7 @@ if (import.meta.client) {
   );
 
   watch(
-    () => checkoutForm.phone,
+    () => [checkoutForm.phone, checkoutForm.name],
     () => {
       syncContactSnapshot();
     },
@@ -213,7 +217,7 @@ const submitCheckout = async () => {
         items: getOrderItems(),
         totals: { total: unref(totalKz) },
         contact: {
-          name: '',
+          name: checkoutForm.name.trim(),
           phone: checkoutForm.phone,
         },
         pickupOfficeId: DEFAULT_PICKUP_OFFICE_ID,
@@ -276,7 +280,18 @@ const submitCheckout = async () => {
             Digite um número válido em Angola para podermos escrever ou ligar.
           </p>
 
-          <div class="mt-5 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-start">
+          <div class="mt-5 grid gap-4">
+            <UFormField label="Nome (opcional)">
+              <UInput
+                v-model="checkoutForm.name"
+                name="name"
+                placeholder="Como podemos chamá-la?"
+                type="text"
+                size="xl"
+                class="w-full sm:max-w-sm"
+              />
+            </UFormField>
+
             <UFormField
               :error="formErrors.phone ? 'Por favor, indique o seu número de telefone.' : undefined"
               label="Número de telefone"
@@ -291,7 +306,7 @@ const submitCheckout = async () => {
                 placeholder="+244 XXX XXX XXX"
                 type="tel"
                 size="xl"
-                class="w-full"
+                class="w-full sm:max-w-sm"
               />
             </UFormField>
 
@@ -301,7 +316,7 @@ const submitCheckout = async () => {
               size="xl"
               color="primary"
               type="submit"
-              class="w-full justify-center sm:mt-6 sm:w-fit"
+              class="w-full justify-center sm:w-fit"
             >
               Enviar número
             </UButton>
