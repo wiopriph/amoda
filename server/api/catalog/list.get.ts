@@ -172,7 +172,10 @@ export default defineEventHandler(async (event) => {
         sizes:${sizeJoin}(id, size)
       )
     `, { count: 'exact' })
-    .eq('active', true);
+    .eq('active', true)
+    // only the cover image per variant — the card needs one, not the whole gallery
+    .order('position', { referencedTable: 'variants.product_variant_images', ascending: true })
+    .limit(1, { referencedTable: 'variants.product_variant_images' });
 
   if (descendantIds.length > 0) {
     productsQuery = productsQuery.in('primary_category_id', descendantIds);
