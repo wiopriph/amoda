@@ -26,11 +26,16 @@ useHead({
 
 const route = useRoute();
 
-const { data: heroContent } = await useFetch('/api/home/hero');
-const { data: catalogResponse, error: catalogError } = await useFetch('/api/catalog/list', {
-  query: { limit: 10, sort: 'new' },
-  watch: [() => route.fullPath],
-});
+const [
+  { data: heroContent },
+  { data: catalogResponse, error: catalogError },
+] = await Promise.all([
+  useFetch('/api/home/hero'),
+  useFetch('/api/catalog/list', {
+    query: { limit: 10, sort: 'new' },
+    watch: [() => route.fullPath],
+  }),
+]);
 
 const products = computed(() => catalogResponse.value?.items || []);
 
