@@ -55,13 +55,13 @@ watch(
     if (!loadedProduct?.variants?.length) return;
 
     selectedVariantId.value = loadedProduct.variants[0].id;
-    selectedSizeId.value = loadedProduct.variants[0].sizes?.[0]?.id ?? null;
+    selectedSizeId.value = pickFirstAvailableSizeId(loadedProduct.variants[0].sizes);
   },
   { immediate: true },
 );
 
 watch(selectedVariantId, () => {
-  selectedSizeId.value = activeVariant.value?.sizes?.[0]?.id ?? null;
+  selectedSizeId.value = pickFirstAvailableSizeId(activeVariant.value?.sizes);
 });
 
 const selectedVariantLabel = computed(() => activeVariant.value?.color || '—');
@@ -163,17 +163,30 @@ const sizeOptions = computed(() =>
     const currentProduct = product.value;
     const selectedVariant = activeVariant.value;
     const inCartQty = currentProduct?.id && selectedVariant?.id ? getQty(currentProduct.id, selectedVariant.id, size.id) : 0;
+
+    // stock === null means stock is not tracked for this size — treat as available
+    const hasStockInfo = size.stock !== null && size.stock !== undefined;
     const stock = Number(size.stock ?? 0);
 
     return {
       id: size.id,
       label: size.size,
       stock,
-      isLowStock: stock > 0 && stock <= 2,
+      hasStockInfo,
+      isOutOfStock: hasStockInfo && stock <= 0,
+      isLowStock: hasStockInfo && stock > 0 && stock <= 2,
       inCartQty,
     };
   }),
 );
+
+function pickFirstAvailableSizeId(sizes: any[] | undefined | null) {
+  if (!sizes?.length) return null;
+
+  const available = sizes.find((size: any) => size.stock === null || size.stock === undefined || Number(size.stock) > 0);
+
+  return available?.id ?? null;
+}
 
 const lowStockText = (stock: number) => stock === 1 ? 'Só resta 1' : `Só restam ${stock}`;
 
@@ -196,6 +209,20 @@ const selectedSizeOption = computed(() =>
   sizeOptions.value.find((sizeOption) => sizeOption.id === selectedSizeId.value) || null,
 );
 
+const areAllSizesOutOfStock = computed(() =>
+  sizeOptions.value.length > 0 && sizeOptions.value.every(sizeOption => sizeOption.isOutOfStock),
+);
+
+const isIncrementDisabled = computed(() => {
+  const sizeOption = selectedSizeOption.value;
+
+  if (!sizeOption) return true;
+
+  if (!sizeOption.hasStockInfo) return false;
+
+  return selectedSkuQuantity.value >= sizeOption.stock;
+});
+
 const isCartDrawerOpen = ref(false);
 
 const cartTo = { name: 'cart' } as const;
@@ -209,7 +236,7 @@ const closeCartDrawer = () => {
 };
 
 const addProductToCart = () => {
-  if (!isProductAvailable.value) {
+  if (!isProductAvailable.value || selectedSizeOption.value?.isOutOfStock) {
     return;
   }
 
@@ -622,9 +649,12 @@ useHead(() => ({
                   <button
                     v-for="sizeOption in sizeOptions"
                     :key="sizeOption.id"
-                    :class="selectedSizeId === sizeOption.id
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-gray-200 bg-white hover:border-primary/50'"
+                    :disabled="sizeOption.isOutOfStock"
+                    :class="sizeOption.isOutOfStock
+                      ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300 line-through'
+                      : selectedSizeId === sizeOption.id
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-gray-200 bg-white hover:border-primary/50'"
                     type="button"
                     class="inline-flex min-w-12 items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition"
                     @click="selectedSizeId = sizeOption.id"
@@ -653,7 +683,14 @@ useHead(() => ({
                 </p>
 
                 <p
-                  v-if="!selectedSizeId"
+                  v-if="areAllSizesOutOfStock"
+                  class="mt-2 text-sm text-red-600"
+                >
+                  Todos os tamanhos esgotados nesta cor
+                </p>
+
+                <p
+                  v-else-if="!selectedSizeId"
                   class="mt-2 text-sm text-red-600"
                 >
                   Escolha um tamanho
@@ -686,7 +723,7 @@ useHead(() => ({
                     </div>
 
                     <UButton
-                      :disabled="!selectedSkuKey"
+                      :disabled="!selectedSkuKey || isIncrementDisabled"
                       variant="outline"
                       @click="increment(selectedSkuKey)"
                     >
@@ -712,7 +749,7 @@ useHead(() => ({
                   class="w-full justify-center"
                   @click="addProductToCart"
                 >
-                  {{ selectedSizeId ? "Escolher" : "Escolha um tamanho" }}
+                  {{ selectedSizeId ? "Escolher" : areAllSizesOutOfStock ? "Esgotado" : "Escolha um tamanho" }}
                 </UButton>
               </div>
             </div>
@@ -1019,7 +1056,7 @@ useHead(() => ({
               />
 
               <UButton
-                :disabled="!selectedSkuKey"
+                :disabled="!selectedSkuKey || isIncrementDisabled"
                 size="xl"
                 variant="outline"
                 @click="increment(selectedSkuKey)"
@@ -1044,7 +1081,7 @@ useHead(() => ({
                 class="flex-1 justify-center"
                 @click="addProductToCart"
               >
-                {{ selectedSizeId ? "Escolher" : "Tamanho" }}
+                {{ selectedSizeId ? "Escolher" : areAllSizesOutOfStock ? "Esgotado" : "Tamanho" }}
               </UButton>
 
               <UButton
