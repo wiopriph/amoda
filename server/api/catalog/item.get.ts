@@ -99,7 +99,7 @@ export default defineEventHandler(async (event) => {
   const { data: productRow, error: productError } = await supabase
     .from('products')
     .select(`
-      *,
+      id, title, slug, description, active, badges, created_at,
       brand:brands ( id, name, slug ),
       category:categories!products_primary_category_id_fkey (
         id, name, slug, parent_id
