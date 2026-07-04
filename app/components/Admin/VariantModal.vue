@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { BASE_COLORS } from '#shared/constants/colors';
+
 type VariantForm = {
   id?: number | string | null
   product_id?: number | string | null
@@ -6,6 +8,8 @@ type VariantForm = {
   price?: number | string | null
   active?: boolean
 };
+
+const colorItems = BASE_COLORS.map(color => ({ label: color.label, value: color.value }));
 
 const props = withDefaults(defineProps<{
   modelValue: VariantForm
@@ -60,10 +64,29 @@ const closeModal = () => emit('update:open', false);
           label="Cor"
           class="w-full"
         >
-          <UInput
+          <USelectMenu
             v-model="variantForm.color"
+            :items="colorItems"
+            value-key="value"
+            placeholder="Selecionar cor..."
+            :search-input="{ placeholder: 'Pesquisar cor...' }"
             class="w-full"
-          />
+          >
+            <template #leading>
+              <ColorSwatch
+                v-if="variantForm.color"
+                :color="variantForm.color"
+                :size="16"
+              />
+            </template>
+
+            <template #item-leading="{ item }">
+              <ColorSwatch
+                :color="item.value"
+                :size="16"
+              />
+            </template>
+          </USelectMenu>
         </UFormField>
 
         <UFormField

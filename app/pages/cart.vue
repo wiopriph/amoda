@@ -2,6 +2,7 @@
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
+import { colorLabel } from '#shared/constants/colors';
 
 
 definePageMeta({ name: 'cart' });
@@ -212,8 +213,16 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero confirmar a minha escol
                     {{ cartItem.productName }}
                   </NuxtLink>
 
-                  <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted sm:text-sm">
-                    <span>Cor: {{ cartItem.variantLabel || '—' }}</span>
+                  <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted sm:text-sm">
+                    <span class="inline-flex items-center gap-1.5">
+                      Cor:
+                      <ColorSwatch
+                        v-if="cartItem.variantLabel"
+                        :color="cartItem.variantLabel"
+                        :size="14"
+                      />
+                      {{ colorLabel(cartItem.variantLabel) || '—' }}
+                    </span>
 
                     <span>Tamanho: {{ cartItem.sizeLabel || '—' }}</span>
                   </div>

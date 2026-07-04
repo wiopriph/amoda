@@ -4,6 +4,7 @@ import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 import { CURRENCY } from '~/constants/currency';
+import { colorLabel } from '#shared/constants/colors';
 
 
 definePageMeta({ name: 'product-slug' });
@@ -71,13 +72,13 @@ watch(selectedVariantId, () => {
   selectedSizeId.value = pickFirstAvailableSizeId(activeVariant.value?.sizes);
 });
 
-const selectedVariantLabel = computed(() => activeVariant.value?.color || '—');
+const selectedVariantLabel = computed(() => colorLabel(activeVariant.value?.color) || '—');
 
 const variantOptions = computed(() =>
   variants.value.map((variant: any) => ({
     id: variant.id,
     url: variant.images?.[0]?.url || product.value?.images?.[0]?.url || fallbackImage,
-    label: variant.color || '—',
+    label: colorLabel(variant.color) || '—',
   })),
 );
 
@@ -633,10 +634,15 @@ useHead(() => ({
                     Cor
                   </div>
 
-                  <div
-                    class="text-sm text-muted"
-                    v-text="selectedVariantLabel"
-                  />
+                  <div class="flex items-center gap-1.5 text-sm text-muted">
+                    <ColorSwatch
+                      v-if="activeVariant?.color"
+                      :color="activeVariant.color"
+                      :size="16"
+                    />
+
+                    <span v-text="selectedVariantLabel" />
+                  </div>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -866,7 +872,6 @@ useHead(() => ({
               </div>
             </div>
           </UCard>
-
         </section>
       </div>
 
