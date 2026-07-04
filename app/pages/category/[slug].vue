@@ -5,6 +5,8 @@ import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 import { CURRENCY } from '~/constants/currency';
 import type { CatalogProductCard } from '#shared/types/catalog';
+import { colorLabel } from '#shared/constants/colors';
+import { PRICE_PRESET_MAP, pricePresetToQuery } from '#shared/constants/priceFilters';
 
 
 definePageMeta({ name: 'category-slug' });
@@ -14,8 +16,10 @@ const page = ref(Math.max(1, Number(route.query.page || 1)));
 const productsSection = ref<HTMLElement | null>(null);
 const PRODUCTS_PER_PAGE = 20;
 
-const currentSort = computed(() => String(route.query.sort || 'new'));
-const currentSize = computed(() => String(route.query.size || ''));
+const SORT_LABELS: Record<string, string> = {
+  price_asc: 'Preço ↑',
+  price_desc: 'Preço ↓',
+};
 
 const [
   {
@@ -24,7 +28,7 @@ const [
     pending: isCatalogPending,
   },
   { data: categoryNavigation },
-  { data: availableSizes },
+  { data: facets },
 ] = await Promise.all([
   useFetch('/api/catalog/list', {
     query: {
@@ -33,6 +37,9 @@ const [
       q: computed(() => route.query.q),
       sort: computed(() => route.query.sort),
       size: computed(() => route.query.size),
+      color: computed(() => route.query.cor),
+      min_price: computed(() => pricePresetToQuery(route.query.preco as string).min_price),
+      max_price: computed(() => pricePresetToQuery(route.query.preco as string).max_price),
       limit: PRODUCTS_PER_PAGE,
     },
     watch: [() => route.fullPath],
@@ -41,36 +48,64 @@ const [
     query: { slug: route.params.slug },
     watch: [() => route.fullPath],
   }),
-  useFetch<string[]>('/api/catalog/sizes'),
+  useFetch('/api/catalog/facets', {
+    query: { slug: route.params.slug },
+    watch: [() => route.params.slug],
+  }),
 ]);
 
 const router = useRouter();
 
-const updateCatalogQuery = (patch: Record<string, string | undefined>) => {
+// Applied filters mirror the URL
+const appliedFilters = computed(() => ({
+  size: (route.query.size as string) || undefined,
+  cor: (route.query.cor as string) || undefined,
+  preco: (route.query.preco as string) || undefined,
+  sort: (route.query.sort as string) || undefined,
+}));
+
+const activeFilterCount = computed(() =>
+  [appliedFilters.value.size, appliedFilters.value.cor, appliedFilters.value.preco].filter(Boolean).length,
+);
+
+const isFilterOpen = ref(false);
+
+const applyFilters = (filters: { size?: string; cor?: string; preco?: string; sort?: string }) => {
   page.value = 1;
 
   router.replace({
     query: {
       ...route.query,
-      ...patch,
+      size: filters.size || undefined,
+      cor: filters.cor || undefined,
+      preco: filters.preco || undefined,
+      sort: filters.sort || undefined,
       page: undefined,
     },
   });
 };
 
-const sortOptions = [
-  { label: 'Novidades', value: 'new' },
-  { label: 'Preço: menor primeiro', value: 'price_asc' },
-  { label: 'Preço: maior primeiro', value: 'price_desc' },
-];
+// Active-filter chips shown above the grid
+const activeChips = computed(() => {
+  const chips: { key: 'size' | 'cor' | 'preco' | 'sort'; label: string }[] = [];
 
-const sortModel = computed({
-  get: () => currentSort.value,
-  set: (value: string) => updateCatalogQuery({ sort: value === 'new' ? undefined : value }),
+  if (appliedFilters.value.size) chips.push({ key: 'size', label: `Tam. ${appliedFilters.value.size}` });
+
+  if (appliedFilters.value.cor) chips.push({ key: 'cor', label: colorLabel(appliedFilters.value.cor) });
+
+  if (appliedFilters.value.preco) chips.push({ key: 'preco', label: PRICE_PRESET_MAP[appliedFilters.value.preco]?.label ?? '' });
+
+  if (appliedFilters.value.sort) chips.push({ key: 'sort', label: SORT_LABELS[appliedFilters.value.sort] ?? '' });
+
+  return chips;
 });
 
-const toggleSizeFilter = (size: string) => {
-  updateCatalogQuery({ size: currentSize.value === size ? undefined : size });
+const removeChip = (key: 'size' | 'cor' | 'preco' | 'sort') => {
+  applyFilters({ ...appliedFilters.value, [key]: undefined });
+};
+
+const clearAllFilters = () => {
+  applyFilters({});
 };
 
 if (catalogError.value || !catalogResponse.value) {
@@ -308,32 +343,61 @@ useHead(() => ({
         </div>
       </section>
 
-      <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div
-          v-if="availableSizes?.length"
-          class="flex flex-wrap items-center gap-1.5"
-        >
-          <button
-            v-for="sizeItem in availableSizes"
-            :key="sizeItem"
-            :class="currentSize === sizeItem
-              ? 'border-primary bg-primary text-white'
-              : 'border-gray-200 bg-white text-toned hover:border-primary/50'"
-            type="button"
-            class="inline-flex min-w-10 items-center justify-center rounded-full border px-3 py-1.5 text-xs font-semibold transition"
-            @click="toggleSizeFilter(sizeItem)"
+      <div class="sticky top-14 z-30 -mx-4 mt-5 border-y border-gray-100 bg-white/90 px-4 py-2.5 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
+        <div class="flex items-center gap-3">
+          <UButton
+            variant="soft"
+            color="neutral"
+            icon="i-lucide-sliders-horizontal"
+            @click="isFilterOpen = true"
           >
-            {{ sizeItem }}
-          </button>
-        </div>
+            Filtrar
 
-        <USelect
-          v-model="sortModel"
-          :items="sortOptions"
-          icon="i-lucide-arrow-up-down"
-          class="w-full sm:w-56 shrink-0"
-        />
+            <UBadge
+              v-if="activeFilterCount"
+              :label="String(activeFilterCount)"
+              color="primary"
+              size="xs"
+              class="ml-1"
+            />
+          </UButton>
+
+          <div class="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
+            <UBadge
+              v-for="chip in activeChips"
+              :key="chip.key"
+              color="primary"
+              variant="soft"
+              class="shrink-0 cursor-pointer gap-1"
+              @click="removeChip(chip.key)"
+            >
+              {{ chip.label }}
+
+              <UIcon
+                name="i-lucide-x"
+                class="size-3"
+              />
+            </UBadge>
+
+            <button
+              v-if="activeChips.length"
+              type="button"
+              class="shrink-0 whitespace-nowrap text-xs text-muted hover:text-primary"
+              @click="clearAllFilters"
+            >
+              Limpar
+            </button>
+          </div>
+        </div>
       </div>
+
+      <CatalogFilterSheet
+        v-model:open="isFilterOpen"
+        :facets="facets"
+        :applied="appliedFilters"
+        :base-query="{ slug: route.params.slug }"
+        @apply="applyFilters"
+      />
 
       <UEmpty
         v-if="!isCatalogPending && !categoryProducts.length"
@@ -343,12 +407,12 @@ useHead(() => ({
       >
         <template #actions>
           <UButton
-            v-if="currentSize"
+            v-if="activeFilterCount"
             color="primary"
             variant="soft"
-            @click="toggleSizeFilter(currentSize)"
+            @click="clearAllFilters"
           >
-            Limpar filtro
+            Limpar filtros
           </UButton>
 
           <UButton
