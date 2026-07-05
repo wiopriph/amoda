@@ -55,7 +55,7 @@ export default defineEventHandler(async (event) => {
   // Build map: ms_product_id → local sizes
   const productSizesMap = new Map<string, { id: number; size: string; color: string }[]>();
 
-  for (const row: any of localSizes ?? []) {
+  for (const row of (localSizes ?? []) as any[]) {
     const msId: string = row.product_variants?.products?.ms_product_id;
 
     if (!msId) continue;

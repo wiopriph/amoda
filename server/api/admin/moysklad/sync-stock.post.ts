@@ -17,6 +17,7 @@ type MoyskladStockResponse = {
 type LocalSizeRow = {
   id: number;
   ms_code: string | null;
+  stock: number | null;
 };
 
 type UpdateRow = {
@@ -43,7 +44,7 @@ export default defineEventHandler(async (event) => {
 
   const { data: localSizes, error: localError } = await client
     .from('product_variant_sizes')
-    .select('id, ms_code')
+    .select('id, ms_code, stock')
     .not('ms_code', 'is', null) as {
     data: LocalSizeRow[] | null;
     error: any;
@@ -75,6 +76,7 @@ export default defineEventHandler(async (event) => {
   let skippedNotFound = 0;
 
   const updates: UpdateRow[] = [];
+  const matchedCodes = new Set<string>();
 
   while (true) {
     const url = new URL(`${moyskladBaseUrl}/report/stock/all`);
@@ -119,10 +121,18 @@ export default defineEventHandler(async (event) => {
         continue;
       }
 
-      updates.push({
-        id: localSize.id,
-        stock: Math.max(0, Number(row.stock ?? 0)),
-      });
+      matchedCodes.add(code);
+
+      // Sellable stock: physical stock minus what is reserved for other orders
+      const available = Math.max(0, Number(row.stock ?? 0) - Number(row.reserve ?? 0));
+
+      // Skip rows that already have the right value to keep the upsert small
+      if (Number(localSize.stock ?? -1) !== available) {
+        updates.push({
+          id: localSize.id,
+          stock: available,
+        });
+      }
     }
 
     if (rows.length < limit) {
@@ -132,22 +142,24 @@ export default defineEventHandler(async (event) => {
     offset += limit;
   }
 
-  console.log('updates', updates);
+  if (updates.length) {
+    const { error } = await client
+      .from('product_variant_sizes')
+      .upsert(updates, {
+        onConflict: 'id',
+      });
 
-  // if (updates.length) {
-  //   const { error } = await client
-  //     .from('product_variant_sizes')
-  //     .upsert(updates, {
-  //       onConflict: 'id',
-  //     });
-  //
-  //   if (error) {
-  //     throw createError({
-  //       statusCode: 500,
-  //       statusMessage: error.message,
-  //     });
-  //   }
-  // }
+    if (error) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: error.message,
+      });
+    }
+  }
+
+  // Linked local sizes whose ms_code never appeared in the MS report —
+  // stale codes worth reviewing in the admin
+  const localCodesNotInMoysklad = [...localByCode.keys()].filter(code => !matchedCodes.has(code));
 
   return {
     success: true,
@@ -156,5 +168,6 @@ export default defineEventHandler(async (event) => {
     updated: updates.length,
     skippedWithoutCode,
     skippedNotFound,
+    localCodesNotInMoysklad,
   };
 });
