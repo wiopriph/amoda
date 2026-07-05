@@ -344,11 +344,12 @@ useHead(() => ({
       </section>
 
       <div class="sticky top-14 z-30 -mx-4 mt-5 border-y border-gray-100 bg-white/90 px-4 py-2.5 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2">
           <UButton
             variant="soft"
             color="neutral"
             icon="i-lucide-sliders-horizontal"
+            class="shrink-0"
             @click="isFilterOpen = true"
           >
             Filtrar
@@ -362,32 +363,30 @@ useHead(() => ({
             />
           </UButton>
 
-          <div class="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto">
-            <UBadge
-              v-for="chip in activeChips"
-              :key="chip.key"
-              color="primary"
-              variant="soft"
-              class="shrink-0 cursor-pointer gap-1"
-              @click="removeChip(chip.key)"
-            >
-              {{ chip.label }}
+          <UBadge
+            v-for="chip in activeChips"
+            :key="chip.key"
+            color="primary"
+            variant="soft"
+            class="shrink-0 cursor-pointer gap-1"
+            @click="removeChip(chip.key)"
+          >
+            {{ chip.label }}
 
-              <UIcon
-                name="i-lucide-x"
-                class="size-3"
-              />
-            </UBadge>
+            <UIcon
+              name="i-lucide-x"
+              class="size-3"
+            />
+          </UBadge>
 
-            <button
-              v-if="activeChips.length"
-              type="button"
-              class="shrink-0 whitespace-nowrap text-xs text-muted hover:text-primary"
-              @click="clearAllFilters"
-            >
-              Limpar
-            </button>
-          </div>
+          <button
+            v-if="activeChips.length"
+            type="button"
+            class="shrink-0 whitespace-nowrap text-xs text-muted hover:text-primary"
+            @click="clearAllFilters"
+          >
+            Limpar
+          </button>
         </div>
       </div>
 
