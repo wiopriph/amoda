@@ -111,8 +111,29 @@ const openCheckout = () => {
   navigateTo({ name: 'checkout' });
 };
 
+const buildCartMessage = () => {
+  if (!cartItems.value.length) {
+    return 'Olá! Quero confirmar a minha escolha na Amoda.';
+  }
+
+  const lines = cartItems.value.map((cartItem, index) => {
+    const variant = [colorLabel(cartItem.variantLabel), cartItem.sizeLabel].filter(Boolean).join(' / ');
+    const suffix = variant ? ` (${variant})` : '';
+
+    return `${index + 1}. ${cartItem.productName}${suffix} ×${cartItem.qty} — ${formatPrice(cartItem.price * cartItem.qty)}`;
+  });
+
+  return [
+    'Olá! Quero confirmar a minha escolha na Amoda:',
+    '',
+    ...lines,
+    '',
+    `Total: ${formatPrice(totalKz.value)}`,
+  ].join('\n');
+};
+
 const { makeWhatsappHref } = useWhatsappLink();
-const whatsappHref = makeWhatsappHref(() => 'Olá! Quero confirmar a minha escolha na Amoda.');
+const whatsappHref = makeWhatsappHref(buildCartMessage);
 </script>
 
 <template>
