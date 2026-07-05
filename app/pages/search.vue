@@ -4,6 +4,7 @@ import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 import type { CatalogProductCard } from '#shared/types/catalog';
+import { pricePresetToQuery } from '#shared/constants/priceFilters';
 
 
 definePageMeta({ name: 'search' });
@@ -44,14 +45,36 @@ watch(searchInput, (value) => {
   }, 400);
 });
 
+const {
+  appliedFilters,
+  activeFilterCount,
+  isFilterOpen,
+  applyFilters,
+  activeChips,
+  removeChip,
+  clearAllFilters,
+} = useCatalogFilters();
+
+const filterBaseQuery = computed(() => ({ q: submittedQuery.value }));
+
 const { data: searchResponse, pending: isSearchPending } = useFetch('/api/catalog/list', {
   query: {
     q: submittedQuery,
     page,
+    sort: computed(() => route.query.sort),
+    size: computed(() => route.query.size),
+    color: computed(() => route.query.cor),
+    'min_price': computed(() => pricePresetToQuery(route.query.preco as string).min_price),
+    'max_price': computed(() => pricePresetToQuery(route.query.preco as string).max_price),
     limit: PRODUCTS_PER_PAGE,
   },
-  watch: [submittedQuery, page],
+  watch: [() => route.fullPath],
   immediate: true,
+});
+
+const { data: facets } = useFetch('/api/catalog/facets', {
+  query: { q: submittedQuery },
+  watch: [submittedQuery],
 });
 
 const searchResults = computed(() => submittedQuery.value ? searchResponse.value?.items || [] : []);
@@ -107,7 +130,9 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Estou à procura de: ${submit
 <template>
   <UPage>
     <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
-      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+      <section
+        class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8"
+      >
         <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
           Pesquisar
         </h1>
@@ -131,7 +156,24 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Estou à procura de: ${submit
         </p>
       </section>
 
-      <!-- Empty state: no query yet -->
+      <CatalogFilterBar
+        v-if="submittedQuery"
+        :activeFilterCount="activeFilterCount"
+        :activeChips="activeChips"
+        class="mt-5"
+        @open="isFilterOpen = true"
+        @remove-chip="removeChip"
+        @clear-all="clearAllFilters"
+      />
+
+      <CatalogFilterSheet
+        v-model:open="isFilterOpen"
+        :facets="facets"
+        :applied="appliedFilters"
+        :baseQuery="filterBaseQuery"
+        @apply="applyFilters"
+      />
+
       <section
         v-if="!submittedQuery"
         class="mt-6"
@@ -156,7 +198,6 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Estou à procura de: ${submit
         </UCard>
       </section>
 
-      <!-- Loading skeletons -->
       <section
         v-else-if="isSearchPending"
         class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
@@ -177,7 +218,6 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Estou à procura de: ${submit
         </UCard>
       </section>
 
-      <!-- No results -->
       <UEmpty
         v-else-if="!searchResults.length"
         class="mt-6"
@@ -186,6 +226,15 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Estou à procura de: ${submit
         :description="`Não encontrámos nada para «${submittedQuery}». Tente outra palavra ou fale connosco — podemos ajudar a encontrar.`"
       >
         <template #actions>
+          <UButton
+            v-if="activeFilterCount"
+            color="primary"
+            variant="soft"
+            @click="clearAllFilters"
+          >
+            Limpar filtros
+          </UButton>
+
           <UButton
             :to="whatsappHref"
             target="_blank"
@@ -204,7 +253,6 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Estou à procura de: ${submit
         </template>
       </UEmpty>
 
-      <!-- Results -->
       <section
         v-else
         class="mt-6"

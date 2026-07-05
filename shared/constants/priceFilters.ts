@@ -15,17 +15,22 @@ export const PRICE_PRESET_MAP: Record<string, PricePreset> = Object.fromEntries(
   PRICE_PRESETS.map(preset => [preset.value, preset]),
 );
 
-// Translate a preset token into catalog API query params
 export function pricePresetToQuery(value?: string | null): { min_price?: number; max_price?: number } {
   const preset = value ? PRICE_PRESET_MAP[value] : null;
 
-  if (!preset) return {};
+  if (!preset) {
+    return {};
+  }
 
   const query: { min_price?: number; max_price?: number } = {};
 
-  if (preset.min !== undefined) query.min_price = preset.min;
+  if (preset.min !== undefined) {
+    query['min_price'] = preset.min;
+  }
 
-  if (preset.max !== undefined) query.max_price = preset.max;
+  if (preset.max !== undefined) {
+    query['max_price'] = preset.max;
+  }
 
   return query;
 }

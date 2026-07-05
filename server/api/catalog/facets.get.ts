@@ -14,7 +14,7 @@ type FacetsResponse = {
 
 export default defineEventHandler(async (event): Promise<FacetsResponse> => {
   const supabase = await serverSupabaseClient(event);
-  const { slug } = getQuery(event) as { slug?: string };
+  const { slug, q } = getQuery(event) as { slug?: string; q?: string };
 
   let descendantIds: number[] = [];
 
@@ -44,6 +44,10 @@ export default defineEventHandler(async (event): Promise<FacetsResponse> => {
     query = query.in('primary_category_id', descendantIds);
   }
 
+  if (q) {
+    query = query.ilike('title', `%${q}%`);
+  }
+
   const { data, error } = await query;
 
   if (error) {
@@ -52,6 +56,7 @@ export default defineEventHandler(async (event): Promise<FacetsResponse> => {
 
   const colors = new Set<string>();
   const sizes = new Set<string>();
+
   let priceMin = Infinity;
   let priceMax = 0;
 
@@ -67,7 +72,10 @@ export default defineEventHandler(async (event): Promise<FacetsResponse> => {
       }
 
       for (const size of variant.sizes ?? []) {
-        if (size.size) sizes.add(String(size.size).trim().toUpperCase());
+        if (size.size) {
+          sizes.add(String(size.size).trim()
+            .toUpperCase());
+        }
       }
     }
   }
@@ -83,11 +91,17 @@ export default defineEventHandler(async (event): Promise<FacetsResponse> => {
     const ai = SIZE_ORDER.indexOf(a);
     const bi = SIZE_ORDER.indexOf(b);
 
-    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1 && bi !== -1) {
+      return ai - bi;
+    }
 
-    if (ai !== -1) return -1;
+    if (ai !== -1) {
+      return -1;
+    }
 
-    if (bi !== -1) return 1;
+    if (bi !== -1) {
+      return 1;
+    }
 
     return a.localeCompare(b, undefined, { numeric: true });
   });
