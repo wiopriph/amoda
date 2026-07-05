@@ -621,6 +621,15 @@ useHead(() => ({
 
               <span>Decida na hora</span>
             </div>
+
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-lucide-truck"
+                class="size-4 text-primary"
+              />
+
+              <span>Entrega grátis em Luanda</span>
+            </div>
           </div>
 
           <UCard v-if="isProductAvailable">
