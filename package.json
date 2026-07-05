@@ -30,7 +30,11 @@
   "devDependencies": {
     "@iconify-json/heroicons": "1.2.3",
     "@iconify-json/lucide": "1.2.103",
-    "@wiopriph/eslint-config": "github:wiopriph/nuxt4-eslint-config",
-    "oxc-parser": "0.128.0"
+    "@wiopriph/eslint-config": "github:wiopriph/nuxt4-eslint-config"
+  },
+  "optionalDependencies": {
+    "@oxc-parser/binding-darwin-arm64": "0.128.0",
+    "@oxc-parser/binding-darwin-x64": "0.128.0",
+    "@oxc-parser/binding-linux-x64-gnu": "0.128.0"
   }
 }
