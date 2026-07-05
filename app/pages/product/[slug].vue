@@ -60,7 +60,9 @@ const activeVariant = computed(
 watch(
   product,
   (loadedProduct) => {
-    if (!loadedProduct?.variants?.length) return;
+    if (!loadedProduct?.variants?.length) {
+      return;
+    }
 
     selectedVariantId.value = loadedProduct.variants[0].id;
     selectedSizeId.value = pickFirstAvailableSizeId(loadedProduct.variants[0].sizes);
@@ -141,7 +143,9 @@ const selectedSkuQuantity = computed(() => {
   const selectedVariant = activeVariant.value;
   const selectedSize = selectedSizeId.value;
 
-  if (!currentProduct?.id || !selectedVariant?.id || !selectedSize) return 0;
+  if (!currentProduct?.id || !selectedVariant?.id || !selectedSize) {
+    return 0;
+  }
 
   return getQty(currentProduct.id, selectedVariant.id, selectedSize);
 });
@@ -189,7 +193,9 @@ const sizeOptions = computed(() =>
 );
 
 function pickFirstAvailableSizeId(sizes: any[] | undefined | null) {
-  if (!sizes?.length) return null;
+  if (!sizes?.length) {
+    return null;
+  }
 
   const available = sizes.find((size: any) => size.stock === null || size.stock === undefined || Number(size.stock) > 0);
 
@@ -224,9 +230,13 @@ const areAllSizesOutOfStock = computed(() =>
 const isIncrementDisabled = computed(() => {
   const sizeOption = selectedSizeOption.value;
 
-  if (!sizeOption) return true;
+  if (!sizeOption) {
+    return true;
+  }
 
-  if (!sizeOption.hasStockInfo) return false;
+  if (!sizeOption.hasStockInfo) {
+    return false;
+  }
 
   return selectedSkuQuantity.value >= sizeOption.stock;
 });
@@ -252,7 +262,9 @@ const addProductToCart = () => {
   const selectedVariant = activeVariant.value;
   const selectedSize = selectedVariant?.sizes?.find((size: any) => size.id === selectedSizeId.value);
 
-  if (!currentProduct || !selectedVariant || !selectedSize) return;
+  if (!currentProduct || !selectedVariant || !selectedSize) {
+    return;
+  }
 
   addToCart(currentProduct, selectedVariant, selectedSize, 1);
   openCartDrawer();

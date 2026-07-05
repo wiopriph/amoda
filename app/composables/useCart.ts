@@ -124,7 +124,9 @@ export function useCart() {
   const toast = useToast();
 
   const notifyRollback = () => {
-    if (!import.meta.client) return;
+    if (!import.meta.client) {
+      return;
+    }
 
     toast.add({
       title: 'Não foi possível atualizar a escolha',

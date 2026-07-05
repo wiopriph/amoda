@@ -32,7 +32,9 @@ const page = computed(() => Math.max(1, Number(route.query.page || 1)));
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 watch(searchInput, (value) => {
-  if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer);
+  }
 
   searchDebounceTimer = setTimeout(() => {
     router.replace({
@@ -94,7 +96,9 @@ const trackResultSelect = (product: CatalogProductCard) => {
   const variantId = Number(product.default_variant_id);
   const sizeId = Number(product.default_size_id);
 
-  if (!variantId || !sizeId) return;
+  if (!variantId || !sizeId) {
+    return;
+  }
 
   trackSelectItem({
     listId: 'search_results',

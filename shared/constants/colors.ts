@@ -34,7 +34,9 @@ export const BASE_COLOR_MAP: Record<string, BaseColor> = Object.fromEntries(
 );
 
 export function colorLabel(value?: string | null): string {
-  if (!value) return '';
+  if (!value) {
+    return '';
+  }
 
   return BASE_COLOR_MAP[value]?.label ?? value;
 }

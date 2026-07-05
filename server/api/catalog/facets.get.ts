@@ -62,7 +62,9 @@ export default defineEventHandler(async (event): Promise<FacetsResponse> => {
 
   for (const product of data ?? []) {
     for (const variant of (product as any).variants ?? []) {
-      if (variant.color) colors.add(String(variant.color));
+      if (variant.color) {
+        colors.add(String(variant.color));
+      }
 
       const price = Number(variant.price);
 
