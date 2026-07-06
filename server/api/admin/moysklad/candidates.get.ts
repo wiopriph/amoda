@@ -109,13 +109,7 @@ export default defineEventHandler(async (event) => {
       const color = r.characteristics?.find((c: any) => c.name === 'Cor')?.value ?? '';
       const productName = r.product?.name ?? r.name;
       const price = r.salePrices?.[0]?.value ?? 0;
-
-      // Build link to the parent product in MoySklad web UI
-      const productHref: string = r.product?.meta?.href ?? '';
-      const productUuidMatch = productHref.match(/\/entity\/product\/([a-f0-9-]+)/i);
-      const msProductUrl = productUuidMatch
-        ? `https://online.moysklad.ru/app/#good/edit?id=${productUuidMatch[1]}`
-        : null;
+      const msProductUrl: string = r.meta?.uuidHref ?? '';
 
       msVariants.push({ msCode: code, productName, color, size, price, msProductUrl });
     }

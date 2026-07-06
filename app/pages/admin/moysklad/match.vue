@@ -121,6 +121,41 @@ const pendingCount = computed(() =>
 const isSaving = ref(false);
 const isSyncing = ref(false);
 const isSyncingStock = ref(false);
+const isSyncingPrices = ref(false);
+
+const anySyncing = computed(() => isSyncing.value || isSyncingStock.value || isSyncingPrices.value);
+
+const syncPrices = async () => {
+  isSyncingPrices.value = true;
+
+  try {
+    const result = await $fetch<{
+      updated: number
+      totalLinkedVariants: number
+      conflicts: { variantId: number; prices: number[] }[]
+    }>('/api/admin/moysklad/sync-prices', { method: 'POST' });
+
+    const conflictNote = result.conflicts.length
+      ? ` Conflitos de preço em ${result.conflicts.length} variante(s) — revise manualmente.`
+      : '';
+
+    toast.add({
+      title: 'Preços sincronizados',
+      description: `${result.updated} de ${result.totalLinkedVariants} variantes atualizadas.${conflictNote}`,
+      color: result.conflicts.length ? 'warning' : 'success',
+    });
+
+    await refresh();
+  } catch (e: any) {
+    toast.add({
+      title: 'Erro na sincronização de preços',
+      description: e?.data?.statusMessage || 'Falha ao sincronizar preços.',
+      color: 'error',
+    });
+  } finally {
+    isSyncingPrices.value = false;
+  }
+};
 
 const syncStock = async () => {
   isSyncingStock.value = true;
@@ -247,7 +282,7 @@ const showLinked = ref(false);
           color="neutral"
           icon="i-lucide-zap"
           :loading="isSyncing"
-          :disabled="isSyncing || isSyncingStock"
+          :disabled="anySyncing"
           @click="syncVariants"
         >
           Sincronizar tamanhos
@@ -258,10 +293,21 @@ const showLinked = ref(false);
           color="neutral"
           icon="i-lucide-package"
           :loading="isSyncingStock"
-          :disabled="isSyncing || isSyncingStock"
+          :disabled="anySyncing"
           @click="syncStock"
         >
           Sincronizar estoque
+        </UButton>
+
+        <UButton
+          variant="soft"
+          color="neutral"
+          icon="i-lucide-tag"
+          :loading="isSyncingPrices"
+          :disabled="anySyncing"
+          @click="syncPrices"
+        >
+          Sincronizar preços
         </UButton>
 
         <UButton
