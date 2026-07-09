@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { serverSupabaseServiceRole } from '#supabase/server';
+import { compareSizeLabels } from '#shared/constants/sizes';
 
 
 type CategoryRow = {
@@ -161,7 +162,7 @@ export default defineEventHandler(async (event) => {
         [...v.images].sort((a, b) => (a?.position ?? 0) - (b?.position ?? 0)) :
         [];
       const sizesSorted = Array.isArray(v.sizes) ?
-        [...v.sizes].sort((a, b) => String(a.size).localeCompare(String(b.size))) :
+        [...v.sizes].sort((a, b) => compareSizeLabels(a.size, b.size)) :
         [];
 
       return {

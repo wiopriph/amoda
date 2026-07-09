@@ -223,9 +223,67 @@ const selectedSizeOption = computed(() =>
   sizeOptions.value.find((sizeOption) => sizeOption.id === selectedSizeId.value) || null,
 );
 
+const selectionSummary = computed(() => {
+  const parts: string[] = [];
+
+  const sizeLabel = selectedSizeOption.value?.label;
+
+  if (sizeLabel) {
+    parts.push(`Tamanho ${sizeLabel}`);
+  }
+
+  const color = colorLabel(activeVariant.value?.color);
+
+  if (color) {
+    parts.push(color);
+  }
+
+  return parts.join(' · ');
+});
+
+const sizeSectionRef = useTemplateRef('sizeSection');
+const isSizeSectionHighlighted = ref(false);
+
+let sizeHighlightTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scrollToSizeSection() {
+  sizeSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  isSizeSectionHighlighted.value = true;
+
+  if (sizeHighlightTimer) {
+    clearTimeout(sizeHighlightTimer);
+  }
+
+  sizeHighlightTimer = setTimeout(() => {
+    isSizeSectionHighlighted.value = false;
+  }, 1600);
+}
+
 const areAllSizesOutOfStock = computed(() =>
   sizeOptions.value.length > 0 && sizeOptions.value.every(sizeOption => sizeOption.isOutOfStock),
 );
+
+const hasSelectableSizes = computed(() => sizeOptions.value.some(sizeOption => !sizeOption.isOutOfStock));
+
+const mobileCtaLabel = computed(() => {
+  if (selectedSizeId.value) {
+    return 'Escolher';
+  }
+
+  return hasSelectableSizes.value ? 'Escolha o tamanho' : 'Esgotado';
+});
+
+function onMobileCtaClick() {
+  if (selectedSizeId.value) {
+    addProductToCart();
+
+    return;
+  }
+
+  if (hasSelectableSizes.value) {
+    scrollToSizeSection();
+  }
+}
 
 const isIncrementDisabled = computed(() => {
   const sizeOption = selectedSizeOption.value;
@@ -678,7 +736,12 @@ useHead(() => ({
                 </div>
               </div>
 
-              <div v-if="sizeOptions.length">
+              <div
+                v-if="sizeOptions.length"
+                ref="sizeSection"
+                :class="isSizeSectionHighlighted ? 'ring-2 ring-primary ring-offset-4 ring-offset-white' : ''"
+                class="rounded-xl transition-shadow duration-300"
+              >
                 <div class="mb-2 text-sm font-semibold text-highlighted">
                   Tamanho
                 </div>
@@ -985,6 +1048,12 @@ useHead(() => ({
                 />
 
                 <div
+                  v-if="selectionSummary"
+                  class="mt-0.5 truncate text-xs text-muted"
+                  v-text="selectionSummary"
+                />
+
+                <div
                   class="mt-1 text-sm font-bold text-primary"
                   v-text="formattedPrice"
                 />
@@ -1022,8 +1091,16 @@ useHead(() => ({
       >
         <div class="mx-auto max-w-(--ui-container) px-1">
           <div class="mb-2 flex items-center justify-between gap-3">
-            <div class="text-xs font-medium text-muted">
-              {{ mobilePriceLabel }}
+            <div class="min-w-0">
+              <div class="text-xs font-medium text-muted">
+                {{ mobilePriceLabel }}
+              </div>
+
+              <div
+                v-if="selectionSummary"
+                class="truncate text-sm font-semibold text-highlighted"
+                v-text="selectionSummary"
+              />
             </div>
 
             <div
@@ -1068,13 +1145,13 @@ useHead(() => ({
 
             <template v-else>
               <UButton
-                :disabled="!selectedSizeId"
+                :disabled="!selectedSizeId && !hasSelectableSizes"
                 size="xl"
                 color="primary"
                 class="flex-1 justify-center"
-                @click="addProductToCart"
+                @click="onMobileCtaClick"
               >
-                {{ selectedSizeId ? "Escolher" : areAllSizesOutOfStock ? "Esgotado" : "Tamanho" }}
+                {{ mobileCtaLabel }}
               </UButton>
 
               <UButton
