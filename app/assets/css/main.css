@@ -1,2 +1,7 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+
+:root {
+  /* Promo bar (h-7 in AppHeader) + UHeader height — top offset for elements that stick below the header */
+  --app-header-offset: calc(var(--ui-header-height) + 1.75rem);
+}

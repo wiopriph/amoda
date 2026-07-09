@@ -35,7 +35,8 @@ const { count } = useCart();
 
 <template>
   <div class="sticky top-0 z-50">
-    <div class="bg-primary px-4 py-1.5 text-center text-xs font-semibold text-white">
+    <!-- h-7 is part of --app-header-offset in main.css — keep them in sync -->
+    <div class="flex h-7 items-center justify-center overflow-hidden whitespace-nowrap bg-primary px-4 text-xs font-semibold text-white">
       Experimente antes de pagar · Pague só o que gostar
     </div>
 
