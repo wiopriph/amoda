@@ -23,7 +23,9 @@ const {
   activeChips,
   removeChip,
   clearAllFilters,
-} = useCatalogFilters(() => { page.value = 1; });
+} = useCatalogFilters(() => {
+  page.value = 1; 
+});
 
 // Stable reference — an inline object literal in the template would be
 // recreated on every render and falsely trigger the sheet's count refetch
@@ -250,9 +252,9 @@ useHead(() => ({
 
 <template>
   <UPage>
-    <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
+    <UPageBody class="mx-auto mt-4 max-w-6xl space-y-5 sm:mt-8 sm:space-y-12 sm:px-6 lg:px-8">
       <section
-        class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8"
+        class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-4 shadow-sm sm:p-8"
       >
         <UBreadcrumb
           :items="breadcrumbItems"
@@ -273,35 +275,32 @@ useHead(() => ({
         </NuxtLink>
 
         <div class="mt-0 md:mt-5">
-          <UBadge
-            color="primary"
-            variant="soft"
-          >
-            {{ `${totalProducts} produtos disponíveis` }}
-          </UBadge>
-
           <h1
-            class="mt-4 text-3xl font-black tracking-tight text-highlighted sm:text-5xl"
+            class="text-2xl font-black tracking-tight text-highlighted sm:text-5xl"
             v-text="categoryH1"
           />
 
           <p
-            class="mt-4 text-base leading-7 text-muted sm:text-lg"
+            class="mt-2 line-clamp-2 text-sm leading-6 text-muted sm:mt-4 sm:line-clamp-none sm:text-lg sm:leading-7"
             v-text="description"
           />
         </div>
 
         <div
           v-if="categoryNavigation?.length"
-          class="mt-5"
+          class="mt-4 sm:mt-5"
         >
-          <CategoryPills :list="categoryNavigation" />
+          <CategoryPills
+            :list="categoryNavigation"
+            :currentSlug="String(route.params.slug)"
+          />
         </div>
       </section>
 
       <CatalogFilterBar
-        :active-filter-count="activeFilterCount"
-        :active-chips="activeChips"
+        :activeFilterCount="activeFilterCount"
+        :activeChips="activeChips"
+        :total="isCatalogPending ? null : totalProducts"
         @open="isFilterOpen = true"
         @remove-chip="removeChip"
         @clear-all="clearAllFilters"
@@ -311,7 +310,7 @@ useHead(() => ({
         v-model:open="isFilterOpen"
         :facets="facets"
         :applied="appliedFilters"
-        :base-query="filterBaseQuery"
+        :baseQuery="filterBaseQuery"
         @apply="applyFilters"
       />
 
@@ -343,7 +342,7 @@ useHead(() => ({
       <section
         v-else
         ref="productsSection"
-        class="mt-6 scroll-mt-24"
+        class="mt-6 scroll-mt-40"
       >
         <div
           v-if="isCatalogPending"
