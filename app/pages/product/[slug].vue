@@ -467,7 +467,7 @@ const copyProductLink = async () => {
 };
 
 
-const title = computed(() => `${product.value?.title || ''} | Escolha sem pagar`);
+const title = computed(() => `${product.value?.title || ''} | Amoda`);
 const description = computed(() => product.value?.description || `Escolha ${productName.value} na Amoda em Luanda. Selecione o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar.`);
 const seoImage = computed(() => galleryImages.value?.[0]?.url || fallbackImage);
 
@@ -491,6 +491,9 @@ const productSchema = computed(() => {
   if (isProductAvailable.value) {
     schema.offers.priceCurrency = CURRENCY;
     schema.offers.price = activeVariant.value?.price ?? product.value?.price ?? 0;
+
+    schema.offers.priceValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      .slice(0, 10);
   }
 
   return schema;

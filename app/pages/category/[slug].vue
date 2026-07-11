@@ -163,7 +163,7 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Preciso de ajuda com a catego
 
 const requestUrl = useRequestURL();
 
-const title = computed(() => category.value?.seo_title || `${categoryTitle.value} em Luanda | Escolha e experimente antes de pagar`);
+const title = computed(() => category.value?.seo_title || `${categoryTitle.value} em Luanda | Amoda`);
 const description = computed(() => category.value?.seo_description || `Encontre ${categoryTitle.value} na Amoda em Luanda. Escolha online sem pagar, experimente primeiro e leve apenas o que gostar.`);
 const ogImage = computed(() => category.value?.image || 'https://amoda.ao/logo.webp');
 // category images are cropped to 400×400 on upload; the logo fallback is 2048×2048

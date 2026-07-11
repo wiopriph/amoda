@@ -5,6 +5,6 @@ Disallow: /checkout
 Disallow: /order
 Disallow: /auth
 Disallow: /admin
-Disallow: /_nuxt/
+Disallow: /api/
 
 Sitemap: https://amoda.ao/sitemap.xml
