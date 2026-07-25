@@ -31,6 +31,7 @@ const closeCategories = () => {
 };
 
 const { count } = useCart();
+const { count: favoritesCount } = useFavorites();
 </script>
 
 <template>
@@ -182,6 +183,23 @@ const { count } = useCart();
             aria-label="Pesquisar"
             class="hover:text-primary"
           />
+
+          <UButton
+            :to="{ name: 'favorites' }"
+            variant="ghost"
+            color="neutral"
+            icon="i-heroicons-heart"
+            aria-label="Favoritos"
+            class="relative hover:text-primary"
+          >
+            <span
+              v-if="favoritesCount"
+              :aria-label="`Favoritos: ${favoritesCount}`"
+              class="absolute -right-1 -top-1 rounded-full bg-primary px-1.5 py-0.5 text-[11px] font-bold leading-none text-white"
+            >
+              {{ favoritesCount }}
+            </span>
+          </UButton>
 
           <UButton
             :to="{ name: 'cart' }"

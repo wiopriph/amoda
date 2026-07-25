@@ -227,6 +227,11 @@ const startShoppingTo = { name: 'category-slug', params: { slug: 'mulheres' } } 
                   {{ getProductBadgeLabel(badge) }}
                 </UBadge>
               </div>
+
+              <FavoriteToggle
+                :product="product"
+                class="absolute right-2 top-2"
+              />
             </template>
           </UBlogPost>
         </UBlogPosts>

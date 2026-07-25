@@ -294,6 +294,11 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Estou à procura de: ${submit
                   {{ getProductBadgeLabel(badge) }}
                 </UBadge>
               </div>
+
+              <FavoriteToggle
+                :product="searchProduct"
+                class="absolute right-2 top-2"
+              />
             </template>
           </UBlogPost>
         </UBlogPosts>

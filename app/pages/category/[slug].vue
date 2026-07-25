@@ -402,6 +402,11 @@ useHead(() => ({
                   {{ getProductBadgeLabel(badge) }}
                 </UBadge>
               </div>
+
+              <FavoriteToggle
+                :product="categoryProduct"
+                class="absolute right-2 top-2"
+              />
             </template>
           </UBlogPost>
         </UBlogPosts>

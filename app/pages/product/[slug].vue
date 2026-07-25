@@ -127,6 +127,16 @@ const unitPrice = computed(() => activeVariant.value?.price ?? product.value?.pr
 
 const formattedPrice = computed(() => formatPrice(unitPrice.value));
 
+const favoriteProduct = computed(() => ({
+  id: product.value?.id ?? 0,
+  slug: product.value?.slug || '',
+  title: productName.value,
+  // eslint-disable-next-line camelcase
+  brand_name: product.value?.brand_name ?? null,
+  price: unitPrice.value,
+  image: galleryImages.value[0]?.url || null,
+}));
+
 
 const {
   add: addToCart,
@@ -580,6 +590,12 @@ useHead(() => ({
             >
               {{ activeImageIndex + 1 }} / {{ carouselSlides.length }}
             </div>
+
+            <FavoriteToggle
+              v-if="product?.id"
+              :product="favoriteProduct"
+              class="absolute right-3 top-3 z-10"
+            />
           </div>
 
           <div
@@ -996,6 +1012,18 @@ useHead(() => ({
                   {{ getProductBadgeLabel(badge) }}
                 </UBadge>
               </div>
+
+              <FavoriteToggle
+                :product="{
+                  id: recommendedProduct.id,
+                  slug: recommendedProduct.slug,
+                  title: recommendedProduct.title,
+                  brand_name: recommendedProduct.brand_name,
+                  price: recommendedProduct.price,
+                  image: recommendedProduct.images?.[0]?.url || null,
+                }"
+                class="absolute right-2 top-2"
+              />
             </template>
           </UBlogPost>
         </UBlogPosts>

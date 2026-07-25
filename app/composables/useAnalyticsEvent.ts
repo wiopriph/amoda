@@ -6,6 +6,7 @@ export const ANALYTICS_EVENTS = {
   SELECT_ITEM: 'select_item',
   VIEW_ITEM: 'view_item',
   ADD_TO_CART: 'add_to_cart',
+  ADD_TO_WISHLIST: 'add_to_wishlist',
   REMOVE_FROM_CART: 'remove_from_cart',
   BEGIN_CHECKOUT: 'begin_checkout',
   PURCHASE: 'purchase',
@@ -52,6 +53,11 @@ type SelectItemPayload = {
 type ViewItemPayload = { items: Ga4Item[] };
 
 type AddToCartPayload = {
+  value?: number;
+  items: Ga4Item[]
+};
+
+type AddToWishlistPayload = {
   value?: number;
   items: Ga4Item[]
 };
@@ -156,6 +162,18 @@ export function useAnalyticsEvent() {
     });
   };
 
+  const trackAddToWishlist = (p: AddToWishlistPayload) => {
+    resetEcommerce();
+
+    pushEvent(ANALYTICS_EVENTS.ADD_TO_WISHLIST, {
+      ecommerce: {
+        currency: CURRENCY,
+        value: p.value,
+        items: p.items,
+      },
+    });
+  };
+
   const trackRemoveFromCart = (p: RemoveFromCartPayload) => {
     resetEcommerce();
 
@@ -206,6 +224,7 @@ export function useAnalyticsEvent() {
     trackSelectItem,
     trackViewItem,
     trackAddToCart,
+    trackAddToWishlist,
     trackRemoveFromCart,
     trackBeginCheckout,
     trackPurchase,

@@ -6,5 +6,6 @@ Disallow: /order
 Disallow: /auth
 Disallow: /admin
 Disallow: /api/
+Disallow: /favorites
 
 Sitemap: https://amoda.ao/sitemap.xml
