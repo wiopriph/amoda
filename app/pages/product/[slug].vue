@@ -761,8 +761,23 @@ useHead(() => ({
                 :class="isSizeSectionHighlighted ? 'ring-2 ring-primary ring-offset-4 ring-offset-white' : ''"
                 class="rounded-xl transition-shadow duration-300"
               >
-                <div class="mb-2 text-sm font-semibold text-highlighted">
-                  Tamanho
+                <div class="mb-2 flex items-center justify-between gap-3">
+                  <div class="text-sm font-semibold text-highlighted">
+                    Tamanho
+                  </div>
+
+                  <div
+                    v-if="variantOptions.length === 1"
+                    class="flex items-center gap-1.5 text-sm text-muted"
+                  >
+                    <ColorSwatch
+                      v-if="activeVariant?.color"
+                      :color="activeVariant.color"
+                      :size="16"
+                    />
+
+                    <span v-text="selectedVariantLabel" />
+                  </div>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
