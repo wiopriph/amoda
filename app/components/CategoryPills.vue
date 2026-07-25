@@ -19,7 +19,7 @@ const getCategoryTo = (slug: string) => ({ name: 'category-slug', params: { slug
     v-if="list?.length"
     aria-label="Category navigation"
   >
-    <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-3 sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
+    <div class="-mx-4 flex gap-2 overflow-x-auto p-1 px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-3 sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
       <NuxtLink
         v-for="category in list"
         :key="category.id"
