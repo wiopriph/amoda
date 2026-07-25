@@ -70,6 +70,7 @@ type Product = {
   description?: string | null
   active?: boolean
   badges?: ProductBadge[]
+  'ms_product_id'?: string | null
   variants?: ProductVariant[]
 };
 

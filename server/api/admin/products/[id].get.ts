@@ -33,6 +33,7 @@ type ProductRow = {
   description: string | null
   active: boolean
   badges: string[]
+  'ms_product_id': string | null
   product_variants?: ProductVariantRow[] | null
 };
 
@@ -57,6 +58,7 @@ export default defineEventHandler(async (event) => {
       description,
       active,
       badges,
+      ms_product_id,
       brand:brands ( id, name, slug ),
       primary_category:categories!products_primary_category_id_fkey ( id, name, slug, parent_id ),
       product_variants:product_variants (
@@ -87,6 +89,7 @@ export default defineEventHandler(async (event) => {
     badges: product.badges ?? [],
     'brand_id': product['brand_id'],
     'primary_category_id': product['primary_category_id'],
+    'ms_product_id': product['ms_product_id'],
     variants: product.product_variants?.map(v => ({
       id: v.id,
       color: v.color,

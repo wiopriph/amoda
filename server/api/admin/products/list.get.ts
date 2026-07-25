@@ -39,6 +39,7 @@ type ProductRow = {
   slug: string
   active: boolean
   badges: string[]
+  'ms_product_id': string | null
   brands: BrandRow | null
   product_variants?: ProductVariantRow[] | null
 };
@@ -62,6 +63,7 @@ export default defineEventHandler(async (event) => {
       slug,
       active,
       badges,
+      ms_product_id,
       brands ( id, name ),
       product_variants (
         id,
@@ -92,6 +94,7 @@ export default defineEventHandler(async (event) => {
     slug: p.slug,
     active: p.active,
     badges: p.badges ?? [],
+    msProductId: p['ms_product_id'] ?? null,
     brand: p.brands,
     variants: (p.product_variants || []).map(v => ({
       id: v.id,

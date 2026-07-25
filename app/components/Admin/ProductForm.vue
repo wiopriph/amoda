@@ -16,6 +16,7 @@ type ProductForm = {
   description?: string | null
   active?: boolean
   badges?: ProductBadge[]
+  'ms_product_id'?: string | null
 };
 
 const props = defineProps<{
@@ -44,6 +45,12 @@ watch(
 );
 
 const isEditingProduct = computed(() => !!productForm.value.id);
+
+const msProductUrl = computed(() => {
+  const msId = productForm.value.ms_product_id?.trim();
+
+  return msId ? `https://online.moysklad.ru/app/#good/edit?id=${msId}` : null;
+});
 const submitLabel = computed(() => isEditingProduct.value ? 'Guardar alterações' : 'Criar produto');
 const brandOptions = computed(() => props.brands.map(brand => ({ label: brand.name, value: brand.id })));
 const categoryOptions = computed(() => props.categories.map(category => ({ label: category.name, value: category.id })));
@@ -195,6 +202,33 @@ const updateSlug = (slug: string) => {
         label="Produto ativo"
         @update:model-value="updateProductField('active', $event)"
       />
+    </UFormField>
+
+    <UFormField
+      label="MoySklad ID"
+      description="UUID do produto no MoySklad. Preenchido pela extensão do navegador; necessário para sincronizar estoque e preços."
+      class="w-full"
+    >
+      <div class="flex items-center gap-2">
+        <UInput
+          v-model="productForm.ms_product_id"
+          placeholder="ab3f6f21-6a69-11f1-0a80-1da700149115"
+          class="w-full font-mono"
+          @update:model-value="updateProductField('ms_product_id', String($event))"
+        />
+
+        <UButton
+          v-if="msProductUrl"
+          :to="msProductUrl"
+          target="_blank"
+          size="sm"
+          variant="ghost"
+          color="neutral"
+          icon="i-lucide-external-link"
+          aria-label="Abrir no MoySklad"
+          class="shrink-0"
+        />
+      </div>
     </UFormField>
 
     <UFormField

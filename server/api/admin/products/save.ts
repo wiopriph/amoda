@@ -12,6 +12,7 @@ type ProductSaveBody = {
   description?: string | null
   active?: boolean
   badges?: unknown
+  ms_product_id?: string | null
 };
 
 export default defineEventHandler(async (event) => {
@@ -39,6 +40,7 @@ export default defineEventHandler(async (event) => {
     description: body.description || null,
     active: body.active ?? true,
     badges: normalizeProductBadges(body.badges),
+    'ms_product_id': body['ms_product_id']?.trim() || null,
   };
 
   if (body.id) {

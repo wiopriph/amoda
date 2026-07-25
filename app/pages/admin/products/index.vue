@@ -42,6 +42,7 @@ type Product = {
   slug: string
   active: boolean
   badges: ProductBadge[]
+  msProductId: string | null
   brand: Brand
   variants: Variant[]
 };
@@ -122,6 +123,7 @@ const expandedRows = ref<Record<string, boolean>>({});
 
 const UBadge = resolveComponent('UBadge');
 const UButton = resolveComponent('UButton');
+const UIcon = resolveComponent('UIcon');
 
 const getMissingMsCodeSizesCount = (product: Product) =>
   (product.variants || []).reduce((total, variant) => total + (variant.sizes || [])
@@ -206,6 +208,20 @@ const productColumns: TableColumn<ProductTableRow>[] = [
   {
     accessorKey: 'variantsCount',
     header: 'Variantes',
+  },
+  {
+    accessorKey: 'msProductId',
+    header: 'MoySklad',
+    meta: { class: { th: 'w-28 text-center', td: 'text-center' } },
+    cell: ({ row }) => {
+      const msProductId = row.original.msProductId;
+
+      return h(UIcon, {
+        name: msProductId ? 'i-lucide-circle-check' : 'i-lucide-circle-dashed',
+        class: msProductId ? 'size-5 text-success' : 'size-5 text-muted',
+        title: msProductId || 'Produto não vinculado ao MoySklad',
+      });
+    },
   },
   {
     accessorKey: 'missingMsCodeSizesCount',
