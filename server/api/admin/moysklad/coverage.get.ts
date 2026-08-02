@@ -12,6 +12,7 @@ type ProductRow = {
 type SizeRow = {
   id: number;
   size: string;
+  'ms_code': string | null;
   'ms_variant_id': string | null;
   'product_variants': { color: string | null; 'product_id': number };
 };
@@ -35,7 +36,7 @@ export default defineEventHandler(async (event) => {
 
   const { data: sizes, error: sizesError } = await client
     .from('product_variant_sizes')
-    .select('id, size, ms_variant_id, product_variants!inner(color, product_id)') as {
+    .select('id, size, ms_code, ms_variant_id, product_variants!inner(color, product_id)') as {
     data: SizeRow[] | null;
     error: any;
   };
@@ -62,8 +63,10 @@ export default defineEventHandler(async (event) => {
     msVariantsTotal: number;
     // Модификации МС без пары на сайте — новый цвет/размер на складе
     missingOnSite: { id: string; name: string; code: string | null; characteristics: string }[];
-    // Размеры сайта без привязки к МС
-    unlinkedLocalSizes: { sizeId: number; color: string | null; size: string }[];
+    // Размеры сайта без привязки к МС; foreignCode — старый ms_code,
+    // которого нет среди модификаций привязанного товара (обычно цвет
+    // заведён в МС отдельной карточкой либо код устарел)
+    unlinkedLocalSizes: { sizeId: number; color: string | null; size: string; msCode: string | null; foreignCode: boolean }[];
     // Привязка указывает на модификацию, которой нет у этого товара МС
     brokenLinks: { sizeId: number; color: string | null; size: string; msVariantId: string }[];
     error?: string;
@@ -102,6 +105,7 @@ export default defineEventHandler(async (event) => {
     );
 
     const msIds = new Set(msVariants.map(v => v.id));
+    const msCodes = new Set(msVariants.map(v => v.code).filter((code): code is string => Boolean(code)));
 
     base.missingOnSite = msVariants
       .filter(v => !linkedMsIds.has(v.id))
@@ -114,11 +118,17 @@ export default defineEventHandler(async (event) => {
 
     base.unlinkedLocalSizes = localSizes
       .filter(size => !size['ms_variant_id'])
-      .map(size => ({
-        sizeId: size.id,
-        color: size['product_variants'].color,
-        size: size.size,
-      }));
+      .map((size) => {
+        const msCode = size['ms_code']?.trim() || null;
+
+        return {
+          sizeId: size.id,
+          color: size['product_variants'].color,
+          size: size.size,
+          msCode,
+          foreignCode: Boolean(msCode && !msCodes.has(msCode)),
+        };
+      });
 
     base.brokenLinks = localSizes
       .filter(size => size['ms_variant_id'] && !msIds.has(size['ms_variant_id']))

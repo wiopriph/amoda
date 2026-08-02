@@ -80,7 +80,7 @@ type CoverageResult = {
     title: string
     msVariantsTotal: number
     missingOnSite: { id: string; name: string; code: string | null; characteristics: string }[]
-    unlinkedLocalSizes: { sizeId: number; color: string | null; size: string }[]
+    unlinkedLocalSizes: { sizeId: number; color: string | null; size: string; msCode: string | null; foreignCode: boolean }[]
     brokenLinks: { sizeId: number; color: string | null; size: string; msVariantId: string }[]
     error?: string
   }[]
@@ -280,7 +280,7 @@ const runBackfill = async () => {
                 class="mt-1 text-xs text-gray-700"
               >
                 <strong>No site, sem vínculo MoySklad:</strong>
-                {{ item.unlinkedLocalSizes.map(s => `${s.color || '—'} / ${s.size}`).join(', ') }}
+                {{ item.unlinkedLocalSizes.map(s => `${s.color || '—'} / ${s.size}${s.msCode ? ` [${s.msCode}${s.foreignCode ? ' — código de outro produto MS' : ''}]` : ''}`).join(', ') }}
               </p>
 
               <p
