@@ -71,6 +71,39 @@ const runSync = async () => {
   }
 };
 
+type CoverageResult = {
+  ok: boolean
+  checkedProducts: number
+  productsWithIssues: number
+  report: {
+    productId: number
+    title: string
+    msVariantsTotal: number
+    missingOnSite: { id: string; name: string; code: string | null; characteristics: string }[]
+    unlinkedLocalSizes: { sizeId: number; color: string | null; size: string }[]
+    brokenLinks: { sizeId: number; color: string | null; size: string; msVariantId: string }[]
+    error?: string
+  }[]
+};
+
+const isCheckingCoverage = ref(false);
+const coverageResult = ref<CoverageResult | null>(null);
+const coverageError = ref<string | null>(null);
+
+const runCoverage = async () => {
+  isCheckingCoverage.value = true;
+  coverageResult.value = null;
+  coverageError.value = null;
+
+  try {
+    coverageResult.value = await $fetch<CoverageResult>('/api/admin/moysklad/coverage');
+  } catch (error: any) {
+    coverageError.value = getErrorText(error, 'Falha ao verificar cobertura.');
+  } finally {
+    isCheckingCoverage.value = false;
+  }
+};
+
 const isBackfilling = ref(false);
 const backfillResult = ref<BackfillResult | null>(null);
 const backfillError = ref<string | null>(null);
@@ -131,6 +164,17 @@ const runBackfill = async () => {
             >
               Preencher vínculos (ms_code → UUID)
             </UButton>
+
+            <UButton
+              icon="i-lucide-scan-search"
+              variant="outline"
+              color="neutral"
+              :loading="isCheckingCoverage"
+              :disabled="isCheckingCoverage"
+              @click="runCoverage"
+            >
+              Verificar cobertura
+            </UButton>
           </div>
 
           <UAlert
@@ -180,6 +224,74 @@ const runBackfill = async () => {
             color="error"
             variant="soft"
           />
+
+          <UAlert
+            v-if="coverageError"
+            title="Erro na verificação"
+            :description="coverageError"
+            color="error"
+            variant="soft"
+          />
+
+          <div
+            v-if="coverageResult"
+            class="rounded-lg border border-gray-200 bg-gray-50 p-4"
+          >
+            <h3 class="text-sm font-semibold text-gray-900">
+              Cobertura: {{ coverageResult.productsWithIssues }} de {{ coverageResult.checkedProducts }} produtos com pendências
+            </h3>
+
+            <p
+              v-if="!coverageResult.report.length"
+              class="mt-2 text-sm text-gray-600"
+            >
+              Tudo vinculado — nenhum problema encontrado.
+            </p>
+
+            <div
+              v-for="item in coverageResult.report"
+              :key="item.productId"
+              class="mt-3 rounded-md bg-white p-3 shadow-sm"
+            >
+              <ULink
+                :to="{ name: 'admin-products-edit', params: { id: item.productId } }"
+                class="text-sm font-medium text-primary"
+              >
+                #{{ item.productId }} · {{ item.title }}
+              </ULink>
+
+              <p
+                v-if="item.error"
+                class="mt-1 text-xs text-error"
+              >
+                Erro MoySklad: {{ item.error }}
+              </p>
+
+              <p
+                v-if="item.missingOnSite.length"
+                class="mt-1 text-xs text-gray-700"
+              >
+                <strong>No MoySklad, sem par no site ({{ item.missingOnSite.length }} de {{ item.msVariantsTotal }}):</strong>
+                {{ item.missingOnSite.map(v => `${v.characteristics || v.name}${v.code ? ` [${v.code}]` : ''}`).join(', ') }}
+              </p>
+
+              <p
+                v-if="item.unlinkedLocalSizes.length"
+                class="mt-1 text-xs text-gray-700"
+              >
+                <strong>No site, sem vínculo MoySklad:</strong>
+                {{ item.unlinkedLocalSizes.map(s => `${s.color || '—'} / ${s.size}`).join(', ') }}
+              </p>
+
+              <p
+                v-if="item.brokenLinks.length"
+                class="mt-1 text-xs text-error"
+              >
+                <strong>Vínculo quebrado (modificação não existe mais):</strong>
+                {{ item.brokenLinks.map(s => `${s.color || '—'} / ${s.size}`).join(', ') }}
+              </p>
+            </div>
+          </div>
 
           <UAlert
             v-if="backfillResult"
