@@ -30,11 +30,6 @@ const MENU_LIST = [
     icon: 'i-lucide-store',
     to: { name: 'admin-offices' },
   },
-  {
-    label: 'MoySklad',
-    icon: 'i-lucide-link',
-    to: { name: 'admin-moysklad-match' },
-  },
 ];
 
 const isMenuOpen = ref(false);
