@@ -80,10 +80,18 @@ export function msMoneyToPrice(valueMinor: unknown): number | null {
   return Number.isFinite(value) && value > 0 ? Math.round(value / 100) : null;
 }
 
-// Модификации одного товара МойСклад
+// Расширение сохраняет id товара из адресной строки UI (#good/edit?id=...),
+// который отличается от id в JSON API. GET товара принимает оба и отдаёт канонический.
+export async function msResolveProductId(msProductId: string): Promise<string> {
+  const product = await msFetch<{ id: string }>(`/entity/product/${msProductId}`);
+
+  return product.id;
+}
+
+// Модификации одного товара МойСклад; принимает и UI-id, и API-id товара
 export async function msListProductVariants(msProductId: string): Promise<MsVariantRow[]> {
   const rows = await msFetchAllRows<any>('/entity/variant', {
-    filter: `productid=${msProductId}`,
+    filter: `productid=${await msResolveProductId(msProductId)}`,
   });
 
   return rows.map(row => ({

@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const updates: { id: number; 'ms_variant_id': string }[] = [];
-  const unmatched: { productId: number; title: string; codes: string[] }[] = [];
+  const unmatched: { productId: number; title: string; codes: string[]; error?: string }[] = [];
 
   for (const product of products ?? []) {
     const productSizes = sizesByProductId.get(product.id) ?? [];
@@ -63,7 +63,22 @@ export default defineEventHandler(async (event) => {
       continue;
     }
 
-    const msVariants = await msListProductVariants(product['ms_product_id']);
+    let msVariants;
+
+    // Битая ссылка на МС (товар удалён и т.п.) не должна прерывать весь прогон
+    try {
+      msVariants = await msListProductVariants(product['ms_product_id']);
+    } catch (error: any) {
+      unmatched.push({
+        productId: product.id,
+        title: product.title,
+        codes: productSizes.map(size => size['ms_code']?.trim()).filter((code): code is string => Boolean(code)),
+        error: error?.statusMessage || error?.message || 'MoySklad request failed',
+      });
+
+      continue;
+    }
+
     const msIdByCode = new Map(
       msVariants
         .filter(v => v.code)
