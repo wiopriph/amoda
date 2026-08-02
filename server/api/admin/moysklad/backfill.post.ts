@@ -1,6 +1,7 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { assertAdmin } from '~~/server/utils/assertAdmin';
 import { msListProductVariants } from '~~/server/utils/moysklad';
+import { updateRowsById } from '~~/server/utils/updateRowsById';
 
 
 type ProductRow = {
@@ -108,15 +109,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if (updates.length) {
-    const { error } = await client
-      .from('product_variant_sizes')
-      .upsert(updates, { onConflict: 'id' });
-
-    if (error) {
-      throw createError({ statusCode: 500, statusMessage: error.message });
-    }
-  }
+  await updateRowsById(client, 'product_variant_sizes', updates);
 
   return {
     ok: true,

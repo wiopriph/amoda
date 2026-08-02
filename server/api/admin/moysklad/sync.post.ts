@@ -1,6 +1,7 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { assertAdmin } from '~~/server/utils/assertAdmin';
 import { msFetch, msFetchAllRows, msMoneyToPrice } from '~~/server/utils/moysklad';
+import { updateRowsById } from '~~/server/utils/updateRowsById';
 
 
 type LocalSizeRow = {
@@ -78,15 +79,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if (stockUpdates.length) {
-    const { error } = await client
-      .from('product_variant_sizes')
-      .upsert(stockUpdates, { onConflict: 'id' });
-
-    if (error) {
-      throw createError({ statusCode: 500, statusMessage: error.message });
-    }
-  }
+  await updateRowsById(client, 'product_variant_sizes', stockUpdates);
 
   // --- Цены ---
 
@@ -173,15 +166,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if (priceUpdates.length) {
-    const { error } = await client
-      .from('product_variants')
-      .upsert(priceUpdates, { onConflict: 'id' });
-
-    if (error) {
-      throw createError({ statusCode: 500, statusMessage: error.message });
-    }
-  }
+  await updateRowsById(client, 'product_variants', priceUpdates);
 
   return {
     ok: true,
