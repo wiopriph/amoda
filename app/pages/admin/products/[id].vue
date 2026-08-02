@@ -44,7 +44,16 @@ type VariantSize = {
   size: string
   stock: number
   msCode?: string | null
+  msVariantId?: string | null
   sku?: string
+};
+
+type MsVariantOption = {
+  id: string
+  name: string
+  code: string | null
+  characteristics: { name: string; value: string }[]
+  salePrice: number | null
 };
 
 type ProductVariant = {
@@ -85,6 +94,19 @@ const [
   useFetch<Category[]>('/api/admin/categories/list'),
   useFetch<Product>(`/api/admin/products/${route.params.id}`),
 ]);
+
+// Модификации привязанного товара МойСклад — для выбора пары к размеру
+const msProductId = computed(() => product.value?.ms_product_id?.trim() || null);
+
+const { data: msVariants } = await useAsyncData<MsVariantOption[] | null>(
+  'admin-ms-product-variants',
+  () => msProductId.value ?
+    $fetch<MsVariantOption[]>('/api/admin/moysklad/product-variants', {
+      query: { msProductId: msProductId.value },
+    }).catch(() => null) :
+    Promise.resolve(null),
+  { server: false, watch: [msProductId] },
+);
 
 const brands = computed(() => brandOptions.value || []);
 const categories = computed(() => categoryOptions.value || []);
@@ -229,7 +251,7 @@ const selectedSize = ref<Partial<VariantSize>>({});
 const openCreateSizeModal = (variant: ProductVariant) => {
   const variantId = Number(variant.id);
 
-  selectedSize.value = { 'variant_id': variantId, size: '', stock: 0, msCode: '', sku: '' };
+  selectedSize.value = { 'variant_id': variantId, size: '', stock: 0, msCode: '', msVariantId: null, sku: '' };
   isSizeModalOpen.value = true;
 };
 
@@ -409,11 +431,11 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
                     v-for="variantSize in variant.sizes || []"
                     :key="variantSize.id"
                     variant="soft"
-                    :color="variantSize.msCode ? 'neutral' : 'warning'"
+                    :color="variantSize.msVariantId ? 'success' : 'warning'"
                     class="cursor-pointer transition hover:ring-1 hover:ring-primary/40"
                     @click="openEditSizeModal(variant, variantSize)"
                   >
-                    <strong>{{ variantSize.size }}</strong> · {{ variantSize.stock || 0 }} · {{ variantSize.msCode || 'sem código' }}
+                    <strong>{{ variantSize.size }}</strong> · {{ variantSize.stock || 0 }} · {{ variantSize.msVariantId ? (variantSize.msCode || 'vinculado') : 'sem vínculo' }}
                   </UBadge>
 
                   <UButton
@@ -543,6 +565,7 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
     <AdminSizeModal
       v-model:open="isSizeModalOpen"
       :modelValue="selectedSize"
+      :msVariants="msVariants"
       @save="saveSize"
     />
   </UPage>

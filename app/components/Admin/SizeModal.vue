@@ -5,14 +5,25 @@ type SizeForm = {
   size?: string | null
   stock?: number | string | null
   msCode?: string | null
+  msVariantId?: string | null
   sku?: string | null
+};
+
+type MsVariantOption = {
+  id: string
+  name: string
+  code: string | null
+  characteristics: { name: string; value: string }[]
+  salePrice: number | null
 };
 
 const props = withDefaults(defineProps<{
   open?: boolean
   modelValue: SizeForm
+  msVariants?: MsVariantOption[] | null
 }>(), {
   open: false,
+  msVariants: null,
 });
 
 const getEmptySizeForm = (): SizeForm => ({
@@ -21,6 +32,7 @@ const getEmptySizeForm = (): SizeForm => ({
   size: '',
   stock: 0,
   msCode: '',
+  msVariantId: null,
   sku: '',
 });
 
@@ -51,6 +63,36 @@ const closeModal = () => emit('update:open', false);
 const modalTitle = computed(() => sizeForm.id ? 'Editar tamanho' : 'Adicionar tamanho');
 const submitLabel = computed(() => sizeForm.id ? 'Guardar' : 'Adicionar');
 
+const formatMsVariantLabel = (msVariant: MsVariantOption) => {
+  const characteristics = msVariant.characteristics.map(c => c.value).join(' / ');
+  const parts = [characteristics || msVariant.name];
+
+  if (msVariant.code) {
+    parts.push(msVariant.code);
+  }
+
+  if (msVariant.salePrice !== null) {
+    parts.push(`${msVariant.salePrice} Kz`);
+  }
+
+  return parts.join(' · ');
+};
+
+const msVariantItems = computed(() => [
+  { label: '— sem vínculo —', value: null as string | null },
+  ...(props.msVariants ?? []).map(msVariant => ({
+    label: formatMsVariantLabel(msVariant),
+    value: msVariant.id,
+  })),
+]);
+
+const updateMsVariant = (msVariantId: string | null) => {
+  sizeForm.msVariantId = msVariantId;
+
+  const msVariant = (props.msVariants ?? []).find(v => v.id === msVariantId);
+
+  sizeForm.msCode = msVariant?.code ?? sizeForm.msCode;
+};
 
 const isSavingSize = ref(false);
 
@@ -93,6 +135,29 @@ const saveSize = () => {
             class="w-full"
           />
         </UFormField>
+
+        <UFormField
+          v-if="props.msVariants"
+          label="Modificação MoySklad"
+          description="Vínculo usado para sincronizar estoque e preço."
+          class="w-full"
+        >
+          <USelect
+            :modelValue="sizeForm.msVariantId"
+            :items="msVariantItems"
+            placeholder="Selecionar modificação"
+            class="w-full"
+            @update:model-value="updateMsVariant($event as string | null)"
+          />
+        </UFormField>
+
+        <UAlert
+          v-else
+          color="warning"
+          variant="soft"
+          title="Sem vínculo MoySklad"
+          description="Preencha o MoySklad ID do produto (via extensão) para escolher a modificação."
+        />
 
         <UFormField
           label="Código Moysklad"

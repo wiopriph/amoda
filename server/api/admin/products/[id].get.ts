@@ -13,6 +13,7 @@ type VariantSizeRow = {
   size: string
   stock: number | null
   'ms_code': string | null
+  'ms_variant_id': string | null
 };
 
 type ProductVariantRow = {
@@ -64,7 +65,7 @@ export default defineEventHandler(async (event) => {
       product_variants:product_variants (
         id, color, price, active,
         images:product_variant_images!product_variant_images_variant_id_fkey ( url, position, alt ),
-        sizes:product_variant_sizes!product_variant_sizes_variant_id_fkey ( id, size, stock, ms_code )
+        sizes:product_variant_sizes!product_variant_sizes_variant_id_fkey ( id, size, stock, ms_code, ms_variant_id )
       )
     `)
     .eq('id', id)
@@ -101,6 +102,7 @@ export default defineEventHandler(async (event) => {
         size: size.size,
         stock: size.stock,
         msCode: size['ms_code'],
+        msVariantId: size['ms_variant_id'],
       })),
     })) || [],
   };

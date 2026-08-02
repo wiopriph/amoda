@@ -86,6 +86,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     moyskladToken: process.env.MOYSKLAD_TOKEN,
+    // Опционально: секрет для запуска синка планировщиком (заголовок x-sync-token)
+    moyskladSyncToken: process.env.MOYSKLAD_SYNC_TOKEN,
     extensionToken: process.env.EXTENSION_TOKEN,
     supabase: {
       serviceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,

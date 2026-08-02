@@ -16,6 +16,8 @@ export default defineEventHandler(async (event) => {
   const variantId = body['variant_id'];
   const hasMsCode = Object.hasOwn(body, 'msCode') || Object.hasOwn(body, 'ms_code');
   const msCode = body.msCode ?? body['ms_code'];
+  const hasMsVariantId = Object.hasOwn(body, 'msVariantId') || Object.hasOwn(body, 'ms_variant_id');
+  const msVariantId = body.msVariantId ?? body['ms_variant_id'];
 
   if (!variantId || !size) {
     throw createError({ statusCode: 400, statusMessage: 'Variant ID and size required' });
@@ -31,6 +33,12 @@ export default defineEventHandler(async (event) => {
   if (hasMsCode) {
     Object.assign(payload, {
       'ms_code': msCode == null ? null : String(msCode).trim() || null,
+    });
+  }
+
+  if (hasMsVariantId) {
+    Object.assign(payload, {
+      'ms_variant_id': msVariantId == null ? null : String(msVariantId).trim() || null,
     });
   }
 
