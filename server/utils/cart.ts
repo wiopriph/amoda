@@ -260,7 +260,7 @@ export const getVariantSnapshot = async (client: SupabaseClient, variantId: numb
   // stock === null means stock is not tracked — no limit applies
   const stock = size.stock === null || size.stock === undefined ? null : Number(size.stock);
 
-  return { price, stock };
+  return { price, stock, productId: Number(variant.product?.id) };
 };
 
 export const addOrUpdateCartItem = async (

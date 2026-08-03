@@ -1,20 +1,19 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { notifyOrderToTelegram } from '~~/server/utils/notifyOrderToTelegram';
+import { getVariantSnapshot, normalizeCartQty } from '~~/server/utils/cart';
 
 
-type CartItem = {
-  productId: number
-  variantId: number
-  sizeId: number
-  title: string
-  price: number
-  qty: number
-  slug?: string
-  image?: string | null
+type OrderItemInput = {
+  variantId?: unknown
+  sizeId?: unknown
+  qty?: unknown
 };
 
-type Totals = { total: number };
-type Contact = { name: string; phone: string; };
+type Contact = { name?: unknown; phone?: unknown };
+
+const MAX_ORDER_ITEMS = 50;
+const MAX_NAME_LENGTH = 120;
+const MAX_PHONE_LENGTH = 30;
 
 function generateOrderNumber() {
   const ymd = new Date().toISOString()
@@ -27,12 +26,21 @@ function generateOrderNumber() {
   return `${ymd}-${rnd}`;
 }
 
+const toPositiveInt = (value: unknown, field: string) => {
+  const number = typeof value === 'string' ? Number(value) : value;
+
+  if (!Number.isInteger(number) || Number(number) <= 0) {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+
+  return Number(number);
+};
+
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseServiceRole(event);
 
   const body = await readBody<{
-    items: CartItem[]
-    totals: Totals
+    items: OrderItemInput[]
     contact: Contact
     pickupOfficeId?: number | null
   }>(event);
@@ -41,22 +49,26 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Cart is empty' });
   }
 
-  if (!body.contact?.phone) {
+  if (body.items.length > MAX_ORDER_ITEMS) {
+    throw createError({ statusCode: 400, statusMessage: 'Too many items' });
+  }
+
+  const phone = String(body.contact?.phone ?? '').trim();
+  const name = String(body.contact?.name ?? '').trim();
+
+  if (!phone) {
     throw createError({ statusCode: 400, statusMessage: 'Phone is required' });
   }
 
-  if (!Number.isInteger(body.totals?.total) || body.totals.total < 0) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid totals.total' });
-  }
+  const contact = {
+    name: name.slice(0, MAX_NAME_LENGTH),
+    phone: phone.slice(0, MAX_PHONE_LENGTH),
+  };
 
   let pickupOfficeId: number | null = null;
 
   if (body.pickupOfficeId != null) {
-    const id = Number(body.pickupOfficeId);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid pickupOfficeId' });
-    }
+    const id = toPositiveInt(body.pickupOfficeId, 'pickupOfficeId');
 
     const { data: office, error: officeErr } = await supabase
       .from('offices')
@@ -75,17 +87,51 @@ export default defineEventHandler(async (event) => {
     pickupOfficeId = id;
   }
 
+  // Цены и принадлежность размера варианту берём только из базы —
+  // клиентские price/totals не принимаются
+  const itemRows: {
+    'product_id': number
+    'product_variant_id': number
+    'product_variant_size_id': number
+    'unit_price': number
+    qty: number
+  }[] = [];
+
+  let total = 0;
+
+  for (const item of body.items) {
+    const variantId = toPositiveInt(item.variantId, 'variantId');
+    const sizeId = toPositiveInt(item.sizeId, 'sizeId');
+    const qty = normalizeCartQty(item.qty);
+
+    const { price, productId } = await getVariantSnapshot(supabase, variantId, sizeId);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      throw createError({ statusCode: 500, statusMessage: 'Invalid product for variant' });
+    }
+
+    total += price * qty;
+
+    itemRows.push({
+      'product_id': productId,
+      'product_variant_id': variantId,
+      'product_variant_size_id': sizeId,
+      'unit_price': price,
+      qty,
+    });
+  }
+
   const orderNumber = generateOrderNumber();
 
   const { data: orderRow, error: orderErr } = await supabase
     .from('orders')
     .insert({
       number: orderNumber,
-      guest_contact: body.contact,
+      'guest_contact': contact,
       status: 'PLACED',
-      payment_status: 'UNPAID',
-      totals: body.totals,
-      pickup_office_id: pickupOfficeId,
+      'payment_status': 'UNPAID',
+      totals: { total },
+      'pickup_office_id': pickupOfficeId,
     })
     .select('id, number, created_at')
     .single();
@@ -94,44 +140,9 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: orderErr?.message || 'Failed to create order' });
   }
 
-  const itemRows = body.items.map((item) => {
-    const productId = Number(item.productId);
-    const variantId = Number(item.variantId);
-    const sizeId = Number(item.sizeId);
-
-    if (!Number.isInteger(productId) || productId <= 0) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid productId' });
-    }
-
-    if (!Number.isInteger(variantId) || variantId <= 0) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid variantId' });
-    }
-
-    if (!Number.isInteger(sizeId) || sizeId <= 0) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid sizeId' });
-    }
-
-    if (!Number.isInteger(item.qty) || item.qty <= 0) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid qty' });
-    }
-
-    if (!Number.isInteger(item.price) || item.price < 0) {
-      throw createError({ statusCode: 400, statusMessage: 'Invalid price' });
-    }
-
-    return {
-      order_id: orderRow.id,
-      product_id: productId,
-      product_variant_id: variantId,
-      product_variant_size_id: sizeId,
-      unit_price: item.price,
-      qty: item.qty,
-    };
-  });
-
   const { error: itemsErr } = await supabase
     .from('order_items')
-    .insert(itemRows);
+    .insert(itemRows.map(row => ({ ...row, 'order_id': orderRow.id })));
 
   if (itemsErr) {
     await supabase

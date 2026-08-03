@@ -162,15 +162,11 @@ const scrollToPhoneInput = async () => {
   }, PHONE_FOCUS_DELAY_MS);
 };
 
+// Сервер сам берёт цены из базы — отправляем только идентификаторы и количество
 const getOrderItems = () => items.value.map(cartItem => ({
-  productId: cartItem.productId,
   variantId: cartItem.variantId,
   sizeId: cartItem.sizeId,
-  title: cartItem.productName,
-  price: cartItem.price,
   qty: cartItem.qty,
-  slug: cartItem.slug,
-  image: cartItem.image ?? null,
 }));
 
 const getAnalyticsItems = () => items.value.map(cartItem =>
@@ -215,7 +211,6 @@ const submitCheckout = async () => {
       method: 'POST',
       body: {
         items: getOrderItems(),
-        totals: { total: unref(totalKz) },
         contact: {
           name: checkoutForm.name.trim(),
           phone: checkoutForm.phone,
