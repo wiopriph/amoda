@@ -15,6 +15,7 @@ useHead({
   title,
   meta: [
     { name: 'description', content: description },
+    { property: 'og:url', content: 'https://amoda.ao/' },
     { property: 'og:title', content: title },
     { property: 'og:description', content: description },
     { name: 'twitter:title', content: title },

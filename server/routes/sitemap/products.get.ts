@@ -4,7 +4,8 @@ import { serverSupabaseClient } from '#supabase/server';
 
 type ProductRow = {
   slug: string;
-  created_at?: string | null;
+  'updated_at'?: string | null;
+  'created_at'?: string | null;
   active?: boolean | null;
 };
 
@@ -13,7 +14,7 @@ export default defineSitemapEventHandler(async (event) => {
 
   const { data, error } = await db
     .from('products')
-    .select('slug, created_at, active')
+    .select('slug, updated_at, created_at, active')
     .eq('active', true);
 
   if (error) {
@@ -27,10 +28,14 @@ export default defineSitemapEventHandler(async (event) => {
   }
 
 
-  return products.map((product) => ({
-    loc: `/product/${product.slug}`,
-    lastmod: product.created_at ? new Date(product.created_at).toISOString() : undefined,
-    changefreq: 'weekly',
-    priority: 0.7,
-  }));
+  return products.map((product) => {
+    const lastmod = product['updated_at'] || product['created_at'];
+
+    return {
+      loc: `/product/${product.slug}`,
+      lastmod: lastmod ? new Date(lastmod).toISOString() : undefined,
+      changefreq: 'weekly',
+      priority: 0.7,
+    };
+  });
 });

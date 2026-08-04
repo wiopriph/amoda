@@ -8,4 +8,4 @@ Disallow: /admin
 Disallow: /api/
 Disallow: /favorites
 
-Sitemap: https://amoda.ao/sitemap.xml
+Sitemap: https://amoda.ao/sitemap_index.xml

@@ -2,6 +2,12 @@ const image = 'https://amoda.ao/logo.webp';
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
+
+  // Канонический origin для sitemap и абсолютных URL независимо от заголовков прокси
+  site: {
+    url: 'https://amoda.ao',
+    name: 'Amoda',
+  },
   css: ['~/assets/css/main.css'],
 
   app: {
