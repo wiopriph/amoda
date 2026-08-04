@@ -478,7 +478,13 @@ const copyProductLink = async () => {
 
 
 const title = computed(() => `${product.value?.title || ''} | Amoda`);
-const description = computed(() => product.value?.description || `Escolha ${productName.value} na Amoda em Luanda. Selecione o tamanho, confirme no WhatsApp, experimente primeiro e pague só se gostar.`);
+
+// Короткая мета под лимит сниппета (~160 симв.) — полное описание остаётся на странице
+const description = computed(() => {
+  const price = unitPrice.value > 0 ? ` por ${formatPrice(unitPrice.value)}` : '';
+
+  return `${productName.value}${price} na Amoda • Entrega em Luanda • Experimente antes de pagar e leve só se gostar.`;
+});
 const seoImage = computed(() => galleryImages.value?.[0]?.url || fallbackImage);
 
 const productSchema = computed(() => {
@@ -489,7 +495,6 @@ const productSchema = computed(() => {
     image: galleryImages.value.map((image: any) => image.url),
     description: product.value?.description || '',
     sku: product.value?.variants?.[0]?.id || product.value?.id,
-    brand: { '@type': 'Brand', name: product.value?.brand_name || '' },
     offers: {
       '@type': 'Offer',
       url: productUrl.value,
@@ -497,6 +502,10 @@ const productSchema = computed(() => {
       itemCondition: 'https://schema.org/NewCondition',
     },
   };
+
+  if (product.value?.brand_name) {
+    schema.brand = { '@type': 'Brand', name: product.value.brand_name };
+  }
 
   if (isProductAvailable.value) {
     schema.offers.priceCurrency = CURRENCY;

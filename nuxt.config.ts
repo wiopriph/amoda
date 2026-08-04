@@ -65,6 +65,14 @@ export default defineNuxtConfig({
 
   nitro: {
     routeRules: {
+      // Старый slug товара 180 описывал другой товар (копия от 182)
+      '/product/vestido-feminino-curto-com-ombro-assimetrico-e-estilo-tomara-que-caia-elegante-e-sexy-em-cor-solida-para-festas-e-verao': {
+        redirect: {
+          to: '/product/vestido-longo-vinho-em-malha-com-fenda',
+          statusCode: 301,
+        },
+      },
+
       '/**': {
         headers: {
           'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
