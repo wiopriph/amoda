@@ -18,6 +18,8 @@ export function getMoyskladToken(): string {
   return token;
 }
 
+const MS_REQUEST_TIMEOUT_MS = 30_000;
+
 export async function msFetch<T>(path: string, params?: Record<string, string>): Promise<T> {
   const url = new URL(`${MS_BASE}${path}`);
 
@@ -25,24 +27,49 @@ export async function msFetch<T>(path: string, params?: Record<string, string>):
     url.searchParams.set(key, value);
   }
 
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${getMoyskladToken()}`,
-      'Accept-Encoding': 'gzip',
-      Accept: 'application/json;charset=utf-8',
-    },
-  });
+  // Сетевые сбои undici всплывают как безликий «Server Error» — оборачиваем
+  // в понятную ошибку с эндпоинтом и причиной; один повтор на случай тарпита
+  for (let attempt = 1; ; attempt++) {
+    const startedAt = Date.now();
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
+    let response: Response;
 
-    throw createError({
-      statusCode: 502,
-      statusMessage: `MoySklad ${response.status} on ${path}: ${text.slice(0, 500)}`,
-    });
+    try {
+      response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${getMoyskladToken()}`,
+          'Accept-Encoding': 'gzip',
+          Accept: 'application/json;charset=utf-8',
+        },
+        signal: AbortSignal.timeout(MS_REQUEST_TIMEOUT_MS),
+      });
+    } catch (error: any) {
+      const cause = error?.cause?.code || error?.name || error?.message || 'unknown';
+      const elapsed = Math.round((Date.now() - startedAt) / 1000);
+
+      console.error(`[moysklad] ${path} attempt ${attempt} failed after ${elapsed}s: ${cause}`);
+
+      if (attempt < 2) {
+        continue;
+      }
+
+      throw createError({
+        statusCode: 502,
+        statusMessage: `MoySklad network failure on ${path} after ${elapsed}s: ${cause}`,
+      });
+    }
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+
+      throw createError({
+        statusCode: 502,
+        statusMessage: `MoySklad ${response.status} on ${path}: ${text.slice(0, 500)}`,
+      });
+    }
+
+    return response.json() as Promise<T>;
   }
-
-  return response.json() as Promise<T>;
 }
 
 // Постраничный обход списочных эндпоинтов ({ rows: [...] })

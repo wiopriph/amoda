@@ -35,6 +35,10 @@ export default defineEventHandler(async (event) => {
 
   const client = await serverSupabaseServiceRole(event);
 
+  const syncStartedAt = Date.now();
+  const logStep = (step: string) =>
+    console.log(`[moysklad-sync] ${step} at ${Math.round((Date.now() - syncStartedAt) / 1000)}s`);
+
   // --- Остатки ---
 
   const { data: sizes, error: sizesError } = await client
@@ -48,11 +52,15 @@ export default defineEventHandler(async (event) => {
 
   const linkedSizes = sizes ?? [];
 
+  logStep('sizes loaded');
+
   // freeStock = физический остаток минус резерв; zeroLines — чтобы обнулять распроданное
   const stockReport = await msFetch<MsCurrentStockRow[]>('/report/stock/all/current', {
     stockType: 'freeStock',
     include: 'zeroLines',
   });
+
+  logStep(`stock report loaded (${stockReport.length} rows)`);
 
   const stockByMsId = new Map<string, number>();
 
@@ -81,9 +89,13 @@ export default defineEventHandler(async (event) => {
 
   await updateRowsById(client, 'product_variant_sizes', stockUpdates);
 
+  logStep(`stock updated (${stockUpdates.length} rows)`);
+
   // --- Цены ---
 
   const assortment = await msFetchAllRows<any>('/entity/assortment');
+
+  logStep(`assortment loaded (${assortment.length} rows)`);
 
   const productPriceById = new Map<string, number>();
   const variantPriceById = new Map<string, number>();
@@ -167,6 +179,8 @@ export default defineEventHandler(async (event) => {
   }
 
   await updateRowsById(client, 'product_variants', priceUpdates);
+
+  logStep(`prices updated (${priceUpdates.length} rows)`);
 
   return {
     ok: true,
