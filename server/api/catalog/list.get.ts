@@ -199,17 +199,18 @@ export default defineEventHandler(async (event): Promise<CatalogListResponse> =>
     productsQuery = productsQuery.lte('product_variants.price', Number(query.max_price));
   }
 
-  // PostgREST can't order parent rows by a one-to-many embedded column,
-  // so price sorting is done in JS over the full (small) result set below
-  const isPriceSort = query.sort === 'price_asc' || query.sort === 'price_desc';
-
-  productsQuery = productsQuery.order('id', { ascending: false });
-
-  if (!isPriceSort) {
-    productsQuery = productsQuery.range(rangeFrom, rangeTo);
-  } else {
-    productsQuery = productsQuery.limit(1000);
+  // Сортировка по цене — по денормализованным products.min_price/max_price
+  // (поддерживаются триггером, migrations/2026-08-11_product_price_range.sql):
+  // PostgREST не умеет сортировать родителей по колонке вложенной one-to-many таблицы
+  if (query.sort === 'price_asc') {
+    productsQuery = productsQuery.order('min_price', { ascending: true, nullsFirst: false });
+  } else if (query.sort === 'price_desc') {
+    productsQuery = productsQuery.order('max_price', { ascending: false, nullsFirst: false });
   }
+
+  productsQuery = productsQuery
+    .order('id', { ascending: false })
+    .range(rangeFrom, rangeTo);
 
   const { data: productRows, count: totalCount, error: listError } = await productsQuery;
 
@@ -274,17 +275,10 @@ export default defineEventHandler(async (event): Promise<CatalogListResponse> =>
     };
   });
 
-  let pageItems = items;
-
-  if (isPriceSort) {
-    items.sort((a, b) => query.sort === 'price_asc' ? a.price - b.price : b.price - a.price);
-    pageItems = items.slice(rangeFrom, rangeTo + 1);
-  }
-
   return {
     breadcrumbs,
     category: currentCategory,
-    items: pageItems,
+    items,
     total: totalCount || 0,
     page,
     limit,
