@@ -538,9 +538,18 @@ useHead(() => ({
     { property: 'og:title', content: title.value },
     { property: 'og:description', content: description.value },
     { property: 'og:image', content: seoImage.value },
+    { property: 'og:image:secure_url', content: seoImage.value },
+    { property: 'og:image:alt', content: productName.value },
+    ...(isProductAvailable.value && unitPrice.value > 0 ?
+      [
+        { property: 'product:price:amount', content: String(unitPrice.value) },
+        { property: 'product:price:currency', content: CURRENCY },
+      ] :
+      []),
     { name: 'twitter:title', content: title.value },
     { name: 'twitter:description', content: description.value },
     { name: 'twitter:image', content: seoImage.value },
+    { name: 'twitter:image:alt', content: productName.value },
   ],
   link: [{ rel: 'canonical', href: productUrl.value }],
   script: [
