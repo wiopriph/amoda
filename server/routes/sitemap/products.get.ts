@@ -9,19 +9,32 @@ type ProductRow = {
   active?: boolean | null;
 };
 
+// PostgREST молча режет ответ на 1000 строк — выбираем постранично
+const PAGE_SIZE = 1000;
+
 export default defineSitemapEventHandler(async (event) => {
   const db = await serverSupabaseClient(event);
 
-  const { data, error } = await db
-    .from('products')
-    .select('slug, updated_at, created_at, active')
-    .eq('active', true);
+  const products: ProductRow[] = [];
 
-  if (error) {
-    throw createError({ statusCode: 500, statusMessage: error.message });
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await db
+      .from('products')
+      .select('slug, updated_at, created_at, active')
+      .eq('active', true)
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      throw createError({ statusCode: 500, statusMessage: error.message });
+    }
+
+    products.push(...(data || []));
+
+    if (!data || data.length < PAGE_SIZE) {
+      break;
+    }
   }
-
-  const products: ProductRow[] = data || [];
 
   if (!products.length) {
     return [];
