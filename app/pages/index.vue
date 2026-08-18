@@ -29,15 +29,22 @@ const route = useRoute();
 const [
   { data: heroContent },
   { data: catalogResponse, error: catalogError },
+  { data: categoriesResponse },
 ] = await Promise.all([
   useFetch('/api/home/hero'),
   useFetch('/api/catalog/list', {
     query: { limit: 10, sort: 'new' },
     watch: [() => route.fullPath],
   }),
+  useFetch('/api/categories/list'),
 ]);
 
 const products = computed(() => catalogResponse.value?.items || []);
+
+// Витрина категорий: все, кроме корневой (у корня нет parent_id)
+const showcaseCategories = computed(() =>
+  (categoriesResponse.value || []).filter((category: any) => category.parent_id),
+);
 
 
 const { trackViewItemList, trackSelectItem } = useAnalyticsEvent();
@@ -211,6 +218,41 @@ const startShoppingTo = { name: 'category-slug', params: { slug: 'mulheres' } } 
             Ver todos os produtos
           </UButton>
         </div>
+      </section>
+
+      <section
+        v-if="showcaseCategories.length"
+        class="mt-6 sm:mt-10"
+      >
+        <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
+          Categorias
+        </h2>
+
+        <nav
+          aria-label="Categorias da loja"
+          class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5"
+        >
+          <NuxtLink
+            v-for="showcaseCategory in showcaseCategories"
+            :key="showcaseCategory.slug"
+            :to="{ name: 'category-slug', params: { slug: showcaseCategory.slug } }"
+            class="group overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 transition hover:shadow-md"
+          >
+            <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+              <img
+                v-if="showcaseCategory.image"
+                :src="showcaseCategory.image"
+                :alt="showcaseCategory.name"
+                loading="lazy"
+                class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              >
+            </div>
+
+            <div class="p-3 text-sm font-semibold text-highlighted">
+              {{ showcaseCategory.name }}
+            </div>
+          </NuxtLink>
+        </nav>
       </section>
 
       <section class="mt-6 sm:mt-10">

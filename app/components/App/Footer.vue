@@ -34,6 +34,19 @@ const footerLinks = [
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda.');
 
+type FooterCategory = {
+  slug: string
+  name: string
+  parent_id?: number | null
+};
+
+// Ссылки на категории в футере — перелинковка со всех страниц сайта
+const { data: footerCategoriesResponse } = await useFetch<FooterCategory[]>('/api/categories/list');
+
+const footerCategories = computed(() =>
+  (footerCategoriesResponse.value || []).filter(category => category.parent_id),
+);
+
 const socialLinks = computed(() => [
   {
     label: 'TikTok',
@@ -79,6 +92,27 @@ const socialLinks = computed(() => [
             >
               {{ footerLink.label }}
             </NuxtLink>
+          </nav>
+
+          <nav
+            v-if="footerCategories.length"
+            aria-label="Categorias"
+            class="mt-4 border-t border-gray-100 pt-4"
+          >
+            <h2 class="text-sm font-bold text-highlighted">
+              Categorias
+            </h2>
+
+            <div class="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm sm:gap-x-6">
+              <NuxtLink
+                v-for="footerCategory in footerCategories"
+                :key="footerCategory.slug"
+                :to="{ name: 'category-slug', params: { slug: footerCategory.slug } }"
+                class="text-muted transition hover:text-primary"
+              >
+                {{ footerCategory.name }}
+              </NuxtLink>
+            </div>
           </nav>
         </div>
 
