@@ -27,7 +27,6 @@ const {
   totalKz,
   increment,
   decrement,
-  setQty,
   remove,
   publicCode: cartPublicCode,
   isPending: isCartPending,
@@ -72,8 +71,6 @@ const getProductTo = (cartItem: any) => ({
   name: 'product-slug',
   params: { slug: cartItem.slug },
 });
-
-const normalizeQuantity = (quantity: unknown) => Math.max(1, Number(quantity) || 1);
 
 const isAtStockLimit = (cartItem: any) => cartItem.stock !== null && cartItem.qty >= cartItem.stock;
 
@@ -264,14 +261,10 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
                           −
                         </UButton>
 
-                        <UInput
-                          :modelValue="cartItem.qty"
-                          type="number"
-                          inputmode="numeric"
-                          pattern="[0-9]*"
-                          size="md"
-                          class="w-14 sm:w-16"
-                          @update:model-value="quantity => setQty(cartItem.key, normalizeQuantity(quantity))"
+                        <div
+                          class="w-10 text-center text-base font-bold text-highlighted sm:w-12"
+                          aria-live="polite"
+                          v-text="cartItem.qty"
                         />
 
                         <UButton
