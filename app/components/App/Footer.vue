@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { INSTAGRAM_LINK, TIKTOK_LINK } from '~/constants/contacts';
+import { FACEBOOK_LINK, INSTAGRAM_LINK, TIKTOK_LINK } from '~/constants/contacts';
 
 
 const currentYear = new Date().getFullYear();
@@ -57,6 +57,11 @@ const socialLinks = computed(() => [
     label: 'Instagram',
     icon: 'i-simple-icons-instagram',
     to: INSTAGRAM_LINK,
+  },
+  {
+    label: 'Facebook',
+    icon: 'i-simple-icons-facebook',
+    to: FACEBOOK_LINK,
   },
   {
     label: 'WhatsApp',
