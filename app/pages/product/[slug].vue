@@ -428,6 +428,7 @@ const productUrl = computed(() => {
 
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => `Olá! Tenho uma pergunta sobre este produto: ${productUrl.value}`);
+const soldOutWhatsappHref = makeWhatsappHref(() => `Olá! O produto «${productName.value}» está esgotado. Podem avisar-me quando chegar? ${productUrl.value}`);
 
 const shareText = computed(() => productName.value ? `Veja ${productName.value} na Amoda` : 'Veja este produto na Amoda');
 
@@ -834,12 +835,25 @@ useHead(() => ({
                   {{ lowStockText(selectedSizeOption.stock) }}
                 </p>
 
-                <p
+                <div
                   v-if="areAllSizesOutOfStock"
-                  class="mt-2 text-sm text-red-600"
+                  class="mt-2"
                 >
-                  Todos os tamanhos esgotados nesta cor
-                </p>
+                  <p class="text-sm text-red-600">
+                    Todos os tamanhos esgotados nesta cor
+                  </p>
+
+                  <UButton
+                    :to="soldOutWhatsappHref"
+                    target="_blank"
+                    color="success"
+                    variant="soft"
+                    icon="i-simple-icons-whatsapp"
+                    class="mt-2"
+                  >
+                    Avise-me quando chegar
+                  </UButton>
+                </div>
 
                 <p
                   v-else-if="!selectedSizeId"
@@ -1176,6 +1190,19 @@ useHead(() => ({
 
             <template v-else>
               <UButton
+                v-if="areAllSizesOutOfStock"
+                :to="soldOutWhatsappHref"
+                target="_blank"
+                size="xl"
+                color="success"
+                icon="i-simple-icons-whatsapp"
+                class="flex-1 justify-center"
+              >
+                Avise-me quando chegar
+              </UButton>
+
+              <UButton
+                v-else
                 :disabled="!selectedSizeId && !hasSelectableSizes"
                 size="xl"
                 color="primary"
