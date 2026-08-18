@@ -494,12 +494,34 @@ const productSchema = computed(() => {
     name: product.value?.title,
     image: galleryImages.value.map((image: any) => image.url),
     description: product.value?.description || '',
-    sku: product.value?.variants?.[0]?.id || product.value?.id,
+    // sku — id товара: id первого варианта нестабилен (меняется при удалении варианта)
+    sku: String(product.value?.id ?? ''),
     offers: {
       '@type': 'Offer',
       url: productUrl.value,
       availability: isProductAvailable.value ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
+      // Google показывает возврат и доставку в сниппете товара
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'AO',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: 7,
+        returnMethod: 'https://schema.org/ReturnInStore',
+        returnFees: 'https://schema.org/FreeReturn',
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: 0,
+          currency: CURRENCY,
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'AO',
+        },
+      },
     },
   };
 
