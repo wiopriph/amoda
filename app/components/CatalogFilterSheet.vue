@@ -81,11 +81,22 @@ const countQuery = computed(() => ({
   limit: 1,
 }));
 
-const { data: countData, pending: isCounting } = useFetch('/api/catalog/list', {
+// Счётчик запрашиваем только при открытой шторке: с immediate/watch он дублировал
+// запрос списка на каждой загрузке категории (в том числе в SSR) и при смене фильтров
+const { data: countData, pending: isCounting, execute: refreshCount } = useFetch('/api/catalog/list', {
   query: countQuery,
-  watch: [countQuery],
-  immediate: true,
+  watch: false,
+  immediate: false,
 });
+
+watch(
+  [() => props.open, countQuery],
+  ([isOpen]) => {
+    if (isOpen) {
+      refreshCount();
+    }
+  },
+);
 
 const previewCount = computed(() => countData.value?.total ?? 0);
 
