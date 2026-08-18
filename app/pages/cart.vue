@@ -316,6 +316,19 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
 
           <aside>
             <div class="sticky top-24 space-y-4">
+              <!-- На мобиле резюме скрыто, но код корзины нужен — его диктуют в WhatsApp -->
+              <div
+                v-if="cartPublicCode"
+                class="rounded-xl border border-primary/15 bg-primary/5 px-3 py-2 text-xs text-muted lg:hidden"
+              >
+                <span>Código do carrinho:</span>
+
+                <span
+                  class="ml-1 font-bold text-highlighted"
+                  v-text="cartPublicCode"
+                />
+              </div>
+
               <UCard class="border-primary/20 bg-primary/5 hidden lg:block">
                 <h2 class="text-lg font-black text-highlighted">
                   Resumo da escolha

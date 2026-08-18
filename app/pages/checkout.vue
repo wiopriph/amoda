@@ -4,6 +4,7 @@ import { vMaska } from 'maska/vue';
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
+import { colorLabel } from '#shared/constants/colors';
 
 
 definePageMeta({ name: 'checkout' });
@@ -135,6 +136,9 @@ watch(() => checkoutForm.phone, () => {
 const isSubmitting = ref(false);
 
 const totalCount = computed(() => items.value.reduce((total, cartItem) => total + cartItem.qty, 0));
+
+const itemVariantLabel = (cartItem: any) =>
+  [colorLabel(cartItem.variantLabel), cartItem.sizeLabel].filter(Boolean).join(' · ');
 
 const phoneInputRef = ref<any>(null);
 
@@ -305,9 +309,10 @@ const submitCheckout = async () => {
               />
             </UFormField>
 
+            <!-- Не блокируем кнопку при ошибке телефона: сабмит валидирует и подводит к полю -->
             <UButton
               :loading="isSubmitting"
-              :disabled="!items.length || formErrors.phone"
+              :disabled="!items.length"
               size="xl"
               color="primary"
               type="submit"
@@ -343,6 +348,37 @@ const submitCheckout = async () => {
             />
           </div>
         </div>
+
+        <ul class="mt-3 space-y-2 border-t border-primary/10 pt-3">
+          <li
+            v-for="cartItem in items"
+            :key="cartItem.key"
+            class="flex items-baseline justify-between gap-3 text-sm"
+          >
+            <span class="min-w-0 text-highlighted">
+              {{ cartItem.productName }}
+
+              <span
+                v-if="itemVariantLabel(cartItem)"
+                class="text-xs text-muted"
+              >
+                · {{ itemVariantLabel(cartItem) }}
+              </span>
+
+              <span
+                v-if="cartItem.qty > 1"
+                class="text-xs text-muted"
+              >
+                ×{{ cartItem.qty }}
+              </span>
+            </span>
+
+            <span
+              class="shrink-0 font-semibold text-highlighted"
+              v-text="formatPrice(cartItem.price * cartItem.qty)"
+            />
+          </li>
+        </ul>
 
         <p class="mt-3 border-t border-primary/10 pt-3 text-xs leading-5 text-muted">
           Este valor é apenas uma referência. Você só paga depois de experimentar e apenas pelo que decidir levar.
