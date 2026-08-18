@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { getProductBadgeColor, getProductBadgeLabel } from '~/utils/productBadges';
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
-import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 import { CURRENCY } from '~/constants/currency';
 import type { CatalogProductCard } from '#shared/types/catalog';
@@ -370,45 +368,12 @@ useHead(() => ({
           v-else
           class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
         >
-          <UBlogPost
+          <ProductCard
             v-for="categoryProduct in categoryProducts"
             :key="categoryProduct.id"
-            :title="categoryProduct.title"
-            :description="formatPrice(categoryProduct.price)"
-            :image="categoryProduct.image || '/placeholder.webp'"
-            :to="{ name: 'product-slug', params: { slug: categoryProduct.slug } }"
-            :ui="{
-              root: 'group overflow-hidden border border-gray-100 rounded-2xl hover:shadow-md transition',
-              header: 'aspect-[4/5] overflow-hidden bg-gray-50',
-              image: 'h-full w-full object-cover transition duration-300 group-hover:scale-105',
-              body: 'sm:p-3',
-              title: 'text-sm font-semibold text-highlighted line-clamp-2 min-h-[40px]',
-              description: 'mt-2 text-sm font-bold text-primary'
-            }"
-            variant="outline"
-            @click="trackProductSelect(categoryProduct)"
-          >
-            <template #badge>
-              <div
-                v-if="categoryProduct.badges?.length"
-                class="absolute left-2 top-2 flex flex-wrap gap-1"
-              >
-                <UBadge
-                  v-for="badge in categoryProduct.badges"
-                  :key="badge"
-                  :color="getProductBadgeColor(badge)"
-                  variant="solid"
-                >
-                  {{ getProductBadgeLabel(badge) }}
-                </UBadge>
-              </div>
-
-              <FavoriteToggle
-                :product="categoryProduct"
-                class="absolute right-2 top-2"
-              />
-            </template>
-          </UBlogPost>
+            :product="categoryProduct"
+            @select="trackProductSelect(categoryProduct)"
+          />
         </UBlogPosts>
 
         <div
