@@ -257,7 +257,7 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
                       <div class="flex items-center gap-2">
                         <UButton
                           :disabled="cartItem.qty <= 1"
-                          size="sm"
+                          size="lg"
                           variant="outline"
                           @click="decrement(cartItem.key)"
                         >
@@ -269,14 +269,14 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
                           type="number"
                           inputmode="numeric"
                           pattern="[0-9]*"
-                          size="sm"
+                          size="md"
                           class="w-14 sm:w-16"
                           @update:model-value="quantity => setQty(cartItem.key, normalizeQuantity(quantity))"
                         />
 
                         <UButton
                           :disabled="isAtStockLimit(cartItem)"
-                          size="sm"
+                          size="lg"
                           variant="outline"
                           @click="increment(cartItem.key)"
                         >
@@ -487,7 +487,7 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
 
             <UButton
               :disabled="!cartItems.length"
-              size="sm"
+              size="md"
               color="neutral"
               variant="ghost"
               class="mt-1 w-full justify-center"

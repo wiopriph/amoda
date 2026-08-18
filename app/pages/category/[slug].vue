@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { makeGa4Item } from '~/utils/ga4';
+import { sanitizeHtml } from '~/utils/sanitizeHtml';
 import { CURRENCY } from '~/constants/currency';
 import type { CatalogProductCard } from '#shared/types/catalog';
 import { pricePresetToQuery } from '#shared/constants/priceFilters';
@@ -393,7 +394,7 @@ useHead(() => ({
       <section
         v-if="category?.seo_content"
         class="mt-10 rounded-2xl border border-gray-100 bg-gray-50 px-6 py-8 text-sm leading-7 text-muted prose prose-sm max-w-none"
-        v-html="category.seo_content"
+        v-html="sanitizeHtml(category.seo_content)"
       />
     </UPageBody>
 

@@ -132,7 +132,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero comprar alguma coisa na
         <div class="aspect-[4/5] overflow-hidden rounded-3xl bg-muted shadow-xl">
           <img
             :src="heroContent.imageUrl"
-            alt="Amoda party look"
+            alt="Look da Amoda — moda feminina em Luanda"
             class="h-full w-full object-cover"
           >
         </div>

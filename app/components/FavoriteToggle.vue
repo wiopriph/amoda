@@ -23,7 +23,7 @@ const onToggle = (clickEvent: Event) => {
     :aria-label="isActive ? 'Remover dos favoritos' : 'Guardar nos favoritos'"
     :aria-pressed="isActive"
     type="button"
-    class="flex size-9 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition hover:scale-105 active:scale-95"
+    class="flex size-11 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition hover:scale-105 active:scale-95"
     @click="onToggle"
   >
     <UIcon
