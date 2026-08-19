@@ -24,18 +24,18 @@ const isOpen = computed({
 
 const currentIndex = ref(0);
 
-// Зум ступенями — надёжнее жестов: панорамирование через нативный скролл контейнера
-const ZOOM_LEVELS = [1, 2, 3];
-const zoomStep = ref(0);
-const zoom = computed(() => ZOOM_LEVELS[zoomStep.value] ?? 1);
-const isZoomed = computed(() => zoom.value > 1);
+// Зум одной ступенью (1×/2×) — надёжнее жестов: тап приближает, тап возвращает,
+// панорамирование через нативный скролл контейнера
+const ZOOM_SCALE = 2;
+const isZoomed = ref(false);
+const zoom = computed(() => isZoomed.value ? ZOOM_SCALE : 1);
 
 watch(
   () => props.open,
   (opened) => {
     if (opened) {
       currentIndex.value = Math.min(Math.max(props.startIndex, 0), props.images.length - 1);
-      zoomStep.value = 0;
+      isZoomed.value = false;
     }
   },
 );
@@ -46,16 +46,12 @@ const showImage = (index: number) => {
   const total = props.images.length;
 
   currentIndex.value = (index + total) % total;
-  zoomStep.value = 0;
+  isZoomed.value = false;
   emit('select', currentIndex.value);
 };
 
 const toggleZoom = () => {
-  zoomStep.value = (zoomStep.value + 1) % ZOOM_LEVELS.length;
-};
-
-const zoomOut = () => {
-  zoomStep.value = 0;
+  isZoomed.value = !isZoomed.value;
 };
 </script>
 
@@ -84,7 +80,7 @@ const zoomOut = () => {
               color="neutral"
               variant="soft"
               class="rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
-              @click="isZoomed ? zoomOut() : toggleZoom()"
+              @click="toggleZoom"
             />
 
             <UButton
