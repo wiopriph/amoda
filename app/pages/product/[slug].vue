@@ -121,6 +121,14 @@ function selectImage(index: number) {
   carouselRef.value?.emblaApi?.scrollTo(index);
 }
 
+const isLightboxOpen = ref(false);
+
+function openLightbox() {
+  if (hasGalleryImages.value) {
+    isLightboxOpen.value = true;
+  }
+}
+
 
 const unitPrice = computed(() => activeVariant.value?.price ?? product.value?.price ?? 0);
 
@@ -604,7 +612,10 @@ useHead(() => ({
               class="w-full overflow-hidden"
               @select="setActiveImage"
             >
-              <div class="aspect-[4/5] w-full overflow-hidden bg-gray-50">
+              <div
+                class="aspect-[4/5] w-full cursor-zoom-in overflow-hidden bg-gray-50"
+                @click="openLightbox"
+              >
                 <NuxtImg
                   :src="slide.url"
                   :alt="slide.alt"
@@ -631,12 +642,35 @@ useHead(() => ({
               {{ activeImageIndex + 1 }} / {{ carouselSlides.length }}
             </div>
 
+            <!-- Точки-навигация по фото на мобиле (миниатюры — только с md:) -->
+            <div
+              v-if="hasGalleryImages && carouselSlides.length > 1"
+              class="absolute inset-x-0 bottom-3 flex justify-center gap-1.5 md:hidden"
+            >
+              <button
+                v-for="dotSlide in carouselSlides"
+                :key="dotSlide.index"
+                :aria-label="`Foto ${dotSlide.index + 1}`"
+                :class="activeImageIndex === dotSlide.index ? 'w-5 bg-primary' : 'w-1.5 bg-white/70 ring-1 ring-black/10'"
+                type="button"
+                class="h-1.5 rounded-full transition-all"
+                @click.stop="selectImage(dotSlide.index)"
+              />
+            </div>
+
             <FavoriteToggle
               v-if="product?.id"
               :product="favoriteProduct"
               class="absolute right-3 top-3 z-10"
             />
           </div>
+
+          <ProductGalleryLightbox
+            v-model:open="isLightboxOpen"
+            :images="carouselSlides"
+            :startIndex="activeImageIndex"
+            @select="selectImage"
+          />
 
           <div
             v-if="hasGalleryImages && carouselSlides.length > 1"

@@ -1,0 +1,159 @@
+<script setup lang="ts">
+type LightboxImage = {
+  url: string
+  alt: string
+};
+
+const props = withDefaults(defineProps<{
+  open: boolean
+  images: LightboxImage[]
+  startIndex?: number
+}>(), {
+  startIndex: 0,
+});
+
+const emit = defineEmits<{
+  'update:open': [open: boolean]
+  select: [index: number]
+}>();
+
+const isOpen = computed({
+  get: () => props.open,
+  set: (value: boolean) => emit('update:open', value),
+});
+
+const currentIndex = ref(0);
+
+// Зум ступенями — надёжнее жестов: панорамирование через нативный скролл контейнера
+const ZOOM_LEVELS = [1, 2, 3];
+const zoomStep = ref(0);
+const zoom = computed(() => ZOOM_LEVELS[zoomStep.value] ?? 1);
+const isZoomed = computed(() => zoom.value > 1);
+
+watch(
+  () => props.open,
+  (opened) => {
+    if (opened) {
+      currentIndex.value = Math.min(Math.max(props.startIndex, 0), props.images.length - 1);
+      zoomStep.value = 0;
+    }
+  },
+);
+
+const currentImage = computed(() => props.images[currentIndex.value] || null);
+
+const showImage = (index: number) => {
+  const total = props.images.length;
+
+  currentIndex.value = (index + total) % total;
+  zoomStep.value = 0;
+  emit('select', currentIndex.value);
+};
+
+const toggleZoom = () => {
+  zoomStep.value = (zoomStep.value + 1) % ZOOM_LEVELS.length;
+};
+
+const zoomOut = () => {
+  zoomStep.value = 0;
+};
+</script>
+
+<template>
+  <UModal
+    v-model:open="isOpen"
+    fullscreen
+    :ui="{ content: 'bg-black' }"
+  >
+    <template #content>
+      <div class="relative flex h-full flex-col bg-black">
+        <div class="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-3">
+          <span
+            v-if="images.length > 1"
+            class="rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur"
+          >
+            {{ currentIndex + 1 }} / {{ images.length }}
+          </span>
+
+          <span v-else />
+
+          <div class="flex items-center gap-2">
+            <UButton
+              :icon="isZoomed ? 'i-lucide-zoom-out' : 'i-lucide-zoom-in'"
+              :aria-label="isZoomed ? 'Reduzir' : 'Ampliar'"
+              color="neutral"
+              variant="soft"
+              class="rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
+              @click="isZoomed ? zoomOut() : toggleZoom()"
+            />
+
+            <UButton
+              icon="i-lucide-x"
+              aria-label="Fechar"
+              color="neutral"
+              variant="soft"
+              class="rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
+              @click="isOpen = false"
+            />
+          </div>
+        </div>
+
+        <div
+          v-if="currentImage"
+          class="min-h-0 flex-1 overflow-auto overscroll-contain"
+        >
+          <img
+            v-if="isZoomed"
+            :src="currentImage.url"
+            :alt="currentImage.alt"
+            :style="{ width: `${zoom * 100}%` }"
+            class="max-w-none cursor-zoom-out"
+            @click="toggleZoom"
+          >
+
+          <img
+            v-else
+            :src="currentImage.url"
+            :alt="currentImage.alt"
+            class="h-full w-full cursor-zoom-in object-contain"
+            @click="toggleZoom"
+          >
+        </div>
+
+        <template v-if="images.length > 1 && !isZoomed">
+          <UButton
+            icon="i-lucide-chevron-left"
+            aria-label="Foto anterior"
+            color="neutral"
+            variant="soft"
+            size="lg"
+            class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
+            @click="showImage(currentIndex - 1)"
+          />
+
+          <UButton
+            icon="i-lucide-chevron-right"
+            aria-label="Próxima foto"
+            color="neutral"
+            variant="soft"
+            size="lg"
+            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
+            @click="showImage(currentIndex + 1)"
+          />
+
+          <div class="absolute inset-x-0 bottom-4 flex justify-center gap-1.5">
+            <button
+              v-for="(dotImage, dotIndex) in images"
+              :key="dotIndex"
+              :aria-label="`Foto ${dotIndex + 1}`"
+              :class="dotIndex === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'"
+              type="button"
+              class="h-1.5 rounded-full transition-all"
+              @click="showImage(dotIndex)"
+            />
+          </div>
+        </template>
+      </div>
+    </template>
+  </UModal>
+</template>
