@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { compareSizeLabels } from '#shared/constants/sizes';
+import { withAutoBadges } from '~~/app/utils/productBadges';
 
 
 type CategoryRow = {
@@ -71,6 +72,7 @@ type RecommendedProductRow = {
   slug: string
   title: string
   badges: string[]
+  created_at: string | null
   primary_category_id: number | null
   brand: Pick<BrandRow, 'name'> | null
   variants?: RecommendedVariantRow[] | null
@@ -206,7 +208,7 @@ export default defineEventHandler(async (event) => {
     const { data: recsA, error: recErrA } = await supabase
       .from('products')
       .select(`
-        id, slug, title, badges, primary_category_id,
+        id, slug, title, badges, created_at, primary_category_id,
         brand:brands(name),
         variants:product_variants(
           id, color, price,
@@ -228,7 +230,7 @@ export default defineEventHandler(async (event) => {
       const { data: recsB, error: recErrB } = await supabase
         .from('products')
         .select(`
-          id, slug, title, badges, primary_category_id,
+          id, slug, title, badges, created_at, primary_category_id,
           brand:brands(name),
           variants:product_variants(
             id, color, price,
@@ -259,7 +261,7 @@ export default defineEventHandler(async (event) => {
         id: p.id,
         slug: p.slug,
         title: p.title,
-        badges: p.badges ?? [],
+        badges: withAutoBadges(p.badges, p.created_at),
         primary_category_id: p.primary_category_id,
         brand_name: p.brand?.name ?? null,
         price: v?.price ?? 0,
@@ -277,7 +279,7 @@ export default defineEventHandler(async (event) => {
       slug: product.slug,
       description: product.description,
       active: product.active,
-      badges: product.badges ?? [],
+      badges: withAutoBadges(product.badges, product.created_at),
       brand_id: product.brand?.id ?? null,
       brand_name: product.brand?.name ?? null,
       primary_category_id: currentCat?.id ?? null,

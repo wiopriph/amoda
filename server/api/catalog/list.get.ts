@@ -1,4 +1,5 @@
 import { serverSupabaseClient } from '#supabase/server';
+import { withAutoBadges } from '~~/app/utils/productBadges';
 import type { CatalogBreadcrumb as Breadcrumb, CatalogCategory as Category, CatalogListResponse } from '#shared/types/catalog';
 
 
@@ -52,6 +53,7 @@ type ProductRow = {
   title: string
   slug: string
   badges: string[]
+  created_at: string | null
   brand_id: number | null
   primary_category_id: number | null
   brand: BrandRow | null
@@ -145,6 +147,7 @@ export default defineEventHandler(async (event): Promise<CatalogListResponse> =>
       title,
       slug,
       badges,
+      created_at,
       brand_id,
       primary_category_id,
       brand:brands(name),
@@ -256,7 +259,7 @@ export default defineEventHandler(async (event): Promise<CatalogListResponse> =>
       id: product.id,
       slug: product.slug,
       title: product.title,
-      badges: product.badges ?? [],
+      badges: withAutoBadges(product.badges, product.created_at),
       primary_category_id: product.primary_category_id,
       brand_id: product.brand_id ?? null,
       brand_name: product.brand?.name ?? null,

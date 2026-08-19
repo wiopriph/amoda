@@ -1,5 +1,5 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
-import { normalizeProductBadges } from '~~/app/utils/productBadges';
+import { normalizeManualProductBadges } from '~~/app/utils/productBadges';
 import { assertAdmin } from '~~/server/utils/assertAdmin';
 
 
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     primary_category_id: body.primary_category_id || null,
     description: body.description || null,
     active: body.active ?? true,
-    badges: normalizeProductBadges(body.badges),
+    badges: normalizeManualProductBadges(body.badges),
     'ms_product_id': body['ms_product_id']?.trim() || null,
   };
 

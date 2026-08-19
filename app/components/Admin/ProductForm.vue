@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PRODUCT_BADGE_LABELS, PRODUCT_BADGES, type ProductBadge } from '~/utils/productBadges';
+import { MANUAL_PRODUCT_BADGES, NEW_BADGE_MAX_AGE_DAYS, PRODUCT_BADGE_LABELS, type ProductBadge } from '~/utils/productBadges';
 
 
 type ProductOption = {
@@ -237,13 +237,17 @@ const updateSlug = (slug: string) => {
     >
       <div class="grid gap-2 sm:grid-cols-3">
         <UCheckbox
-          v-for="badge in PRODUCT_BADGES"
+          v-for="badge in MANUAL_PRODUCT_BADGES"
           :key="badge"
           :modelValue="isProductBadgeSelected(badge)"
           :label="PRODUCT_BADGE_LABELS[badge]"
           @update:model-value="updateProductBadge(badge, Boolean($event))"
         />
       </div>
+
+      <p class="mt-2 text-xs text-muted">
+        «NOVO» é atribuído automaticamente a produtos com menos de {{ NEW_BADGE_MAX_AGE_DAYS }} dias
+      </p>
     </UFormField>
 
     <div class="flex justify-end gap-2 pt-4">
