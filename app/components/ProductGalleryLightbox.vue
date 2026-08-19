@@ -66,7 +66,7 @@ const toggleZoom = () => {
         <div class="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-3">
           <span
             v-if="images.length > 1"
-            class="rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur"
+            class="rounded-full bg-black/40 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur"
           >
             {{ currentIndex + 1 }} / {{ images.length }}
           </span>
@@ -79,7 +79,7 @@ const toggleZoom = () => {
               :aria-label="isZoomed ? 'Reduzir' : 'Ampliar'"
               color="neutral"
               variant="soft"
-              class="rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
+              class="rounded-full bg-black/40 text-white backdrop-blur hover:bg-black/55"
               @click="toggleZoom"
             />
 
@@ -88,7 +88,7 @@ const toggleZoom = () => {
               aria-label="Fechar"
               color="neutral"
               variant="soft"
-              class="rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
+              class="rounded-full bg-black/40 text-white backdrop-blur hover:bg-black/55"
               @click="isOpen = false"
             />
           </div>
@@ -123,7 +123,7 @@ const toggleZoom = () => {
             color="neutral"
             variant="soft"
             size="lg"
-            class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
+            class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 text-white backdrop-blur hover:bg-black/55"
             @click="showImage(currentIndex - 1)"
           />
 
@@ -133,20 +133,22 @@ const toggleZoom = () => {
             color="neutral"
             variant="soft"
             size="lg"
-            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/15 text-white backdrop-blur hover:bg-white/25"
+            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 text-white backdrop-blur hover:bg-black/55"
             @click="showImage(currentIndex + 1)"
           />
 
-          <div class="absolute inset-x-0 bottom-4 flex justify-center gap-1.5">
-            <button
-              v-for="(dotImage, dotIndex) in images"
-              :key="dotIndex"
-              :aria-label="`Foto ${dotIndex + 1}`"
-              :class="dotIndex === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'"
-              type="button"
-              class="h-1.5 rounded-full transition-all"
-              @click="showImage(dotIndex)"
-            />
+          <div class="absolute inset-x-0 bottom-4 flex justify-center">
+            <div class="flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-2 backdrop-blur">
+              <button
+                v-for="(dotImage, dotIndex) in images"
+                :key="dotIndex"
+                :aria-label="`Foto ${dotIndex + 1}`"
+                :class="dotIndex === currentIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/40'"
+                type="button"
+                class="h-1.5 rounded-full transition-all"
+                @click="showImage(dotIndex)"
+              />
+            </div>
           </div>
         </template>
       </div>
