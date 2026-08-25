@@ -124,7 +124,7 @@ export default defineNuxtConfig({
     sitemaps: {
       pages: {
         includeAppSources: true,
-        include: ['/', '/delivery', '/pickup-points', '/return-policy', '/privacy-policy', '/terms-of-use', '/contacts'],
+        include: ['/', '/products', '/delivery', '/pickup-points', '/return-policy', '/privacy-policy', '/terms-of-use', '/contacts'],
       },
 
       categories: {

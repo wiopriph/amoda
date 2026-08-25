@@ -82,7 +82,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero comprar alguma coisa na
 
         <div class="mt-6 flex flex-col gap-3 sm:flex-row">
           <UButton
-            :to="{ name: 'category-slug', params: { slug: 'mulheres' } }"
+            :to="{ name: 'products' }"
             size="xl"
             color="primary"
             icon="i-lucide-shopping-bag"

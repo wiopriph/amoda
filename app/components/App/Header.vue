@@ -166,7 +166,7 @@ const { count: favoritesCount } = useFavorites();
       <template #right>
         <div class="flex items-center gap-1 sm:gap-2">
           <UButton
-            :to="{ name: 'category-slug', params: { slug: 'mulheres' } }"
+            :to="{ name: 'products' }"
             variant="soft"
             color="primary"
             size="sm"

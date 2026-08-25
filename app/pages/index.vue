@@ -149,7 +149,7 @@ const seoDescriptionParagraphs = [
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda para escolher peças na Amoda.');
 
-const startShoppingTo = { name: 'category-slug', params: { slug: 'mulheres' } } as const;
+const startShoppingTo = { name: 'products' } as const;
 </script>
 
 <template>
