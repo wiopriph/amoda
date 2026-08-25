@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FavoriteProduct } from '~/composables/useFavorites';
 import { formatPrice } from '~/utils/formatPrice';
-import { getProductBadgeColor, getProductBadgeLabel } from '~/utils/productBadges';
+import { getProductBadgeDotClass, getProductBadgeLabel } from '~/utils/productBadges';
 
 
 // Минимум, который умеют отдавать все источники карточек:
@@ -20,41 +20,53 @@ defineEmits<{
 </script>
 
 <template>
-  <UBlogPost
-    :title="product.title"
-    :description="formatPrice(product.price ?? 0)"
-    :image="product.image || '/placeholder.webp'"
+  <NuxtLink
     :to="{ name: 'product-slug', params: { slug: product.slug } }"
-    :ui="{
-      root: 'group overflow-hidden border border-gray-100 rounded-2xl hover:shadow-md transition',
-      header: 'aspect-[4/5] overflow-hidden bg-gray-50',
-      image: 'h-full w-full object-cover transition duration-300 group-hover:scale-105',
-      body: 'sm:p-3',
-      title: 'text-sm font-semibold text-highlighted line-clamp-2 min-h-[40px]',
-      description: 'mt-2 text-sm font-bold text-primary'
-    }"
-    variant="outline"
+    class="group block overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:shadow-md"
     @click="$emit('select')"
   >
-    <template #badge>
+    <div class="relative aspect-[4/5] overflow-hidden bg-gray-50">
+      <NuxtImg
+        :src="product.image || '/placeholder.webp'"
+        :alt="product.title"
+        loading="lazy"
+        class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+      />
+
       <div
         v-if="product.badges?.length"
         class="absolute left-2 top-2 flex flex-wrap gap-1"
       >
-        <UBadge
+        <span
           v-for="badge in product.badges"
           :key="badge"
-          :color="getProductBadgeColor(badge)"
-          variant="solid"
+          class="flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 backdrop-blur"
         >
-          {{ getProductBadgeLabel(badge) }}
-        </UBadge>
+          <span
+            :class="getProductBadgeDotClass(badge)"
+            class="size-1.5 rounded-full"
+          />
+
+          <span class="text-[9px] font-bold tracking-wide text-white">
+            {{ getProductBadgeLabel(badge) }}
+          </span>
+        </span>
       </div>
 
       <FavoriteToggle
         :product="product"
         class="absolute right-2 top-2"
       />
-    </template>
-  </UBlogPost>
+    </div>
+
+    <div class="px-2.5 py-2 sm:px-3 sm:py-2.5">
+      <div class="text-sm font-extrabold text-highlighted">
+        {{ formatPrice(product.price ?? 0) }}
+      </div>
+
+      <div class="mt-0.5 truncate text-[11px] text-muted sm:text-xs">
+        {{ product.title }}
+      </div>
+    </div>
+  </NuxtLink>
 </template>

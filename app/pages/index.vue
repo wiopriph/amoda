@@ -243,9 +243,9 @@ const startShoppingTo = { name: 'products' } as const;
             v-for="showcaseCategory in showcaseCategories"
             :key="showcaseCategory.slug"
             :to="{ name: 'category-slug', params: { slug: showcaseCategory.slug } }"
-            class="group overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 transition hover:shadow-md"
+            class="group relative overflow-hidden rounded-2xl bg-gray-100 transition hover:shadow-md"
           >
-            <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+            <div class="aspect-[4/3] overflow-hidden">
               <img
                 v-if="showcaseCategory.image"
                 :src="showcaseCategory.image"
@@ -255,7 +255,9 @@ const startShoppingTo = { name: 'products' } as const;
               >
             </div>
 
-            <div class="p-3 text-sm font-semibold text-highlighted">
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+
+            <div class="absolute bottom-2.5 left-3 right-3 truncate text-sm font-bold text-white">
               {{ showcaseCategory.name }}
             </div>
           </NuxtLink>

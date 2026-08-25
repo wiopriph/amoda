@@ -25,6 +25,16 @@ export const PRODUCT_BADGE_COLORS: Record<ProductBadge, ProductBadgeColor> = {
   hot: 'warning',
 };
 
+// Единая система контролов на фото: тёмная пилюля, цвет бейджа — только точкой
+export const PRODUCT_BADGE_DOT_CLASSES: Record<ProductBadge, string> = {
+  novo: 'bg-green-400',
+  sale: 'bg-red-400',
+  hot: 'bg-amber-400',
+};
+
+export const getProductBadgeDotClass = (badge: string): string =>
+  isProductBadge(badge) ? PRODUCT_BADGE_DOT_CLASSES[badge] : 'bg-gray-300';
+
 export const isProductBadge = (badge: string): badge is ProductBadge =>
   PRODUCT_BADGES.includes(badge as ProductBadge);
 

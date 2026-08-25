@@ -637,7 +637,7 @@ useHead(() => ({
 
             <div
               v-if="hasGalleryImages && carouselSlides.length > 1"
-              class="absolute bottom-3 right-3 rounded-full bg-black/60 px-2 py-1 text-xs text-white backdrop-blur-sm"
+              class="absolute bottom-3 right-3 rounded-full bg-black/40 px-2 py-1 text-xs font-semibold text-white backdrop-blur"
             >
               {{ activeImageIndex + 1 }} / {{ carouselSlides.length }}
             </div>
