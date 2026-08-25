@@ -21,6 +21,7 @@ type ProductVariantRow = {
   color: string | null
   price: number
   active: boolean
+  featured: boolean | null
   images?: ProductImageRow[] | null
   sizes?: VariantSizeRow[] | null
 };
@@ -33,6 +34,7 @@ type ProductRow = {
   'primary_category_id': number | null
   description: string | null
   active: boolean
+  featured: boolean | null
   badges: string[]
   'ms_product_id': string | null
   product_variants?: ProductVariantRow[] | null
@@ -57,7 +59,7 @@ export default defineEventHandler(async (event) => {
       brand_id,
       primary_category_id,
       description,
-      active,
+      active, featured,
       badges,
       ms_product_id,
       brand:brands ( id, name, slug ),
@@ -87,6 +89,7 @@ export default defineEventHandler(async (event) => {
     slug: product.slug,
     description: product.description,
     active: product.active,
+    featured: product.featured ?? false,
     badges: product.badges ?? [],
     'brand_id': product['brand_id'],
     'primary_category_id': product['primary_category_id'],

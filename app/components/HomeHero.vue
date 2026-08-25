@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { TIKTOK_LINK } from '~/constants/contacts';
+import { formatPrice } from '~/utils/formatPrice';
+import type { CatalogProductCard } from '#shared/types/catalog';
 
 
 type HeroProps = {
@@ -7,110 +8,84 @@ type HeroProps = {
   subtitle?: string
   socialProof?: string
   bullets?: string[]
-  tiktokTitle?: string
-  tiktokSubtitle?: string
   ctaPrimary?: string
-  whatsappLabel?: string
-  isTiktokLive?: boolean
-  imageUrl?: string
+  // Выборочные товары для веера справа (галочка «Destaque» в админке)
+  products?: CatalogProductCard[]
 };
 
 const props = defineProps<HeroProps>();
 
 const heroDefaults = {
-  title: 'Seja a mais linda da festa',
-  subtitle: 'Escolha o seu look, experimente antes de pagar e fique apenas com o que amar.',
-  socialProof: 'Mais de 3.000 meninas já confiaram na Amoda',
+  title: 'Moda feminina em Luanda. Experimenta antes de pagar.',
+  subtitle: 'Recebes o teu pedido, provas com calma e pagas só o que gostar.',
+  socialProof: 'Entregas em Luanda e nas províncias',
   bullets: [
-    'Experimente antes de pagar',
-    'Pague só o que gostar',
-    'Entrega grátis',
-    'Atendimento 24/7',
+    'Sem pagamento online',
+    'Pagas só o que gostar',
+    'Troca fácil em 7 dias',
   ],
-  tiktokTitle: 'Siga-nos no TikTok',
-  tiktokSubtitle: 'Looks, novidades e inspiração',
-  ctaPrimary: 'Escolher meu look',
-  whatsappLabel: 'Comprar pelo WhatsApp',
-  imageUrl: 'https://yrdnlswgptdachbcoyri.supabase.co/storage/v1/object/public/products/products/256/c28c300c-0f1f-43f3-863b-098ca6e13d07.webp',
+  ctaPrimary: 'Ver os looks',
 } as const;
-
 
 const heroContent = computed(() => ({
   title: props.title || heroDefaults.title,
   subtitle: props.subtitle || heroDefaults.subtitle,
   socialProof: props.socialProof || heroDefaults.socialProof,
-  bullets: props.bullets?.length ? props.bullets : heroDefaults.bullets,
-  tiktokTitle: props.tiktokTitle || heroDefaults.tiktokTitle,
-  tiktokSubtitle: props.tiktokSubtitle || heroDefaults.tiktokSubtitle,
+  bullets: (props.bullets?.length ? props.bullets : heroDefaults.bullets).slice(0, 3),
   ctaPrimary: props.ctaPrimary || heroDefaults.ctaPrimary,
-  whatsappLabel: props.whatsappLabel || heroDefaults.whatsappLabel,
-  imageUrl: props.imageUrl || heroDefaults.imageUrl,
 }));
 
-const tiktokSubtitle = computed(() => props.isTiktokLive ? 'Ao vivo agora' : heroContent.value.tiktokSubtitle);
-const tiktokTitle = computed(() => `${props.isTiktokLive ? 'LIVE — ' : ''}${heroContent.value.tiktokTitle}`);
+// Веер: боковые карточки повёрнуты, центральная сверху с бейджем
+const FAN_SLOTS = [
+  'absolute left-1 top-4 w-[42%] -rotate-6 lg:left-0 lg:top-10',
+  'absolute left-1/2 top-0 z-10 w-[46%] -translate-x-1/2',
+  'absolute right-1 top-6 w-[42%] rotate-6 lg:right-0 lg:top-12',
+] as const;
 
-const { makeWhatsappHref } = useWhatsappLink();
-const whatsappHref = makeWhatsappHref(() => 'Olá! Quero comprar alguma coisa na vossa loja.');
+const fanProducts = computed(() => (props.products || []).slice(0, 3));
 </script>
 
 <template>
   <section
-    class="relative overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8"
+    class="relative overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 sm:p-8 lg:p-10"
   >
-    <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+    <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
       <div>
-        <UButton
-          :to="TIKTOK_LINK"
-          target="_blank"
-          variant="soft"
-          color="neutral"
-          size="sm"
-          icon="i-simple-icons-tiktok"
-          class="mb-4 w-fit border border-pink-100 bg-white/70 font-semibold text-pink-600 shadow-sm backdrop-blur hover:bg-white"
-        >
-          {{ heroContent.socialProof }}
-        </UButton>
+        <div class="inline-flex items-center gap-1.5 rounded-full border border-pink-100 bg-white/80 px-3 py-1.5 text-xs font-semibold text-muted backdrop-blur">
+          <UIcon
+            name="i-lucide-check"
+            class="size-3.5 text-primary"
+          />
 
-        <h1 class="text-4xl font-black tracking-tight text-highlighted text-balance sm:text-5xl lg:text-6xl">
+          <span>{{ heroContent.socialProof }}</span>
+        </div>
+
+        <h1 class="mt-4 text-[1.9rem] font-black leading-tight tracking-tight text-highlighted text-balance sm:text-4xl lg:text-5xl">
           {{ heroContent.title }}
         </h1>
 
-        <p class="mt-5 max-w-2xl text-base text-muted sm:text-lg">
+        <p class="mt-3 max-w-2xl text-sm text-muted sm:text-base lg:text-lg">
           {{ heroContent.subtitle }}
         </p>
 
-        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-          <UButton
-            :to="{ name: 'products' }"
-            size="xl"
-            color="primary"
-            icon="i-lucide-shopping-bag"
-          >
-            {{ heroContent.ctaPrimary }}
-          </UButton>
+        <UButton
+          :to="{ name: 'products' }"
+          size="xl"
+          color="primary"
+          class="mt-6 w-full justify-center sm:w-fit sm:px-8"
+        >
+          {{ heroContent.ctaPrimary }}
+        </UButton>
 
-          <UButton
-            v-if="false"
-            :to="whatsappHref"
-            size="xl"
-            color="success"
-            icon="i-simple-icons-whatsapp"
-            target="_blank"
-          >
-            {{ heroContent.whatsappLabel }}
-          </UButton>
-        </div>
-
-        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+        <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2">
           <div
             v-for="heroBullet in heroContent.bullets"
             :key="heroBullet"
-            class="flex items-center gap-2 text-sm font-medium text-toned"
+            class="flex items-center gap-1.5 text-xs font-medium text-toned sm:text-sm"
           >
             <UIcon
               name="i-lucide-check-circle-2"
-              class="size-5 text-primary"
+              class="size-4 shrink-0 text-primary"
             />
 
             <span>{{ heroBullet }}</span>
@@ -118,52 +93,42 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero comprar alguma coisa na
         </div>
       </div>
 
-      <div class="relative">
-        <UBadge
-          v-if="isTiktokLive"
-          color="error"
-          variant="solid"
-          class="absolute right-3 top-3 z-10 flex items-center gap-1 px-2.5 py-1"
+      <div
+        v-if="fanProducts.length"
+        class="relative mx-auto h-[310px] w-full max-w-[420px] sm:h-[360px] lg:h-[420px]"
+      >
+        <NuxtLink
+          v-for="(fanProduct, fanIndex) in fanProducts"
+          :key="fanProduct.id"
+          :to="{ name: 'product-slug', params: { slug: fanProduct.slug } }"
+          :class="FAN_SLOTS[fanIndex]"
+          class="block rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-gray-900/10 transition hover:-translate-y-1 hover:shadow-2xl"
         >
-          <span class="size-2 rounded-full bg-white animate-pulse" />
-          LIVE
-        </UBadge>
+          <div class="aspect-[4/5] overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
+            <img
+              :src="fanProduct.image || '/placeholder.webp'"
+              :alt="fanProduct.title"
+              fetchpriority="high"
+              class="h-full w-full object-cover"
+            >
+          </div>
 
-        <div class="aspect-[4/5] overflow-hidden rounded-3xl bg-muted shadow-xl">
-          <img
-            :src="heroContent.imageUrl"
-            alt="Look da Amoda — moda feminina em Luanda"
-            class="h-full w-full object-cover"
-          >
-        </div>
-
-        <a
-          :href="TIKTOK_LINK"
-          :aria-label="heroContent.tiktokTitle"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="absolute bottom-3 left-3 right-3 rounded-2xl bg-white/90 px-3 py-3 shadow-lg backdrop-blur transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary sm:bottom-4 sm:left-4 sm:right-4 sm:px-4"
-        >
-          <div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-            <div class="min-w-0">
-              <p class="truncate text-sm font-bold text-highlighted">
-                {{ tiktokTitle }}
-              </p>
-
-              <p class="line-clamp-2 text-xs text-muted sm:line-clamp-1">
-                {{ tiktokSubtitle }}
-              </p>
-            </div>
+          <div class="flex items-center justify-between gap-1 px-1.5 py-2">
+            <span class="text-xs font-extrabold text-primary sm:text-sm">
+              {{ formatPrice(fanProduct.price) }}
+            </span>
 
             <UBadge
+              v-if="fanIndex === 1"
               color="primary"
               variant="solid"
-              class="w-fit shrink-0"
+              size="sm"
+              class="hidden shrink-0 sm:inline-flex"
             >
-              @amoda.ao
+              Escolha Amoda
             </UBadge>
           </div>
-        </a>
+        </NuxtLink>
       </div>
     </div>
   </section>

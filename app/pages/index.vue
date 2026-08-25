@@ -29,6 +29,7 @@ const route = useRoute();
 const [
   { data: heroContent },
   { data: catalogResponse, error: catalogError },
+  { data: featuredResponse },
   { data: categoriesResponse },
 ] = await Promise.all([
   useFetch('/api/home/hero'),
@@ -36,10 +37,20 @@ const [
     query: { limit: 10, sort: 'new' },
     watch: [() => route.fullPath],
   }),
+  useFetch('/api/catalog/list', {
+    query: { featured: 1, limit: 3 },
+  }),
   useFetch('/api/categories/list'),
 ]);
 
 const products = computed(() => catalogResponse.value?.items || []);
+
+// Веер в hero: отмеченные «Destaque» в админке, пока их нет — свежие новинки
+const heroProducts = computed(() => {
+  const featured = featuredResponse.value?.items || [];
+
+  return featured.length ? featured : products.value.slice(0, 3);
+});
 
 // Витрина категорий: все, кроме корневой (у корня нет parent_id)
 const showcaseCategories = computed(() =>
@@ -161,11 +172,7 @@ const startShoppingTo = { name: 'products' } as const;
         :socialProof="heroContent?.socialProof ?? ''"
         :bullets="heroContent?.bullets?.length ? heroContent.bullets : undefined"
         :ctaPrimary="heroContent?.ctaPrimary ?? ''"
-        :whatsappLabel="heroContent?.whatsappLabel ?? ''"
-        :tiktokTitle="heroContent?.tiktokTitle ?? ''"
-        :tiktokSubtitle="heroContent?.tiktokSubtitle ?? ''"
-        :isTiktokLive="heroContent?.isTiktokLive ?? false"
-        :imageUrl="heroContent?.imageUrl ?? ''"
+        :products="heroProducts"
       />
 
       <section class="mt-6 sm:mt-10">

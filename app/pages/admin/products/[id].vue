@@ -78,6 +78,7 @@ type Product = {
   primary_category_id?: number | string | null
   description?: string | null
   active?: boolean
+  featured?: boolean
   badges?: ProductBadge[]
   'ms_product_id'?: string | null
   variants?: ProductVariant[]

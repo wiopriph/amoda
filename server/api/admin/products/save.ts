@@ -11,6 +11,7 @@ type ProductSaveBody = {
   primary_category_id?: number | string | null
   description?: string | null
   active?: boolean
+  featured?: boolean
   badges?: unknown
   ms_product_id?: string | null
 };
@@ -39,6 +40,7 @@ export default defineEventHandler(async (event) => {
     primary_category_id: body.primary_category_id || null,
     description: body.description || null,
     active: body.active ?? true,
+    featured: body.featured ?? false,
     badges: normalizeManualProductBadges(body.badges),
     'ms_product_id': body['ms_product_id']?.trim() || null,
   };

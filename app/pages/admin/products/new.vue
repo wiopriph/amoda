@@ -29,6 +29,7 @@ type ProductForm = {
   primary_category_id: number | null
   description: string
   active: boolean
+  featured: boolean
   badges: ProductBadge[]
 };
 
@@ -49,6 +50,7 @@ const productForm = reactive<ProductForm>({
   primary_category_id: null,
   description: '',
   active: true,
+  featured: false,
   badges: [],
 });
 

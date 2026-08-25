@@ -15,6 +15,7 @@ type QueryParams = {
   page?: string | number
   limit?: string | number
   sort?: 'price_asc' | 'price_desc' | 'new'
+  featured?: string | number
 };
 
 type CategoryClosureRow = {
@@ -170,6 +171,11 @@ export default defineEventHandler(async (event): Promise<CatalogListResponse> =>
 
   if (query.q) {
     productsQuery = productsQuery.ilike('title', `%${query.q}%`);
+  }
+
+  // Выборочные товары для hero главной («Destaque» в админке)
+  if (query.featured) {
+    productsQuery = productsQuery.eq('featured', true);
   }
 
   if (query.brand_id) {

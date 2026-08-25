@@ -15,6 +15,7 @@ type ProductForm = {
   brand_id?: number | string | null
   description?: string | null
   active?: boolean
+  featured?: boolean
   badges?: ProductBadge[]
   'ms_product_id'?: string | null
 };
@@ -201,6 +202,18 @@ const updateSlug = (slug: string) => {
         v-model="productForm.active"
         label="Produto ativo"
         @update:model-value="updateProductField('active', $event)"
+      />
+    </UFormField>
+
+    <UFormField
+      label="Destaque"
+      description="Aparece no bloco principal da página inicial (até 3 produtos)"
+      class="w-full"
+    >
+      <UCheckbox
+        v-model="productForm.featured"
+        label="Destaque na página inicial"
+        @update:model-value="updateProductField('featured', $event)"
       />
     </UFormField>
 
