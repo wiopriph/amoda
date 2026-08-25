@@ -113,39 +113,23 @@ const sendSelectProductEvent = (product: CatalogProductCard) => {
   });
 };
 
+// Один блок «Como funciona» вместо «Como comprar» + «Por que comprar»:
+// выгоды вшиты в шаги, каждое сообщение звучит на странице один раз
 const shoppingSteps = [
   {
     icon: 'i-lucide-shopping-bag',
-    title: 'Escolha o look',
-    description: 'Veja os produtos no site e adicione ao pedido as peças que quer experimentar.',
-  },
-  {
-    icon: 'i-lucide-message-circle',
-    title: 'Escolha sem pagar',
-    description: 'Envie o pedido com seu nome e WhatsApp. Não precisa pagar online.',
+    title: '1 · Escolhe no site',
+    description: 'Adiciona as peças que queres experimentar e envia o pedido. Sem pagamento online.',
   },
   {
     icon: 'i-lucide-shirt',
-    title: 'Experimente e decida',
-    description: 'Veja as peças ao vivo, experimente e pague apenas pelo que gostar.',
+    title: '2 · Experimenta com calma',
+    description: 'Entregamos em casa ou no ponto. Vês o tamanho, o tecido e o caimento ao vivo.',
   },
-];
-
-const benefits = [
   {
     icon: 'i-lucide-wallet',
-    title: 'Sem pagamento online',
-    description: 'Você seleciona primeiro e paga só quando decidir levar.',
-  },
-  {
-    icon: 'i-lucide-shield-check',
-    title: 'Prova antes de comprar',
-    description: 'Veja tamanho, tecido e caimento antes de finalizar.',
-  },
-  {
-    icon: 'i-simple-icons-whatsapp',
-    title: 'Atendimento no WhatsApp',
-    description: 'A nossa equipa ajuda com escolha, tamanho e ponto de experimentação.',
+    title: '3 · Pagas só o que gostar',
+    description: 'Em dinheiro ou TPA na entrega. O resto devolves na hora, e tens troca fácil em 7 dias.',
   },
 ];
 
@@ -260,7 +244,7 @@ const startShoppingTo = { name: 'products' } as const;
           <div class="flex flex-col gap-6">
             <div>
               <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
-                Como comprar na Amoda
+                Como funciona
               </h2>
             </div>
 
@@ -295,41 +279,6 @@ const startShoppingTo = { name: 'products' } as const;
       </section>
 
       <TrustProofs />
-
-      <section class="mt-6 sm:mt-10">
-        <UCard class="border-primary/20 bg-primary/5">
-          <div>
-            <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
-              Por que comprar com a Amoda?
-            </h2>
-          </div>
-
-          <div class="mt-5 grid gap-3 md:grid-cols-3">
-            <div
-              v-for="benefit in benefits"
-              :key="benefit.title"
-              class="rounded-2xl bg-white p-4 shadow-sm"
-            >
-              <div class="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <UIcon
-                  :name="benefit.icon"
-                  class="size-5"
-                />
-              </div>
-
-              <h3
-                class="mt-4 font-bold text-highlighted"
-                v-text="benefit.title"
-              />
-
-              <p
-                class="mt-2 text-sm leading-6 text-muted"
-                v-text="benefit.description"
-              />
-            </div>
-          </div>
-        </UCard>
-      </section>
 
       <section class="mt-6 sm:mt-10">
         <div class="text-center">

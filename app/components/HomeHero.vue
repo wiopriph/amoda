@@ -15,10 +15,11 @@ const heroContent = {
   title: 'Moda feminina em Luanda. Experimenta antes de pagar.',
   subtitle: 'Recebes o teu pedido, provas com calma e pagas só o que gostar.',
   socialProof: 'Entregas em Luanda e nas províncias',
+  // У каждого буллета своё сообщение — «pagas só o que gostar» уже в H1 и подзаголовке
   bullets: [
     'Sem pagamento online',
-    'Pagas só o que gostar',
-    'Troca fácil em 7 dias',
+    'Preço fixo — sem surpresas',
+    'Entrega no horário combinado',
   ],
   ctaPrimary: 'Ver os looks',
 } as const;
