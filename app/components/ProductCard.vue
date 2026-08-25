@@ -26,10 +26,10 @@ defineEmits<{
     :image="product.image || '/placeholder.webp'"
     :to="{ name: 'product-slug', params: { slug: product.slug } }"
     :ui="{
-      root: 'group overflow-hidden border border-gray-100 rounded-2xl bg-white p-1.5 hover:shadow-md transition',
-      header: 'aspect-[4/5] overflow-hidden rounded-xl border border-gray-100 bg-gray-50',
+      root: 'group overflow-hidden border border-gray-100 rounded-2xl hover:shadow-md transition',
+      header: 'aspect-[4/5] overflow-hidden bg-gray-50',
       image: 'h-full w-full object-cover transition duration-300 group-hover:scale-105',
-      body: 'p-2 pt-2.5 sm:p-2.5',
+      body: 'sm:p-3',
       title: 'text-sm font-semibold text-highlighted line-clamp-2 min-h-[40px]',
       description: 'mt-2 text-sm font-bold text-primary'
     }"
