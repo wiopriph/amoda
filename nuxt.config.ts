@@ -17,6 +17,8 @@ export default defineNuxtConfig({
       },
 
       link: [
+        { rel: 'preconnect', href: 'https://yrdnlswgptdachbcoyri.supabase.co', crossorigin: '' },
+
         { rel: 'icon', type: 'image/x-icon', href: '/favicon-new.ico' },
 
         { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
