@@ -294,6 +294,8 @@ const startShoppingTo = { name: 'category-slug', params: { slug: 'mulheres' } } 
         </UCard>
       </section>
 
+      <TrustProofs />
+
       <section class="mt-6 sm:mt-10">
         <UCard class="border-primary/20 bg-primary/5">
           <div>
