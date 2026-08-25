@@ -27,12 +27,10 @@ useHead({
 const route = useRoute();
 
 const [
-  { data: heroContent },
   { data: catalogResponse, error: catalogError },
   { data: featuredResponse },
   { data: categoriesResponse },
 ] = await Promise.all([
-  useFetch('/api/home/hero'),
   useFetch('/api/catalog/list', {
     query: { limit: 10, sort: 'new' },
     watch: [() => route.fullPath],
@@ -166,14 +164,7 @@ const startShoppingTo = { name: 'products' } as const;
 <template>
   <UPage>
     <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
-      <HomeHero
-        :title="heroContent?.title ?? ''"
-        :subtitle="heroContent?.subtitle ?? ''"
-        :socialProof="heroContent?.socialProof ?? ''"
-        :bullets="heroContent?.bullets?.length ? heroContent.bullets : undefined"
-        :ctaPrimary="heroContent?.ctaPrimary ?? ''"
-        :products="heroProducts"
-      />
+      <HomeHero :products="heroProducts" />
 
       <section class="mt-6 sm:mt-10">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

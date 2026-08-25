@@ -4,18 +4,14 @@ import type { CatalogProductCard } from '#shared/types/catalog';
 
 
 type HeroProps = {
-  title?: string
-  subtitle?: string
-  socialProof?: string
-  bullets?: string[]
-  ctaPrimary?: string
   // Выборочные товары для веера справа (галочка «Destaque» в админке)
   products?: CatalogProductCard[]
 };
 
 const props = defineProps<HeroProps>();
 
-const heroDefaults = {
+// Тексты hero живут в коде: правятся вместе с дизайном блока и версионируются в git
+const heroContent = {
   title: 'Moda feminina em Luanda. Experimenta antes de pagar.',
   subtitle: 'Recebes o teu pedido, provas com calma e pagas só o que gostar.',
   socialProof: 'Entregas em Luanda e nas províncias',
@@ -26,14 +22,6 @@ const heroDefaults = {
   ],
   ctaPrimary: 'Ver os looks',
 } as const;
-
-const heroContent = computed(() => ({
-  title: props.title || heroDefaults.title,
-  subtitle: props.subtitle || heroDefaults.subtitle,
-  socialProof: props.socialProof || heroDefaults.socialProof,
-  bullets: (props.bullets?.length ? props.bullets : heroDefaults.bullets).slice(0, 3),
-  ctaPrimary: props.ctaPrimary || heroDefaults.ctaPrimary,
-}));
 
 // Веер: боковые карточки повёрнуты, центральная сверху с бейджем
 const FAN_SLOTS = [
