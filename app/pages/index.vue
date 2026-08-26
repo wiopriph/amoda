@@ -137,7 +137,7 @@ const shoppingSteps = [
   {
     icon: 'i-lucide-wallet',
     title: '3 · Pagas só o que gostar',
-    description: 'Em dinheiro ou TPA, só pelo que levares. O que não servir, o entregador leva de volta — e ainda tens 7 dias para trocas.',
+    description: 'Em dinheiro ou TPA, na entrega.',
   },
 ];
 
