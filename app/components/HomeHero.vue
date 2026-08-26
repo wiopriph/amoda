@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatPrice } from '~/utils/formatPrice';
+import { TIKTOK_LINK } from '~/constants/contacts';
 import type { CatalogProductCard } from '#shared/types/catalog';
 
 
@@ -14,7 +15,7 @@ const props = defineProps<HeroProps>();
 const heroContent = {
   title: 'Moda feminina em Luanda. Experimenta antes de pagar.',
   subtitle: 'Recebes o teu pedido, provas com calma e pagas só o que gostar.',
-  socialProof: 'Entregas em Luanda e nas províncias',
+  socialProof: '+1.700 seguidoras · Segue-nos no TikTok 🤗',
   // У каждого буллета своё сообщение — «pagas só o que gostar» уже в H1 и подзаголовке
   bullets: [
     'Sem pagamento online',
@@ -74,14 +75,19 @@ function onFanCardClick(slotIndex: number, event: MouseEvent) {
   >
     <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-12">
       <div>
-        <div class="inline-flex items-center gap-1.5 rounded-full border border-pink-100 bg-white/80 px-3 py-1.5 text-xs font-semibold text-muted backdrop-blur">
+        <NuxtLink
+          :to="TIKTOK_LINK"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 rounded-full border border-pink-100 bg-white/80 px-3 py-1.5 text-xs font-semibold text-pink-600 shadow-sm backdrop-blur transition hover:bg-white"
+        >
           <UIcon
-            name="i-lucide-check"
-            class="size-3.5 text-primary"
+            name="i-simple-icons-tiktok"
+            class="size-3.5"
           />
 
           <span>{{ heroContent.socialProof }}</span>
-        </div>
+        </NuxtLink>
 
         <h1 class="mt-4 text-[1.9rem] font-black leading-tight tracking-tight text-highlighted text-balance sm:text-4xl lg:text-5xl">
           {{ heroContent.title }}
