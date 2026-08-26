@@ -57,7 +57,9 @@ function onFanCardClick(slotIndex: number, event: MouseEvent) {
     return;
   }
 
+  // capture-фаза: гасим клик до обработчика NuxtLink, иначе уходит навигация
   event.preventDefault();
+  event.stopPropagation();
 
   const next = [...fanArrangement.value];
 
@@ -125,7 +127,7 @@ function onFanCardClick(slotIndex: number, event: MouseEvent) {
           :to="{ name: 'product-slug', params: { slug: fanSlot.product.slug } }"
           :class="FAN_SLOTS[fanSlot.slotIndex]"
           class="block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl shadow-gray-900/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
-          @click="onFanCardClick(fanSlot.slotIndex, $event)"
+          @click.capture="onFanCardClick(fanSlot.slotIndex, $event)"
         >
           <div class="relative aspect-[4/5] overflow-hidden bg-gray-50">
             <img
