@@ -1,54 +1,52 @@
 <script setup lang="ts">
-type CategoryPill = {
-  id: number
-  name: string
-  slug: string
-  image?: string | null
-};
+import type { CategoryNavigationResponse } from '~~/server/api/catalog/category-navigation.get';
 
-defineProps<{
-  list: CategoryPill[]
-  currentSlug?: string
+
+const props = defineProps<{
+  navigation: CategoryNavigationResponse
 }>();
 
-const getCategoryTo = (slug: string) => ({ name: 'category-slug', params: { slug } });
+// «Todos» + чипы одного уровня; активный чип — не ссылка
+const chips = computed(() => {
+  const list: { label: string; slug: string; active: boolean }[] = [];
+
+  if (props.navigation.todos) {
+    list.push({ label: 'Todos', slug: props.navigation.todos.slug, active: props.navigation.todos.active });
+  }
+
+  for (const item of props.navigation.items) {
+    list.push({ label: item.name, slug: item.slug, active: item.active });
+  }
+
+  return list;
+});
 </script>
 
 <template>
   <nav
-    v-if="list?.length"
+    v-if="chips.length"
     aria-label="Navegação de categorias"
   >
-    <div class="-mx-4 flex gap-2 overflow-x-auto p-1 px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-3 sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
-      <NuxtLink
-        v-for="category in list"
-        :key="category.id"
-        :to="getCategoryTo(category.slug)"
-        :aria-current="category.slug === currentSlug ? 'page' : undefined"
-        class="group shrink-0"
+    <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
+      <template
+        v-for="chip in chips"
+        :key="chip.slug"
       >
-        <div
-          :class="category.slug === currentSlug
-            ? 'border-primary bg-primary/10'
-            : 'border-gray-100 bg-white/80 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md'"
-          class="flex items-center gap-2 rounded-full border px-3 py-2 shadow-sm transition"
-        >
-          <div class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100">
-            <img
-              :src="category.image || '/placeholder.webp'"
-              :alt="category.name"
-              class="size-full object-cover transition group-hover:scale-105"
-              loading="lazy"
-            >
-          </div>
+        <span
+          v-if="chip.active"
+          aria-current="page"
+          class="shrink-0 rounded-full bg-primary px-3.5 py-2 text-sm font-semibold text-white"
+          v-text="chip.label"
+        />
 
-          <span
-            :class="category.slug === currentSlug ? 'text-primary' : 'text-highlighted'"
-            class="max-w-[140px] truncate text-sm font-medium"
-            v-text="category.name"
-          />
-        </div>
-      </NuxtLink>
+        <NuxtLink
+          v-else
+          :to="{ name: 'category-slug', params: { slug: chip.slug } }"
+          class="shrink-0 rounded-full border border-gray-100 bg-white px-3.5 py-2 text-sm font-medium text-highlighted transition hover:border-primary/30 hover:bg-primary/5"
+        >
+          {{ chip.label }}
+        </NuxtLink>
+      </template>
     </div>
   </nav>
 </template>

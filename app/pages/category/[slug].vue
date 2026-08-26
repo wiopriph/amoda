@@ -255,25 +255,40 @@ useHead(() => ({
       <section
         class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-4 shadow-sm sm:p-8"
       >
-        <UBreadcrumb
-          :items="breadcrumbItems"
-          class="hidden md:block"
-        />
-
-        <NuxtLink
-          v-if="breadcrumbItems.length >= 2"
-          :to="breadcrumbItems[breadcrumbItems.length - 2]!.to"
-          class="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted transition hover:text-primary md:hidden"
+        <!-- Крошки видны и на мобиле: направление «вверх» по дереву, чипы ниже — «вглубь» -->
+        <nav
+          v-if="breadcrumbItems.length > 1"
+          aria-label="Breadcrumb"
+          class="-mx-1 flex items-center gap-1 overflow-x-auto whitespace-nowrap px-1 text-xs text-dimmed [-ms-overflow-style:none] [scrollbar-width:none] sm:text-sm [&::-webkit-scrollbar]:hidden"
         >
-          <UIcon
-            name="i-lucide-arrow-left"
-            class="size-4"
-          />
+          <template
+            v-for="(breadcrumbItem, breadcrumbIndex) in breadcrumbItems"
+            :key="breadcrumbItem.label"
+          >
+            <span
+              v-if="breadcrumbIndex === breadcrumbItems.length - 1"
+              aria-current="page"
+              class="font-semibold text-highlighted"
+              v-text="breadcrumbItem.label"
+            />
 
-          {{ breadcrumbItems[breadcrumbItems.length - 2]!.label }}
-        </NuxtLink>
+            <NuxtLink
+              v-else
+              :to="breadcrumbItem.to"
+              class="transition hover:text-primary"
+            >
+              {{ breadcrumbItem.label }}
+            </NuxtLink>
 
-        <div class="mt-0 md:mt-5">
+            <UIcon
+              v-if="breadcrumbIndex < breadcrumbItems.length - 1"
+              name="i-lucide-chevron-right"
+              class="size-3.5 shrink-0 text-gray-300"
+            />
+          </template>
+        </nav>
+
+        <div class="mt-3 sm:mt-4">
           <h1
             class="text-2xl font-black tracking-tight text-highlighted sm:text-5xl"
             v-text="categoryH1"
@@ -286,13 +301,10 @@ useHead(() => ({
         </div>
 
         <div
-          v-if="categoryNavigation?.length"
+          v-if="categoryNavigation?.todos || categoryNavigation?.items?.length"
           class="mt-4 sm:mt-5"
         >
-          <CategoryPills
-            :list="categoryNavigation"
-            :currentSlug="String(route.params.slug)"
-          />
+          <CategoryPills :navigation="categoryNavigation" />
         </div>
       </section>
 

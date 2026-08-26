@@ -1,160 +1,95 @@
 import { serverSupabaseClient } from '#supabase/server';
 
 
-type QueryParams = {
-  slug?: string
-};
-
-type Category = {
+type CategoryRow = {
   id: number
   name: string
   slug: string
   parent_id: number | null
-  image: string | null
 };
 
-type NavigationItem = {
-  slug: string
-  name: string
-  image: string | null
+export type CategoryNavigationResponse = {
+  // Чип «Todos»: текущая категория (если есть дети) или родитель (если лист)
+  todos: { slug: string; active: boolean } | null
+  // Один уровень: дети текущей либо сёстры листа (текущая помечена active)
+  items: { slug: string; name: string; active: boolean }[]
 };
 
-export default defineEventHandler(async (event) => {
+const CATEGORY_FIELDS = 'id, name, slug, parent_id';
+
+export default defineEventHandler(async (event): Promise<CategoryNavigationResponse> => {
   const supabase = await serverSupabaseClient(event);
-  const query = getQuery(event) as QueryParams;
+  const slug = String(getQuery(event).slug || '');
 
-  let currentCategory: Category | null = null;
-  let parentCategory: Category | null = null;
-  let navigation: NavigationItem[] = [];
-
-  // --- 1. Если slug нет → отдаём верхние категории ---
-  if (!query.slug) {
-    const { data: topCategories, error: topErr } = await supabase
-      .from('categories')
-      .select('id, name, slug, parent_id, image')
-      .eq('active', true)
-      .is('parent_id', null)
-      .order('name', { ascending: true });
-
-    if (topErr) {
-      throw createError({ statusCode: 500, statusMessage: topErr.message });
-    }
-
-    return (topCategories || []).map((c: Category) => ({
-      slug: c.slug,
-      name: c.name,
-      image: c.image,
-    }));
+  if (!slug) {
+    throw createError({ statusCode: 400, statusMessage: 'Slug required' });
   }
 
-  // --- 2. Текущая категория ---
-  const { data: category, error: catErr } = await supabase
+  const { data: current, error: currentError } = await supabase
     .from('categories')
-    .select('id, name, slug, parent_id, image')
-    .eq('slug', String(query.slug))
+    .select(CATEGORY_FIELDS)
+    .eq('slug', slug)
     .eq('active', true)
-    .maybeSingle();
+    .maybeSingle<CategoryRow>();
 
-  if (catErr) {
-    throw createError({ statusCode: 500, statusMessage: catErr.message });
+  if (currentError) {
+    throw createError({ statusCode: 500, statusMessage: currentError.message });
   }
 
-  if (!category) {
+  if (!current) {
     throw createError({ statusCode: 404, statusMessage: 'Category not found' });
   }
 
-  currentCategory = category as Category;
-
-  // --- 3. Родитель ---
-  if (currentCategory.parent_id !== null) {
-    const { data: parentRow } = await supabase
-      .from('categories')
-      .select('id, name, slug, parent_id, image')
-      .eq('id', currentCategory.parent_id)
-      .eq('active', true)
-      .maybeSingle();
-
-    if (parentRow) parentCategory = parentRow as Category;
-  }
-
-  // --- 4. Дети ---
-  const { data: children } = await supabase
+  const { data: children, error: childrenError } = await supabase
     .from('categories')
-    .select('id, name, slug, parent_id, image')
-    .eq('parent_id', currentCategory.id)
+    .select(CATEGORY_FIELDS)
+    .eq('parent_id', current.id)
     .eq('active', true)
     .order('name', { ascending: true });
 
-  if (children && children.length > 0) {
-    if (parentCategory) {
-      navigation.push({
-        slug: parentCategory.slug,
-        name: parentCategory.name,
-        image: parentCategory.image,
-      });
-    }
-
-    navigation.push({
-      slug: currentCategory.slug,
-      name: currentCategory.name,
-      image: currentCategory.image,
-    });
-
-    navigation.push(
-      ...children.map((c: Category) => ({
-        slug: c.slug,
-        name: c.name,
-        image: c.image,
-      })),
-    );
-  } else {
-    // --- 5. Соседи ---
-    let siblings: Category[] = [];
-
-    if (parentCategory) {
-      const { data: siblingRows } = await supabase
-        .from('categories')
-        .select('id, name, slug, parent_id, image')
-        .eq('parent_id', parentCategory.id)
-        .eq('active', true)
-        .neq('id', currentCategory.id)
-        .order('name', { ascending: true });
-
-      siblings = siblingRows || [];
-    } else {
-      const { data: rootSiblings } = await supabase
-        .from('categories')
-        .select('id, name, slug, parent_id, image')
-        .is('parent_id', null)
-        .eq('active', true)
-        .neq('id', currentCategory.id)
-        .order('name', { ascending: true });
-
-      siblings = rootSiblings || [];
-    }
-
-    if (parentCategory) {
-      navigation.push({
-        slug: parentCategory.slug,
-        name: parentCategory.name,
-        image: parentCategory.image,
-      });
-    }
-
-    navigation.push({
-      slug: currentCategory.slug,
-      name: currentCategory.name,
-      image: currentCategory.image,
-    });
-
-    navigation.push(
-      ...siblings.map((c: Category) => ({
-        slug: c.slug,
-        name: c.name,
-        image: c.image,
-      })),
-    );
+  if (childrenError) {
+    throw createError({ statusCode: 500, statusMessage: childrenError.message });
   }
 
-  return navigation;
+  // Есть дети: «Todos» — текущая, чипы — дети
+  if (children?.length) {
+    return {
+      todos: { slug: current.slug, active: true },
+      items: children.map(child => ({ slug: child.slug, name: child.name, active: false })),
+    };
+  }
+
+  // Лист без родителя: навигации нет
+  if (current.parent_id === null) {
+    return { todos: null, items: [] };
+  }
+
+  // Лист: «Todos» — родитель, чипы — сёстры вместе с текущей
+  const [{ data: parent }, { data: generation, error: generationError }] = await Promise.all([
+    supabase
+      .from('categories')
+      .select(CATEGORY_FIELDS)
+      .eq('id', current.parent_id)
+      .eq('active', true)
+      .maybeSingle<CategoryRow>(),
+    supabase
+      .from('categories')
+      .select(CATEGORY_FIELDS)
+      .eq('parent_id', current.parent_id)
+      .eq('active', true)
+      .order('name', { ascending: true }),
+  ]);
+
+  if (generationError) {
+    throw createError({ statusCode: 500, statusMessage: generationError.message });
+  }
+
+  return {
+    todos: parent ? { slug: parent.slug, active: false } : null,
+    items: (generation || []).map(sibling => ({
+      slug: sibling.slug,
+      name: sibling.name,
+      active: sibling.slug === current.slug,
+    })),
+  };
 });
