@@ -39,6 +39,18 @@ const { data: catalogResponse, pending: isCatalogPending } = useFetch('/api/cata
 });
 
 const { data: facets } = useFetch('/api/catalog/facets');
+const { data: categoriesResponse } = await useFetch('/api/categories/list');
+
+const categoriesNavigation = computed(() => ({
+  items: (categoriesResponse.value || [])
+    .filter((category: any) => category.parent_id)
+    .map((category: any) => ({
+      slug: category.slug,
+      name: category.name,
+      image: category.image,
+      active: false,
+    })),
+}));
 
 const products = computed(() => catalogResponse.value?.items || []);
 const totalProducts = computed(() => catalogResponse.value?.total || 0);
@@ -116,7 +128,9 @@ useHead(() => ({
 <template>
   <UPage>
     <UPageBody class="mx-auto mt-4 max-w-6xl sm:mt-8 sm:px-6 lg:px-8">
-      <section class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
+      <section
+        class="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8"
+      >
         <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
           Todos os produtos
         </h1>
@@ -124,6 +138,12 @@ useHead(() => ({
         <p class="mt-3 text-sm leading-6 text-muted sm:text-base">
           Todas as peças disponíveis para experimentar. Escolha sem pagar agora e leve só o que gostar.
         </p>
+
+        <CategoryPills
+          v-if="categoriesNavigation.items.length"
+          :navigation="categoriesNavigation"
+          class="mt-4 sm:mt-5"
+        />
       </section>
 
       <CatalogFilterBar
@@ -196,7 +216,9 @@ useHead(() => ({
           {{ totalProducts }} {{ totalProducts === 1 ? 'produto' : 'produtos' }}
         </p>
 
-        <UBlogPosts class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4">
+        <UBlogPosts
+          class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
+        >
           <ProductCard
             v-for="product in products"
             :key="product.id"
