@@ -91,6 +91,28 @@ type RecommendedProduct = {
   images: VariantImageRow[]
 };
 
+const mapRecommendation = (p: RecommendedProductRow) => {
+  const v = Array.isArray(p.variants) ? p.variants[0] : null;
+  const imgs = Array.isArray(v?.product_variant_images) ?
+    [...v.product_variant_images].sort(
+      (a, b) => (a?.position ?? 0) - (b?.position ?? 0),
+    ) :
+    [];
+
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    badges: withAutoBadges(p.badges, p.created_at),
+    primary_category_id: p.primary_category_id,
+    brand_name: p.brand?.name ?? null,
+    price: v?.price ?? 0,
+    variant_id: v?.id ?? null,
+    color: v?.color ?? null,
+    images: imgs,
+  };
+};
+
 export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseServiceRole(event);
   const { slug } = getQuery(event) as { slug?: string };
@@ -249,27 +271,28 @@ export default defineEventHandler(async (event) => {
       recs = (recsB || []) as RecommendedProductRow[];
     }
 
-    recommendations = recs.map((p) => {
-      const v = Array.isArray(p.variants) ? p.variants[0] : null;
-      const imgs = Array.isArray(v?.product_variant_images) ?
-        [...v.product_variant_images].sort(
-          (a, b) => (a?.position ?? 0) - (b?.position ?? 0),
-        ) :
-        [];
+    recommendations = recs.map(mapRecommendation);
+  }
 
-      return {
-        id: p.id,
-        slug: p.slug,
-        title: p.title,
-        badges: withAutoBadges(p.badges, p.created_at),
-        primary_category_id: p.primary_category_id,
-        brand_name: p.brand?.name ?? null,
-        price: v?.price ?? 0,
-        variant_id: v?.id ?? null,
-        color: v?.color ?? null,
-        images: imgs,
-      };
-    });
+  // Фолбэк: у товара нет категории или в ней пусто — показываем новинки,
+  // чтобы секция рекомендаций никогда не пустовала
+  if (!recommendations.length) {
+    const { data: fallbackRecs } = await supabase
+      .from('products')
+      .select(`
+        id, slug, title, badges, created_at, primary_category_id,
+        brand:brands(name),
+        variants:product_variants(
+          id, color, price,
+          product_variant_images(url, position)
+        )
+      `)
+      .neq('id', product.id)
+      .eq('active', true)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    recommendations = ((fallbackRecs || []) as RecommendedProductRow[]).map(mapRecommendation);
   }
 
   return {

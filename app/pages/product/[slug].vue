@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
+import { getProductBadgeDotClass, getProductBadgeLabel } from '~/utils/productBadges';
 import { makeGa4Item } from '~/utils/ga4';
 import { CURRENCY } from '~/constants/currency';
 import { colorLabel } from '#shared/constants/colors';
@@ -11,10 +12,16 @@ definePageMeta({ name: 'product-slug' });
 const fallbackImage = '/placeholder.webp';
 
 const route = useRoute();
-const { data: productResponse, error: productError } = await useFetch('/api/catalog/item', {
-  query: { slug: route.params.slug },
-  watch: [() => route.fullPath],
-});
+const [
+  { data: productResponse, error: productError },
+  { data: officesResponse },
+] = await Promise.all([
+  useFetch('/api/catalog/item', {
+    query: { slug: route.params.slug },
+    watch: [() => route.fullPath],
+  }),
+  useFetch('/api/offices/list'),
+]);
 
 if (productError.value) {
   throw createError({
@@ -39,13 +46,6 @@ const breadcrumbs = computed(() =>
 );
 
 const recommendedProducts = computed(() => productResponse.value?.recommendations || []);
-
-// Last crumb is the product itself; the one before is its category
-const parentCrumb = computed(() => {
-  const crumbs = breadcrumbs.value;
-
-  return crumbs.length >= 2 ? crumbs[crumbs.length - 2] : null;
-});
 
 const variants = computed(() => product.value?.variants || []);
 
@@ -179,8 +179,6 @@ const selectedSkuKey = computed(() => {
   return buildCartItemKey(currentProduct.id, selectedVariant.id, selectedSize);
 });
 
-const mobilePriceLabel = computed(() => selectedSkuQuantity.value > 0 ? 'Subtotal da seleção' : 'Preço');
-
 const formattedMobilePrice = computed(() => {
   const quantity = selectedSkuQuantity.value || 1;
 
@@ -220,21 +218,6 @@ function pickFirstAvailableSizeId(sizes: any[] | undefined | null) {
 }
 
 const lowStockText = (stock: number) => stock === 1 ? 'Só resta 1' : `Só restam ${stock}`;
-
-const purchaseFlowSteps = [
-  {
-    title: 'Escolha em segundos',
-    description: 'Selecione o tamanho sem pagar agora.',
-  },
-  {
-    title: 'Experimente no ponto',
-    description: 'Veja ao vivo e experimente com calma.',
-  },
-  {
-    title: 'Decida na hora',
-    description: 'Leve só o que gostar.',
-  },
-];
 
 const selectedSizeOption = computed(() =>
   sizeOptions.value.find((sizeOption) => sizeOption.id === selectedSizeId.value) || null,
@@ -437,6 +420,10 @@ const productUrl = computed(() => {
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => `Olá! Tenho uma pergunta sobre este produto: ${productUrl.value}`);
 const soldOutWhatsappHref = makeWhatsappHref(() => `Olá! O produto «${productName.value}» está esgotado. Podem avisar-me quando chegar? ${productUrl.value}`);
+const deliveryWhatsappHref = makeWhatsappHref(() => `Olá! Quero saber o custo e o prazo de entrega para: ${productUrl.value}`);
+
+// Единственный пункт примерки — для блока «Entrega e levantamento»
+const mainOffice = computed(() => officesResponse.value?.items?.[0] || null);
 
 const shareText = computed(() => productName.value ? `Veja ${productName.value} na Amoda` : 'Veja este produto na Amoda');
 
@@ -593,7 +580,7 @@ useHead(() => ({
   <UPage>
     <UPageBody class="mx-auto max-w-6xl pb-32 sm:px-6 sm:pb-0 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-3">
-        <section class="flex-1 w-full">
+        <section class="w-full min-w-0">
           <div class="relative overflow-hidden rounded-3xl bg-gray-50">
             <UCarousel
               v-if="hasGalleryImages"
@@ -658,6 +645,26 @@ useHead(() => ({
               />
             </div>
 
+            <div
+              v-if="product?.badges?.length"
+              class="absolute left-3 top-3 z-10 flex flex-wrap gap-1"
+            >
+              <span
+                v-for="badge in product.badges"
+                :key="badge"
+                class="flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 backdrop-blur"
+              >
+                <span
+                  :class="getProductBadgeDotClass(badge)"
+                  class="size-1.5 rounded-full"
+                />
+
+                <span class="text-[9px] font-bold tracking-wide text-white">
+                  {{ getProductBadgeLabel(badge) }}
+                </span>
+              </span>
+            </div>
+
             <FavoriteToggle
               v-if="product?.id"
               :product="favoriteProduct"
@@ -696,50 +703,67 @@ useHead(() => ({
           </div>
         </section>
 
-        <section class="flex flex-col gap-5 px-2">
+        <section class="flex min-w-0 flex-col gap-5 px-2">
           <div>
-            <UBreadcrumb
-              :items="breadcrumbs"
-              :ui="{
-                root: 'mb-4',
-                list: 'flex items-center gap-1 min-w-0',
-                item: 'shrink-0 last:flex-1 last:min-w-0',
-                link: 'text-xs md:text-sm hover:text-primary aria-[current=page]:pointer-events-none',
-                linkLabel: 'block whitespace-nowrap overflow-hidden text-ellipsis truncate aria-[current=page]:font-medium',
-                separator: 'mx-1 text-gray-400'
-              }"
-              class="hidden md:block"
-            />
-
-            <NuxtLink
-              v-if="parentCrumb"
-              :to="parentCrumb.to"
-              class="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted transition hover:text-primary md:hidden"
+            <!-- Крошки как на категории: компактные, видны и на мобиле -->
+            <nav
+              v-if="breadcrumbs.length > 1"
+              aria-label="Breadcrumb"
+              class="-mx-1 mb-3 flex items-center gap-1 overflow-x-auto whitespace-nowrap px-1 text-xs text-dimmed [-ms-overflow-style:none] [scrollbar-width:none] sm:text-sm [&::-webkit-scrollbar]:hidden"
             >
-              <UIcon
-                name="i-lucide-arrow-left"
-                class="size-4"
-              />
+              <template
+                v-for="(breadcrumbItem, breadcrumbIndex) in breadcrumbs"
+                :key="breadcrumbItem.label"
+              >
+                <span
+                  v-if="breadcrumbIndex === breadcrumbs.length - 1"
+                  aria-current="page"
+                  class="truncate font-semibold text-highlighted"
+                  v-text="breadcrumbItem.label"
+                />
 
-              {{ parentCrumb.label }}
-            </NuxtLink>
+                <NuxtLink
+                  v-else
+                  :to="breadcrumbItem.to"
+                  class="transition hover:text-primary"
+                >
+                  {{ breadcrumbItem.label }}
+                </NuxtLink>
+
+                <UIcon
+                  v-if="breadcrumbIndex < breadcrumbs.length - 1"
+                  name="i-lucide-chevron-right"
+                  class="size-3.5 shrink-0 text-gray-300"
+                />
+              </template>
+            </nav>
 
             <h1
-              class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl"
+              class="text-lg font-medium leading-snug text-highlighted sm:text-xl"
               v-text="product?.title"
             />
 
             <p
               v-if="product?.brand_name"
-              class="mt-2 text-sm text-muted"
+              class="mt-1.5 text-sm text-muted"
               v-text="product?.brand_name"
             />
 
             <div
               v-if="isProductAvailable"
-              class="mt-4 text-3xl font-black text-primary"
-              v-text="formattedPrice"
-            />
+              class="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1"
+            >
+              <span
+                class="text-2xl font-extrabold text-highlighted"
+                v-text="formattedPrice"
+              />
+
+              <span
+                v-if="selectionSummary"
+                class="text-sm text-muted"
+                v-text="selectionSummary"
+              />
+            </div>
 
             <div
               v-else
@@ -773,7 +797,7 @@ useHead(() => ({
                 class="size-4 text-primary"
               />
 
-              <span>Experimente primeiro</span>
+              <span>Experimenta primeiro</span>
             </div>
 
             <div class="flex items-center gap-2">
@@ -782,7 +806,7 @@ useHead(() => ({
                 class="size-4 text-primary"
               />
 
-              <span>Decida na hora</span>
+              <span>Decides na hora</span>
             </div>
           </div>
 
@@ -992,82 +1016,102 @@ useHead(() => ({
             </div>
           </UCard>
 
-          <UCard v-if="product?.description">
-            <h2 class="text-base font-bold text-highlighted">
-              Descrição
-            </h2>
+          <div v-if="product?.description">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h2 class="text-base font-bold text-highlighted">
+                Descrição
+              </h2>
+
+              <div class="flex items-center gap-1.5">
+                <UButton
+                  v-for="shareLink in socialShareLinks"
+                  :key="shareLink.icon"
+                  :to="shareLink.to"
+                  :aria-label="shareLink.ariaLabel"
+                  :icon="shareLink.icon"
+                  color="neutral"
+                  variant="outline"
+                  size="xs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="size-8 justify-center rounded-full text-toned hover:border-primary/40 hover:text-primary"
+                />
+
+                <UButton
+                  aria-label="Copiar link do produto"
+                  icon="i-lucide-copy"
+                  color="neutral"
+                  variant="outline"
+                  size="xs"
+                  class="size-8 justify-center rounded-full text-toned hover:border-primary/40 hover:text-primary"
+                  @click="copyProductLink"
+                />
+              </div>
+            </div>
 
             <p
-              class="mt-3 text-sm leading-7 text-toned"
+              class="mt-2 text-sm leading-7 text-toned"
               v-text="product.description"
             />
-          </UCard>
+          </div>
 
-          <UCard>
+          <div v-if="isProductAvailable">
             <h2 class="text-base font-bold text-highlighted">
-              Partilhar
+              Entrega e levantamento
             </h2>
 
-            <div class="mt-3 flex items-center gap-2">
-              <UButton
-                v-for="shareLink in socialShareLinks"
-                :key="shareLink.icon"
-                :to="shareLink.to"
-                :aria-label="shareLink.ariaLabel"
-                :icon="shareLink.icon"
-                color="neutral"
-                variant="outline"
-                size="sm"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="size-10 justify-center rounded-xl text-toned hover:border-primary/40 hover:text-primary"
-              />
-
-              <UButton
-                aria-label="Copiar link do produto"
-                icon="i-lucide-copy"
-                color="neutral"
-                variant="outline"
-                size="sm"
-                class="size-10 justify-center rounded-xl text-toned hover:border-primary/40 hover:text-primary"
-                @click="copyProductLink"
-              />
-            </div>
-          </UCard>
-
-          <UCard
-            v-if="isProductAvailable"
-            class="border-primary/20 bg-primary/5"
-          >
-            <h2 class="text-base font-bold text-highlighted">
-              Como funciona
-            </h2>
-
-            <div class="mt-4 space-y-3">
+            <div class="mt-3 space-y-2.5 text-sm leading-6 text-toned">
               <div
-                v-for="(purchaseStep, stepIndex) in purchaseFlowSteps"
-                :key="purchaseStep.title"
-                class="flex gap-3"
+                v-if="mainOffice"
+                class="flex gap-2.5"
               >
-                <div
-                  class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white"
-                  v-text="stepIndex + 1"
+                <UIcon
+                  name="i-lucide-map-pin"
+                  class="mt-1 size-4 shrink-0 text-primary"
                 />
 
                 <div>
-                  <div
-                    class="text-sm font-semibold text-highlighted"
-                    v-text="purchaseStep.title"
-                  />
+                  <span class="font-semibold text-highlighted">Levantamento grátis</span>
+                  — {{ mainOffice.address || mainOffice.name }}
+                </div>
+              </div>
 
-                  <div
-                    class="text-sm leading-6 text-muted"
-                    v-text="purchaseStep.description"
-                  />
+              <div class="flex gap-2.5">
+                <UIcon
+                  name="i-lucide-truck"
+                  class="mt-1 size-4 shrink-0 text-primary"
+                />
+
+                <div>
+                  <span class="font-semibold text-highlighted">Entrega em Luanda</span>
+                  — taxa conforme a localização
+                </div>
+              </div>
+
+              <div class="flex gap-2.5">
+                <UIcon
+                  name="i-lucide-package"
+                  class="mt-1 size-4 shrink-0 text-primary"
+                />
+
+                <div>
+                  <span class="font-semibold text-highlighted">Envios para as províncias</span>
+                  — com comprovativo de envio
                 </div>
               </div>
             </div>
-          </UCard>
+
+            <UButton
+              :to="deliveryWhatsappHref"
+              target="_blank"
+              color="success"
+              variant="soft"
+              icon="i-simple-icons-whatsapp"
+              class="mt-3"
+            >
+              Pergunta o custo e o prazo
+            </UButton>
+          </div>
         </section>
       </div>
 
@@ -1191,22 +1235,16 @@ useHead(() => ({
         class="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white p-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] sm:hidden"
       >
         <div class="mx-auto max-w-(--ui-container) px-1">
-          <div class="mb-2 flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <div class="text-xs font-medium text-muted">
-                {{ mobilePriceLabel }}
-              </div>
-
-              <div
-                v-if="selectionSummary"
-                class="truncate text-sm font-semibold text-highlighted"
-                v-text="selectionSummary"
-              />
-            </div>
+          <div class="mb-2 flex items-baseline justify-between gap-3">
+            <div
+              class="text-lg font-extrabold text-highlighted"
+              v-text="formattedMobilePrice"
+            />
 
             <div
-              class="text-xl font-black text-primary"
-              v-text="formattedMobilePrice"
+              v-if="selectionSummary"
+              class="truncate text-xs text-muted"
+              v-text="selectionSummary"
             />
           </div>
 
