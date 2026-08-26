@@ -132,7 +132,7 @@ const shoppingSteps = [
   {
     icon: 'i-lucide-shirt',
     title: '2 · Experimenta com calma',
-    description: 'Entregamos em casa ou no ponto. Vês o tamanho, o tecido e o caimento ao vivo.',
+    description: 'Entregamos em casa ou levantas no nosso showroom. Provas tudo com calma antes de decidir.',
   },
   {
     icon: 'i-lucide-wallet',

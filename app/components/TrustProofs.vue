@@ -6,27 +6,27 @@ import { FACEBOOK_LINK } from '~/constants/contacts';
 const proofs = [
   {
     image: '/trust/proof-01.webp',
-    caption: 'Levamos várias peças — escolhe só o que gostar',
+    caption: 'Pediu 4 vestidos para experimentar em casa e ficou com os que gostou',
   },
   {
     image: '/trust/proof-02.webp',
-    caption: '«Já recebi o vestido. Muito obrigada.»',
+    caption: '«Já recebi o vestido. Muito obrigada.» — mais uma entrega em Luanda',
   },
   {
     image: '/trust/proof-03.webp',
-    caption: 'Enviamos para as províncias com comprovativo',
+    caption: 'Envio para Benguela — o comprovativo segue sempre no WhatsApp',
   },
   {
     image: '/trust/proof-04.webp',
-    caption: 'Entrega no teu bairro — pagas só ao receber',
+    caption: 'Entrega no Benfica — combinámos o preço e a hora pelo WhatsApp',
   },
   {
     image: '/trust/proof-05.webp',
-    caption: 'De Luanda a Benguela: pagas quando receberes',
+    caption: 'Cliente de Benguela — só pagou quando o vestido chegou',
   },
   {
     image: '/trust/proof-06.webp',
-    caption: 'Entregamos até à tua porta',
+    caption: 'Levamos até à porta — mesmo quando é no 7.º andar',
   },
 ] as const;
 
@@ -45,11 +45,11 @@ const openViewer = (index: number) => {
 <template>
   <section class="mt-6 sm:mt-10">
     <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
-      Conversas reais, entregas reais
+      Quem já comprou connosco
     </h2>
 
     <p class="mt-2 text-sm text-muted sm:text-base">
-      Sem filtros: perguntas, entregas e agradecimentos de clientes no nosso WhatsApp.
+      Prints do nosso WhatsApp, partilhados com autorização das clientes. É assim que funciona no dia a dia.
     </p>
 
     <div class="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:gap-4 sm:px-0 [&::-webkit-scrollbar]:hidden">
@@ -96,7 +96,7 @@ const openViewer = (index: number) => {
         </span>
 
         <span class="text-sm text-blue-100">
-          Vê entregas, novidades e comentários de clientes
+          Vê as novidades e o que as clientes dizem
         </span>
       </a>
     </div>
