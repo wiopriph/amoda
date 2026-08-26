@@ -778,38 +778,6 @@ useHead(() => ({
             </div>
           </div>
 
-          <div
-            v-if="isProductAvailable"
-            class="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-toned"
-          >
-            <div class="flex items-center gap-2">
-              <UIcon
-                name="i-lucide-wallet"
-                class="size-4 text-primary"
-              />
-
-              <span>Sem pagamento online</span>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <UIcon
-                name="i-lucide-shirt"
-                class="size-4 text-primary"
-              />
-
-              <span>Experimenta primeiro</span>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <UIcon
-                name="i-simple-icons-whatsapp"
-                class="size-4 text-primary"
-              />
-
-              <span>Decides na hora</span>
-            </div>
-          </div>
-
           <UCard v-if="isProductAvailable">
             <div>
               <div
@@ -1016,38 +984,122 @@ useHead(() => ({
             </div>
           </UCard>
 
-          <div v-if="product?.description">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <h2 class="text-base font-bold text-highlighted">
-                Descrição
-              </h2>
+          <div
+            v-if="isProductAvailable"
+            class="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-toned"
+          >
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-lucide-wallet"
+                class="size-4 text-primary"
+              />
 
-              <div class="flex items-center gap-1.5">
-                <UButton
-                  v-for="shareLink in socialShareLinks"
-                  :key="shareLink.icon"
-                  :to="shareLink.to"
-                  :aria-label="shareLink.ariaLabel"
-                  :icon="shareLink.icon"
-                  color="neutral"
-                  variant="outline"
-                  size="xs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="size-8 justify-center rounded-full text-toned hover:border-primary/40 hover:text-primary"
-                />
+              <span>Sem pagamento online</span>
+            </div>
 
-                <UButton
-                  aria-label="Copiar link do produto"
-                  icon="i-lucide-copy"
-                  color="neutral"
-                  variant="outline"
-                  size="xs"
-                  class="size-8 justify-center rounded-full text-toned hover:border-primary/40 hover:text-primary"
-                  @click="copyProductLink"
-                />
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-lucide-shirt"
+                class="size-4 text-primary"
+              />
+
+              <span>Experimenta primeiro</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-simple-icons-whatsapp"
+                class="size-4 text-primary"
+              />
+
+              <span>Decides na hora</span>
+            </div>
+          </div>
+
+          <div
+            v-if="isProductAvailable"
+            class="rounded-2xl border border-gray-100"
+          >
+            <div class="divide-y divide-gray-100">
+              <div
+                v-if="mainOffice"
+                class="flex items-start gap-3 p-3.5"
+              >
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <UIcon
+                    name="i-lucide-map-pin"
+                    class="size-4.5"
+                  />
+                </div>
+
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold text-highlighted">
+                    Showroom Amoda
+                  </div>
+
+                  <div class="mt-0.5 text-xs leading-5 text-muted">
+                    {{ mainOffice.address || mainOffice.name }} · levantamento grátis
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 p-3.5">
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <UIcon
+                    name="i-lucide-truck"
+                    class="size-4.5"
+                  />
+                </div>
+
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold text-highlighted">
+                    Entrega em Luanda
+                  </div>
+
+                  <div class="mt-0.5 text-xs leading-5 text-muted">
+                    Taxa conforme a localização, no horário combinado
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3 p-3.5">
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <UIcon
+                    name="i-lucide-package"
+                    class="size-4.5"
+                  />
+                </div>
+
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold text-highlighted">
+                    Envios para as províncias
+                  </div>
+
+                  <div class="mt-0.5 text-xs leading-5 text-muted">
+                    Com comprovativo de envio
+                  </div>
+                </div>
               </div>
             </div>
+
+            <div class="border-t border-gray-100 p-3">
+              <UButton
+                :to="deliveryWhatsappHref"
+                target="_blank"
+                color="success"
+                variant="soft"
+                icon="i-simple-icons-whatsapp"
+                class="w-full justify-center"
+              >
+                Pergunta o custo e o prazo
+              </UButton>
+            </div>
+          </div>
+
+          <div v-if="product?.description">
+            <h2 class="text-base font-bold text-highlighted">
+              Descrição
+            </h2>
 
             <p
               class="mt-2 text-sm leading-7 text-toned"
@@ -1055,62 +1107,36 @@ useHead(() => ({
             />
           </div>
 
-          <div v-if="isProductAvailable">
+          <div>
             <h2 class="text-base font-bold text-highlighted">
-              Entrega e levantamento
+              Partilhar
             </h2>
 
-            <div class="mt-3 space-y-2.5 text-sm leading-6 text-toned">
-              <div
-                v-if="mainOffice"
-                class="flex gap-2.5"
-              >
-                <UIcon
-                  name="i-lucide-map-pin"
-                  class="mt-1 size-4 shrink-0 text-primary"
-                />
+            <div class="mt-3 flex items-center gap-2">
+              <UButton
+                v-for="shareLink in socialShareLinks"
+                :key="shareLink.icon"
+                :to="shareLink.to"
+                :aria-label="shareLink.ariaLabel"
+                :icon="shareLink.icon"
+                color="neutral"
+                variant="outline"
+                size="sm"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="size-10 justify-center rounded-full text-toned hover:border-primary/40 hover:text-primary"
+              />
 
-                <div>
-                  <span class="font-semibold text-highlighted">Levantamento grátis</span>
-                  — {{ mainOffice.address || mainOffice.name }}
-                </div>
-              </div>
-
-              <div class="flex gap-2.5">
-                <UIcon
-                  name="i-lucide-truck"
-                  class="mt-1 size-4 shrink-0 text-primary"
-                />
-
-                <div>
-                  <span class="font-semibold text-highlighted">Entrega em Luanda</span>
-                  — taxa conforme a localização
-                </div>
-              </div>
-
-              <div class="flex gap-2.5">
-                <UIcon
-                  name="i-lucide-package"
-                  class="mt-1 size-4 shrink-0 text-primary"
-                />
-
-                <div>
-                  <span class="font-semibold text-highlighted">Envios para as províncias</span>
-                  — com comprovativo de envio
-                </div>
-              </div>
+              <UButton
+                aria-label="Copiar link do produto"
+                icon="i-lucide-copy"
+                color="neutral"
+                variant="outline"
+                size="sm"
+                class="size-10 justify-center rounded-full text-toned hover:border-primary/40 hover:text-primary"
+                @click="copyProductLink"
+              />
             </div>
-
-            <UButton
-              :to="deliveryWhatsappHref"
-              target="_blank"
-              color="success"
-              variant="soft"
-              icon="i-simple-icons-whatsapp"
-              class="mt-3"
-            >
-              Pergunta o custo e o prazo
-            </UButton>
           </div>
         </section>
       </div>
