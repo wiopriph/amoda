@@ -75,12 +75,32 @@ watch(selectedVariantId, () => {
 
 const selectedVariantLabel = computed(() => colorLabel(activeVariant.value?.color) || '—');
 
+// stock === null — остатки не отслеживаются, считаем доступным
+const isVariantOutOfStock = (variant: any) => {
+  const sizes = variant?.sizes || [];
+
+  if (!sizes.length) {
+    return false;
+  }
+
+  return sizes.every((size: any) => size.stock !== null && size.stock !== undefined && Number(size.stock) <= 0);
+};
+
 const variantOptions = computed(() =>
   variants.value.map((variant: any) => ({
     id: variant.id,
     url: variant.images?.[0]?.url || product.value?.images?.[0]?.url || fallbackImage,
     label: colorLabel(variant.color) || '—',
+    isOutOfStock: isVariantOutOfStock(variant),
   })),
+);
+
+const availableOtherVariants = computed(() =>
+  variantOptions.value.filter(variantOption => !variantOption.isOutOfStock && variantOption.id !== activeVariant.value?.id),
+);
+
+const areAllVariantsOutOfStock = computed(() =>
+  variantOptions.value.length > 0 && variantOptions.value.every(variantOption => variantOption.isOutOfStock),
 );
 
 const galleryImages = computed(() => {
@@ -808,17 +828,36 @@ useHead(() => ({
                       ? 'border-primary ring-2 ring-primary/30'
                       : 'border-gray-200 hover:border-primary/50'"
                     type="button"
-                    class="relative size-14 overflow-hidden rounded-2xl border transition"
+                    class="relative h-[72px] w-14 overflow-hidden rounded-xl border transition"
                     @click="selectedVariantId = variantOption.id"
                   >
                     <NuxtImg
                       :src="variantOption.url"
                       :alt="`${productName} - cor ${variantOption.label}`"
+                      :class="variantOption.isOutOfStock ? 'opacity-50 grayscale-[35%]' : ''"
                       class="h-full w-full object-cover"
                       loading="lazy"
                     />
+
+                    <span
+                      v-if="variantOption.isOutOfStock && selectedVariantId === variantOption.id"
+                      class="absolute inset-0 flex items-center justify-center"
+                    >
+                      <span class="rounded-full bg-black/55 px-1.5 py-0.5 text-[8px] font-bold tracking-wide text-white">
+                        ESGOTADO
+                      </span>
+                    </span>
                   </button>
                 </div>
+
+                <p
+                  v-if="areAllSizesOutOfStock && availableOtherVariants.length"
+                  class="mt-2 text-xs leading-5 text-muted"
+                >
+                  Disponível em
+                  <span class="font-semibold text-highlighted">{{ availableOtherVariants.map(variantOption => variantOption.label).join(', ') }}</span>
+                  — toca na cor
+                </p>
               </div>
 
               <div
@@ -832,18 +871,31 @@ useHead(() => ({
                     Tamanho
                   </div>
 
+                  <span
+                    v-if="areAllSizesOutOfStock"
+                    class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-muted"
+                  >
+                    {{ variantOptions.length > 1 && !areAllVariantsOutOfStock ? 'Esgotado nesta cor' : 'Esgotado' }}
+                  </span>
+
                   <div
-                    v-if="variantOptions.length === 1"
+                    v-else-if="variantOptions.length === 1 && activeVariant?.color"
                     class="flex items-center gap-1.5 text-sm text-muted"
                   >
                     <ColorSwatch
-                      v-if="activeVariant?.color"
                       :color="activeVariant.color"
                       :size="16"
                     />
 
                     <span v-text="selectedVariantLabel" />
                   </div>
+
+                  <span
+                    v-else-if="sizeOptions.length === 1"
+                    class="text-sm text-muted"
+                  >
+                    Tamanho único
+                  </span>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -852,7 +904,7 @@ useHead(() => ({
                     :key="sizeOption.id"
                     :disabled="sizeOption.isOutOfStock"
                     :class="sizeOption.isOutOfStock
-                      ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300 line-through'
+                      ? 'cursor-not-allowed border-dashed border-gray-200 bg-transparent font-normal text-gray-300'
                       : selectedSizeId === sizeOption.id
                         ? 'border-primary bg-primary/10 text-primary'
                         : 'border-gray-200 bg-white hover:border-primary/50'"
@@ -883,31 +935,11 @@ useHead(() => ({
                   {{ lowStockText(selectedSizeOption.stock) }}
                 </p>
 
-                <div
-                  v-if="areAllSizesOutOfStock"
-                  class="mt-2"
-                >
-                  <p class="text-sm text-red-600">
-                    Todos os tamanhos esgotados nesta cor
-                  </p>
-
-                  <UButton
-                    :to="soldOutWhatsappHref"
-                    target="_blank"
-                    color="success"
-                    variant="soft"
-                    icon="i-simple-icons-whatsapp"
-                    class="mt-2"
-                  >
-                    Avise-me quando chegar
-                  </UButton>
-                </div>
-
                 <p
-                  v-else-if="!selectedSizeId"
-                  class="mt-2 text-sm text-red-600"
+                  v-if="areAllVariantsOutOfStock"
+                  class="mt-3 text-xs leading-5 text-muted"
                 >
-                  Escolha um tamanho
+                  Este produto esgotou. Deixa o teu contacto — avisamos quando voltar.
                 </p>
               </div>
 
@@ -956,6 +988,18 @@ useHead(() => ({
                 </div>
 
                 <UButton
+                  v-else-if="areAllSizesOutOfStock"
+                  :to="soldOutWhatsappHref"
+                  target="_blank"
+                  size="xl"
+                  color="success"
+                  icon="i-simple-icons-whatsapp"
+                  class="w-full justify-center"
+                >
+                  Avise-me quando chegar
+                </UButton>
+
+                <UButton
                   v-else
                   :disabled="!selectedSizeId"
                   size="xl"
@@ -963,7 +1007,7 @@ useHead(() => ({
                   class="w-full justify-center"
                   @click="addProductToCart"
                 >
-                  {{ selectedSizeId ? "Escolher" : areAllSizesOutOfStock ? "Esgotado" : "Escolha um tamanho" }}
+                  {{ selectedSizeId ? "Escolher" : "Escolha um tamanho" }}
                 </UButton>
               </div>
             </div>
