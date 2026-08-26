@@ -301,7 +301,7 @@ useHead(() => ({
         </div>
 
         <div
-          v-if="categoryNavigation?.todos || categoryNavigation?.items?.length"
+          v-if="categoryNavigation?.items?.length"
           class="mt-4 sm:mt-5"
         >
           <CategoryPills :navigation="categoryNavigation" />

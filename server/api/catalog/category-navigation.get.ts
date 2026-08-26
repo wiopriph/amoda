@@ -6,16 +6,16 @@ type CategoryRow = {
   name: string
   slug: string
   parent_id: number | null
+  image: string | null
 };
 
 export type CategoryNavigationResponse = {
-  // Чип «Todos»: текущая категория (если есть дети) или родитель (если лист)
-  todos: { slug: string; active: boolean } | null
-  // Один уровень: дети текущей либо сёстры листа (текущая помечена active)
-  items: { slug: string; name: string; active: boolean }[]
+  // Один уровень «вглубь/вбок»: дети текущей либо сёстры листа (текущая помечена active).
+  // Вверх по дереву ведут хлебные крошки — здесь этого направления нет
+  items: { slug: string; name: string; image: string | null; active: boolean }[]
 };
 
-const CATEGORY_FIELDS = 'id, name, slug, parent_id';
+const CATEGORY_FIELDS = 'id, name, slug, parent_id, image';
 
 export default defineEventHandler(async (event): Promise<CategoryNavigationResponse> => {
   const supabase = await serverSupabaseClient(event);
@@ -51,44 +51,32 @@ export default defineEventHandler(async (event): Promise<CategoryNavigationRespo
     throw createError({ statusCode: 500, statusMessage: childrenError.message });
   }
 
-  // Есть дети: «Todos» — текущая, чипы — дети
   if (children?.length) {
     return {
-      todos: { slug: current.slug, active: true },
-      items: children.map(child => ({ slug: child.slug, name: child.name, active: false })),
+      items: children.map(child => ({ slug: child.slug, name: child.name, image: child.image, active: false })),
     };
   }
 
-  // Лист без родителя: навигации нет
   if (current.parent_id === null) {
-    return { todos: null, items: [] };
+    return { items: [] };
   }
 
-  // Лист: «Todos» — родитель, чипы — сёстры вместе с текущей
-  const [{ data: parent }, { data: generation, error: generationError }] = await Promise.all([
-    supabase
-      .from('categories')
-      .select(CATEGORY_FIELDS)
-      .eq('id', current.parent_id)
-      .eq('active', true)
-      .maybeSingle<CategoryRow>(),
-    supabase
-      .from('categories')
-      .select(CATEGORY_FIELDS)
-      .eq('parent_id', current.parent_id)
-      .eq('active', true)
-      .order('name', { ascending: true }),
-  ]);
+  const { data: generation, error: generationError } = await supabase
+    .from('categories')
+    .select(CATEGORY_FIELDS)
+    .eq('parent_id', current.parent_id)
+    .eq('active', true)
+    .order('name', { ascending: true });
 
   if (generationError) {
     throw createError({ statusCode: 500, statusMessage: generationError.message });
   }
 
   return {
-    todos: parent ? { slug: parent.slug, active: false } : null,
     items: (generation || []).map(sibling => ({
       slug: sibling.slug,
       name: sibling.name,
+      image: sibling.image,
       active: sibling.slug === current.slug,
     })),
   };

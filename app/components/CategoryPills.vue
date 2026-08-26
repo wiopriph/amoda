@@ -2,49 +2,63 @@
 import type { CategoryNavigationResponse } from '~~/server/api/catalog/category-navigation.get';
 
 
-const props = defineProps<{
+defineProps<{
   navigation: CategoryNavigationResponse
 }>();
-
-// «Todos» + чипы одного уровня; активный чип — не ссылка
-const chips = computed(() => {
-  const list: { label: string; slug: string; active: boolean }[] = [];
-
-  if (props.navigation.todos) {
-    list.push({ label: 'Todos', slug: props.navigation.todos.slug, active: props.navigation.todos.active });
-  }
-
-  for (const item of props.navigation.items) {
-    list.push({ label: item.name, slug: item.slug, active: item.active });
-  }
-
-  return list;
-});
 </script>
 
 <template>
+  <!-- Тот же паттерн, что лента «Categorias» на главной: фото 3:4, имя на градиенте.
+       Активная — розовое кольцо и не ссылка -->
   <nav
-    v-if="chips.length"
+    v-if="navigation.items.length"
     aria-label="Navegação de categorias"
   >
-    <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
+    <div class="-mx-4 flex gap-2.5 overflow-x-auto p-1 px-4 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:gap-3 sm:px-1 [&::-webkit-scrollbar]:hidden">
       <template
-        v-for="chip in chips"
-        :key="chip.slug"
+        v-for="item in navigation.items"
+        :key="item.slug"
       >
         <span
-          v-if="chip.active"
+          v-if="item.active"
           aria-current="page"
-          class="shrink-0 rounded-full bg-primary px-3.5 py-2 text-sm font-semibold text-white"
-          v-text="chip.label"
-        />
+          class="relative w-24 shrink-0 overflow-hidden rounded-2xl bg-gray-100 ring-2 ring-primary sm:w-28"
+        >
+          <span class="block aspect-[3/4] overflow-hidden">
+            <img
+              :src="item.image || '/placeholder.webp'"
+              :alt="item.name"
+              loading="lazy"
+              class="h-full w-full object-cover object-top"
+            >
+          </span>
+
+          <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+
+          <span class="absolute bottom-1.5 left-2 right-2 text-xs font-bold leading-tight text-white sm:text-[13px]">
+            {{ item.name }}
+          </span>
+        </span>
 
         <NuxtLink
           v-else
-          :to="{ name: 'category-slug', params: { slug: chip.slug } }"
-          class="shrink-0 rounded-full border border-gray-100 bg-white px-3.5 py-2 text-sm font-medium text-highlighted transition hover:border-primary/30 hover:bg-primary/5"
+          :to="{ name: 'category-slug', params: { slug: item.slug } }"
+          class="group relative w-24 shrink-0 overflow-hidden rounded-2xl bg-gray-100 transition hover:shadow-md sm:w-28"
         >
-          {{ chip.label }}
+          <span class="block aspect-[3/4] overflow-hidden">
+            <img
+              :src="item.image || '/placeholder.webp'"
+              :alt="item.name"
+              loading="lazy"
+              class="h-full w-full object-cover object-top transition duration-300 group-hover:scale-105"
+            >
+          </span>
+
+          <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+
+          <span class="absolute bottom-1.5 left-2 right-2 text-xs font-bold leading-tight text-white sm:text-[13px]">
+            {{ item.name }}
+          </span>
         </NuxtLink>
       </template>
     </div>

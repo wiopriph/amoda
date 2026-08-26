@@ -198,16 +198,16 @@ const startShoppingTo = { name: 'products' } as const;
           Categorias
         </h2>
 
-        <!-- Горизонтальная лента вместо грида: секция в один ряд, вертикальные фото 3:4 -->
+        <!-- Плитка: все категории видны сразу, без горизонтального скролла -->
         <nav
           aria-label="Categorias da loja"
-          class="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:gap-4 sm:px-0 [&::-webkit-scrollbar]:hidden"
+          class="mt-5 grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5"
         >
           <NuxtLink
             v-for="showcaseCategory in showcaseCategories"
             :key="showcaseCategory.slug"
             :to="{ name: 'category-slug', params: { slug: showcaseCategory.slug } }"
-            class="group relative w-[132px] shrink-0 snap-start overflow-hidden rounded-2xl bg-gray-100 transition hover:shadow-md sm:w-40"
+            class="group relative overflow-hidden rounded-2xl bg-gray-100 transition hover:shadow-md"
           >
             <div class="aspect-[3/4] overflow-hidden">
               <img
@@ -221,7 +221,7 @@ const startShoppingTo = { name: 'products' } as const;
 
             <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
 
-            <div class="absolute bottom-2.5 left-3 right-3 truncate text-sm font-bold text-white">
+            <div class="absolute bottom-2 left-2.5 right-2.5 text-xs font-bold leading-tight text-white sm:text-sm">
               {{ showcaseCategory.name }}
             </div>
           </NuxtLink>
