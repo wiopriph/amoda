@@ -38,7 +38,7 @@ const { count: favoritesCount } = useFavorites();
   <div class="sticky top-0 z-50">
     <!-- h-7 is part of --app-header-offset in main.css — keep them in sync -->
     <div class="flex h-7 items-center justify-center overflow-hidden whitespace-nowrap bg-primary px-4 text-xs font-semibold text-white">
-      Experimente antes de pagar · Pague só o que gostar
+      Experimenta antes de pagar · Paga só o que gostar
     </div>
 
     <UHeader

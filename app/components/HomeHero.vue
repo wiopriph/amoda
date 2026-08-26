@@ -26,12 +26,44 @@ const heroContent = {
 
 // Веер: боковые карточки повёрнуты, центральная сверху с бейджем
 const FAN_SLOTS = [
-  'absolute left-1 top-4 w-[42%] -rotate-6 lg:left-0 lg:top-10',
+  'absolute left-1 top-3 z-0 w-[42%] -rotate-6 lg:left-0 lg:top-6',
   'absolute left-1/2 top-0 z-10 w-[46%] -translate-x-1/2',
-  'absolute right-1 top-6 w-[42%] rotate-6 lg:right-0 lg:top-12',
+  'absolute right-1 top-4 z-0 w-[42%] rotate-6 lg:right-0 lg:top-7',
 ] as const;
 
+const CENTER_SLOT = 1;
+
 const fanProducts = computed(() => (props.products || []).slice(0, 3));
+
+// Расстановка по слотам [левый, центр, правый]: тап по боковой выдвигает её в центр,
+// тап по центральной — переход на товар
+const fanArrangement = ref<number[]>([0, 1, 2]);
+
+watch(fanProducts, () => {
+  fanArrangement.value = [0, 1, 2];
+});
+
+const fanSlots = computed(() =>
+  fanArrangement.value
+    .map((productIndex, slotIndex) => ({
+      product: fanProducts.value[productIndex],
+      slotIndex,
+    }))
+    .filter((slot): slot is { product: CatalogProductCard; slotIndex: number } => Boolean(slot.product)),
+);
+
+function onFanCardClick(slotIndex: number, event: MouseEvent) {
+  if (slotIndex === CENTER_SLOT || fanProducts.value.length < 2) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const next = [...fanArrangement.value];
+
+  [next[CENTER_SLOT], next[slotIndex]] = [next[slotIndex]!, next[CENTER_SLOT]!];
+  fanArrangement.value = next;
+}
 </script>
 
 <template>
@@ -84,38 +116,44 @@ const fanProducts = computed(() => (props.products || []).slice(0, 3));
 
       <div
         v-if="fanProducts.length"
-        class="relative mx-auto h-[310px] w-full max-w-[420px] sm:h-[360px] lg:h-[420px]"
+        class="relative mx-auto h-[265px] w-full max-w-[420px] sm:h-[300px] lg:h-[315px]"
       >
+        <!-- Карточки в стиле ProductCard: фото до краёв, цена чёрным главным текстом -->
         <NuxtLink
-          v-for="(fanProduct, fanIndex) in fanProducts"
-          :key="fanProduct.id"
-          :to="{ name: 'product-slug', params: { slug: fanProduct.slug } }"
-          :class="FAN_SLOTS[fanIndex]"
-          class="block rounded-2xl border border-gray-100 bg-white p-1.5 shadow-xl shadow-gray-900/10 transition hover:-translate-y-1 hover:shadow-2xl"
+          v-for="fanSlot in fanSlots"
+          :key="fanSlot.product.id"
+          :to="{ name: 'product-slug', params: { slug: fanSlot.product.slug } }"
+          :class="FAN_SLOTS[fanSlot.slotIndex]"
+          class="block overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl shadow-gray-900/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+          @click="onFanCardClick(fanSlot.slotIndex, $event)"
         >
-          <div class="aspect-[4/5] overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
+          <div class="relative aspect-[4/5] overflow-hidden bg-gray-50">
             <img
-              :src="fanProduct.image || '/placeholder.webp'"
-              :alt="fanProduct.title"
+              :src="fanSlot.product.image || '/placeholder.webp'"
+              :alt="fanSlot.product.title"
               fetchpriority="high"
               class="h-full w-full object-cover"
             >
-          </div>
-
-          <div class="flex items-center justify-between gap-1 px-1.5 py-2">
-            <span class="text-xs font-extrabold text-primary sm:text-sm">
-              {{ formatPrice(fanProduct.price) }}
-            </span>
 
             <UBadge
-              v-if="fanIndex === 1"
+              v-if="fanSlot.slotIndex === CENTER_SLOT"
               color="primary"
               variant="solid"
               size="sm"
-              class="hidden shrink-0 sm:inline-flex"
+              class="absolute left-2 top-2"
             >
               Escolha Amoda
             </UBadge>
+          </div>
+
+          <div class="px-2.5 py-1.5">
+            <div class="text-xs font-extrabold text-highlighted sm:text-sm">
+              {{ formatPrice(fanSlot.product.price) }}
+            </div>
+
+            <div class="truncate text-[10px] text-muted">
+              {{ fanSlot.product.title }}
+            </div>
           </div>
         </NuxtLink>
       </div>

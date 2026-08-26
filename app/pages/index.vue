@@ -32,7 +32,8 @@ const [
   { data: categoriesResponse },
 ] = await Promise.all([
   useFetch('/api/catalog/list', {
-    query: { limit: 10, sort: 'new' },
+    // 13 = 10 в сетку + запас на исключение товаров веера hero
+    query: { limit: 13, sort: 'new' },
     watch: [() => route.fullPath],
   }),
   useFetch('/api/catalog/list', {
@@ -48,6 +49,13 @@ const heroProducts = computed(() => {
   const featured = featuredResponse.value?.items || [];
 
   return featured.length ? featured : products.value.slice(0, 3);
+});
+
+// Сетка новинок без товаров веера — иначе они дублируются на одном экране
+const gridProducts = computed(() => {
+  const heroIds = new Set(heroProducts.value.map(heroProduct => heroProduct.id));
+
+  return products.value.filter(product => !heroIds.has(product.id)).slice(0, 10);
 });
 
 // Витрина категорий: все, кроме корневой (у корня нет parent_id)
@@ -85,7 +93,7 @@ if (import.meta.client) {
   watch(
     () => route.fullPath,
     () => {
-      const analyticsItems = products.value
+      const analyticsItems = gridProducts.value
         .map((product, productIndex) => mapProductToGa4Item(product, productIndex + 1))
         .filter(Boolean);
 
@@ -133,11 +141,8 @@ const shoppingSteps = [
   },
 ];
 
-const seoDescriptionParagraphs = [
-  'A Amoda é uma loja online de roupa feminina em Angola feita para quem quer comprar com mais segurança.',
-  'Você escolhe as peças online, seleciona sem pagamento antecipado e experimenta antes de decidir.',
-  'Se gostar, leva e paga. Se não gostar, não precisa comprar.',
-] as const;
+// Компактный SEO-абзац на «tu», без повторов сообщений страницы
+const seoDescription = 'A Amoda é uma loja online de roupa feminina em Angola. Escolhes as peças no site, recebes sem pagamento antecipado e experimentas antes de decidir. Se gostares, levas e pagas na hora — em dinheiro ou TPA. Se não gostares, devolves sem custo. Entregamos em Luanda e enviamos para as províncias.';
 
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda para escolher peças na Amoda.');
@@ -151,24 +156,17 @@ const startShoppingTo = { name: 'products' } as const;
       <HomeHero :products="heroProducts" />
 
       <section class="mt-6 sm:mt-10">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
-              Novidades para experimentar
-            </h2>
+        <div class="flex items-baseline justify-between gap-3">
+          <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
+            Novidades
+          </h2>
 
-            <p class="mt-2 text-sm text-muted sm:text-base">
-              Peças selecionadas para você montar o seu próximo look.
-            </p>
-          </div>
-
-          <UButton
+          <NuxtLink
             :to="startShoppingTo"
-            variant="soft"
-            class="hidden sm:inline-flex"
+            class="shrink-0 text-sm font-semibold text-primary transition hover:text-primary/80"
           >
-            Ver todos os produtos
-          </UButton>
+            Ver todos →
+          </NuxtLink>
         </div>
 
         <UAlert
@@ -184,22 +182,12 @@ const startShoppingTo = { name: 'products' } as const;
           class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-y-4"
         >
           <ProductCard
-            v-for="product in products"
+            v-for="product in gridProducts"
             :key="product.id"
             :product="product"
             @select="sendSelectProductEvent(product)"
           />
         </UBlogPosts>
-
-        <div class="mt-5 sm:hidden">
-          <UButton
-            :to="startShoppingTo"
-            size="lg"
-            class="w-full justify-center"
-          >
-            Ver todos os produtos
-          </UButton>
-        </div>
       </section>
 
       <section
@@ -210,23 +198,24 @@ const startShoppingTo = { name: 'products' } as const;
           Categorias
         </h2>
 
+        <!-- Горизонтальная лента вместо грида: секция в один ряд, вертикальные фото 3:4 -->
         <nav
           aria-label="Categorias da loja"
-          class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5"
+          class="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:gap-4 sm:px-0 [&::-webkit-scrollbar]:hidden"
         >
           <NuxtLink
             v-for="showcaseCategory in showcaseCategories"
             :key="showcaseCategory.slug"
             :to="{ name: 'category-slug', params: { slug: showcaseCategory.slug } }"
-            class="group relative overflow-hidden rounded-2xl bg-gray-100 transition hover:shadow-md"
+            class="group relative w-[132px] shrink-0 snap-start overflow-hidden rounded-2xl bg-gray-100 transition hover:shadow-md sm:w-40"
           >
-            <div class="aspect-[4/3] overflow-hidden">
+            <div class="aspect-[3/4] overflow-hidden">
               <img
                 v-if="showcaseCategory.image"
                 :src="showcaseCategory.image"
                 :alt="showcaseCategory.name"
                 loading="lazy"
-                class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                class="h-full w-full object-cover object-top transition duration-300 group-hover:scale-105"
               >
             </div>
 
@@ -280,20 +269,15 @@ const startShoppingTo = { name: 'products' } as const;
 
       <TrustProofs />
 
-      <section class="mt-6 sm:mt-10">
-        <div class="text-center">
-          <h2 class="text-lg font-bold text-highlighted">
-            Loja online de roupa feminina em Luanda
-          </h2>
+      <section class="mt-8 border-t border-gray-100 pt-6 sm:mt-12">
+        <h2 class="text-sm font-bold text-muted">
+          Loja online de roupa feminina em Luanda
+        </h2>
 
-          <div class="mt-4 space-y-1 text-sm leading-7 text-muted">
-            <p
-              v-for="paragraph in seoDescriptionParagraphs"
-              :key="paragraph"
-              v-text="paragraph"
-            />
-          </div>
-        </div>
+        <p
+          class="mt-2 text-xs leading-6 text-dimmed sm:text-sm"
+          v-text="seoDescription"
+        />
       </section>
     </UPageBody>
 
