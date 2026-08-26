@@ -229,42 +229,34 @@ const startShoppingTo = { name: 'products' } as const;
       </section>
 
       <section class="mt-6 sm:mt-10">
-        <UCard class="overflow-hidden">
-          <div class="flex flex-col gap-6">
-            <div>
-              <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
-                Como funciona
-              </h2>
+        <h2 class="text-2xl font-black tracking-tight text-highlighted sm:text-3xl">
+          Como funciona
+        </h2>
+
+        <div class="mt-5 grid gap-3 md:grid-cols-3 sm:gap-4">
+          <div
+            v-for="step in shoppingSteps"
+            :key="step.title"
+            class="rounded-2xl border border-gray-100 bg-gray-50/60 p-4"
+          >
+            <div class="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <UIcon
+                :name="step.icon"
+                class="size-5"
+              />
             </div>
 
-            <div class="grid gap-3 md:grid-cols-3">
-              <div
-                v-for="step in shoppingSteps"
-                :key="step.title"
-                class="relative rounded-2xl border border-gray-100 bg-gray-50/60 p-4"
-              >
-                <div class="flex items-center gap-3">
-                  <div class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <UIcon
-                      :name="step.icon"
-                      class="size-5"
-                    />
-                  </div>
-                </div>
+            <h3
+              class="mt-4 font-bold text-highlighted"
+              v-text="step.title"
+            />
 
-                <h3
-                  class="mt-4 font-bold text-highlighted"
-                  v-text="step.title"
-                />
-
-                <p
-                  class="mt-2 text-sm leading-6 text-muted"
-                  v-text="step.description"
-                />
-              </div>
-            </div>
+            <p
+              class="mt-2 text-sm leading-6 text-muted"
+              v-text="step.description"
+            />
           </div>
-        </UCard>
+        </div>
       </section>
 
       <TrustProofs />
