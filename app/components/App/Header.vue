@@ -166,16 +166,6 @@ const { count: favoritesCount } = useFavorites();
       <template #right>
         <div class="flex items-center gap-1 sm:gap-2">
           <UButton
-            :to="{ name: 'products' }"
-            variant="soft"
-            color="primary"
-            size="sm"
-            class="hidden sm:inline-flex"
-          >
-            Novidades
-          </UButton>
-
-          <UButton
             :to="{ name: 'search' }"
             variant="ghost"
             color="neutral"
