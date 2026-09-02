@@ -10,7 +10,7 @@ import { colorLabel } from '#shared/constants/colors';
 definePageMeta({ name: 'checkout' });
 
 const title = 'Deixar número | Amoda';
-const description = 'Deixe o seu número para a equipa da Amoda entrar em contacto e confirmar a sua escolha.';
+const description = 'Deixa o teu número para a equipa da Amoda entrar em contacto e confirmar a tua escolha.';
 
 useHead(() => ({
   title,
@@ -199,7 +199,7 @@ const submitCheckout = async () => {
 
   if (!items.value.length) {
     toast.add({
-      title: 'A sua seleção está vazia.',
+      title: 'A tua seleção está vazia.',
       color: 'error',
     });
 
@@ -236,7 +236,7 @@ const submitCheckout = async () => {
     await navigateTo({ name: 'order-number', params: { number } });
   } catch (checkoutError: any) {
     toast.add({
-      title: checkoutError?.data?.message || 'Não foi possível enviar a sua escolha. Tente novamente em alguns instantes.',
+      title: checkoutError?.data?.message || 'Não foi possível enviar a tua escolha. Tenta novamente em alguns instantes.',
       color: 'error',
     });
   } finally {
@@ -258,11 +258,11 @@ const submitCheckout = async () => {
         </UBadge>
 
         <h1 class="text-2xl font-black tracking-tight text-highlighted sm:text-4xl">
-          Deixe o seu número
+          Deixa o teu número
         </h1>
 
         <p class="mt-3 text-sm leading-6 text-muted sm:text-base">
-          Use esta opção se preferir que a equipa da Amoda fale consigo. Podemos escrever ou ligar para confirmar a sua escolha.
+          Usa esta opção se preferires que a equipa da Amoda fale contigo. Podemos escrever ou ligar para confirmar a tua escolha.
         </p>
       </section>
 
@@ -272,11 +272,11 @@ const submitCheckout = async () => {
       >
         <UCard>
           <h2 class="text-lg font-black text-highlighted">
-            Nós falamos consigo
+            Nós falamos contigo
           </h2>
 
           <p class="mt-2 text-sm leading-6 text-muted">
-            Digite um número válido em Angola para podermos escrever ou ligar.
+            Indica um número válido em Angola para podermos escrever ou ligar.
           </p>
 
           <div class="mt-5 grid gap-4">
@@ -284,7 +284,7 @@ const submitCheckout = async () => {
               <UInput
                 v-model="checkoutForm.name"
                 name="name"
-                placeholder="Como podemos chamá-la?"
+                placeholder="Como te podemos chamar?"
                 type="text"
                 size="xl"
                 class="w-full sm:max-w-sm"
@@ -292,7 +292,7 @@ const submitCheckout = async () => {
             </UFormField>
 
             <UFormField
-              :error="formErrors.phone ? 'Por favor, indique o seu número de telefone.' : undefined"
+              :error="formErrors.phone ? 'Por favor, indica o teu número de telefone.' : undefined"
               label="Número de telefone"
               required
             >
@@ -381,7 +381,7 @@ const submitCheckout = async () => {
         </ul>
 
         <p class="mt-3 border-t border-primary/10 pt-3 text-xs leading-5 text-muted">
-          Este valor é apenas uma referência. Você só paga depois de experimentar e apenas pelo que decidir levar.
+          Este valor é só uma referência. Pagas depois de experimentar e apenas o que decidires levar.
         </p>
       </UCard>
     </UPageBody>

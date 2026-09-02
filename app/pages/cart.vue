@@ -8,7 +8,7 @@ import { colorLabel } from '#shared/constants/colors';
 definePageMeta({ name: 'cart' });
 
 const title = 'Seleção para experimentar';
-const description = 'Revise a sua seleção na Amoda antes de confirmar. Você não paga online: experimenta primeiro e paga apenas pelo que gostar.';
+const description = 'Revê a tua seleção na Amoda antes de confirmar. Não pagas online: experimentas primeiro e pagas só o que gostares.';
 
 useHead(() => ({
   title,
@@ -44,26 +44,26 @@ const trustBadges = [
   },
   {
     icon: 'i-lucide-shirt',
-    title: 'Experimente antes',
+    title: 'Experimenta antes',
   },
   {
     icon: 'i-lucide-check-circle-2',
-    title: 'Pague só o que gostar',
+    title: 'Paga só o que gostar',
   },
 ];
 
 const nextSteps = [
   {
-    title: 'Confirme a escolha',
-    description: 'Enviaremos o pedido com os itens escolhidos.',
+    title: 'Confirma a escolha',
+    description: 'Enviamos o pedido com as peças escolhidas.',
   },
   {
-    title: 'Falamos consigo no WhatsApp',
+    title: 'Falamos contigo no WhatsApp',
     description: 'Confirmamos disponibilidade, ponto e horário.',
   },
   {
-    title: 'Experimente e decida',
-    description: 'Você leva apenas o que gostar. Sem obrigação.',
+    title: 'Experimenta e decide',
+    description: 'Levas só o que gostares. Sem compromisso.',
   },
 ];
 
@@ -146,11 +146,11 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
         </UBadge>
 
         <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-          A sua seleção para experimentar
+          A tua seleção para experimentar
         </h1>
 
         <p class="mt-4 text-base leading-7 text-muted sm:text-lg">
-          Estes itens ainda não estão comprados. Esta é a sua escolha para experimentar primeiro.
+          Estas peças ainda não estão compradas. É a tua escolha para experimentar primeiro.
         </p>
 
         <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-toned">
@@ -183,11 +183,11 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
             </div>
 
             <h2 class="mt-4 text-xl font-bold text-highlighted">
-              A sua seleção está vazia
+              A tua seleção está vazia
             </h2>
 
             <p class="mt-2 max-w-sm text-sm leading-6 text-muted">
-              Escolha algumas peças para experimentar. Não precisa pagar agora.
+              Escolhe algumas peças para experimentar. Não precisas de pagar agora.
             </p>
 
             <UButton
@@ -346,7 +346,7 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
                   </div>
 
                   <p class="text-xs leading-5 text-muted">
-                    Se tiver WhatsApp, envie a escolha agora. Se preferir, deixe o seu número e a nossa equipa escreve ou liga para si.
+                    Se tiveres WhatsApp, envia a escolha agora. Se preferires, deixa o teu número e nós escrevemos ou ligamos para ti.
                   </p>
 
                   <div
@@ -462,7 +462,7 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
             </div>
 
             <p class="mb-2 text-xs leading-5 text-muted">
-              WhatsApp é mais rápido. Sem WhatsApp? Deixe o número e falamos consigo.
+              WhatsApp é mais rápido. Sem WhatsApp? Deixa o número e falamos contigo.
             </p>
 
             <UButton

@@ -71,7 +71,7 @@ const { count: favoritesCount } = useFavorites();
                       </div>
 
                       <div class="mt-1 text-sm text-muted">
-                        Escolha o que quer experimentar
+                        Escolhe o que queres experimentar
                       </div>
                     </div>
 
