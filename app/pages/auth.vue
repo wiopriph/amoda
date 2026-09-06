@@ -21,21 +21,32 @@ const reg = reactive({ email: '', password: '' });
 const otp = reactive({ email: '' });
 
 
-const { signIn, signUp, signInOtp, signOut, user, isLoading, error } = useAuth();
+const {
+  signIn,
+  signUp,
+  signInOtp,
+  signOut,
+  user,
+  isLoading,
+  error,
+  canAccessAccount,
+  resolveHomeRoute
+} = useAuth();
 const toast = useToast();
 
 const route = useRoute();
 
 const onLogin = async () => {
-  const ok = await signIn(login);
+  const signedInUser = await signIn(login);
 
-  if (ok) {
+  if (signedInUser) {
     toast.add({
       title: 'Bem-vindo de volta à Amoda!',
       color: 'primary',
     });
 
-    navigateTo(route.query.redirected_from as string || { name: 'index' });
+    // Роль берём из ответа: реактивный user обновляется позже, чем уходит навигация
+    navigateTo(route.query.redirected_from as string || resolveHomeRoute(signedInUser));
   }
 };
 
@@ -146,10 +157,22 @@ const benefits = [
             />
 
             <UButton
-              :to="{ name: 'index' }"
+              v-if="canAccessAccount"
+              :to="{ name: 'conta' }"
               size="lg"
               color="primary"
               class="mt-6 w-full justify-center"
+            >
+              A minha conta
+            </UButton>
+
+            <UButton
+              :to="{ name: 'index' }"
+              :color="canAccessAccount ? 'neutral' : 'primary'"
+              :variant="canAccessAccount ? 'soft' : 'solid'"
+              :class="canAccessAccount ? 'mt-2' : 'mt-6'"
+              size="lg"
+              class="w-full justify-center"
             >
               Continuar a comprar
             </UButton>

@@ -106,6 +106,9 @@ export default defineNuxtConfig({
       serviceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
     },
     public: {
+      // Личный кабинет за флагом: пока false — /conta и /api/account доступны только админу
+      accountEnabled: false,
+
       gtmId: '',
       gtmEnabled: false,
 
@@ -120,7 +123,7 @@ export default defineNuxtConfig({
 
   sitemap: {
     cacheMaxAgeSeconds: 86400,
-    exclude: ['/admin/**', '/auth', '/cart', '/checkout', '/order/**'],
+    exclude: ['/admin/**', '/auth', '/cart', '/checkout', '/order/**', '/conta/**', '/favorites'],
     sitemapName: 'sitemap.xml',
 
     sitemaps: {
