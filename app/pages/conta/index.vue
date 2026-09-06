@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { AccountOrderSummary } from '~/components/Account/OrderList.vue';
+
+
 definePageMeta({ name: 'conta', layout: 'account', middleware: 'account' });
 
 const title = 'Os meus pedidos | Amoda';
@@ -13,8 +16,10 @@ useHead({
 
 const { isAdmin } = useAuth();
 const { data: profile } = await useAccountProfile();
+const { data: orders, error: ordersError } = await useFetch<AccountOrderSummary[]>('/api/account/orders');
 
 const greeting = computed(() => (profile.value?.name ? `Olá, ${profile.value.name}!` : 'Olá!'));
+const hasOrders = computed(() => Boolean(orders.value?.length));
 </script>
 
 <template>
@@ -34,8 +39,21 @@ const greeting = computed(() => (profile.value?.name ? `Olá, ${profile.value.na
       </p>
     </section>
 
-    <!-- Этап 2: здесь появится список педидов -->
+    <UAlert
+      v-if="ordersError"
+      color="error"
+      variant="soft"
+      icon="i-heroicons-exclamation-triangle"
+      description="Não foi possível carregar os pedidos. Atualiza a página."
+    />
+
+    <AccountOrderList
+      v-else-if="hasOrders"
+      :orders="orders || []"
+    />
+
     <UEmpty
+      v-else
       icon="i-lucide-list"
       title="Ainda não tens pedidos."
       description="Quando fizeres um pedido no site, ele aparece aqui."

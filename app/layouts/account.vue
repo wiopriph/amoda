@@ -4,24 +4,28 @@ const NAV_ITEMS = [
     label: 'Pedidos',
     icon: 'i-lucide-list',
     to: { name: 'conta' },
-    exact: true,
+    // /conta и /conta/pedidos/*, но не /conta/dados
+    isActive: (path: string) => path === '/conta' || path.startsWith('/conta/pedidos'),
   },
   {
     label: 'Favoritos',
     icon: 'i-heroicons-heart',
     to: { name: 'favorites' },
-    exact: false,
+    isActive: (path: string) => path.startsWith('/favorites'),
   },
   {
     label: 'Os meus dados',
     icon: 'i-lucide-settings',
     to: { name: 'conta-dados' },
-    exact: false,
+    isActive: (path: string) => path.startsWith('/conta/dados'),
   },
 ];
 
 const ACTIVE_MOBILE = 'bg-white text-highlighted shadow-sm';
 const ACTIVE_DESKTOP = 'border-primary/40 bg-primary/5 text-primary';
+
+const route = useRoute();
+const activeLabel = computed(() => NAV_ITEMS.find(navItem => navItem.isActive(route.path))?.label ?? null);
 </script>
 
 <template>
@@ -42,9 +46,11 @@ const ACTIVE_DESKTOP = 'border-primary/40 bg-primary/5 text-primary';
                 :to="navItem.to"
                 :aria-label="navItem.label"
                 :title="navItem.label"
-                :exactActiveClass="navItem.exact ? ACTIVE_MOBILE : ''"
-                :activeClass="navItem.exact ? '' : ACTIVE_MOBILE"
-                class="flex h-11 items-center justify-center rounded-xl text-muted transition hover:text-highlighted"
+                :class="[
+                  'flex h-11 items-center justify-center rounded-xl text-muted transition hover:text-highlighted',
+                  activeLabel === navItem.label && ACTIVE_MOBILE,
+                ]"
+                :aria-current="activeLabel === navItem.label ? 'page' : undefined"
               >
                 <UIcon
                   :name="navItem.icon"
@@ -61,9 +67,11 @@ const ACTIVE_DESKTOP = 'border-primary/40 bg-primary/5 text-primary';
                 v-for="navItem in NAV_ITEMS"
                 :key="navItem.label"
                 :to="navItem.to"
-                :exactActiveClass="navItem.exact ? ACTIVE_DESKTOP : ''"
-                :activeClass="navItem.exact ? '' : ACTIVE_DESKTOP"
-                class="flex items-center gap-2 rounded-2xl border border-gray-100 bg-white px-3 py-2.5 text-sm font-semibold text-toned transition hover:border-primary/30 hover:text-primary"
+                :class="[
+                  'flex items-center gap-2 rounded-2xl border border-gray-100 bg-white px-3 py-2.5 text-sm font-semibold text-toned transition hover:border-primary/30 hover:text-primary',
+                  activeLabel === navItem.label && ACTIVE_DESKTOP,
+                ]"
+                :aria-current="activeLabel === navItem.label ? 'page' : undefined"
               >
                 <UIcon
                   :name="navItem.icon"

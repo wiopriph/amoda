@@ -79,11 +79,11 @@ Layout `account`: обычные header/footer сайта + компактная
 - Хедер: иконка аккаунта (по флагу / для админа). `/auth`: после входа редирект в `/conta` (админ без флага → `/admin`), залогиненному — кнопка «A minha conta».
 - Sitemap: исключить `/conta/**`.
 
-### Этап 2 — заказы в кабинете
-- `place-order`: писать `user_id` (если залогинен) и `cart_id`.
-- При логине проставлять `carts.user_id` текущей корзине; при регистрации привязывать заказы этого устройства (`cart_id → carts.session_id = sid`).
-- API `GET /api/account/orders`, `GET /api/account/orders/[number]` (только свои).
-- Страницы `/conta/pedidos`, `/conta/pedidos/[number]`, последний заказ на `/conta`.
+### Этап 2 — заказы в кабинете (сделано 2026-09-03)
+- `place-order` пишет `user_id` (если вошла) и `cart_id` (корзина по cookie `sid`).
+- Плагин `account-link.client.ts` после входа вызывает `POST /api/account/link-session`: корзины этого `sid` получают `user_id`, а их заказы без владельца — тоже. Один раз на пользователя за вкладку.
+- API `GET /api/account/orders` (список, до 50, с превью фото) и `GET /api/account/orders/[number]` (чужой заказ = 404). Общий фетч заказа вынесен в `server/utils/orders.ts`, публичный `/api/orders/get` использует его же.
+- Страницы `/conta` (список) и `/conta/pedidos/[number]` (детали, статус с пояснением, кнопка WhatsApp по номеру заказа). Тексты статусов для клиентки — `shared/constants/orderStatus.ts`.
 
 ### Этап 3 — избранное на сервере
 - Таблица `favorites (user_id, product_id, created_at)`, API list/add/remove.

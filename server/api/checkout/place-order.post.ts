@@ -1,6 +1,11 @@
-import { serverSupabaseServiceRole } from '#supabase/server';
+import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server';
 import { notifyOrderToTelegram } from '~~/server/utils/notifyOrderToTelegram';
-import { getVariantSnapshot, normalizeCartQty } from '~~/server/utils/cart';
+import {
+  SESSION_ID_RE,
+  findCartBySessionId,
+  getVariantSnapshot,
+  normalizeCartQty,
+} from '~~/server/utils/cart';
 
 
 type OrderItemInput = {
@@ -123,10 +128,17 @@ export default defineEventHandler(async (event) => {
 
   const orderNumber = generateOrderNumber();
 
+  // Привязка к аккаунту (если вошла) и к корзине этого устройства — по ним кабинет находит свои заказы
+  const user = await serverSupabaseUser(event).catch(() => null);
+  const sid = String(getCookie(event, 'sid') || '');
+  const cart = SESSION_ID_RE.test(sid) ? await findCartBySessionId(supabase, sid) : null;
+
   const { data: orderRow, error: orderErr } = await supabase
     .from('orders')
     .insert({
       number: orderNumber,
+      'user_id': user?.id ?? null,
+      'cart_id': cart?.id ?? null,
       'guest_contact': contact,
       status: 'PLACED',
       'payment_status': 'UNPAID',

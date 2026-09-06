@@ -7,7 +7,8 @@ import { serverSupabaseServiceRole } from '#supabase/server';
 const PUBLIC_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const PUBLIC_CODE_LENGTH = 6;
 const MAX_QTY = 99;
-const SESSION_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export const SESSION_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 type SupabaseClient = any;
 
@@ -153,7 +154,7 @@ export const getCartItems = async (client: SupabaseClient, cartId: string) => {
   return (data || []).map(mapCartItem);
 };
 
-const findCartBySessionId = async (client: SupabaseClient, sessionId: string) => {
+export const findCartBySessionId = async (client: SupabaseClient, sessionId: string) => {
   const { data, error } = await client
     .from('carts')
     .select('*')
