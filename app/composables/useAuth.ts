@@ -7,6 +7,7 @@ const hasAdminRole = (user: any) => {
 // Ошибки Supabase Auth по-человечески, в tu-регистре
 const AUTH_ERROR_MESSAGES: [RegExp, string][] = [
   [/unsupported phone provider|sms provider/i, 'O acesso por SMS ainda não está ativo. Tenta mais tarde.'],
+  [/sms_send_failed|error sending confirmation otp/i, 'Não conseguimos enviar o SMS. Confirma o número e tenta novamente daqui a pouco.'],
   [/token has expired|invalid|otp_expired/i, 'Código errado ou expirado. Pede um novo código.'],
   [/only request this after|rate limit|too many/i, 'Espera um pouco antes de pedir outro código.'],
   [/captcha/i, 'Confirma que não és um robô e tenta de novo.'],
