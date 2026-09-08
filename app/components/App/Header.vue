@@ -35,7 +35,7 @@ const { count: favoritesCount } = useFavorites();
 
 // Иконка кабинета: по флагу для всех, до релиза — только админу
 const { user, canAccessAccount } = useAuth();
-const accountRoute = computed(() => (user.value ? { name: 'conta' } : { name: 'auth' }));
+const accountRoute = computed(() => (user.value ? { name: 'conta' } : { name: 'entrar' }));
 </script>
 
 <template>

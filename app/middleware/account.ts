@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   if (!user.value) {
-    return navigateTo({ name: 'auth', query: { 'redirected_from': to.fullPath } });
+    return navigateTo({ name: 'entrar', query: { 'redirected_from': to.fullPath } });
   }
 
   if (!canAccessAccount.value) {

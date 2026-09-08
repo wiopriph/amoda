@@ -4,6 +4,22 @@ const hasAdminRole = (user: any) => {
   return Array.isArray(roles) && roles.includes('admin');
 };
 
+// Ошибки Supabase Auth по-человечески, в tu-регистре
+const AUTH_ERROR_MESSAGES: [RegExp, string][] = [
+  [/unsupported phone provider|sms provider/i, 'O acesso por SMS ainda não está ativo. Tenta mais tarde.'],
+  [/token has expired|invalid|otp_expired/i, 'Código errado ou expirado. Pede um novo código.'],
+  [/only request this after|rate limit|too many/i, 'Espera um pouco antes de pedir outro código.'],
+  [/captcha/i, 'Confirma que não és um robô e tenta de novo.'],
+  [/invalid login credentials/i, 'E-mail ou palavra-passe errados.'],
+];
+
+export const humanizeAuthError = (message?: string | null) => {
+  const raw = String(message || '');
+  const match = AUTH_ERROR_MESSAGES.find(([pattern]) => pattern.test(raw));
+
+  return match ? match[1] : 'Não foi possível entrar. Tenta novamente em instantes.';
+};
+
 export const useAuth = () => {
   const supabase = useSupabaseClient();
   const supaUser = useSupabaseUser();
@@ -18,61 +34,46 @@ export const useAuth = () => {
   const isAccountEnabled = computed(() => Boolean(accountEnabled));
   const canAccessAccount = computed(() => isAccountEnabled.value || isAdmin.value);
 
+  const run = async <T>(action: () => Promise<{ data: T; error: { message: string } | null }>) => {
+    error.value = null;
+    isLoading.value = true;
 
+    try {
+      const { data, error: err } = await action();
+
+      if (err) {
+        error.value = humanizeAuthError(err.message);
+
+        return null;
+      }
+
+      return data;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  // Админ: e-mail + пароль на скрытом /admin/login
   const signIn = async ({ email, password }: { email: string; password: string }) => {
-    error.value = null;
-    isLoading.value = true;
+    const data = await run(() => supabase.auth.signInWithPassword({ email, password }));
 
-    const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
-
-    isLoading.value = false;
-
-    if (err) {
-      error.value = err.message;
-
-      return null;
-    }
-
-    return data.user;
+    return data?.user ?? null;
   };
 
-  const signUp = async ({ email, password }: { email: string; password: string }) => {
-    error.value = null;
-    isLoading.value = true;
+  // Клиентка: код по SMS. Пользователь создаётся при первом входе, отдельной регистрации нет
+  const signInWithPhone = async (phone: string, captchaToken?: string) => {
+    const data = await run(() => supabase.auth.signInWithOtp({
+      phone,
+      options: { channel: 'sms', captchaToken },
+    }));
 
-    const { data, error: err } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/auth` },
-    });
-
-    isLoading.value = false;
-
-    if (err) {
-      error.value = err.message;
-
-      return null;
-    }
-
-    return data.user;
+    return data !== null;
   };
 
-  const signInOtp = async (email: string) => {
-    error.value = null;
-    isLoading.value = true;
+  const verifyPhoneOtp = async (phone: string, token: string) => {
+    const data = await run(() => supabase.auth.verifyOtp({ phone, token, type: 'sms' }));
 
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth` },
-    });
-
-    isLoading.value = false;
-
-    if (err) {
-      error.value = err.message;
-    }
-
-    return !err;
+    return data?.user ?? null;
   };
 
   const signOut = async () => {
@@ -97,8 +98,8 @@ export const useAuth = () => {
     isLoading,
     error,
     signIn,
-    signUp,
-    signInOtp,
+    signInWithPhone,
+    verifyPhoneOtp,
     signOut,
     resolveHomeRoute,
   };

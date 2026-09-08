@@ -94,14 +94,43 @@ Layout `account`: обычные header/footer сайта + компактная
 - Чекаут: для вошедшей клиентки имя и номер подставляются из профиля (номер пока редактируемый; с OTP станет подтверждённым и его можно будет не спрашивать).
 - `/api/orders/get` отдаёт `isMine` (заказ принадлежит текущей сессии). На `/order/[number]` владелица видит кнопку «Ver na minha conta», гость при включённом флаге — мягкий блок «Criar conta» со ссылкой на вход и возвратом в `/conta`.
 
-### Этап 5 — открытие кабинета
-- Проверить кастомный SMTP в Supabase (встроенный лимит ~3 письма/час не подходит для регистраций).
-- Включить флаг, проверить тексты и пустые состояния.
+### Этап 5 — вход по SMS-коду (код готов 2026-09-03, ждёт настройки Supabase и провайдера)
+Решение по провайдеру: только SMS, без WhatsApp. Сначала Infobip (оплата в USD, тест доставки на Unitel и Africell), потом eSMS Africa (оплата в AOA, прямые маршруты) — оба через Send SMS Hook, замена провайдера = замена ключей. Twilio отвергнут: $0.31 за SMS в Анголу.
+
+Что сделано в коде:
+- `/entrar`: «номер → код», регистрация и вход — одно действие (`signInWithOtp({ phone })` + `verifyOtp`). Повторная отправка через 60 с, автосабмит при 6 цифрах, ошибки Supabase переведены (`humanizeAuthError`). Опциональная капча Cloudflare Turnstile по `NUXT_PUBLIC_TURNSTILE_SITE_KEY`.
+- `/admin/login`: e-mail + пароль только для админа, ссылок на него нет. Старый `/auth` удалён.
+- `POST /api/auth/send-sms`: Send SMS Hook. Проверка подписи Standard Webhooks (`server/utils/standardWebhooks.ts`), адаптеры провайдеров в `server/utils/sms.ts` (`infobip`, `log` для разработки).
+- `migrations/2026-09-03_account_claim_orders.sql`: функция `claim_orders_by_phone` — гостевые заказы с тем же номером получают владельца при входе (вызов из `link-session`).
+- Чекаут: у вошедшей клиентки номер подставлен из аккаунта и не редактируется.
+
+Переменные окружения (`.env`):
+```
+SUPABASE_SMS_HOOK_SECRET=v1,whsec_...   # Authentication → Hooks → Send SMS → Generate secret
+SMS_PROVIDER=infobip                     # или log
+SMS_SENDER_ID=Amoda
+INFOBIP_BASE_URL=xxxxx.api.infobip.com
+INFOBIP_API_KEY=...
+NUXT_PUBLIC_TURNSTILE_SITE_KEY=          # опционально
+```
+
+Чек-лист настройки Supabase (Authentication):
+1. Providers → Phone: Enable phone provider. SMS provider там можно оставить любой — его перекрывает хук.
+2. Hooks → Send SMS Hook: HTTP, URL `https://amoda.ao/api/auth/send-sms`, сгенерировать секрет → в `SUPABASE_SMS_HOOK_SECRET` на хостинге.
+3. Providers → Phone → Test OTPs: добавить тестовые номера с фиксированным кодом для разработки (SMS не отправляется).
+4. Rate limits: SMS в час — небольшое число (например 30), OTP expiry 5–10 минут, длина 6.
+5. Опционально: Attack protection → CAPTCHA (Turnstile) и ключи в env.
+
+Чек-лист открытия:
+- Применить миграции `profiles`, `favorites`, `claim_orders`.
+- Проверить доставку на реальных номерах Unitel и Africell, засечь задержку.
+- `NUXT_PUBLIC_ACCOUNT_ENABLED=true` на хостинге.
+- Первые дни следить за расходом SMS и лимитами.
 
 ### Этап 6 — купоны (позже)
 - `coupons`, `coupon_redemptions`, `coupon_grants`; CRUD в админке; поле в чекауте; `/conta/cupoes`; welcome-купон.
 
-### Этап 7 — OTP по телефону (позже)
-- Supabase Phone + Twilio (SMS или WhatsApp-канал). UI «номер → код», привязка старых заказов по подтверждённому телефону, e-mail-аккаунты добавляют телефон в `/conta/dados`.
+### Этап 7 — WhatsApp-канал для кодов (позже, по желанию)
+- Через тот же хук: Meta Cloud API напрямую ($0.0076 за код в регионе Rest of Africa) или провайдер с WhatsApp. Нужны Meta Business, верификация и отдельный номер.
 
 ### Этап 8 — отзывы (позже)

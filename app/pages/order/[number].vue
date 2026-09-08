@@ -146,7 +146,7 @@ useHead({
           icon="i-lucide-user-round"
           title="Acompanha este pedido na tua conta"
           description="Cria a tua conta Amoda para ver o estado dos pedidos e guardar favoritos."
-          :actions="[{ label: 'Criar conta', to: { name: 'auth', query: { redirected_from: '/conta' } }, color: 'primary' }]"
+          :actions="[{ label: 'Criar conta', to: { name: 'entrar', query: { redirected_from: '/conta' } }, color: 'primary' }]"
           class="mt-5"
         />
 

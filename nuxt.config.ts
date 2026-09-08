@@ -102,12 +102,24 @@ export default defineNuxtConfig({
     // Опционально: секрет для запуска синка планировщиком (заголовок x-sync-token)
     moyskladSyncToken: process.env.MOYSKLAD_SYNC_TOKEN,
     extensionToken: process.env.EXTENSION_TOKEN,
+
+    // Send SMS Hook Supabase → наш /api/auth/send-sms → SMS-провайдер (см. docs/account-plan.md)
+    smsHookSecret: process.env.SUPABASE_SMS_HOOK_SECRET,
+    sms: {
+      provider: process.env.SMS_PROVIDER || 'infobip',
+      senderId: process.env.SMS_SENDER_ID || 'Amoda',
+      infobipBaseUrl: process.env.INFOBIP_BASE_URL,
+      infobipApiKey: process.env.INFOBIP_API_KEY,
+    },
     supabase: {
       serviceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
     },
     public: {
       // Личный кабинет за флагом: пока false — /conta и /api/account доступны только админу
       accountEnabled: false,
+
+      // Cloudflare Turnstile на форме «enviar código»; пусто — без капчи
+      turnstileSiteKey: '',
 
       gtmId: '',
       gtmEnabled: false,
@@ -123,7 +135,7 @@ export default defineNuxtConfig({
 
   sitemap: {
     cacheMaxAgeSeconds: 86400,
-    exclude: ['/admin/**', '/auth', '/cart', '/checkout', '/order/**', '/conta/**', '/favorites'],
+    exclude: ['/admin/**', '/entrar', '/cart', '/checkout', '/order/**', '/conta/**', '/favorites'],
     sitemapName: 'sitemap.xml',
 
     sitemaps: {

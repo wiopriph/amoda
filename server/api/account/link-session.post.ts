@@ -33,8 +33,24 @@ export default defineEventHandler(async (event) => {
 
   const cartIds = (carts || []).map((cart: any) => cart.id);
 
+  // Подтверждённый номер (OTP): забираем и гостевые заказы с этим телефоном
+  let claimedByPhone = 0;
+
+  if (user.phone) {
+    const { data, error: claimError } = await client.rpc('claim_orders_by_phone', {
+      'p_user_id': user.id,
+      'p_phone': user.phone,
+    });
+
+    if (claimError) {
+      console.error('claim_orders_by_phone failed', claimError.message);
+    } else {
+      claimedByPhone = Number(data || 0);
+    }
+  }
+
   if (!cartIds.length) {
-    return { linkedOrders: 0 };
+    return { linkedOrders: claimedByPhone };
   }
 
   const { data: orders, error: ordersError } = await client
@@ -48,5 +64,5 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: ordersError.message });
   }
 
-  return { linkedOrders: (orders || []).length };
+  return { linkedOrders: (orders || []).length + claimedByPhone };
 });

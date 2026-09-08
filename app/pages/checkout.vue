@@ -57,15 +57,16 @@ if (import.meta.client) {
 
 const checkoutForm = reactive({ phone: '', name: '' });
 
-// Вошедшая клиентка: имя и номер из профиля, чтобы не вводить каждый раз.
-// Позже, с OTP по телефону, номер станет подтверждённым и его можно будет не спрашивать вовсе.
+// Вошедшая клиентка: имя из профиля, номер — тот, под которым вошла (подтверждён по SMS), его не меняем
 const { user, canAccessAccount } = useAuth();
+const verifiedPhone = ref('');
 
 if (user.value && canAccessAccount.value) {
   const { data: profile } = await useAccountProfile();
 
   checkoutForm.name = profile.value?.name || '';
-  checkoutForm.phone = formatAoPhone(profile.value?.phone);
+  verifiedPhone.value = formatAoPhone(profile.value?.phone);
+  checkoutForm.phone = verifiedPhone.value;
 }
 
 
@@ -305,6 +306,7 @@ const submitCheckout = async () => {
 
             <UFormField
               :error="formErrors.phone ? 'Por favor, indica o teu número de telefone.' : undefined"
+              :help="verifiedPhone ? 'O número da tua conta.' : undefined"
               label="Número de telefone"
               required
             >
@@ -312,6 +314,7 @@ const submitCheckout = async () => {
                 ref="phoneInputRef"
                 v-model="checkoutForm.phone"
                 v-maska="'+244 ### ### ###'"
+                :disabled="Boolean(verifiedPhone)"
                 required
                 name="phone"
                 placeholder="+244 XXX XXX XXX"
