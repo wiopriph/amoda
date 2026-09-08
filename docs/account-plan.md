@@ -85,9 +85,10 @@ Layout `account`: обычные header/footer сайта + компактная
 - API `GET /api/account/orders` (список, до 50, с превью фото) и `GET /api/account/orders/[number]` (чужой заказ = 404). Общий фетч заказа вынесен в `server/utils/orders.ts`, публичный `/api/orders/get` использует его же.
 - Страницы `/conta` (список) и `/conta/pedidos/[number]` (детали, статус с пояснением, кнопка WhatsApp по номеру заказа). Тексты статусов для клиентки — `shared/constants/orderStatus.ts`.
 
-### Этап 3 — избранное на сервере
-- Таблица `favorites (user_id, product_id, created_at)`, API list/add/remove.
-- `useFavorites`: гость — localStorage, залогинен — сервер, при логине слияние.
+### Этап 3 — избранное на сервере (сделано 2026-09-03)
+- `migrations/2026-09-03_favorites.sql`: таблица `favorites (user_id, product_id, created_at)`, RLS без политик.
+- API `GET/POST /api/account/favorites`, `DELETE /api/account/favorites/[id]`, `POST /api/account/favorites/merge`. Список в формате карточки каталога (цена и фото default-варианта), снятые с продажи товары скрыты, но не удалены.
+- `useFavorites`: гость — localStorage, вошедшая клиентка — сервер с оптимистичным обновлением и откатом. При входе локальный список сливается на сервер и очищается. Инициализация и реакция на вход/выход вынесены в плагин `favorites.client.ts`.
 
 ### Этап 4 — чекаут
 - Префилл имени/телефона из профиля; после заказа «Ver na minha conta».
