@@ -8,6 +8,9 @@ type SmsConfig = {
   senderId: string
   infobipBaseUrl?: string
   infobipApiKey?: string
+  castbrickApiKey?: string
+  ziettApiKey?: string
+  ziettRemitterId?: string
 };
 
 const REQUEST_TIMEOUT_MS = 8000;
@@ -45,6 +48,49 @@ const sendViaInfobip = async (config: SmsConfig, message: SmsMessage) => {
   }
 };
 
+// CastBrick (Ангола, оплата в AOA): POST https://api.castbrick.co/v1/sms/send, Bearer <key>
+const sendViaCastbrick = async (config: SmsConfig, message: SmsMessage) => {
+  if (!config.castbrickApiKey) {
+    throw createError({ statusCode: 500, statusMessage: 'CastBrick is not configured (CASTBRICK_API_KEY)' });
+  }
+
+  await $fetch('https://api.castbrick.co/v1/sms/send', {
+    method: 'POST',
+    timeout: REQUEST_TIMEOUT_MS,
+    headers: {
+      Authorization: `Bearer ${config.castbrickApiKey}`,
+      Accept: 'application/json',
+    },
+    body: {
+      recipients: [`+${message.to}`],
+      content: message.text,
+      senderId: config.senderId,
+    },
+  });
+};
+
+// Ziett (Ангола, оплата в AOA): POST https://api.ziett.co/c/v1/messages, X-API-KEY; sender — заранее заведённый remitter
+const sendViaZiett = async (config: SmsConfig, message: SmsMessage) => {
+  if (!config.ziettApiKey || !config.ziettRemitterId) {
+    throw createError({ statusCode: 500, statusMessage: 'Ziett is not configured (ZIETT_API_KEY / ZIETT_REMITTER_ID)' });
+  }
+
+  await $fetch('https://api.ziett.co/c/v1/messages', {
+    method: 'POST',
+    timeout: REQUEST_TIMEOUT_MS,
+    headers: {
+      'X-API-KEY': config.ziettApiKey,
+      'Accept': 'application/json',
+    },
+    body: {
+      'remitter_id': config.ziettRemitterId,
+      'channel_type': 'SMS',
+      'target_e164': `+${message.to}`,
+      'content': message.text,
+    },
+  });
+};
+
 // Для локальной разработки без провайдера: код уходит в лог сервера
 const sendViaLog = async (_config: SmsConfig, message: SmsMessage) => {
   console.info(`[sms:log] to=${message.to} text="${message.text}"`);
@@ -52,6 +98,8 @@ const sendViaLog = async (_config: SmsConfig, message: SmsMessage) => {
 
 const PROVIDERS: Record<string, (config: SmsConfig, message: SmsMessage) => Promise<void>> = {
   infobip: sendViaInfobip,
+  castbrick: sendViaCastbrick,
+  ziett: sendViaZiett,
   log: sendViaLog,
 };
 

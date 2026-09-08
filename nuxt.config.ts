@@ -110,6 +110,9 @@ export default defineNuxtConfig({
       senderId: process.env.SMS_SENDER_ID || 'Amoda',
       infobipBaseUrl: process.env.INFOBIP_BASE_URL,
       infobipApiKey: process.env.INFOBIP_API_KEY,
+      castbrickApiKey: process.env.CASTBRICK_API_KEY,
+      ziettApiKey: process.env.ZIETT_API_KEY,
+      ziettRemitterId: process.env.ZIETT_REMITTER_ID,
     },
     supabase: {
       serviceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,

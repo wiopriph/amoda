@@ -95,7 +95,7 @@ Layout `account`: обычные header/footer сайта + компактная
 - `/api/orders/get` отдаёт `isMine` (заказ принадлежит текущей сессии). На `/order/[number]` владелица видит кнопку «Ver na minha conta», гость при включённом флаге — мягкий блок «Criar conta» со ссылкой на вход и возвратом в `/conta`.
 
 ### Этап 5 — вход по SMS-коду (код готов 2026-09-03, ждёт настройки Supabase и провайдера)
-Решение по провайдеру: только SMS, без WhatsApp. Сначала Infobip (оплата в USD, тест доставки на Unitel и Africell), потом eSMS Africa (оплата в AOA, прямые маршруты) — оба через Send SMS Hook, замена провайдера = замена ключей. Twilio отвергнут: $0.31 за SMS в Анголу.
+Решение по провайдеру: только SMS, без WhatsApp. Все через Send SMS Hook, замена провайдера = замена ключей. Twilio отвергнут ($0.31 за SMS). Кандидаты на тест доставки (Unitel и Africell): CastBrick (~10 AOA/SMS, оплата в AOA), Ziett (~18 AOA/SMS, AOA), Infobip (~$0.10, USD) как запасной. KambaSMS не подходит: генерирует код сам, не принимает свой текст. Адаптеры: `infobip`, `castbrick`, `ziett`, `log`.
 
 Что сделано в коде:
 - `/entrar`: «номер → код», регистрация и вход — одно действие (`signInWithOtp({ phone })` + `verifyOtp`). Повторная отправка через 60 с, автосабмит при 6 цифрах, ошибки Supabase переведены (`humanizeAuthError`). Опциональная капча Cloudflare Turnstile по `NUXT_PUBLIC_TURNSTILE_SITE_KEY`.
@@ -109,8 +109,11 @@ Layout `account`: обычные header/footer сайта + компактная
 SUPABASE_SMS_HOOK_SECRET=v1,whsec_...   # Authentication → Hooks → Send SMS → Generate secret
 SMS_PROVIDER=infobip                     # или log
 SMS_SENDER_ID=Amoda
-INFOBIP_BASE_URL=xxxxx.api.infobip.com
+INFOBIP_BASE_URL=xxxxx.api.infobip.com   # для SMS_PROVIDER=infobip
 INFOBIP_API_KEY=...
+CASTBRICK_API_KEY=...                    # для SMS_PROVIDER=castbrick
+ZIETT_API_KEY=zk_live_...                # для SMS_PROVIDER=ziett
+ZIETT_REMITTER_ID=<uuid sender id>       # заведённый в кабинете Ziett
 NUXT_PUBLIC_TURNSTILE_SITE_KEY=          # опционально
 ```
 
