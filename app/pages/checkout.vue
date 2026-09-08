@@ -5,6 +5,7 @@ import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 import { colorLabel } from '#shared/constants/colors';
+import { formatAoPhone } from '#shared/utils/phone';
 
 
 definePageMeta({ name: 'checkout' });
@@ -55,6 +56,17 @@ if (import.meta.client) {
 }
 
 const checkoutForm = reactive({ phone: '', name: '' });
+
+// Вошедшая клиентка: имя и номер из профиля, чтобы не вводить каждый раз.
+// Позже, с OTP по телефону, номер станет подтверждённым и его можно будет не спрашивать вовсе.
+const { user, canAccessAccount } = useAuth();
+
+if (user.value && canAccessAccount.value) {
+  const { data: profile } = await useAccountProfile();
+
+  checkoutForm.name = profile.value?.name || '';
+  checkoutForm.phone = formatAoPhone(profile.value?.phone);
+}
 
 
 const DEFAULT_PICKUP_OFFICE_ID = 1;

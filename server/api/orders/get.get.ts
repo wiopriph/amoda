@@ -1,4 +1,4 @@
-import { serverSupabaseServiceRole } from '#supabase/server';
+import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server';
 import { fetchOrderByNumber, toPublicOrder } from '~~/server/utils/orders';
 
 
@@ -16,5 +16,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Order not found' });
   }
 
-  return toPublicOrder(order);
+  // Кнопка «Ver na minha conta» показывается только владелице заказа
+  const user = await serverSupabaseUser(event).catch(() => null);
+
+  return {
+    ...toPublicOrder(order),
+    isMine: Boolean(user && order.userId === user.id),
+  };
 });

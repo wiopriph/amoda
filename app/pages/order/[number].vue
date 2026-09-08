@@ -44,6 +44,11 @@ const nextSteps = [
   'Você experimenta e decide com calma.',
 ];
 
+// Владелице — путь в кабинет; гостю (когда кабинет открыт) — мягкое приглашение создать аккаунт
+const { user, isAccountEnabled, canAccessAccount } = useAuth();
+const showAccountLink = computed(() => Boolean(order.value?.isMine) && canAccessAccount.value);
+const showAccountInvite = computed(() => !user.value && isAccountEnabled.value);
+
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => `Olá! Quero confirmar a minha escolha #${orderNumber}.`);
 
@@ -119,8 +124,31 @@ useHead({
             >
               Falar connosco no WhatsApp
             </UButton>
+
+            <UButton
+              v-if="showAccountLink"
+              :to="{ name: 'conta-pedidos-number', params: { number: orderNumber } }"
+              size="xl"
+              color="neutral"
+              variant="soft"
+              icon="i-lucide-user-round"
+              class="justify-center"
+            >
+              Ver na minha conta
+            </UButton>
           </div>
         </section>
+
+        <UAlert
+          v-if="showAccountInvite"
+          color="primary"
+          variant="soft"
+          icon="i-lucide-user-round"
+          title="Acompanha este pedido na tua conta"
+          description="Cria a tua conta Amoda para ver o estado dos pedidos e guardar favoritos."
+          :actions="[{ label: 'Criar conta', to: { name: 'auth', query: { redirected_from: '/conta' } }, color: 'primary' }]"
+          class="mt-5"
+        />
 
         <section class="mt-5 grid gap-5 sm:mt-6 lg:grid-cols-[1fr_340px] lg:items-start">
           <div class="space-y-5">
