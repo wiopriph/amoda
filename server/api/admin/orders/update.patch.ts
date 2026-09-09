@@ -1,4 +1,5 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
+import { assertAdmin } from '~~/server/utils/assertAdmin';
 
 
 type Body = {
@@ -8,6 +9,8 @@ type Body = {
 };
 
 export default defineEventHandler(async (event) => {
+  await assertAdmin(event);
+
   const client = await serverSupabaseServiceRole(event);
   const body = (await readBody(event)) as Body;
 

@@ -1,8 +1,11 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { getCartItems } from '~~/server/utils/cart';
+import { assertAdmin } from '~~/server/utils/assertAdmin';
 
 
 export default defineEventHandler(async (event) => {
+  await assertAdmin(event);
+
   const client = await serverSupabaseServiceRole(event);
   const { publicCode } = getQuery(event) as { publicCode?: string };
   const normalizedPublicCode = String(publicCode || '').trim();

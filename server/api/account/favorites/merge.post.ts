@@ -9,17 +9,20 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<{ product_ids?: unknown; productIds?: unknown }>(event);
   const productIds = normalizeProductIds(body?.product_ids ?? body?.productIds);
 
-  const client = await serverSupabaseServiceRole(event);
+  const client = await serverSupabaseServiceRole(event) as any;
 
-  // Удалённые товары в локальном списке не должны ломать слияние — добавляем по одному, ошибки 404 глотаем
-  for (const productId of productIds) {
-    try {
-      await addFavorites(client, user.id, [productId]);
-    } catch (addError: any) {
-      if (addError?.statusCode !== 404) {
-        throw addError;
-      }
+  if (productIds.length) {
+    // Удалённые из каталога товары отсеиваем заранее, чтобы один upsert не упал на внешнем ключе
+    const { data: products, error } = await client
+      .from('products')
+      .select('id')
+      .in('id', productIds);
+
+    if (error) {
+      throw createError({ statusCode: 500, statusMessage: error.message });
     }
+
+    await addFavorites(client, user.id, (products || []).map((product: any) => Number(product.id)));
   }
 
   return listFavorites(client, user.id);

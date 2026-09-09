@@ -1,4 +1,5 @@
-import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server';
+import { serverSupabaseServiceRole } from '#supabase/server';
+import { getOptionalUser } from '~~/server/utils/auth';
 import { fetchOrderByNumber, toPublicOrder } from '~~/server/utils/orders';
 
 
@@ -17,7 +18,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Кнопка «Ver na minha conta» показывается только владелице заказа
-  const user = await serverSupabaseUser(event).catch(() => null);
+  const user = await getOptionalUser(event);
 
   return {
     ...toPublicOrder(order),

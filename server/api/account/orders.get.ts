@@ -1,5 +1,6 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { assertAccount } from '~~/server/utils/assertAccount';
+import { linkSessionToUser } from '~~/server/utils/accountLink';
 import { firstVariantImage } from '~~/server/utils/orders';
 
 
@@ -8,6 +9,8 @@ const MAX_ORDERS = 50;
 export default defineEventHandler(async (event) => {
   const user = await assertAccount(event);
   const client = await serverSupabaseServiceRole(event) as any;
+
+  await linkSessionToUser(client, user, getCookie(event, 'sid'));
 
   const { data, error } = await client
     .from('orders')
@@ -25,6 +28,9 @@ export default defineEventHandler(async (event) => {
       )
     `)
     .eq('user_id', user.id)
+    // Карточке нужна одна обложка на вещь — не тянем всю галерею
+    .order('position', { referencedTable: 'items.variant.images', ascending: true })
+    .limit(1, { referencedTable: 'items.variant.images' })
     .order('created_at', { ascending: false })
     .limit(MAX_ORDERS);
 

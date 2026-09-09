@@ -23,7 +23,12 @@ type FavoriteItem = {
 
 type ServerFavorite = FavoriteProduct & { addedAt: string };
 
-const STORAGE_KEY = 'amoda:favorites';
+export const FAVORITES_STORAGE_KEY = 'amoda:favorites';
+
+const STORAGE_KEY = FAVORITES_STORAGE_KEY;
+
+// Растёт при каждом локальном изменении: ответ синка, начатого раньше, не должен затирать более новое состояние
+let changeVersion = 0;
 
 const readStorage = (): FavoriteItem[] => {
   try {
@@ -89,6 +94,7 @@ export function useFavorites() {
 
   const syncFromServer = async () => {
     const local = readStorage();
+    const startedAt = changeVersion;
 
     try {
       const rows = local.length ?
@@ -98,20 +104,29 @@ export function useFavorites() {
         }) :
         await $fetch<ServerFavorite[]>('/api/account/favorites');
 
-      itemsState.value = rows.map(fromServer);
-
       // После слияния локальная копия не нужна — иначе после выхода она бы «воскресла»
       writeStorage([]);
+
+      // Пока ждали ответ, клиентка что-то отметила: её изменения уже на сервере, старый снимок не применяем
+      if (changeVersion === startedAt) {
+        itemsState.value = rows.map(fromServer);
+      }
     } catch {
-      itemsState.value = local;
+      if (changeVersion === startedAt) {
+        itemsState.value = local;
+      }
     }
   };
+
+  // Гость: перечитать localStorage; вошедшая: подтянуть с сервера
+  const reload = () => (isServerMode.value ? syncFromServer() : Promise.resolve(loadFromStorage()));
 
   const isFavorite = (productId: number) => itemsState.value.some(item => item.productId === productId);
 
   const remove = async (productId: number) => {
-    const previous = itemsState.value;
+    const removed = itemsState.value.find(item => item.productId === productId);
 
+    changeVersion += 1;
     itemsState.value = itemsState.value.filter(item => item.productId !== productId);
     persist();
 
@@ -122,7 +137,11 @@ export function useFavorites() {
     try {
       await $fetch(`/api/account/favorites/${productId}`, { method: 'DELETE' });
     } catch {
-      itemsState.value = previous;
+      // Откатываем только эту вещь: параллельные отметки других товаров уже могли успеть
+      if (removed && !isFavorite(productId)) {
+        itemsState.value = [removed, ...itemsState.value];
+      }
+
       notifyRollback();
     }
   };
@@ -132,8 +151,7 @@ export function useFavorites() {
       return;
     }
 
-    const previous = itemsState.value;
-
+    changeVersion += 1;
     itemsState.value = [toItem(product, Date.now()), ...itemsState.value];
     persist();
 
@@ -161,7 +179,7 @@ export function useFavorites() {
         body: { product_id: product.id },
       });
     } catch {
-      itemsState.value = previous;
+      itemsState.value = itemsState.value.filter(item => item.productId !== product.id);
       notifyRollback();
     }
   };
@@ -187,7 +205,6 @@ export function useFavorites() {
     add,
     remove,
     toggle,
-    loadFromStorage,
-    syncFromServer,
+    reload,
   };
 }

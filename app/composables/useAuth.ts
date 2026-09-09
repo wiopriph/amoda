@@ -1,17 +1,14 @@
-const hasAdminRole = (user: any) => {
-  const roles = user?.app_metadata?.roles || [];
+import { hasAdminRole } from '#shared/utils/auth';
 
-  return Array.isArray(roles) && roles.includes('admin');
-};
 
-// Ошибки Supabase Auth по-человечески, в tu-регистре
+// Ошибки Supabase Auth по-человечески, в tu-регистре. Порядок важен: первый совпавший паттерн побеждает
 const AUTH_ERROR_MESSAGES: [RegExp, string][] = [
+  [/invalid login credentials/i, 'E-mail ou palavra-passe errados.'],
   [/unsupported phone provider|sms provider/i, 'O acesso por SMS ainda não está ativo. Tenta mais tarde.'],
   [/sms_send_failed|error sending confirmation otp/i, 'Não conseguimos enviar o SMS. Confirma o número e tenta novamente daqui a pouco.'],
-  [/token has expired|invalid|otp_expired/i, 'Código errado ou expirado. Pede um novo código.'],
+  [/token has expired|otp_expired|invalid (otp|token)|token.*invalid/i, 'Código errado ou expirado. Pede um novo código.'],
   [/only request this after|rate limit|too many/i, 'Espera um pouco antes de pedir outro código.'],
   [/captcha/i, 'Confirma que não és um robô e tenta de novo.'],
-  [/invalid login credentials/i, 'E-mail ou palavra-passe errados.'],
 ];
 
 export const humanizeAuthError = (message?: string | null) => {
@@ -83,11 +80,11 @@ export const useAuth = () => {
 
   // Куда вести после входа: в кабинет, если он доступен, админа без флага — в админку
   const resolveHomeRoute = (user: any = supaUser.value) => {
-    if (isAccountEnabled.value || hasAdminRole(user)) {
-      return isAccountEnabled.value || !hasAdminRole(user) ? { name: 'conta' } : { name: 'admin' };
+    if (isAccountEnabled.value) {
+      return { name: 'conta' };
     }
 
-    return { name: 'index' };
+    return hasAdminRole(user) ? { name: 'admin' } : { name: 'index' };
   };
 
 

@@ -74,8 +74,9 @@ const requestCode = async () => {
     return;
   }
 
+  // Ошибка капчи — в общий error: он виден и на шаге кода, где тоже есть «enviar novo código»
   if (turnstileSiteKey && !captchaToken.value) {
-    phoneError.value = 'Confirma que não és um robô.';
+    error.value = 'Confirma que não és um robô.';
 
     return;
   }
@@ -182,11 +183,6 @@ const benefits = [
             />
           </UFormField>
 
-          <AuthTurnstile
-            ref="captchaRef"
-            v-model="captchaToken"
-          />
-
           <UButton
             :loading="isLoading"
             type="submit"
@@ -286,6 +282,13 @@ const benefits = [
             </UButton>
           </div>
         </UForm>
+
+        <!-- Один экземпляр на оба шага: токен одноразовый, повторная отправка кода тоже требует капчу -->
+        <AuthTurnstile
+          ref="captchaRef"
+          v-model="captchaToken"
+          class="mt-4"
+        />
       </UCard>
 
       <p class="mt-4 text-center text-xs leading-5 text-muted">

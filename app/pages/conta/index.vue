@@ -15,8 +15,10 @@ useHead({
 });
 
 const { isAdmin } = useAuth();
-const { data: profile } = await useAccountProfile();
-const { data: orders, error: ordersError } = await useFetch<AccountOrderSummary[]>('/api/account/orders');
+const [{ data: profile }, { data: orders, error: ordersError }] = await Promise.all([
+  useAccountProfile(),
+  useFetch<AccountOrderSummary[]>('/api/account/orders'),
+]);
 
 const greeting = computed(() => (profile.value?.name ? `Olá, ${profile.value.name}!` : 'Olá!'));
 const hasOrders = computed(() => Boolean(orders.value?.length));

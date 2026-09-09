@@ -1,6 +1,6 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { assertAccount } from '~~/server/utils/assertAccount';
-import { getOrCreateProfile } from '~~/server/utils/profile';
+import { mapProfile, PROFILE_COLUMNS } from '~~/server/utils/profile';
 
 
 const MAX_NAME_LENGTH = 120;
@@ -16,19 +16,18 @@ export default defineEventHandler(async (event) => {
 
   const name = String(body.name ?? '').trim();
 
-  // Гарантируем строку профиля до UPDATE (аккаунты старше миграции)
-  await getOrCreateProfile(event, user);
-
   const client = await serverSupabaseServiceRole(event) as any;
 
-  const { error } = await client
+  // upsert создаёт строку аккаунтам старше миграции и обновляет имя за один запрос
+  const { data, error } = await client
     .from('profiles')
-    .update({ name: name ? name.slice(0, MAX_NAME_LENGTH) : null })
-    .eq('user_id', user.id);
+    .upsert({ 'user_id': user.id, name: name ? name.slice(0, MAX_NAME_LENGTH) : null }, { onConflict: 'user_id' })
+    .select(PROFILE_COLUMNS)
+    .single();
 
   if (error) {
     throw createError({ statusCode: 500, statusMessage: error.message });
   }
 
-  return getOrCreateProfile(event, user);
+  return mapProfile(data, user);
 });

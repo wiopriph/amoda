@@ -8,9 +8,9 @@ export type AccountProfile = {
   email: string | null
 };
 
-const PROFILE_COLUMNS = 'user_id, name, phone';
+export const PROFILE_COLUMNS = 'user_id, name, phone';
 
-const mapProfile = (row: any, user: any): AccountProfile => ({
+export const mapProfile = (row: any, user: any): AccountProfile => ({
   name: row?.name ?? null,
   // Источник правды — подтверждённый номер в Supabase Auth; profiles.phone лишь его зеркало
   phone: user?.phone || row?.phone || null,

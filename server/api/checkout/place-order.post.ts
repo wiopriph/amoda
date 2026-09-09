@@ -1,5 +1,7 @@
-import { serverSupabaseServiceRole, serverSupabaseUser } from '#supabase/server';
+import { serverSupabaseServiceRole } from '#supabase/server';
+import { getOptionalUser } from '~~/server/utils/auth';
 import { notifyOrderToTelegram } from '~~/server/utils/notifyOrderToTelegram';
+import { formatAoPhone } from '#shared/utils/phone';
 import {
   SESSION_ID_RE,
   findCartBySessionId,
@@ -58,7 +60,17 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Too many items' });
   }
 
-  const phone = String(body.contact?.phone ?? '').trim();
+  // Вошедшая клиентка: номер только из подтверждённой сессии, тело запроса не решает
+  const [user, cart] = await Promise.all([
+    getOptionalUser(event),
+    (() => {
+      const sid = String(getCookie(event, 'sid') || '');
+
+      return SESSION_ID_RE.test(sid) ? findCartBySessionId(supabase, sid) : Promise.resolve(null);
+    })(),
+  ]);
+
+  const phone = user?.phone ? formatAoPhone(user.phone) : String(body.contact?.phone ?? '').trim();
   const name = String(body.contact?.name ?? '').trim();
 
   if (!phone) {
@@ -128,11 +140,7 @@ export default defineEventHandler(async (event) => {
 
   const orderNumber = generateOrderNumber();
 
-  // Привязка к аккаунту (если вошла) и к корзине этого устройства — по ним кабинет находит свои заказы
-  const user = await serverSupabaseUser(event).catch(() => null);
-  const sid = String(getCookie(event, 'sid') || '');
-  const cart = SESSION_ID_RE.test(sid) ? await findCartBySessionId(supabase, sid) : null;
-
+  // user_id и cart_id — по ним кабинет находит свои заказы
   const { data: orderRow, error: orderErr } = await supabase
     .from('orders')
     .insert({

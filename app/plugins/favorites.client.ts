@@ -1,34 +1,23 @@
+import { FAVORITES_STORAGE_KEY } from '~/composables/useFavorites';
+
+
 // Инициализация избранного один раз на приложение: после гидрации (чтобы SSR-разметка совпала)
-// и при каждом входе/выходе. Раньше это жило в композабле и зависело от жизни первого компонента.
+// и при каждом входе/выходе. Живёт в плагине, а не в композабле, чтобы не зависеть от жизни первого компонента.
 export default defineNuxtPlugin(() => {
   const { user } = useAuth();
-  const { isServerMode, loadFromStorage, syncFromServer } = useFavorites();
-
-  const STORAGE_KEY = 'amoda:favorites';
+  const { isServerMode, reload } = useFavorites();
 
   onNuxtReady(() => {
-    if (isServerMode.value) {
-      syncFromServer();
-    } else {
-      loadFromStorage();
-    }
+    reload();
 
     window.addEventListener('storage', (storageEvent) => {
-      if (storageEvent.key === STORAGE_KEY && !isServerMode.value) {
-        loadFromStorage();
+      if (storageEvent.key === FAVORITES_STORAGE_KEY && !isServerMode.value) {
+        reload();
       }
     });
 
-    watch(() => user.value?.id ?? null, (userId, previousUserId) => {
-      if (userId === previousUserId) {
-        return;
-      }
-
-      if (isServerMode.value) {
-        syncFromServer();
-      } else {
-        loadFromStorage();
-      }
+    watch(() => user.value?.id ?? null, () => {
+      reload();
     });
   });
 });

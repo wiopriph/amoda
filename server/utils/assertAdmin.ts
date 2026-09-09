@@ -1,8 +1,9 @@
-import { serverSupabaseUser } from '#supabase/server';
+import { getOptionalUser } from '~~/server/utils/auth';
+import { hasAdminRole } from '#shared/utils/auth';
 
 
 export async function assertAdmin(event: any) {
-  const user = await serverSupabaseUser(event);
+  const user = await getOptionalUser(event);
 
   if (!user) {
     throw createError({
@@ -11,11 +12,7 @@ export async function assertAdmin(event: any) {
     });
   }
 
-  const roles = user.app_metadata?.roles || [];
-
-  const isAdmin = Array.isArray(roles) && roles.includes('admin');
-
-  if (!isAdmin) {
+  if (!hasAdminRole(user)) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden — admin access only',
