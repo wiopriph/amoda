@@ -106,8 +106,8 @@ export default defineNuxtConfig({
     // Send SMS Hook Supabase → наш /api/auth/send-sms → SMS-провайдер (см. docs/account-plan.md)
     smsHookSecret: process.env.SUPABASE_SMS_HOOK_SECRET,
     sms: {
-      provider: process.env.SMS_PROVIDER || 'infobip',
-      senderId: process.env.SMS_SENDER_ID || 'Amoda',
+      provider: process.env.SMS_PROVIDER || 'castbrick',
+      senderId: process.env.SMS_SENDER_ID || 'amoda',
       infobipBaseUrl: process.env.INFOBIP_BASE_URL,
       infobipApiKey: process.env.INFOBIP_API_KEY,
       castbrickApiKey: process.env.CASTBRICK_API_KEY,
