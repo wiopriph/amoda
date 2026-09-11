@@ -32,8 +32,6 @@ export default defineEventHandler(async (event) => {
     text: `Amoda: o teu código é ${otp}. Não partilhes este código com ninguém.`,
   });
 
-  // Supabase ждёт пустой 200
-  setResponseStatus(event, 200);
-
-  return '';
+  // Supabase проверяет content-type ответа: нужен JSON, иначе hook_payload_invalid_content_type
+  return {};
 });
