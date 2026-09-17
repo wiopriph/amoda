@@ -10,6 +10,10 @@ const footerLinks = [
     to: { name: 'delivery' },
   },
   {
+    label: 'Blog',
+    to: { name: 'blog' },
+  },
+  {
     label: 'Pontos de levantamento',
     to: { name: 'pickup-points' },
   },

@@ -3,11 +3,11 @@ const image = 'https://amoda.ao/logo.webp';
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
-  // Канонический origin для sitemap и абсолютных URL независимо от заголовков прокси
   site: {
     url: 'https://amoda.ao',
     name: 'Amoda',
   },
+
   css: ['~/assets/css/main.css'],
 
   app: {
@@ -62,22 +62,24 @@ export default defineNuxtConfig({
   },
 
   modules: [
+    '@nuxt/content',
     '@nuxt/image',
     '@nuxt/ui',
     '@nuxtjs/supabase',
     '@nuxtjs/sitemap',
   ],
 
+  components: [
+    {
+      path: '~/components/content',
+      global: true,
+      pathPrefix: false,
+    },
+    '~/components',
+  ],
+
   nitro: {
     routeRules: {
-      // Старый slug товара 180 описывал другой товар (копия от 182)
-      '/product/vestido-feminino-curto-com-ombro-assimetrico-e-estilo-tomara-que-caia-elegante-e-sexy-em-cor-solida-para-festas-e-verao': {
-        redirect: {
-          to: '/product/vestido-longo-vinho-em-malha-com-fenda',
-          statusCode: 301,
-        },
-      },
-
       '/**': {
         headers: {
           'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
@@ -138,13 +140,36 @@ export default defineNuxtConfig({
 
   sitemap: {
     cacheMaxAgeSeconds: 86400,
-    exclude: ['/admin/**', '/entrar', '/cart', '/checkout', '/order/**', '/conta/**', '/favorites'],
+    exclude: [
+      '/admin/**',
+      '/entrar',
+      '/cart',
+      '/checkout',
+      '/order/**',
+      '/conta/**',
+      '/favorites',
+    ],
     sitemapName: 'sitemap.xml',
 
     sitemaps: {
       pages: {
         includeAppSources: true,
-        include: ['/', '/products', '/delivery', '/pickup-points', '/return-policy', '/privacy-policy', '/terms-of-use', '/contacts'],
+        include: [
+          '/',
+          '/products',
+          '/delivery',
+          '/pickup-points',
+          '/return-policy',
+          '/privacy-policy',
+          '/terms-of-use',
+          '/contacts',
+          '/blog',
+        ],
+      },
+
+      blog: {
+        includeAppSources: false,
+        sources: ['/sitemap/blog'],
       },
 
       categories: {
