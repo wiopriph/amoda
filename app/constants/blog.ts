@@ -4,13 +4,12 @@ export const BLOG_AUTHOR = {
   id: 'manuel',
   name: 'Manuel',
   role: 'Amoda, Luanda',
-  // TODO: заменить на реальное фото автора (положить файл в public/blog/)
-  photo: '/blog/manuel.webp',
+  // TODO: заменить заглушку на реальное фото автора
+  photo: '/blog-assets/manuel.webp',
 } as const;
 
-// Дефолтная og-image статей блога
-// TODO: заменить на выделенную картинку блога (положить файл в public/blog/)
-export const BLOG_OG_IMAGE = '/logo.webp';
+// Дефолтная og-image статей блога (заглушка, сгенерирована вместе с обложками)
+export const BLOG_OG_IMAGE = '/blog-assets/og-default.webp';
 
 // Заглушка обложки карточки статьи, когда cover в frontmatter пуст
 export const BLOG_COVER_FALLBACK = '/placeholder.webp';
