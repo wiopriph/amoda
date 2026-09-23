@@ -11,6 +11,11 @@ const MENU_LIST = [
     to: { name: 'admin-orders' },
   },
   {
+    label: 'Cupões',
+    icon: 'i-lucide-ticket',
+    to: { name: 'admin-coupons' },
+  },
+  {
     label: 'Products',
     icon: 'i-lucide-shirt',
     to: { name: 'admin-products' },

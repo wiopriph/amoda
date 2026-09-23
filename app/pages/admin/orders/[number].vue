@@ -62,6 +62,9 @@ type AdminOrder = {
   items: OrderItem[]
   totals?: {
     total?: number
+    subtotal?: number
+    discount?: number
+    coupon?: { code: string } | null
   } | null
 };
 
@@ -386,8 +389,20 @@ const saveOrder = async () => {
             </div>
           </div>
 
-          <div class="border-t mt-4 pt-3 text-right text-lg font-semibold">
-            Total: {{ formattedOrderTotal }}
+          <div class="border-t mt-4 pt-3 text-right">
+            <template v-if="order.totals?.discount">
+              <div class="text-sm text-muted">
+                Peças: {{ formatPrice(order.totals.subtotal ?? 0) }}
+              </div>
+
+              <div class="text-sm text-primary">
+                Cupão {{ order.totals.coupon?.code }}: −{{ formatPrice(order.totals.discount) }}
+              </div>
+            </template>
+
+            <div class="text-lg font-semibold">
+              Total: {{ formattedOrderTotal }}
+            </div>
           </div>
         </UCard>
       </template>

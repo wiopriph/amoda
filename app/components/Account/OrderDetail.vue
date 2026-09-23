@@ -3,6 +3,7 @@ import { formatPrice } from '~/utils/formatPrice';
 import { formatDate } from '~/utils/formatDate';
 import { colorLabel } from '#shared/constants/colors';
 import { orderStatusColor, orderStatusDescription, orderStatusLabel } from '#shared/constants/orderStatus';
+import { normalizeTotals } from '#shared/constants/coupons';
 
 
 const props = defineProps<{
@@ -10,6 +11,7 @@ const props = defineProps<{
 }>();
 
 const pickupOffice = computed(() => props.order?.pickupOffice || null);
+const totals = computed(() => normalizeTotals(props.order?.totals));
 
 const pickupMapUrl = computed(() => {
   const office = pickupOffice.value;
@@ -124,14 +126,30 @@ const variantLabel = (item: any) => [item.variant?.size, colorLabel(item.variant
           </div>
         </div>
 
-        <div class="mt-4 flex items-center justify-between gap-4 border-t pt-4">
-          <span class="text-sm font-semibold text-highlighted">
-            Total se levares tudo
-          </span>
+        <div class="mt-4 space-y-1 border-t pt-4">
+          <template v-if="totals.discount > 0">
+            <div class="flex items-center justify-between gap-4 text-sm text-muted">
+              <span>Peças</span>
 
-          <span class="text-lg font-black text-primary">
-            {{ formatPrice(order.totals?.total ?? 0) }}
-          </span>
+              <span>{{ formatPrice(totals.subtotal) }}</span>
+            </div>
+
+            <div class="flex items-center justify-between gap-4 text-sm text-primary">
+              <span>Cupão {{ totals.coupon?.code }}</span>
+
+              <span>−{{ formatPrice(totals.discount) }}</span>
+            </div>
+          </template>
+
+          <div class="flex items-center justify-between gap-4">
+            <span class="text-sm font-semibold text-highlighted">
+              Total se levares tudo
+            </span>
+
+            <span class="text-lg font-black text-primary">
+              {{ formatPrice(totals.total) }}
+            </span>
+          </div>
         </div>
 
         <p class="mt-2 text-xs leading-5 text-muted">

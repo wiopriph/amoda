@@ -6,6 +6,7 @@ import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 import { colorLabel } from '#shared/constants/colors';
 import { formatAoPhone } from '#shared/utils/phone';
+import { couponLabel, couponReasonMessage, type CouponSummary } from '#shared/constants/coupons';
 
 
 definePageMeta({ name: 'checkout' });
@@ -60,13 +61,78 @@ const checkoutForm = reactive({ phone: '', name: '' });
 // Вошедшая клиентка: имя из профиля, номер — тот, под которым вошла (подтверждён по SMS), его не меняем
 const { user, canAccessAccount } = useAuth();
 const verifiedPhone = ref('');
+const isAccountUser = computed(() => Boolean(user.value) && canAccessAccount.value);
 
-if (user.value && canAccessAccount.value) {
+if (isAccountUser.value) {
   const { data: profile } = await useAccountProfile();
 
   checkoutForm.name = profile.value?.name || '';
   verifiedPhone.value = formatAoPhone(profile.value?.phone);
   checkoutForm.phone = verifiedPhone.value;
+}
+
+// Купон: только для вошедших. Лучший персональный подставляется сам, публичный код вводится руками
+type CouponQuote = { ok: boolean; reason: string | null; coupon: CouponSummary | null; discount: number };
+
+const coupon = reactive({
+  input: '',
+  applied: null as CouponSummary | null,
+  discount: 0,
+  error: null as string | null,
+  isChecking: false,
+  isFieldOpen: false,
+});
+
+const discountedTotal = computed(() => Math.max(0, totalKz.value - coupon.discount));
+
+const quoteCoupon = async (code?: string) => {
+  if (!isAccountUser.value || !items.value.length) {
+    return;
+  }
+
+  coupon.isChecking = true;
+  coupon.error = null;
+
+  try {
+    const quote = await $fetch<CouponQuote>('/api/account/coupons/quote', {
+      method: 'POST',
+      body: { code: code || undefined, subtotal: totalKz.value },
+    });
+
+    if (quote.ok && quote.coupon) {
+      coupon.applied = quote.coupon;
+      coupon.discount = quote.discount;
+      coupon.isFieldOpen = false;
+    } else if (code) {
+      coupon.error = couponReasonMessage(quote.reason);
+    }
+  } catch (quoteError: any) {
+    if (code) {
+      coupon.error = quoteError?.data?.message || couponReasonMessage(null);
+    }
+  } finally {
+    coupon.isChecking = false;
+  }
+};
+
+const applyCouponCode = () => quoteCoupon(coupon.input.trim());
+
+const removeCoupon = () => {
+  coupon.applied = null;
+  coupon.discount = 0;
+  coupon.input = '';
+  coupon.error = null;
+};
+
+if (import.meta.client && isAccountUser.value) {
+  // Корзина приходит после гидрации; при изменении суммы пересчитываем применённый купон
+  watch(() => [isLoading.value, totalKz.value], ([loading]) => {
+    if (loading || !items.value.length) {
+      return;
+    }
+
+    quoteCoupon(coupon.applied?.code);
+  }, { immediate: true });
 }
 
 
@@ -233,13 +299,15 @@ const submitCheckout = async () => {
           phone: checkoutForm.phone,
         },
         pickupOfficeId: DEFAULT_PICKUP_OFFICE_ID,
+        couponCode: coupon.applied?.code || undefined,
       },
     });
 
     if (import.meta.client) {
       trackPurchase({
         transaction_id: String(number),
-        value: totalKz.value,
+        value: discountedTotal.value,
+        coupon: coupon.applied?.code,
         items: getAnalyticsItems(),
         pickup_office_id: DEFAULT_PICKUP_OFFICE_ID,
       } as any);
@@ -359,9 +427,96 @@ const submitCheckout = async () => {
 
             <div
               class="text-lg font-black text-primary"
-              v-text="formatPrice(totalKz)"
+              v-text="formatPrice(discountedTotal)"
             />
           </div>
+        </div>
+
+        <!-- Cupão: só para quem entrou na conta -->
+        <div
+          v-if="isAccountUser"
+          class="mt-3 border-t border-primary/10 pt-3"
+        >
+          <div
+            v-if="coupon.applied"
+            class="flex items-center justify-between gap-3 text-sm"
+          >
+            <span class="flex items-center gap-2 text-highlighted">
+              <UIcon
+                name="i-lucide-ticket"
+                class="size-4 text-primary"
+              />
+
+              Cupão <strong v-text="coupon.applied.code" /> · {{ couponLabel(coupon.applied) }}
+            </span>
+
+            <span class="flex items-center gap-2">
+              <span
+                class="font-semibold text-primary"
+                v-text="`−${formatPrice(coupon.discount)}`"
+              />
+
+              <UButton
+                variant="ghost"
+                color="neutral"
+                size="xs"
+                icon="i-heroicons-x-mark"
+                aria-label="Remover cupão"
+                @click="removeCoupon"
+              />
+            </span>
+          </div>
+
+          <UButton
+            v-else-if="!coupon.isFieldOpen"
+            variant="link"
+            color="primary"
+            size="sm"
+            class="px-0"
+            icon="i-lucide-ticket"
+            @click="coupon.isFieldOpen = true"
+          >
+            Tens um cupão?
+          </UButton>
+
+          <UFormField
+            v-if="coupon.isFieldOpen && !coupon.applied"
+            :error="coupon.error || undefined"
+            class="mt-1"
+          >
+            <div class="flex gap-2">
+              <UInput
+                v-model="coupon.input"
+                placeholder="CÓDIGO"
+                autocapitalize="characters"
+                size="lg"
+                class="w-full uppercase"
+                @keydown.enter.prevent="applyCouponCode"
+              />
+
+              <UButton
+                :loading="coupon.isChecking"
+                :disabled="!coupon.input.trim()"
+                color="primary"
+                variant="soft"
+                size="lg"
+                @click="applyCouponCode"
+              >
+                Aplicar
+              </UButton>
+            </div>
+          </UFormField>
+
+          <UButton
+            v-if="!coupon.applied && coupon.isFieldOpen"
+            variant="link"
+            color="neutral"
+            size="xs"
+            class="mt-1 px-0"
+            @click="coupon.isFieldOpen = false"
+          >
+            Cancelar
+          </UButton>
         </div>
 
         <ul class="mt-3 space-y-2 border-t border-primary/10 pt-3">

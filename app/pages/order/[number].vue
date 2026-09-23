@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatPrice } from '~/utils/formatPrice';
+import { normalizeTotals } from '#shared/constants/coupons';
 
 
 definePageMeta({ name: 'order-number' });
@@ -15,7 +16,8 @@ const {
 } = await useFetch<any>('/api/orders/get', { query: { number: orderNumber } });
 
 const orderItems = computed(() => order.value?.items || []);
-const orderTotal = computed(() => order.value?.totals?.total ?? 0);
+const orderTotals = computed(() => normalizeTotals(order.value?.totals));
+const orderTotal = computed(() => orderTotals.value.total);
 
 const pickupOffice = computed(() => order.value?.pickupOffice || null);
 const pickupMapUrl = computed(() => {
@@ -251,6 +253,20 @@ useHead({
               </div>
 
               <div class="mt-4 border-t pt-4">
+                <template v-if="orderTotals.discount > 0">
+                  <div class="flex items-center justify-between gap-4 text-sm text-muted">
+                    <span>Peças</span>
+
+                    <span>{{ formatPrice(orderTotals.subtotal) }}</span>
+                  </div>
+
+                  <div class="mb-1 flex items-center justify-between gap-4 text-sm text-primary">
+                    <span>Cupão {{ orderTotals.coupon?.code }}</span>
+
+                    <span>−{{ formatPrice(orderTotals.discount) }}</span>
+                  </div>
+                </template>
+
                 <div class="flex items-center justify-between gap-4">
                   <span class="text-sm font-semibold text-highlighted">
                     Total se levar tudo

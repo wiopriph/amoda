@@ -14,6 +14,12 @@ const NAV_ITEMS = [
     isActive: (path: string) => path.startsWith('/favorites'),
   },
   {
+    label: 'Cupões',
+    icon: 'i-lucide-ticket',
+    to: { name: 'conta-cupoes' },
+    isActive: (path: string) => path.startsWith('/conta/cupoes'),
+  },
+  {
     label: 'Os meus dados',
     icon: 'i-lucide-settings',
     to: { name: 'conta-dados' },
@@ -38,7 +44,7 @@ const activeLabel = computed(() => NAV_ITEMS.find(navItem => navItem.isActive(ro
           <div class="mt-4 grid gap-5 sm:mt-8 lg:grid-cols-[220px_1fr] lg:items-start">
             <nav
               aria-label="A minha conta"
-              class="grid grid-cols-3 gap-1 rounded-2xl bg-gray-100 p-1.5 lg:hidden"
+              class="grid grid-cols-4 gap-1 rounded-2xl bg-gray-100 p-1.5 lg:hidden"
             >
               <NuxtLink
                 v-for="navItem in NAV_ITEMS"

@@ -2,6 +2,8 @@ import { serverSupabaseServiceRole } from '#supabase/server';
 import { getOptionalUser } from '~~/server/utils/auth';
 import { notifyOrderToTelegram } from '~~/server/utils/notifyOrderToTelegram';
 import { formatAoPhone } from '#shared/utils/phone';
+import { checkCoupon, couponSummary, normalizeCouponCode, reserveCoupon } from '~~/server/utils/coupons';
+import { couponReasonMessage } from '#shared/constants/coupons';
 import {
   SESSION_ID_RE,
   findCartBySessionId,
@@ -50,6 +52,7 @@ export default defineEventHandler(async (event) => {
     items: OrderItemInput[]
     contact: Contact
     pickupOfficeId?: number | null
+    couponCode?: unknown
   }>(event);
 
   if (!body?.items?.length) {
@@ -138,6 +141,40 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // Купон: только для вошедшей. Проверяем до создания заказа, резервируем сразу после (с блокировкой купона)
+  const subtotal = total;
+  const couponCode = String(body.couponCode ?? '').trim() ? normalizeCouponCode(body.couponCode) : null;
+
+  if (String(body.couponCode ?? '').trim() && !couponCode) {
+    throw createError({ statusCode: 400, statusMessage: couponReasonMessage('not_found') });
+  }
+
+  if (couponCode && !user) {
+    throw createError({ statusCode: 401, statusMessage: 'Entra na tua conta para usar o cupão.' });
+  }
+
+  let discount = 0;
+  let coupon: ReturnType<typeof couponSummary> | null = null;
+
+  if (couponCode && user) {
+    const check = await checkCoupon(supabase, user.id, couponCode, subtotal);
+
+    if (!check.ok) {
+      throw createError({ statusCode: 400, statusMessage: couponReasonMessage(check.reason) });
+    }
+
+    const { data: couponRow } = await supabase
+      .from('coupons')
+      .select('code, discount_type, value')
+      .eq('id', check.coupon_id)
+      .single();
+
+    discount = check.discount;
+    coupon = couponRow ? couponSummary(couponRow) : null;
+  }
+
+  const totals = { subtotal, discount, total: subtotal - discount, coupon };
+
   const orderNumber = generateOrderNumber();
 
   // user_id и cart_id — по ним кабинет находит свои заказы
@@ -150,7 +187,7 @@ export default defineEventHandler(async (event) => {
       'guest_contact': contact,
       status: 'PLACED',
       'payment_status': 'UNPAID',
-      totals: { total },
+      totals,
       'pickup_office_id': pickupOfficeId,
     })
     .select('id, number, created_at')
@@ -164,13 +201,29 @@ export default defineEventHandler(async (event) => {
     .from('order_items')
     .insert(itemRows.map(row => ({ ...row, 'order_id': orderRow.id })));
 
-  if (itemsErr) {
-    await supabase
-      .from('orders')
-      .delete()
+  const rollbackOrder = async () => {
+    await supabase.from('order_items').delete()
+      .eq('order_id', orderRow.id);
+
+    await supabase.from('orders').delete()
       .eq('id', orderRow.id);
+  };
+
+  if (itemsErr) {
+    await rollbackOrder();
 
     throw createError({ statusCode: 500, statusMessage: itemsErr.message });
+  }
+
+  // Резерв под блокировкой: если купон успели потратить параллельным заказом, заказ откатываем
+  if (couponCode && user) {
+    const reserved = await reserveCoupon(supabase, user.id, couponCode, subtotal, orderRow.id);
+
+    if (!reserved.ok) {
+      await rollbackOrder();
+
+      throw createError({ statusCode: 409, statusMessage: couponReasonMessage(reserved.reason) });
+    }
   }
 
   try {
@@ -178,6 +231,7 @@ export default defineEventHandler(async (event) => {
       id: orderRow.id,
       number: orderRow.number,
       createdAt: orderRow.created_at,
+      totals,
     });
   } catch (error) {
     console.error('Failed to send telegram notifications', error);

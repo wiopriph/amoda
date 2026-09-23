@@ -1,11 +1,13 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { sendTelegramMessage } from '~~/server/utils/telegram';
+import type { OrderTotals } from '#shared/constants/coupons';
 
 
 type NotifyOrderPayload = {
   id: string | number;
   number: string | number;
   createdAt: string;
+  totals?: OrderTotals;
 };
 
 export async function notifyOrderToTelegram(
@@ -38,12 +40,24 @@ export async function notifyOrderToTelegram(
 
   const adminUrl = `https://amoda.ao/admin/orders/${order.number}`;
 
+  const kz = (value: number) => `${value.toLocaleString('ru-RU')} kz`;
+  const totalsLines: string[] = [];
+
+  if (order.totals) {
+    if (order.totals.discount > 0 && order.totals.coupon) {
+      totalsLines.push(`Вещи: ${kz(order.totals.subtotal)}`, `Купон ${order.totals.coupon.code}: −${kz(order.totals.discount)}`);
+    }
+
+    totalsLines.push(`Итого: ${kz(order.totals.total)}`);
+  }
+
   const text = [
     '🛍 Новый заказ',
     '',
     `Дата: ${dateStr}`,
     `Время: ${timeStr}`,
     `Заказ: #${order.number}`,
+    ...totalsLines,
     '',
     `Ссылка: ${adminUrl}`,
   ].join('\n');

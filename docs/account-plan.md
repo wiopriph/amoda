@@ -130,8 +130,39 @@ NUXT_PUBLIC_TURNSTILE_SITE_KEY=          # опционально
 - `NUXT_PUBLIC_ACCOUNT_ENABLED=true` на хостинге.
 - Первые дни следить за расходом SMS и лимитами.
 
-### Этап 6 — купоны (позже)
-- `coupons`, `coupon_redemptions`, `coupon_grants`; CRUD в админке; поле в чекауте; `/conta/cupoes`; welcome-купон.
+### Этап 6 — купоны (в работе с 2026-09-23)
+
+Решения: только для вошедших; welcome 10% на 30 дней от регистрации, без минимума и потолка; типы percent и fixed; публичные коды (вводятся руками) и персональные (выдаются автоматически или из админки по номеру); один купон на заказ; доставка в расчёте не участвует; списание при DELIVERED или PAID, возврат при CANCELLED; вкладка Cupões четвёртой иконкой в кабинете.
+
+**Схема работы**
+```
+регистрация ──trigger──► coupon_grants(welcome, expires_at = +30 дней)
+                                                │
+чекаут (вошедшая) ──GET /api/account/coupons/quote──► coupon_quote(): доступные + скидка
+                                                │
+place-order ──► coupon_apply() в одной транзакции: lock купона, проверки, redemption=reserved
+                                                │
+orders.status/payment_status ──trigger──► reserved → consumed (DELIVERED|PAID) | released (CANCELLED)
+```
+
+**База (`migrations/2026-09-23_coupons.sql`)**
+- `coupons`: id, code (uniq, upper), kind public|personal, discount_type percent|fixed, value int, min_subtotal int null, max_discount int null, starts_at, ends_at null, max_uses null, per_user_limit int default 1, active bool, note, created_at.
+- `coupon_grants`: coupon_id, user_id, granted_at, expires_at null; PK (coupon_id, user_id).
+- `coupon_redemptions`: id, coupon_id, user_id, order_id uniq, discount int, status reserved|consumed|released, created_at, updated_at.
+- `orders.coupon_id` (fk null); `orders.totals` = `{ subtotal, discount, total, coupon: { code, discountType, value } }`.
+- SQL: `coupon_compute(discount_type, value, min_subtotal, max_discount, subtotal)`; `coupon_check_and_reserve(user_id, code, subtotal, order_id)` — SELECT ... FOR UPDATE купона, все проверки, insert redemption; `coupon_available(user_id, code|null, subtotal)` для превью; триггер на orders для consumed/released; триггер на profiles → грант welcome (код в таблице `coupons` с note 'welcome', ищется по `code = 'BEMVINDA10'`).
+
+**API**
+- `GET /api/account/coupons` — персональные купоны клиентки со статусом (available|used|expired) для вкладки.
+- `POST /api/account/coupons/quote` `{ code?, subtotal }` — скидка для чекаута; без code возвращает лучший доступный персональный.
+- `place-order`: принимает `couponCode?`, для вошедшей вызывает `coupon_check_and_reserve` в той же транзакции, что и создание заказа (RPC `place_order_with_coupon` или резерв сразу после insert с откатом при ошибке).
+- Admin: `GET/POST /api/admin/coupons`, `PATCH /api/admin/coupons/[id]`, `POST /api/admin/coupons/[id]/grant` `{ phone }`, `GET /api/admin/coupons/[id]/redemptions`.
+
+**UI**
+- Чекаут: блок «Cupão» только для вошедших — авто-подстановка лучшего персонального, поле для кода, строки Subtotal / Desconto / Total.
+- `/conta/cupoes`: список персональных купонов, 4-я иконка `i-lucide-ticket`.
+- Страница заказа, `/conta/pedidos/[number]`, админка заказа, Telegram: три строки вместо одной.
+- Админка `/admin/coupons`: таблица, форма, выдача по номеру, использования.
 
 ### Этап 7 — WhatsApp-канал для кодов (позже, по желанию)
 - Через тот же хук: Meta Cloud API напрямую ($0.0076 за код в регионе Rest of Africa) или провайдер с WhatsApp. Нужны Meta Business, верификация и отдельный номер.
