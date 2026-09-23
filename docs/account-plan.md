@@ -152,6 +152,8 @@ orders.status/payment_status ──trigger──► reserved → consumed (DELIV
 - `orders.coupon_id` (fk null); `orders.totals` = `{ subtotal, discount, total, coupon: { code, discountType, value } }`.
 - SQL: `coupon_compute(discount_type, value, min_subtotal, max_discount, subtotal)`; `coupon_check_and_reserve(user_id, code, subtotal, order_id)` — SELECT ... FOR UPDATE купона, все проверки, insert redemption; `coupon_available(user_id, code|null, subtotal)` для превью; триггер на orders для consumed/released; триггер на profiles → грант welcome (код в таблице `coupons` с note 'welcome', ищется по `code = 'BEMVINDA10'`).
 
+**Известное ограничение (решено оставить, 2026-09-23):** повторная выдача персонального купона из админки не добавляет использований — лимит считается по `coupon_redemptions` против `per_user_limit`. Если клиентка уже использовала купон, повторная выдача ничего не меняет. При необходимости: счётчик `uses_allowed` в `coupon_grants`, повторная выдача увеличивает его на 1.
+
 **API**
 - `GET /api/account/coupons` — персональные купоны клиентки со статусом (available|used|expired) для вкладки.
 - `POST /api/account/coupons/quote` `{ code?, subtotal }` — скидка для чекаута; без code возвращает лучший доступный персональный.
