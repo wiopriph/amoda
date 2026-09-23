@@ -23,10 +23,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Indica um número válido em Angola (+244 e 9 dígitos).' });
   }
 
+  // В profiles.phone номер лежит как в Supabase Auth — без плюса (244XXXXXXXXX); ищем оба варианта
   const { data: profile, error: profileError } = await client
     .from('profiles')
     .select('user_id, name')
-    .eq('phone', phone)
+    .in('phone', [phone, phone.replace(/^\+/, '')])
+    .limit(1)
     .maybeSingle();
 
   if (profileError) {
