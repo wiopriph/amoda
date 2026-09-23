@@ -22,9 +22,17 @@ export type CouponRow = {
 export type CouponCheckResult = {
   ok: boolean
   reason: string | null
-  coupon_id: number | null
+  couponId: number | null
   discount: number
 };
+
+// Выходные колонки SQL-функций с префиксом r_ (иначе plpgsql путает их с колонками таблиц)
+const mapCheckResult = (row: any): CouponCheckResult => ({
+  ok: Boolean(row?.r_ok),
+  reason: row?.r_reason ?? null,
+  couponId: row?.r_coupon_id ?? null,
+  discount: Number(row?.r_discount ?? 0),
+});
 
 export const COUPON_COLUMNS = 'id, code, kind, discount_type, value, min_subtotal, max_discount, starts_at, ends_at, max_uses, per_user_limit, active, note, created_at';
 
@@ -70,13 +78,13 @@ const rpcSingle = async <T>(client: SupabaseClient, fn: string, args: Record<str
   return (Array.isArray(data) ? data[0] : data) as T;
 };
 
-export const checkCoupon = (client: SupabaseClient, userId: string, code: string, subtotal: number) =>
-  rpcSingle<CouponCheckResult>(client, 'coupon_check', { p_user_id: userId, p_code: code, p_subtotal: subtotal });
+export const checkCoupon = async (client: SupabaseClient, userId: string, code: string, subtotal: number) =>
+  mapCheckResult(await rpcSingle(client, 'coupon_check', { p_user_id: userId, p_code: code, p_subtotal: subtotal }));
 
-export const reserveCoupon = (client: SupabaseClient, userId: string, code: string, subtotal: number, orderId: number) =>
-  rpcSingle<CouponCheckResult>(client, 'coupon_reserve', {
+export const reserveCoupon = async (client: SupabaseClient, userId: string, code: string, subtotal: number, orderId: number) =>
+  mapCheckResult(await rpcSingle(client, 'coupon_reserve', {
     p_user_id: userId, p_code: code, p_subtotal: subtotal, p_order_id: orderId,
-  });
+  }));
 
 export type GrantedCoupon = {
   coupon: CouponRow

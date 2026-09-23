@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     const { data: coupon } = await client
       .from('coupons')
       .select('code, discount_type, value')
-      .eq('id', result.coupon_id)
+      .eq('id', result.couponId)
       .single();
 
     return { ok: true, reason: null, coupon: couponSummary(coupon), discount: result.discount };

@@ -166,7 +166,7 @@ export default defineEventHandler(async (event) => {
     const { data: couponRow } = await supabase
       .from('coupons')
       .select('code, discount_type, value')
-      .eq('id', check.coupon_id)
+      .eq('id', check.couponId)
       .single();
 
     discount = check.discount;
