@@ -6,7 +6,7 @@ targetQuery: "onde comprar vestidos em luanda"
 publishedAt: 2026-09-19
 updatedAt: 2026-09-27
 author: manuel
-cover: "/blog-assets/covers/onde-comprar-vestidos-em-luanda.webp"
+cover: "/blog-assets/onde-comprar-vestidos-em-luanda/cover.webp"
 categories:
   - /category/vestidos
 related: []
@@ -26,7 +26,7 @@ Se está a perguntar onde comprar vestidos em Luanda, a resposta curta é: depen
 
 Neste guia comparamos as opções para decidir sem perder um sábado inteiro no trânsito. Para os preços, distinguimos os valores anunciados pela Amoda das cotações que precisa de confirmar directamente com cada vendedor.
 
-::article-image{src="/blog-assets/comprar-vestidos-luanda/01-arara-de-vestidos.webp" alt="Vestidos estampados organizados em cabides numa loja de roupa" caption="Imagem ilustrativa de uma loja de roupa; não representa o showroom Amoda. Fotografia: Ron Lach / Pexels."}
+::article-image{src="/blog-assets/onde-comprar-vestidos-em-luanda/01-arara-de-vestidos.webp" alt="Vestidos estampados organizados em cabides numa loja de roupa" caption="Imagem ilustrativa de uma loja de roupa; não representa o showroom Amoda. Fotografia: Ron Lach / Pexels."}
 ::
 
 ## Mercados e comércio informal
@@ -59,7 +59,7 @@ Na [Amoda](/), escolhe o vestido no site e a equipa confirma o pedido e a dispon
 
 O pagamento é feito depois de experimentar, em dinheiro ou TPA. Confirme as opções para o seu pedido, o custo da entrega e o horário antes de fechar a combinação. Se uma peça não servir ou não agradar, não precisa de a levar.
 
-::article-image{src="/blog-assets/comprar-vestidos-luanda/02-encomenda-em-casa.webp" alt="Mulher sentada no sofá a abrir uma encomenda, com um computador portátil ao lado" caption="Imagem ilustrativa de uma compra recebida em casa; não representa uma cliente ou entrega real da Amoda. Fotografia: Andrea Piacquadio / Pexels."}
+::article-image{src="/blog-assets/onde-comprar-vestidos-em-luanda/02-encomenda-em-casa.webp" alt="Mulher sentada no sofá a abrir uma encomenda, com um computador portátil ao lado" caption="Imagem ilustrativa de uma compra recebida em casa; não representa uma cliente ou entrega real da Amoda. Fotografia: Andrea Piacquadio / Pexels."}
 ::
 
 ::category-cta{path="/category/vestidos"}
@@ -85,7 +85,7 @@ Três regras simples:
 2. **Compare peças equivalentes.** Observe tecido, acabamento, forro e caimento. Duas fotografias parecidas não significam dois vestidos iguais.
 3. **Experimente sempre que possível.** Sente-se, caminhe e confirme se consegue mover os braços com conforto. O tamanho da etiqueta não conta a história toda.
 
-::article-image{src="/blog-assets/comprar-vestidos-luanda/03-experimentar-vestido.webp" alt="Mulher a experimentar um vestido amarelo numa cabine de prova" caption="Ver o caimento no corpo ajuda a escolher. Imagem ilustrativa; fotografia: Ron Lach / Pexels."}
+::article-image{src="/blog-assets/onde-comprar-vestidos-em-luanda/03-experimentar-vestido.webp" alt="Mulher a experimentar um vestido amarelo numa cabine de prova" caption="Ver o caimento no corpo ajuda a escolher. Imagem ilustrativa; fotografia: Ron Lach / Pexels."}
 ::
 
 Se comprar à distância sem poder provar, peça as medidas da peça e as condições de troca por escrito. Para uma ocasião com data marcada, deixe margem para a entrega e possíveis ajustes — procurar na véspera reduz as opções.

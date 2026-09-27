@@ -6,7 +6,7 @@ targetQuery: "vestido para batizado"
 publishedAt: 2026-09-19
 updatedAt: 2026-09-27
 author: manuel
-cover: "/blog-assets/covers/vestido-para-batizado.webp"
+cover: "/blog-assets/vestido-para-batizado/cover.webp"
 categories:
   - /category/vestidos
 related: []
@@ -26,7 +26,7 @@ Foi convidada para um batizado e não sabe o que vestir? Uma boa opção é um v
 
 Neste guia reunimos cuidados para a cerimónia e 5 ideias de look, com orientações de orçamento em kz e dicas para quem é mãe ou madrinha. Confirme sempre as indicações da família e da igreja: não existe um único dress code para todos os batizados.
 
-::article-image{src="/blog-assets/covers/vestido-para-batizado.webp" alt="Inspirações de vestidos em lilás, bege e tom claro para uma cerimónia de dia" caption="Fotografias de inspiração. Não representam clientes da Amoda, peças necessariamente disponíveis no catálogo ou um batizado real. Os valores abaixo são orçamentos de procura, não preços das roupas fotografadas."}
+::article-image{src="/blog-assets/vestido-para-batizado/cover.webp" alt="Inspirações de vestidos em lilás, bege e tom claro para uma cerimónia de dia" caption="Fotografias de inspiração. Não representam clientes da Amoda, peças necessariamente disponíveis no catálogo ou um batizado real. Os valores abaixo são orçamentos de procura, não preços das roupas fotografadas."}
 ::
 
 ## O dress code da igreja: ombros e comprimento
@@ -47,7 +47,7 @@ Rosa-claro, azul-bebé ou lilás, com tecido leve e espaço para se movimentar. 
 
 **Orçamento de procura:** 15 000–25 000 kz. **Porquê:** é fácil combinar com acessórios que já tem e voltar a usar noutras ocasiões.
 
-::article-image{src="/blog-assets/batizado/01-vestido-lilas.webp" alt="Modelo com vestido lilás de mangas e detalhe bordado no decote" caption="Referência de cor e mangas; o enquadramento não mostra o comprimento total. Fotografia: Mediahooch Pixels / Pexels."}
+::article-image{src="/blog-assets/vestido-para-batizado/01-vestido-lilas.webp" alt="Modelo com vestido lilás de mangas e detalhe bordado no decote" caption="Referência de cor e mangas; o enquadramento não mostra o comprimento total. Fotografia: Mediahooch Pixels / Pexels."}
 ::
 
 ### 2. Vestido de manga curta com estampado floral
@@ -56,7 +56,7 @@ Um estampado floral, pequeno ou mais marcado, pode trazer alegria ao look. Para 
 
 **Orçamento de procura:** 12 000–20 000 kz. **Porquê:** as mangas cobrem os ombros e o estampado dispensa muitos acessórios. Confirme a opacidade e escolha comprimento perto do joelho ou abaixo.
 
-::article-image{src="/blog-assets/batizado/02-vestido-floral-mangas.webp" alt="Mulher com vestido estampado de manga curta, fotografada ao ar livre" caption="Inspiração: estampado e mangas curtas. Fotografia: Samuel Peter / Pexels."}
+::article-image{src="/blog-assets/vestido-para-batizado/02-vestido-floral-mangas.webp" alt="Mulher com vestido estampado de manga curta, fotografada ao ar livre" caption="Inspiração: estampado e mangas curtas. Fotografia: Samuel Peter / Pexels."}
 ::
 
 ### 3. Vestido longo fluido em cor lisa
@@ -65,7 +65,7 @@ Verde-água, terracota suave ou bege, sem brilho excessivo e com uma saia que n�
 
 **Orçamento de procura:** 18 000–35 000 kz. **Porquê:** cria uma composição elegante com poucos acessórios. Prefira um tecido leve e confirme se consegue caminhar sem pisar a barra.
 
-::article-image{src="/blog-assets/batizado/03-vestido-bege-fluido.webp" alt="Modelo com vestido bege de mangas compridas, cintura marcada e saia com pregas" caption="Referência de cor lisa, cintura e movimento da saia. Fotografia: @Jaybeey __photos / Pexels."}
+::article-image{src="/blog-assets/vestido-para-batizado/03-vestido-bege-fluido.webp" alt="Modelo com vestido bege de mangas compridas, cintura marcada e saia com pregas" caption="Referência de cor lisa, cintura e movimento da saia. Fotografia: @Jaybeey __photos / Pexels."}
 ::
 
 ### 4. Vestido evasê + lenço ou casaquinho
@@ -74,7 +74,7 @@ Procure uma saia que se abra suavemente a partir da cintura, com comprimento per
 
 **Orçamento de procura:** 12 000–22 000 kz para o vestido; conte o lenço ou casaquinho à parte se ainda não tiver um. **Porquê:** pode ajustar a composição entre a igreja e a recepção.
 
-::article-image{src="/blog-assets/batizado/04-vestido-claro-alcas.webp" alt="Mulher a experimentar um vestido amarelo-claro de alças e decote quadrado" caption="Referência de vestido claro de alças. A camada para cobrir os ombros não está na fotografia: acrescente um lenço ou casaquinho e confirme o comprimento. Fotografia: Ron Lach / Pexels."}
+::article-image{src="/blog-assets/vestido-para-batizado/04-vestido-claro-alcas.webp" alt="Mulher a experimentar um vestido amarelo-claro de alças e decote quadrado" caption="Referência de vestido claro de alças. A camada para cobrir os ombros não está na fotografia: acrescente um lenço ou casaquinho e confirme o comprimento. Fotografia: Ron Lach / Pexels."}
 ::
 
 ### 5. Vestido camiseiro ou abotoado à frente
@@ -83,7 +83,7 @@ Um modelo com botões, cintura ajustável e mangas pode ser uma escolha prática
 
 **Orçamento de procura:** 10 000–18 000 kz. **Porquê:** permite regular o ajuste e pode facilitar a amamentação se os botões forem funcionais e a abertura for suficiente.
 
-::article-image{src="/blog-assets/batizado/05-vestido-abotoado.webp" alt="Modelo com vestido claro de mangas curtas e botões decorativos na frente" caption="Referência de vestido estruturado com botões. O tecido e a funcionalidade dos botões devem ser confirmados na peça escolhida. Fotografia: magapls . / Pexels."}
+::article-image{src="/blog-assets/vestido-para-batizado/05-vestido-abotoado.webp" alt="Modelo com vestido claro de mangas curtas e botões decorativos na frente" caption="Referência de vestido estruturado com botões. O tecido e a funcionalidade dos botões devem ser confirmados na peça escolhida. Fotografia: magapls . / Pexels."}
 ::
 
 ::category-cta{path="/category/vestidos"}

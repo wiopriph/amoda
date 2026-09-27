@@ -5,7 +5,7 @@ cluster: "B"
 targetQuery: "o que vestir casamento convidada"
 publishedAt: 2026-09-17
 updatedAt: 2026-09-27
-cover: "/blog-assets/covers/o-que-vestir-casamento-luanda-convidada.webp"
+cover: "/blog-assets/o-que-vestir-casamento-luanda-convidada/cover.webp"
 author: manuel
 categories:
   - /category/vestidos-longos
@@ -29,7 +29,7 @@ Recebeu o convite e já começou aquela pergunta na cabeça: o que vestir? A res
 
 Este guia foi feito para convidadas em Luanda: as regras que ninguém explica, o comprimento certo para a igreja, o civil ou a festa à noite, e 6 ideias de look organizadas por orçamento. No catálogo Amoda, pode escolher as peças disponíveis e experimentar antes de pagar.
 
-::article-image{src="/blog-assets/covers/o-que-vestir-casamento-luanda-convidada.webp" alt="Três inspirações de festa: vestido vermelho, vestido rosa de cetim e vestido preto com bordados" caption="Fotografias de inspiração — os looks ilustrados não representam necessariamente produtos disponíveis na Amoda nem os seus preços."}
+::article-image{src="/blog-assets/o-que-vestir-casamento-luanda-convidada/cover.webp" alt="Três inspirações de festa: vestido vermelho, vestido rosa de cetim e vestido preto com bordados" caption="Fotografias de inspiração — os looks ilustrados não representam necessariamente produtos disponíveis na Amoda nem os seus preços."}
 ::
 
 ## As regras de ouro para convidadas
@@ -59,36 +59,36 @@ As faixas abaixo ajudam a planear a compra; não são cotações dos looks fotog
 
 **1. O vestido certo numa cor viva.** Procure um longo liso em verde-esmeralda, azul-royal ou vermelho, sem muitos enfeites — a cor faz o trabalho todo. Com brincos dourados simples, o resultado fica elegante sem precisar de mais nada.
 
-::article-image{src="/blog-assets/casamento-luanda/01-vestido-longo-vermelho.webp" alt="Modelo com vestido longo vermelho, decote ombro a ombro e fenda frontal" caption="Inspiração: cor viva e silhueta simples. Fotografia: Justin Brian / Pexels."}
+::article-image{src="/blog-assets/o-que-vestir-casamento-luanda-convidada/01-vestido-longo-vermelho.webp" alt="Modelo com vestido longo vermelho, decote ombro a ombro e fenda frontal" caption="Inspiração: cor viva e silhueta simples. Fotografia: Justin Brian / Pexels."}
 ::
 
 **2. Estampado floral elegante.** Um midi estampado com fundo escuro pode funcionar bem de dia. Escolha um tecido que resista à viagem até ao salão e complete o look com uma sandália num tom próximo da sua pele. A fotografia ilustra a combinação de flores com fundo escuro; escolha o comprimento que melhor se adapte à cerimónia.
 
-::article-image{src="/blog-assets/casamento-luanda/02-vestido-estampado-floral.webp" alt="Modelo com vestido de estampado floral sobre fundo preto, fotografada ao ar livre" caption="Inspiração: flores sobre fundo escuro. Fotografia: OLIVET PICTURES / Pexels."}
+::article-image{src="/blog-assets/o-que-vestir-casamento-luanda-convidada/02-vestido-estampado-floral.webp" alt="Modelo com vestido de estampado floral sobre fundo preto, fotografada ao ar livre" caption="Inspiração: flores sobre fundo escuro. Fotografia: OLIVET PICTURES / Pexels."}
 ::
 
 ### 20 a 35 mil kz
 
 **3. Cetim em tom pastel.** Um longo de cetim em rosa-velho, lavanda ou azul-céu é uma inspiração para convidadas: brilho suave, caimento fluido e um efeito bonito nas fotos da tarde. Evite tons tão claros que possam parecer brancos nas fotografias.
 
-::article-image{src="/blog-assets/casamento-luanda/03-vestido-cetim-rosa.webp" alt="Modelo sentada com vestido longo rosa-velho de cetim e saia drapeada" caption="Inspiração: rosa-velho e brilho suave. Fotografia: LekePOV / Pexels."}
+::article-image{src="/blog-assets/o-que-vestir-casamento-luanda-convidada/03-vestido-cetim-rosa.webp" alt="Modelo sentada com vestido longo rosa-velho de cetim e saia drapeada" caption="Inspiração: rosa-velho e brilho suave. Fotografia: LekePOV / Pexels."}
 ::
 
 **4. Vestido com fenda.** Para a festa à noite, um vestido com fenda pode trazer movimento ao look. Um decote em V é outra opção, mas não precisa de combinar ambos: escolha um detalhe principal e verifique o conforto ao andar e sentar. Com sandália e mala pequena, a composição fica completa.
 
-::article-image{src="/blog-assets/casamento-luanda/04-vestido-com-fenda.webp" alt="Modelo com vestido castanho de efeito metalizado e fenda lateral, num interior com cortinas claras" caption="Inspiração: vestido com fenda para uma recepção à noite. Fotografia: Mustapha Damilola / Pexels."}
+::article-image{src="/blog-assets/o-que-vestir-casamento-luanda-convidada/04-vestido-com-fenda.webp" alt="Modelo com vestido castanho de efeito metalizado e fenda lateral, num interior com cortinas claras" caption="Inspiração: vestido com fenda para uma recepção à noite. Fotografia: Mustapha Damilola / Pexels."}
 ::
 
 ### 35 a 60 mil kz
 
 **5. Longo bordado ou com detalhes.** Renda, bordados ou mangas trabalhadas dão ao look o toque especial que um casamento formal pede. Para madrinhas ou família próxima dos noivos, confirme antes se existe uma cor ou um estilo combinado. Deixe o vestido ser o destaque e simplifique os acessórios.
 
-::article-image{src="/blog-assets/casamento-luanda/05-vestido-preto-bordado.webp" alt="Modelo com vestido longo preto, decote ombro a ombro e bordados dourados no corpete" caption="Inspiração: bordados concentrados no corpete. Fotografia: Mustapha Damilola / Pexels."}
+::article-image{src="/blog-assets/o-que-vestir-casamento-luanda-convidada/05-vestido-preto-bordado.webp" alt="Modelo com vestido longo preto, decote ombro a ombro e bordados dourados no corpete" caption="Inspiração: bordados concentrados no corpete. Fotografia: Mustapha Damilola / Pexels."}
 ::
 
 **6. O conjunto inesperado.** Um macacão de festa bem cortado destaca-se no meio dos vestidos e pode ser confortável para dançar até ao fim. Experimente sentar-se e caminhar com ele antes de decidir. Se o modelo já tiver mangas ou decote trabalhados, prefira brincos mais discretos.
 
-::article-image{src="/blog-assets/casamento-luanda/06-macacao-vermelho.webp" alt="Modelo com macacão vermelho de pernas largas e decote com folhos, fotografada ao ar livre" caption="Inspiração: macacão de pernas largas numa cor viva. Fotografia: Jvxhn Visuals / Pexels."}
+::article-image{src="/blog-assets/o-que-vestir-casamento-luanda-convidada/06-macacao-vermelho.webp" alt="Modelo com macacão vermelho de pernas largas e decote com folhos, fotografada ao ar livre" caption="Inspiração: macacão de pernas largas numa cor viva. Fotografia: Jvxhn Visuals / Pexels."}
 ::
 
 Veja o que temos agora no seu tamanho:
