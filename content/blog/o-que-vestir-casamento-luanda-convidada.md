@@ -22,7 +22,7 @@ faq:
     a: "Na Amoda não. Escolhe online, recebe em casa ou num ponto de levantamento, experimenta com calma e só paga se gostar. Consulte as condições e o custo da entrega para a sua localização."
   - q: "E se o casamento for anunciado em cima da hora?"
     a: "Fale connosco no WhatsApp com o dia do evento: confirmamos o que há no seu tamanho e combinamos a entrega ou o levantamento, conforme a disponibilidade."
-draft: false
+draft: true
 ---
 
 Recebeu o convite e já começou aquela pergunta na cabeça: o que vestir? A resposta curta: um vestido que respeite duas regras — evitar o branco, salvo indicação dos noivos, e não competir com a noiva — no comprimento certo para o tipo de cerimónia. O resto é escolher o look que combina consigo e com o seu orçamento.
