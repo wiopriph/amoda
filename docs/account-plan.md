@@ -99,7 +99,7 @@ Layout `account`: обычные header/footer сайта + компактная
 
 Что сделано в коде:
 - `/entrar`: «номер → код», регистрация и вход — одно действие (`signInWithOtp({ phone })` + `verifyOtp`). Повторная отправка через 60 с, автосабмит при 6 цифрах, ошибки Supabase переведены (`humanizeAuthError`). Опциональная капча Cloudflare Turnstile по `NUXT_PUBLIC_TURNSTILE_SITE_KEY`.
-- `/admin/login`: e-mail + пароль только для админа, ссылок на него нет. Старый `/auth` удалён.
+- `/auth`: вход админа — e-mail + пароль или магическая ссылка (`emailRedirectTo` = `/auth`, адрес уже в Redirect URLs Supabase), с капчей Turnstile. Ссылок на страницу с сайта нет. Регистрации по e-mail нет (`shouldCreateUser: false`).
 - `POST /api/auth/send-sms`: Send SMS Hook. Проверка подписи Standard Webhooks (`server/utils/standardWebhooks.ts`), адаптеры провайдеров в `server/utils/sms.ts` (`infobip`, `log` для разработки).
 - `migrations/2026-09-03_account_claim_orders.sql`: функция `claim_orders_by_phone` — гостевые заказы с тем же номером получают владельца (вызов из `accountLink.ts` при чтении списка заказов).
 - Чекаут: у вошедшей клиентки номер подставлен из аккаунта и не редактируется; сервер (`place-order`) берёт номер из сессии и игнорирует тело запроса.

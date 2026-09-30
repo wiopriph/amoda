@@ -142,6 +142,7 @@ export default defineNuxtConfig({
     cacheMaxAgeSeconds: 86400,
     exclude: [
       '/admin/**',
+      '/auth',
       '/entrar',
       '/cart',
       '/checkout',

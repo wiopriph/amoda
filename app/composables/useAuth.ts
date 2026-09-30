@@ -51,11 +51,26 @@ export const useAuth = () => {
     }
   };
 
-  // Админ: e-mail + пароль на скрытом /admin/login
-  const signIn = async ({ email, password }: { email: string; password: string }) => {
-    const data = await run(() => supabase.auth.signInWithPassword({ email, password }));
+  // Админ: e-mail + пароль или магическая ссылка на /auth (ссылок на страницу с сайта нет)
+  const signIn = async ({ email, password }: { email: string; password: string }, captchaToken?: string) => {
+    const data = await run(() => supabase.auth.signInWithPassword({ email, password, options: { captchaToken } }));
 
     return data?.user ?? null;
+  };
+
+  // Админ: магическая ссылка на e-mail. Возврат на /auth — этот адрес разрешён в Supabase (Redirect URLs)
+  const signInWithEmailLink = async (email: string, captchaToken?: string) => {
+    const data = await run(() => supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth`,
+        // Вход только для существующих аккаунтов: клиентки регистрируются по телефону на /entrar
+        shouldCreateUser: false,
+        captchaToken,
+      },
+    }));
+
+    return data !== null;
   };
 
   // Клиентка: код по SMS. Пользователь создаётся при первом входе, отдельной регистрации нет
@@ -96,6 +111,7 @@ export const useAuth = () => {
     isLoading,
     error,
     signIn,
+    signInWithEmailLink,
     signInWithPhone,
     verifyPhoneOtp,
     signOut,
