@@ -11,8 +11,8 @@ import { couponLabel, couponReasonMessage, type CouponSummary } from '#shared/co
 
 definePageMeta({ name: 'checkout' });
 
-const title = 'Deixar número | Amoda';
-const description = 'Deixa o teu número para a equipa da Amoda entrar em contacto e confirmar a tua escolha.';
+const title = 'Fazer pedido | Amoda';
+const description = 'Envia o teu pedido sem pagamento online: a equipa da Amoda confirma tudo contigo pelo WhatsApp.';
 
 useHead(() => ({
   title,
@@ -58,10 +58,9 @@ if (import.meta.client) {
 
 const checkoutForm = reactive({ phone: '', name: '' });
 
-// Вошедшая клиентка: имя из профиля, номер — тот, под которым вошла (подтверждён по SMS), его не меняем
-const { user, canAccessAccount } = useAuth();
+const { user } = useAuth();
 const verifiedPhone = ref('');
-const isAccountUser = computed(() => Boolean(user.value) && canAccessAccount.value);
+const isAccountUser = computed(() => Boolean(user.value));
 
 if (isAccountUser.value) {
   const { data: profile } = await useAccountProfile();
@@ -70,6 +69,30 @@ if (isAccountUser.value) {
   verifiedPhone.value = formatAoPhone(profile.value?.phone);
   checkoutForm.phone = verifiedPhone.value;
 }
+
+// Получение: доставка на дом (null, адрес и такса согласуются в WhatsApp) или пункт выдачи
+const PICKUP_DELIVERY = 0;
+
+const { offices, load: loadOffices } = useOffices();
+
+await loadOffices();
+
+const pickupChoice = ref<number>(PICKUP_DELIVERY);
+
+const pickupItems = computed(() => [
+  {
+    value: PICKUP_DELIVERY,
+    label: 'Entrega ao domicílio',
+    description: 'Combinamos o endereço e a taxa no WhatsApp',
+  },
+  ...offices.value.map(office => ({
+    value: Number(office.id),
+    label: office.name,
+    description: office.address || undefined,
+  })),
+]);
+
+const pickupOfficeId = computed(() => (pickupChoice.value === PICKUP_DELIVERY ? null : pickupChoice.value));
 
 // Купон: только для вошедших. Лучший персональный подставляется сам, публичный код вводится руками
 type CouponQuote = { ok: boolean; reason: string | null; coupon: CouponSummary | null; discount: number };
@@ -136,11 +159,9 @@ if (import.meta.client && isAccountUser.value) {
 }
 
 
-const DEFAULT_PICKUP_OFFICE_ID = 1;
-
 const buildContactSnapshot = () => ({
   phone: checkoutForm.phone.trim(),
-  pickupOfficeId: DEFAULT_PICKUP_OFFICE_ID,
+  pickupOfficeId: pickupOfficeId.value,
   name: checkoutForm.name.trim(),
 });
 
@@ -298,7 +319,7 @@ const submitCheckout = async () => {
           name: checkoutForm.name.trim(),
           phone: checkoutForm.phone,
         },
-        pickupOfficeId: DEFAULT_PICKUP_OFFICE_ID,
+        pickupOfficeId: pickupOfficeId.value,
         couponCode: coupon.applied?.code || undefined,
       },
     });
@@ -309,7 +330,7 @@ const submitCheckout = async () => {
         value: discountedTotal.value,
         coupon: coupon.applied?.code,
         items: getAnalyticsItems(),
-        pickup_office_id: DEFAULT_PICKUP_OFFICE_ID,
+        pickup_office_id: pickupOfficeId.value,
       } as any);
     }
 
@@ -339,11 +360,13 @@ const submitCheckout = async () => {
         </UBadge>
 
         <h1 class="text-2xl font-black tracking-tight text-highlighted sm:text-4xl">
-          Deixa o teu número
+          {{ isAccountUser ? 'Confirma o teu pedido' : 'Faz o teu pedido' }}
         </h1>
 
         <p class="mt-3 text-sm leading-6 text-muted sm:text-base">
-          Usa esta opção se preferires que a equipa da Amoda fale contigo. Podemos escrever ou ligar para confirmar a tua escolha.
+          {{ isAccountUser
+            ? 'Está quase: revê os dados e envia. Depois falamos contigo pelo WhatsApp para combinar tudo.'
+            : 'Deixa o teu número e envia o pedido. A equipa da Amoda escreve-te no WhatsApp (ou liga) para confirmar a escolha.' }}
         </p>
       </section>
 
@@ -353,42 +376,76 @@ const submitCheckout = async () => {
       >
         <UCard>
           <h2 class="text-lg font-black text-highlighted">
-            Nós falamos contigo
+            {{ isAccountUser ? 'Os teus dados' : 'Nós falamos contigo' }}
           </h2>
 
           <p class="mt-2 text-sm leading-6 text-muted">
-            Indica um número válido em Angola para podermos escrever ou ligar.
+            {{ isAccountUser
+              ? 'Usamos o número da tua conta para combinar os detalhes.'
+              : 'Indica um número válido em Angola para podermos escrever ou ligar.' }}
           </p>
 
           <div class="mt-5 grid gap-4">
-            <UFormField label="Nome (opcional)">
-              <UInput
-                v-model="checkoutForm.name"
-                name="name"
-                placeholder="Como te podemos chamar?"
-                type="text"
-                size="xl"
-                class="w-full sm:max-w-sm"
-              />
-            </UFormField>
-
-            <UFormField
-              :error="formErrors.phone ? 'Por favor, indica o teu número de telefone.' : undefined"
-              :help="verifiedPhone ? 'O número da tua conta.' : undefined"
-              label="Número de telefone"
-              required
+            <!-- Вошедшая: номер подтверждён по SMS и не меняется, имя из профиля — поля не показываем -->
+            <div
+              v-if="isAccountUser && verifiedPhone"
+              class="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
             >
-              <UInput
-                ref="phoneInputRef"
-                v-model="checkoutForm.phone"
-                v-maska="'+244 ### ### ###'"
-                :disabled="Boolean(verifiedPhone)"
+              <UIcon
+                name="i-lucide-user-round-check"
+                class="size-5 shrink-0 text-primary"
+              />
+
+              <div class="min-w-0 text-sm">
+                <div
+                  v-if="checkoutForm.name"
+                  class="font-semibold text-highlighted"
+                  v-text="checkoutForm.name"
+                />
+
+                <div
+                  class="text-muted"
+                  v-text="verifiedPhone"
+                />
+              </div>
+            </div>
+
+            <template v-else>
+              <UFormField label="Nome (opcional)">
+                <UInput
+                  v-model="checkoutForm.name"
+                  name="name"
+                  placeholder="Como te podemos chamar?"
+                  type="text"
+                  size="xl"
+                  class="w-full sm:max-w-sm"
+                />
+              </UFormField>
+
+              <UFormField
+                :error="formErrors.phone ? 'Por favor, indica o teu número de telefone.' : undefined"
+                label="Número de telefone"
                 required
-                name="phone"
-                placeholder="+244 XXX XXX XXX"
-                type="tel"
-                size="xl"
-                class="w-full sm:max-w-sm"
+              >
+                <UInput
+                  ref="phoneInputRef"
+                  v-model="checkoutForm.phone"
+                  v-maska="'+244 ### ### ###'"
+                  required
+                  name="phone"
+                  placeholder="+244 XXX XXX XXX"
+                  type="tel"
+                  size="xl"
+                  class="w-full sm:max-w-sm"
+                />
+              </UFormField>
+            </template>
+
+            <UFormField label="Como queres receber?">
+              <URadioGroup
+                v-model="pickupChoice"
+                :items="pickupItems"
+                color="primary"
               />
             </UFormField>
 
@@ -401,7 +458,7 @@ const submitCheckout = async () => {
               type="submit"
               class="w-full justify-center sm:w-fit"
             >
-              Enviar número
+              {{ isAccountUser ? 'Confirmar pedido' : 'Enviar pedido' }}
             </UButton>
           </div>
         </UCard>
@@ -431,6 +488,27 @@ const submitCheckout = async () => {
             />
           </div>
         </div>
+
+        <p
+          v-if="!isAccountUser"
+          class="mt-3 border-t border-primary/10 pt-3 text-sm leading-6 text-muted"
+        >
+          <UIcon
+            name="i-lucide-ticket"
+            class="mr-1 inline-block size-4 align-text-bottom text-primary"
+          />
+
+          Tens um cupão?
+
+          <NuxtLink
+            :to="{ name: 'entrar', query: { redirected_from: '/checkout' } }"
+            class="font-semibold text-primary underline-offset-2 hover:underline"
+          >
+            Entra na conta
+          </NuxtLink>
+
+          para o aplicar e acompanhar os teus pedidos.
+        </p>
 
         <!-- Cupão: só para quem entrou na conta -->
         <div
