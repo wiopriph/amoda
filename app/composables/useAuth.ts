@@ -21,16 +21,11 @@ export const humanizeAuthError = (message?: string | null) => {
 export const useAuth = () => {
   const supabase = useSupabaseClient();
   const supaUser = useSupabaseUser();
-  const { accountEnabled } = useRuntimeConfig().public;
 
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
   const isAdmin = computed(() => hasAdminRole(supaUser.value));
-
-  // Кабинет открыт всем по флагу, а до релиза — только админу для проверки в проде
-  const isAccountEnabled = computed(() => Boolean(accountEnabled));
-  const canAccessAccount = computed(() => isAccountEnabled.value || isAdmin.value);
 
   const run = async <T>(action: () => Promise<{ data: T; error: { message: string } | null }>) => {
     error.value = null;
@@ -93,21 +88,13 @@ export const useAuth = () => {
     await supabase.auth.signOut();
   };
 
-  // Куда вести после входа: в кабинет, если он доступен, админа без флага — в админку
-  const resolveHomeRoute = (user: any = supaUser.value) => {
-    if (isAccountEnabled.value) {
-      return { name: 'conta' };
-    }
-
-    return hasAdminRole(user) ? { name: 'admin' } : { name: 'index' };
-  };
+  // После входа — в кабинет
+  const resolveHomeRoute = () => ({ name: 'conta' });
 
 
   return {
     user: supaUser,
     isAdmin,
-    isAccountEnabled,
-    canAccessAccount,
     isLoading,
     error,
     signIn,

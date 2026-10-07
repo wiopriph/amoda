@@ -126,9 +126,6 @@ export default defineNuxtConfig({
       serviceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
     },
     public: {
-      // Личный кабинет за флагом: пока false — /conta и /api/account доступны только админу
-      accountEnabled: false,
-
       // Cloudflare Turnstile на форме «enviar código»; пусто — без капчи
       turnstileSiteKey: '',
 

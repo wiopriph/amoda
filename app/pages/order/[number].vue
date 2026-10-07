@@ -46,10 +46,9 @@ const nextSteps = [
   'Você experimenta e decide com calma.',
 ];
 
-// Владелице — путь в кабинет; гостю (когда кабинет открыт) — мягкое приглашение создать аккаунт
-const { user, isAccountEnabled, canAccessAccount } = useAuth();
-const showAccountLink = computed(() => Boolean(order.value?.isMine) && canAccessAccount.value);
-const showAccountInvite = computed(() => !user.value && isAccountEnabled.value);
+const { user } = useAuth();
+const showAccountLink = computed(() => Boolean(order.value?.isMine));
+const showAccountInvite = computed(() => !user.value);
 
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => `Olá! Quero confirmar a minha escolha #${orderNumber}.`);

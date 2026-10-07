@@ -68,11 +68,11 @@ const fromServer = (row: ServerFavorite) => toItem(row, new Date(row.addedAt).ge
 // Гость: localStorage. Вошедшая клиентка: сервер (таблица favorites), локальное сливается при входе.
 export function useFavorites() {
   const itemsState = useState<FavoriteItem[]>('favorites:items', () => []);
-  const { user, canAccessAccount } = useAuth();
+  const { user } = useAuth();
   const { trackAddToWishlist } = useAnalyticsEvent();
   const toast = useToast();
 
-  const isServerMode = computed(() => Boolean(user.value) && canAccessAccount.value);
+  const isServerMode = computed(() => Boolean(user.value));
 
   const persist = () => {
     if (!isServerMode.value) {

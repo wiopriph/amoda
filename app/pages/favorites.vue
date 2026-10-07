@@ -6,9 +6,9 @@ definePageMeta({
   name: 'favorites',
   middleware: [
     () => {
-      const { user, canAccessAccount } = useAuth();
+      const { user } = useAuth();
 
-      if (user.value && canAccessAccount.value) {
+      if (user.value) {
         setPageLayout('account');
       }
     },

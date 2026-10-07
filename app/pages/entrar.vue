@@ -106,7 +106,7 @@ const confirmCode = async () => {
   const signedInUser = await verifyPhoneOtp(phone.value, token);
 
   if (signedInUser) {
-    await navigateTo(redirectTarget.value || resolveHomeRoute(signedInUser));
+    await navigateTo(redirectTarget.value || resolveHomeRoute());
   }
 };
 

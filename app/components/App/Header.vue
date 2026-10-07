@@ -33,8 +33,7 @@ const closeCategories = () => {
 const { count } = useCart();
 const { count: favoritesCount } = useFavorites();
 
-// Иконка кабинета: по флагу для всех, до релиза — только админу
-const { user, canAccessAccount } = useAuth();
+const { user } = useAuth();
 const accountRoute = computed(() => (user.value ? { name: 'conta' } : { name: 'entrar' }));
 </script>
 
@@ -196,7 +195,6 @@ const accountRoute = computed(() => (user.value ? { name: 'conta' } : { name: 'e
           </UButton>
 
           <UButton
-            v-if="canAccessAccount"
             :to="accountRoute"
             variant="ghost"
             color="neutral"
