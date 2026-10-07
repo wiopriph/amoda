@@ -131,6 +131,9 @@ const buildCartMessage = () => {
 
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(buildCartMessage);
+
+const { user } = useAuth();
+const isAccountUser = computed(() => Boolean(user.value));
 </script>
 
 <template>
@@ -346,7 +349,9 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
                   </div>
 
                   <p class="text-xs leading-5 text-muted">
-                    Se tiveres WhatsApp, envia a escolha agora. Se preferires, deixa o teu número e nós escrevemos ou ligamos para ti.
+                    {{ isAccountUser
+                      ? 'Confirma o pedido em segundos — já temos o teu número. Se preferires, envia pelo WhatsApp.'
+                      : 'Faz o pedido no site em menos de um minuto, sem pagamento online. Se preferires, envia a escolha pelo WhatsApp.' }}
                   </p>
 
                   <div
@@ -383,27 +388,28 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
                 </div>
 
                 <UButton
-                  :to="whatsappHref"
                   :disabled="!cartItems.length"
                   size="xl"
-                  color="success"
-                  icon="i-simple-icons-whatsapp"
+                  color="primary"
+                  icon="i-lucide-shopping-bag"
                   class="mt-5 w-full justify-center"
+                  @click="openCheckout"
+                >
+                  {{ isAccountUser ? 'Confirmar pedido' : 'Fazer o pedido' }}
+                </UButton>
+
+                <UButton
+                  :to="whatsappHref"
+                  :disabled="!cartItems.length"
+                  size="lg"
+                  color="success"
+                  variant="soft"
+                  icon="i-simple-icons-whatsapp"
+                  class="mt-2 w-full justify-center"
                   target="_blank"
                   @click="trackCheckoutIntent"
                 >
                   Enviar no WhatsApp
-                </UButton>
-
-                <UButton
-                  :disabled="!cartItems.length"
-                  size="lg"
-                  color="neutral"
-                  variant="ghost"
-                  class="mt-2 w-full justify-center"
-                  @click="openCheckout"
-                >
-                  Deixar número
                 </UButton>
               </UCard>
 
@@ -462,31 +468,32 @@ const whatsappHref = makeWhatsappHref(buildCartMessage);
             </div>
 
             <p class="mb-2 text-xs leading-5 text-muted">
-              WhatsApp é mais rápido. Sem WhatsApp? Deixa o número e falamos contigo.
+              Pedido no site em menos de um minuto, sem pagamento online. WhatsApp também funciona.
             </p>
+
+            <UButton
+              :disabled="!cartItems.length"
+              size="xl"
+              color="primary"
+              icon="i-lucide-shopping-bag"
+              class="w-full justify-center"
+              @click="openCheckout"
+            >
+              {{ isAccountUser ? 'Confirmar pedido' : 'Fazer o pedido' }}
+            </UButton>
 
             <UButton
               :to="whatsappHref"
               :disabled="!cartItems.length"
-              size="xl"
+              size="md"
               color="success"
+              variant="soft"
               icon="i-simple-icons-whatsapp"
-              class="w-full justify-center"
+              class="mt-1 w-full justify-center"
               target="_blank"
               @click="trackCheckoutIntent"
             >
               Enviar no WhatsApp
-            </UButton>
-
-            <UButton
-              :disabled="!cartItems.length"
-              size="md"
-              color="neutral"
-              variant="ghost"
-              class="mt-1 w-full justify-center"
-              @click="openCheckout"
-            >
-              Deixar número
             </UButton>
           </div>
         </div>
