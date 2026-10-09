@@ -7,12 +7,13 @@ import { makeGa4Item } from '~/utils/ga4';
 import { colorLabel } from '#shared/constants/colors';
 import { formatAoPhone } from '#shared/utils/phone';
 import { couponLabel, couponReasonMessage, type CouponSummary } from '#shared/constants/coupons';
+import { formatOpeningStatus, getOpeningStatus, resolveOfficeMapUrl, toTelHref } from '#shared/utils/openingHours';
 
 
 definePageMeta({ name: 'checkout' });
 
-const title = 'Fazer pedido | Amoda';
-const description = 'Envia o teu pedido sem pagamento online: a equipa da Amoda confirma tudo contigo pelo WhatsApp.';
+const title = 'Confirmar pedido | Amoda';
+const description = 'Confirma o teu pedido sem pagamento online: escolhe como receber e acompanha tudo na tua conta.';
 
 useHead(() => ({
   title,
@@ -56,6 +57,9 @@ if (import.meta.client) {
   watch(isLoading, redirectIfEmpty);
 }
 
+// Список вещей по умолчанию свёрнут: при большом заказе он раздувал страницу
+const isItemsOpen = ref(false);
+
 const checkoutForm = reactive({ phone: '', name: '' });
 
 const { user } = useAuth();
@@ -70,29 +74,44 @@ if (isAccountUser.value) {
   checkoutForm.phone = verifiedPhone.value;
 }
 
-// Получение: доставка на дом (null, адрес и такса согласуются в WhatsApp) или пункт выдачи
-const PICKUP_DELIVERY = 0;
-
+// Получение: шоурум (по умолчанию, бесплатно) или доставка на дом (null, такса согласуется после заказа)
 const { offices, load: loadOffices } = useOffices();
 
 await loadOffices();
 
-const pickupChoice = ref<number>(PICKUP_DELIVERY);
+const showroom = computed(() => offices.value[0] ?? null);
 
-const pickupItems = computed(() => [
-  {
-    value: PICKUP_DELIVERY,
-    label: 'Entrega ao domicílio',
-    description: 'Combinamos o endereço e a taxa no WhatsApp',
-  },
-  ...offices.value.map(office => ({
-    value: Number(office.id),
-    label: office.name,
-    description: office.address || undefined,
-  })),
-]);
+const showroomInfo = computed(() => {
+  const office = showroom.value;
 
-const pickupOfficeId = computed(() => (pickupChoice.value === PICKUP_DELIVERY ? null : pickupChoice.value));
+  if (!office) {
+    return null;
+  }
+
+  const [street, ...rest] = String(office.address || '').replace(/^Luanda,\s*/i, '')
+    .split(/\s*\(|\)\s*/)
+    .filter(Boolean);
+
+  return {
+    name: office.name,
+    street,
+    note: rest.join(' '),
+    mapUrl: resolveOfficeMapUrl(office as any),
+    telHref: toTelHref(office.phone),
+    status: getOpeningStatus(office.opening_hours as any),
+  };
+});
+
+type DeliveryMode = 'showroom' | 'delivery';
+
+const deliveryMode = ref<DeliveryMode>('showroom');
+
+const deliveryOptions: { value: DeliveryMode; label: string; hint: string }[] = [
+  { value: 'showroom', label: 'No showroom', hint: 'Grátis · Luanda' },
+  { value: 'delivery', label: 'Entrega ao domicílio*', hint: '* Taxa a combinar' },
+];
+
+const pickupOfficeId = computed(() => (deliveryMode.value === 'showroom' && showroom.value ? Number(showroom.value.id) : null));
 
 // Купон: только для вошедших. Лучший персональный подставляется сам, публичный код вводится руками
 type CouponQuote = { ok: boolean; reason: string | null; coupon: CouponSummary | null; discount: number };
@@ -335,7 +354,11 @@ const submitCheckout = async () => {
     }
 
     await clear();
-    await navigateTo({ name: 'order-number', params: { number } });
+
+    // Вошедшая видит заказ в кабинете, гость — публичную страницу с приглашением создать аккаунт
+    await navigateTo(isAccountUser.value ?
+      { name: 'conta-pedidos-number', params: { number } } :
+      { name: 'order-number', params: { number } });
   } catch (checkoutError: any) {
     toast.add({
       title: checkoutError?.data?.message || 'Não foi possível enviar a tua escolha. Tenta novamente em alguns instantes.',
@@ -349,54 +372,42 @@ const submitCheckout = async () => {
 
 <template>
   <UPage>
-    <UPageBody class="mx-auto max-w-3xl sm:px-6 lg:px-8">
-      <section class="rounded-2xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-4 shadow-sm sm:p-8">
-        <UBadge
-          color="primary"
-          variant="soft"
-          class="mb-3"
-        >
-          Sem pagamento agora
-        </UBadge>
-
+    <UPageBody
+      :ui="{ base: 'space-y-0' }"
+      class="mx-auto max-w-6xl pb-28 sm:px-6 lg:px-8 lg:pb-16"
+    >
+      <div>
         <h1 class="text-2xl font-black tracking-tight text-highlighted sm:text-4xl">
-          {{ isAccountUser ? 'Confirma o teu pedido' : 'Faz o teu pedido' }}
+          Confirma o teu pedido
         </h1>
 
-        <p class="mt-3 text-sm leading-6 text-muted sm:text-base">
-          {{ isAccountUser
-            ? 'Está quase: revê os dados e envia. Depois falamos contigo pelo WhatsApp para combinar tudo.'
-            : 'Deixa o teu número e envia o pedido. A equipa da Amoda escreve-te no WhatsApp (ou liga) para confirmar a escolha.' }}
+        <p class="mt-1 text-sm text-muted sm:text-base">
+          Escolhe como queres receber
         </p>
-      </section>
+      </div>
 
       <UForm
-        class="mt-5"
+        class="mt-5 grid gap-5 lg:grid-cols-[1fr_360px] lg:items-start"
         @submit.prevent="submitCheckout"
       >
-        <UCard>
-          <h2 class="text-lg font-black text-highlighted">
-            {{ isAccountUser ? 'Os teus dados' : 'Nós falamos contigo' }}
-          </h2>
+        <div class="grid gap-5">
+          <UCard>
+            <h2 class="text-lg font-black text-highlighted">
+              O teu contacto
+            </h2>
 
-          <p class="mt-2 text-sm leading-6 text-muted">
-            {{ isAccountUser
-              ? 'Usamos o número da tua conta para combinar os detalhes.'
-              : 'Indica um número válido em Angola para podermos escrever ou ligar.' }}
-          </p>
-
-          <div class="mt-5 grid gap-4">
-            <!-- Вошедшая: номер подтверждён по SMS и не меняется, имя из профиля — поля не показываем -->
             <div
               v-if="isAccountUser && verifiedPhone"
-              class="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
+              class="mt-4 flex items-center gap-3"
             >
-              <UIcon
-                name="i-lucide-user-round-check"
-                class="size-5 shrink-0 text-primary"
-              />
+              <div class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <UIcon
+                  name="i-lucide-user-round"
+                  class="size-5"
+                />
+              </div>
 
-              <div class="min-w-0 text-sm">
+              <div class="min-w-0">
                 <div
                   v-if="checkoutForm.name"
                   class="font-semibold text-highlighted"
@@ -410,20 +421,12 @@ const submitCheckout = async () => {
               </div>
             </div>
 
-            <template v-else>
-              <UFormField label="Nome (opcional)">
-                <UInput
-                  v-model="checkoutForm.name"
-                  name="name"
-                  placeholder="Como te podemos chamar?"
-                  type="text"
-                  size="xl"
-                  class="w-full sm:max-w-sm"
-                />
-              </UFormField>
-
+            <div
+              v-else
+              class="mt-4 grid gap-4"
+            >
               <UFormField
-                :error="formErrors.phone ? 'Por favor, indica o teu número de telefone.' : undefined"
+                :error="formErrors.phone ? 'Indica o teu número de telefone.' : undefined"
                 label="Número de telefone"
                 required
               >
@@ -439,199 +442,356 @@ const submitCheckout = async () => {
                   class="w-full sm:max-w-sm"
                 />
               </UFormField>
-            </template>
 
-            <UFormField label="Como queres receber?">
-              <URadioGroup
-                v-model="pickupChoice"
-                :items="pickupItems"
-                color="primary"
+              <UFormField label="Nome (opcional)">
+                <UInput
+                  v-model="checkoutForm.name"
+                  name="name"
+                  placeholder="Como te podemos chamar?"
+                  type="text"
+                  size="xl"
+                  class="w-full sm:max-w-sm"
+                />
+              </UFormField>
+            </div>
+          </UCard>
+
+          <UCard>
+            <h2 class="text-lg font-black text-highlighted">
+              Como queres receber?
+            </h2>
+
+            <div
+              role="radiogroup"
+              class="mt-4 grid gap-3 sm:grid-cols-2"
+            >
+              <button
+                v-for="option in deliveryOptions"
+                :key="option.value"
+                :aria-checked="deliveryMode === option.value"
+                :class="deliveryMode === option.value ? 'border-primary/40 bg-primary/5' : 'border-gray-100 hover:border-primary/30 hover:bg-primary/5'"
+                type="button"
+                role="radio"
+                class="flex items-start gap-3 rounded-2xl border bg-white p-4 text-left transition"
+                @click="deliveryMode = option.value"
+              >
+                <span
+                  :class="deliveryMode === option.value ? 'border-primary' : 'border-gray-300'"
+                  class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2"
+                >
+                  <span
+                    v-if="deliveryMode === option.value"
+                    class="size-2.5 rounded-full bg-primary"
+                  />
+                </span>
+
+                <span class="min-w-0">
+                  <span
+                    class="block font-bold text-highlighted"
+                    v-text="option.label"
+                  />
+
+                  <span
+                    class="mt-0.5 block text-sm text-muted"
+                    v-text="option.hint"
+                  />
+                </span>
+              </button>
+            </div>
+
+            <div
+              v-if="deliveryMode === 'showroom' && showroomInfo"
+              class="mt-4 space-y-3 rounded-2xl border border-primary/15 bg-primary/5 p-4"
+            >
+              <div class="font-bold text-highlighted">
+                Showroom · {{ showroomInfo.name }}
+              </div>
+
+              <div class="text-sm leading-6 text-muted">
+                <div v-text="showroomInfo.street" />
+
+                <div
+                  v-if="showroomInfo.note"
+                  v-text="showroomInfo.note"
+                />
+              </div>
+
+              <div
+                :class="showroomInfo.status.isOpen ? 'text-success' : 'text-muted'"
+                class="flex items-center gap-2 text-sm font-medium"
+              >
+                <UIcon
+                  name="i-lucide-clock"
+                  class="size-4"
+                />
+                {{ formatOpeningStatus(showroomInfo.status) }}
+              </div>
+
+              <div class="flex flex-wrap gap-2 pt-1">
+                <UButton
+                  v-if="showroomInfo.mapUrl"
+                  :to="showroomInfo.mapUrl"
+                  target="_blank"
+                  variant="soft"
+                  color="primary"
+                  icon="i-lucide-map-pin"
+                >
+                  Abrir no Google Maps
+                </UButton>
+
+                <UButton
+                  v-if="showroomInfo.telHref"
+                  :to="showroomInfo.telHref"
+                  variant="soft"
+                  color="neutral"
+                  icon="i-lucide-phone"
+                >
+                  Ligar
+                </UButton>
+              </div>
+            </div>
+
+            <div
+              v-else-if="deliveryMode === 'delivery'"
+              class="mt-4 space-y-2 rounded-2xl border border-primary/15 bg-primary/5 p-4"
+            >
+              <div class="font-bold text-highlighted">
+                Entrega na tua morada
+              </div>
+
+              <p class="text-sm leading-6 text-muted">
+                A morada, a data e a taxa de entrega são combinadas após o pedido. A taxa não está incluída no valor dos artigos.
+              </p>
+            </div>
+          </UCard>
+
+          <UCard :ui="{ body: isItemsOpen ? '' : 'py-4 sm:py-4' }">
+            <button
+              type="button"
+              class="flex w-full items-center justify-between gap-3 text-left"
+              :aria-expanded="isItemsOpen"
+              @click="isItemsOpen = !isItemsOpen"
+            >
+              <span class="text-lg font-black text-highlighted">
+                Artigos do pedido · {{ totalCount }}
+              </span>
+
+              <span class="flex items-center gap-1 text-sm font-medium text-primary">
+                {{ isItemsOpen ? 'Ocultar' : 'Ver artigos' }}
+
+                <UIcon
+                  :name="isItemsOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                  class="size-4"
+                />
+              </span>
+            </button>
+
+            <ul
+              v-if="isItemsOpen"
+              class="mt-4 divide-y divide-gray-100 border-t border-gray-100"
+            >
+              <li
+                v-for="cartItem in items"
+                :key="cartItem.key"
+                class="flex items-start justify-between gap-4 py-3"
+              >
+                <div class="min-w-0">
+                  <div
+                    class="font-medium leading-snug text-highlighted"
+                    v-text="cartItem.productName"
+                  />
+
+                  <div class="mt-1 text-sm text-muted">
+                    {{ [itemVariantLabel(cartItem), `${cartItem.qty} un.`].filter(Boolean).join(' · ') }}
+                  </div>
+                </div>
+
+                <span
+                  class="shrink-0 font-semibold text-highlighted"
+                  v-text="formatPrice(cartItem.price * cartItem.qty)"
+                />
+              </li>
+            </ul>
+          </UCard>
+        </div>
+
+        <UCard class="border-primary/20 bg-primary/5 lg:sticky lg:top-24">
+          <h2 class="text-lg font-black text-highlighted">
+            Resumo do pedido
+          </h2>
+
+          <dl class="mt-4 space-y-3 text-sm">
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-muted">
+                {{ totalCount === 1 ? '1 artigo' : `${totalCount} artigos` }}
+              </dt>
+
+              <dd
+                class="text-highlighted"
+                v-text="formatPrice(totalKz)"
               />
-            </UFormField>
+            </div>
 
-            <!-- Не блокируем кнопку при ошибке телефона: сабмит валидирует и подводит к полю -->
+            <div
+              v-if="isAccountUser && coupon.applied"
+              class="flex items-center justify-between gap-3 text-primary"
+            >
+              <dt class="flex items-center gap-2">
+                <UIcon
+                  name="i-lucide-ticket"
+                  class="size-4"
+                />
+                {{ coupon.applied.code }} · −{{ couponLabel(coupon.applied) }}
+              </dt>
+
+              <dd class="flex items-center gap-1">
+                <span v-text="`−${formatPrice(coupon.discount)}`" />
+
+                <UButton
+                  variant="ghost"
+                  color="neutral"
+                  size="xs"
+                  icon="i-heroicons-x-mark"
+                  aria-label="Remover cupão"
+                  @click="removeCoupon"
+                />
+              </dd>
+            </div>
+
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-muted">
+                {{ deliveryMode === 'showroom' ? 'Recolha no showroom' : 'Entrega ao domicílio' }}
+              </dt>
+
+              <dd class="text-highlighted">
+                {{ deliveryMode === 'showroom' ? 'Grátis' : 'Taxa a combinar' }}
+              </dd>
+            </div>
+          </dl>
+
+          <div
+            v-if="isAccountUser && !coupon.applied"
+            class="mt-3"
+          >
+            <UButton
+              variant="link"
+              color="primary"
+              size="sm"
+              icon="i-lucide-ticket"
+              class="px-0"
+              @click="coupon.isFieldOpen = !coupon.isFieldOpen"
+            >
+              Tens um cupão?
+            </UButton>
+
+            <UFormField
+              v-if="coupon.isFieldOpen"
+              :error="coupon.error || undefined"
+              class="mt-2"
+            >
+              <div class="flex gap-2">
+                <UInput
+                  v-model="coupon.input"
+                  placeholder="Código do cupão"
+                  autocapitalize="characters"
+                  size="lg"
+                  class="w-full uppercase"
+                  @keydown.enter.prevent="applyCouponCode"
+                />
+
+                <UButton
+                  :loading="coupon.isChecking"
+                  :disabled="!coupon.input.trim()"
+                  color="primary"
+                  variant="soft"
+                  size="lg"
+                  @click="applyCouponCode"
+                >
+                  Aplicar
+                </UButton>
+              </div>
+            </UFormField>
+          </div>
+
+          <p
+            v-else-if="!isAccountUser"
+            class="mt-3 text-xs leading-5 text-muted"
+          >
+            <NuxtLink
+              :to="{ name: 'entrar', query: { redirected_from: '/checkout' } }"
+              class="font-semibold text-primary underline-offset-2 hover:underline"
+            >
+              Entra na conta
+            </NuxtLink>
+            e usa o teu cupão de boas-vindas.
+          </p>
+
+          <div class="mt-4 border-t border-primary/10 pt-4">
+            <div class="flex items-baseline justify-between gap-4">
+              <span class="text-sm font-semibold text-highlighted">
+                Total se ficares com tudo
+              </span>
+
+              <span
+                class="text-lg font-black text-primary"
+                v-text="formatPrice(discountedTotal)"
+              />
+            </div>
+
+            <p class="mt-2 text-xs leading-5 text-muted">
+              Experimenta primeiro. Paga apenas o que decidires levar.
+            </p>
+          </div>
+
+          <div class="hidden lg:block">
             <UButton
               :loading="isSubmitting"
               :disabled="!items.length"
-              size="xl"
-              color="primary"
               type="submit"
-              class="w-full justify-center sm:w-fit"
+              color="primary"
+              size="xl"
+              class="mt-4 w-full justify-center"
+            >
+              {{ isAccountUser ? 'Confirmar pedido' : 'Enviar pedido' }}
+            </UButton>
+
+            <p class="mt-2 text-center text-xs text-muted">
+              Sem pagamento agora
+            </p>
+          </div>
+
+          <p class="mt-4 border-t border-primary/10 pt-4 text-xs leading-5 text-muted">
+            <strong class="text-highlighted">E depois?</strong>
+            Recebes a confirmação por SMS e acompanhas o pedido na tua conta. Se precisares, falamos pelo WhatsApp.
+          </p>
+        </UCard>
+
+        <div class="fixed inset-x-0 bottom-0 z-40 border-t border-gray-100 bg-white/95 p-3 backdrop-blur lg:hidden">
+          <div class="mx-auto flex max-w-6xl items-center gap-3">
+            <div class="min-w-0">
+              <div class="text-xs text-muted">
+                Total dos artigos
+              </div>
+
+              <div
+                class="text-lg font-black text-primary"
+                v-text="formatPrice(discountedTotal)"
+              />
+            </div>
+
+            <UButton
+              :loading="isSubmitting"
+              :disabled="!items.length"
+              type="submit"
+              color="primary"
+              size="xl"
+              class="ml-auto justify-center"
             >
               {{ isAccountUser ? 'Confirmar pedido' : 'Enviar pedido' }}
             </UButton>
           </div>
-        </UCard>
+        </div>
       </UForm>
-
-      <UCard class="mt-4 border-primary/20 bg-primary/5">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-base font-black text-highlighted">
-              Resumo
-            </h2>
-
-            <p
-              class="mt-1 text-xs leading-5 text-muted"
-              v-text="`${totalCount} item(ns)`"
-            />
-          </div>
-
-          <div class="shrink-0 text-right">
-            <div class="text-xs text-muted">
-              Total se levar tudo
-            </div>
-
-            <div
-              class="text-lg font-black text-primary"
-              v-text="formatPrice(discountedTotal)"
-            />
-          </div>
-        </div>
-
-        <p
-          v-if="!isAccountUser"
-          class="mt-3 border-t border-primary/10 pt-3 text-sm leading-6 text-muted"
-        >
-          <UIcon
-            name="i-lucide-ticket"
-            class="mr-1 inline-block size-4 align-text-bottom text-primary"
-          />
-
-          Tens um cupão?
-
-          <NuxtLink
-            :to="{ name: 'entrar', query: { redirected_from: '/checkout' } }"
-            class="font-semibold text-primary underline-offset-2 hover:underline"
-          >
-            Entra na conta
-          </NuxtLink>
-
-          para o aplicar e acompanhar os teus pedidos.
-        </p>
-
-        <!-- Cupão: só para quem entrou na conta -->
-        <div
-          v-if="isAccountUser"
-          class="mt-3 border-t border-primary/10 pt-3"
-        >
-          <div
-            v-if="coupon.applied"
-            class="flex items-center justify-between gap-3 text-sm"
-          >
-            <span class="flex items-center gap-2 text-highlighted">
-              <UIcon
-                name="i-lucide-ticket"
-                class="size-4 text-primary"
-              />
-
-              Cupão <strong v-text="coupon.applied.code" /> · {{ couponLabel(coupon.applied) }}
-            </span>
-
-            <span class="flex items-center gap-2">
-              <span
-                class="font-semibold text-primary"
-                v-text="`−${formatPrice(coupon.discount)}`"
-              />
-
-              <UButton
-                variant="ghost"
-                color="neutral"
-                size="xs"
-                icon="i-heroicons-x-mark"
-                aria-label="Remover cupão"
-                @click="removeCoupon"
-              />
-            </span>
-          </div>
-
-          <UButton
-            v-else-if="!coupon.isFieldOpen"
-            variant="link"
-            color="primary"
-            size="sm"
-            class="px-0"
-            icon="i-lucide-ticket"
-            @click="coupon.isFieldOpen = true"
-          >
-            Tens um cupão?
-          </UButton>
-
-          <UFormField
-            v-if="coupon.isFieldOpen && !coupon.applied"
-            :error="coupon.error || undefined"
-            class="mt-1"
-          >
-            <div class="flex gap-2">
-              <UInput
-                v-model="coupon.input"
-                placeholder="CÓDIGO"
-                autocapitalize="characters"
-                size="lg"
-                class="w-full uppercase"
-                @keydown.enter.prevent="applyCouponCode"
-              />
-
-              <UButton
-                :loading="coupon.isChecking"
-                :disabled="!coupon.input.trim()"
-                color="primary"
-                variant="soft"
-                size="lg"
-                @click="applyCouponCode"
-              >
-                Aplicar
-              </UButton>
-            </div>
-          </UFormField>
-
-          <UButton
-            v-if="!coupon.applied && coupon.isFieldOpen"
-            variant="link"
-            color="neutral"
-            size="xs"
-            class="mt-1 px-0"
-            @click="coupon.isFieldOpen = false"
-          >
-            Cancelar
-          </UButton>
-        </div>
-
-        <ul class="mt-3 space-y-2 border-t border-primary/10 pt-3">
-          <li
-            v-for="cartItem in items"
-            :key="cartItem.key"
-            class="flex items-baseline justify-between gap-3 text-sm"
-          >
-            <span class="min-w-0 text-highlighted">
-              {{ cartItem.productName }}
-
-              <span
-                v-if="itemVariantLabel(cartItem)"
-                class="text-xs text-muted"
-              >
-                · {{ itemVariantLabel(cartItem) }}
-              </span>
-
-              <span
-                v-if="cartItem.qty > 1"
-                class="text-xs text-muted"
-              >
-                ×{{ cartItem.qty }}
-              </span>
-            </span>
-
-            <span
-              class="shrink-0 font-semibold text-highlighted"
-              v-text="formatPrice(cartItem.price * cartItem.qty)"
-            />
-          </li>
-        </ul>
-
-        <p class="mt-3 border-t border-primary/10 pt-3 text-xs leading-5 text-muted">
-          Este valor é só uma referência. Pagas depois de experimentar e apenas o que decidires levar.
-        </p>
-      </UCard>
     </UPageBody>
   </UPage>
 </template>
