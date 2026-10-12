@@ -264,10 +264,12 @@ watchCartCoupon();
                       </div>
 
                       <p
-                        v-if="isAtStockLimit(cartItem)"
-                        class="mt-1 text-xs text-amber-600"
+                        class="mt-1 min-h-4 text-xs text-amber-600"
+                        aria-live="polite"
                       >
-                        {{ cartItem.stock === 1 ? 'Última unidade disponível' : `Só restam ${cartItem.stock} unidades` }}
+                        <template v-if="isAtStockLimit(cartItem)">
+                          {{ cartItem.stock === 1 ? 'Última unidade disponível' : `Só restam ${cartItem.stock} unidades` }}
+                        </template>
                       </p>
                     </div>
 
