@@ -6,7 +6,6 @@ import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
 import { colorLabel } from '#shared/constants/colors';
 import { formatAoPhone } from '#shared/utils/phone';
-import { couponLabel, couponReasonMessage, type CouponSummary } from '#shared/constants/coupons';
 import { formatOpeningStatus, getOpeningStatus, resolveOfficeMapUrl, toTelHref } from '#shared/utils/openingHours';
 
 
@@ -66,6 +65,24 @@ const { user } = useAuth();
 const verifiedPhone = ref('');
 const isAccountUser = computed(() => Boolean(user.value));
 
+// Гость: вход по SMS прямо здесь (по умолчанию) или заказ без аккаунта
+type ContactMode = 'login' | 'guest';
+
+const contactMode = ref<ContactMode>('login');
+
+const contactOptions: { value: ContactMode; label: string; hint: string }[] = [
+  { value: 'login', label: 'Entrar com SMS', hint: 'Cupão e estado do pedido na tua conta' },
+  { value: 'guest', label: 'Continuar sem conta', hint: 'Só o número, sem cupão' },
+];
+
+const loadProfileIntoForm = async () => {
+  const profile = await $fetch<{ name: string | null; phone: string | null }>('/api/account/profile');
+
+  checkoutForm.name = profile.name || '';
+  verifiedPhone.value = formatAoPhone(profile.phone);
+  checkoutForm.phone = verifiedPhone.value;
+};
+
 if (isAccountUser.value) {
   const { data: profile } = await useAccountProfile();
 
@@ -73,6 +90,11 @@ if (isAccountUser.value) {
   verifiedPhone.value = formatAoPhone(profile.value?.phone);
   checkoutForm.phone = verifiedPhone.value;
 }
+
+// Вошла прямо в чекауте: подтягиваем профиль без перезагрузки, купон пересчитает watchCart
+const onSignedIn = async () => {
+  await loadProfileIntoForm().catch(() => {});
+};
 
 // Получение: шоурум (по умолчанию, бесплатно) или доставка на дом (null, такса согласуется после заказа)
 const { offices, load: loadOffices } = useOffices();
@@ -113,69 +135,14 @@ const deliveryOptions: { value: DeliveryMode; label: string; hint: string }[] = 
 
 const pickupOfficeId = computed(() => (deliveryMode.value === 'showroom' && showroom.value ? Number(showroom.value.id) : null));
 
-// Купон: только для вошедших. Лучший персональный подставляется сам, публичный код вводится руками
-type CouponQuote = { ok: boolean; reason: string | null; coupon: CouponSummary | null; discount: number };
+const {
+  total: discountedTotal,
+  applied: appliedCoupon,
+  watchCart: watchCartCoupon,
+  clear: clearCoupon,
+} = useCheckoutCoupon();
 
-const coupon = reactive({
-  input: '',
-  applied: null as CouponSummary | null,
-  discount: 0,
-  error: null as string | null,
-  isChecking: false,
-  isFieldOpen: false,
-});
-
-const discountedTotal = computed(() => Math.max(0, totalKz.value - coupon.discount));
-
-const quoteCoupon = async (code?: string) => {
-  if (!isAccountUser.value || !items.value.length) {
-    return;
-  }
-
-  coupon.isChecking = true;
-  coupon.error = null;
-
-  try {
-    const quote = await $fetch<CouponQuote>('/api/account/coupons/quote', {
-      method: 'POST',
-      body: { code: code || undefined, subtotal: totalKz.value },
-    });
-
-    if (quote.ok && quote.coupon) {
-      coupon.applied = quote.coupon;
-      coupon.discount = quote.discount;
-      coupon.isFieldOpen = false;
-    } else if (code) {
-      coupon.error = couponReasonMessage(quote.reason);
-    }
-  } catch (quoteError: any) {
-    if (code) {
-      coupon.error = quoteError?.data?.message || couponReasonMessage(null);
-    }
-  } finally {
-    coupon.isChecking = false;
-  }
-};
-
-const applyCouponCode = () => quoteCoupon(coupon.input.trim());
-
-const removeCoupon = () => {
-  coupon.applied = null;
-  coupon.discount = 0;
-  coupon.input = '';
-  coupon.error = null;
-};
-
-if (import.meta.client && isAccountUser.value) {
-  // Корзина приходит после гидрации; при изменении суммы пересчитываем применённый купон
-  watch(() => [isLoading.value, totalKz.value], ([loading]) => {
-    if (loading || !items.value.length) {
-      return;
-    }
-
-    quoteCoupon(coupon.applied?.code);
-  }, { immediate: true });
-}
+watchCartCoupon();
 
 
 const buildContactSnapshot = () => ({
@@ -241,6 +208,12 @@ const formErrors = reactive({
 const PHONE_DIGITS_MIN_LENGTH = 12;
 
 const validateForm = () => {
+  if (isAccountUser.value) {
+    formErrors.phone = false;
+
+    return true;
+  }
+
   formErrors.phone = !checkoutForm.phone.trim() || checkoutForm.phone.replace(/\D/g, '').length < PHONE_DIGITS_MIN_LENGTH;
 
   return !formErrors.phone;
@@ -339,7 +312,7 @@ const submitCheckout = async () => {
           phone: checkoutForm.phone,
         },
         pickupOfficeId: pickupOfficeId.value,
-        couponCode: coupon.applied?.code || undefined,
+        couponCode: appliedCoupon.value?.code || undefined,
       },
     });
 
@@ -347,13 +320,14 @@ const submitCheckout = async () => {
       trackPurchase({
         transaction_id: String(number),
         value: discountedTotal.value,
-        coupon: coupon.applied?.code,
+        coupon: appliedCoupon.value?.code,
         items: getAnalyticsItems(),
         pickup_office_id: pickupOfficeId.value,
       } as any);
     }
 
     await clear();
+    clearCoupon();
 
     // Вошедшая видит заказ в кабинете, гость — публичную страницу с приглашением создать аккаунт
     await navigateTo(isAccountUser.value ?
@@ -387,6 +361,7 @@ const submitCheckout = async () => {
       </div>
 
       <UForm
+        id="checkout-form"
         class="mt-5 grid gap-5 lg:grid-cols-[1fr_360px] lg:items-start"
         @submit.prevent="submitCheckout"
       >
@@ -421,39 +396,94 @@ const submitCheckout = async () => {
               </div>
             </div>
 
-            <div
-              v-else
-              class="mt-4 grid gap-4"
-            >
-              <UFormField
-                :error="formErrors.phone ? 'Indica o teu número de telefone.' : undefined"
-                label="Número de telefone"
-                required
+            <template v-else>
+              <div
+                role="radiogroup"
+                class="mt-4 grid gap-3 sm:grid-cols-2"
               >
-                <UInput
-                  ref="phoneInputRef"
-                  v-model="checkoutForm.phone"
-                  v-maska="'+244 ### ### ###'"
-                  required
-                  name="phone"
-                  placeholder="+244 XXX XXX XXX"
-                  type="tel"
-                  size="xl"
-                  class="w-full sm:max-w-sm"
-                />
-              </UFormField>
+                <button
+                  v-for="option in contactOptions"
+                  :key="option.value"
+                  :aria-checked="contactMode === option.value"
+                  :class="contactMode === option.value ? 'border-primary/40 bg-primary/5' : 'border-gray-100 hover:border-primary/30 hover:bg-primary/5'"
+                  type="button"
+                  role="radio"
+                  class="flex items-start gap-3 rounded-2xl border bg-white p-4 text-left transition"
+                  @click="contactMode = option.value"
+                >
+                  <span
+                    :class="contactMode === option.value ? 'border-primary' : 'border-gray-300'"
+                    class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2"
+                  >
+                    <span
+                      v-if="contactMode === option.value"
+                      class="size-2.5 rounded-full bg-primary"
+                    />
+                  </span>
 
-              <UFormField label="Nome (opcional)">
-                <UInput
-                  v-model="checkoutForm.name"
-                  name="name"
-                  placeholder="Como te podemos chamar?"
-                  type="text"
-                  size="xl"
-                  class="w-full sm:max-w-sm"
+                  <span class="min-w-0">
+                    <span
+                      class="block font-bold text-highlighted"
+                      v-text="option.label"
+                    />
+
+                    <span
+                      class="mt-0.5 block text-sm text-muted"
+                      v-text="option.hint"
+                    />
+                  </span>
+                </button>
+              </div>
+
+              <div
+                v-if="contactMode === 'login'"
+                class="mt-4 rounded-2xl border border-primary/15 bg-primary/5 p-4"
+              >
+                <AuthPhoneLogin
+                  compact
+                  :initialPhone="checkoutForm.phone"
+                  @success="onSignedIn"
                 />
-              </UFormField>
-            </div>
+              </div>
+
+              <div
+                v-else
+                class="mt-4 grid gap-4"
+              >
+                <UFormField
+                  :error="formErrors.phone ? 'Indica o teu número de telefone.' : undefined"
+                  label="Número de telefone"
+                  required
+                >
+                  <UInput
+                    ref="phoneInputRef"
+                    v-model="checkoutForm.phone"
+                    v-maska="'+244 ### ### ###'"
+                    required
+                    name="phone"
+                    placeholder="+244 XXX XXX XXX"
+                    type="tel"
+                    size="xl"
+                    class="w-full sm:max-w-sm"
+                  />
+                </UFormField>
+
+                <UFormField label="Nome (opcional)">
+                  <UInput
+                    v-model="checkoutForm.name"
+                    name="name"
+                    placeholder="Como te podemos chamar?"
+                    type="text"
+                    size="xl"
+                    class="w-full sm:max-w-sm"
+                  />
+                </UFormField>
+
+                <p class="text-xs leading-5 text-muted">
+                  Sem conta não há cupão e não vês o estado do pedido.
+                </p>
+              </div>
+            </template>
           </UCard>
 
           <UCard>
@@ -632,32 +662,6 @@ const submitCheckout = async () => {
               />
             </div>
 
-            <div
-              v-if="isAccountUser && coupon.applied"
-              class="flex items-center justify-between gap-3 text-primary"
-            >
-              <dt class="flex items-center gap-2">
-                <UIcon
-                  name="i-lucide-ticket"
-                  class="size-4"
-                />
-                {{ coupon.applied.code }} · −{{ couponLabel(coupon.applied) }}
-              </dt>
-
-              <dd class="flex items-center gap-1">
-                <span v-text="`−${formatPrice(coupon.discount)}`" />
-
-                <UButton
-                  variant="ghost"
-                  color="neutral"
-                  size="xs"
-                  icon="i-heroicons-x-mark"
-                  aria-label="Remover cupão"
-                  @click="removeCoupon"
-                />
-              </dd>
-            </div>
-
             <div class="flex items-center justify-between gap-3">
               <dt class="text-muted">
                 {{ deliveryMode === 'showroom' ? 'Recolha no showroom' : 'Entrega ao domicílio' }}
@@ -669,62 +673,12 @@ const submitCheckout = async () => {
             </div>
           </dl>
 
-          <div
-            v-if="isAccountUser && !coupon.applied"
-            class="mt-3"
-          >
-            <UButton
-              variant="link"
-              color="primary"
-              size="sm"
-              icon="i-lucide-ticket"
-              class="px-0"
-              @click="coupon.isFieldOpen = !coupon.isFieldOpen"
-            >
-              Tens um cupão?
-            </UButton>
-
-            <UFormField
-              v-if="coupon.isFieldOpen"
-              :error="coupon.error || undefined"
-              class="mt-2"
-            >
-              <div class="flex gap-2">
-                <UInput
-                  v-model="coupon.input"
-                  placeholder="Código do cupão"
-                  autocapitalize="characters"
-                  size="lg"
-                  class="w-full uppercase"
-                  @keydown.enter.prevent="applyCouponCode"
-                />
-
-                <UButton
-                  :loading="coupon.isChecking"
-                  :disabled="!coupon.input.trim()"
-                  color="primary"
-                  variant="soft"
-                  size="lg"
-                  @click="applyCouponCode"
-                >
-                  Aplicar
-                </UButton>
-              </div>
-            </UFormField>
+          <div class="mt-3">
+            <CheckoutCouponLine
+              redirectTo="/checkout"
+              allowCode
+            />
           </div>
-
-          <p
-            v-else-if="!isAccountUser"
-            class="mt-3 text-xs leading-5 text-muted"
-          >
-            <NuxtLink
-              :to="{ name: 'entrar', query: { redirected_from: '/checkout' } }"
-              class="font-semibold text-primary underline-offset-2 hover:underline"
-            >
-              Entra na conta
-            </NuxtLink>
-            e usa o teu cupão de boas-vindas.
-          </p>
 
           <div class="mt-4 border-t border-primary/10 pt-4">
             <div class="flex items-baseline justify-between gap-4">
@@ -765,33 +719,34 @@ const submitCheckout = async () => {
             Recebes a confirmação por SMS e acompanhas o pedido na tua conta. Se precisares, falamos pelo WhatsApp.
           </p>
         </UCard>
+      </UForm>
 
-        <div class="fixed inset-x-0 bottom-0 z-40 border-t border-gray-100 bg-white/95 p-3 backdrop-blur lg:hidden">
-          <div class="mx-auto flex max-w-6xl items-center gap-3">
-            <div class="min-w-0">
-              <div class="text-xs text-muted">
-                Total dos artigos
-              </div>
-
-              <div
-                class="text-lg font-black text-primary"
-                v-text="formatPrice(discountedTotal)"
-              />
+      <div class="fixed inset-x-0 bottom-0 z-40 border-t border-gray-100 bg-white/95 p-3 backdrop-blur lg:hidden">
+        <div class="mx-auto flex max-w-6xl items-center gap-3">
+          <div class="min-w-0">
+            <div class="text-xs text-muted">
+              Total dos artigos
             </div>
 
-            <UButton
-              :loading="isSubmitting"
-              :disabled="!items.length"
-              type="submit"
-              color="primary"
-              size="xl"
-              class="ml-auto justify-center"
-            >
-              {{ isAccountUser ? 'Confirmar pedido' : 'Enviar pedido' }}
-            </UButton>
+            <div
+              class="text-lg font-black text-primary"
+              v-text="formatPrice(discountedTotal)"
+            />
           </div>
+
+          <UButton
+            :loading="isSubmitting"
+            :disabled="!items.length"
+            type="submit"
+            form="checkout-form"
+            color="primary"
+            size="xl"
+            class="ml-auto justify-center"
+          >
+            {{ isAccountUser ? 'Confirmar pedido' : 'Enviar pedido' }}
+          </UButton>
         </div>
-      </UForm>
+      </div>
     </UPageBody>
   </UPage>
 </template>

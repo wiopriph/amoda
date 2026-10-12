@@ -28,7 +28,7 @@ const {
   increment,
   decrement,
   remove,
-  publicCode: cartPublicCode,
+  add: addToCart,
   isPending: isCartPending,
   error: cartError,
 } = useCart();
@@ -37,35 +37,7 @@ const { trackBeginCheckout } = useAnalyticsEvent();
 
 const totalCount = computed(() => cartItems.value.reduce((total, cartItem) => total + cartItem.qty, 0));
 
-const trustBadges = [
-  {
-    icon: 'i-lucide-wallet',
-    title: 'Sem pagamento online',
-  },
-  {
-    icon: 'i-lucide-shirt',
-    title: 'Experimenta antes',
-  },
-  {
-    icon: 'i-lucide-check-circle-2',
-    title: 'Paga só o que gostar',
-  },
-];
-
-const nextSteps = [
-  {
-    title: 'Confirma a escolha',
-    description: 'Enviamos o pedido com as peças escolhidas.',
-  },
-  {
-    title: 'Falamos contigo no WhatsApp',
-    description: 'Confirmamos disponibilidade, ponto e horário.',
-  },
-  {
-    title: 'Experimenta e decide',
-    description: 'Levas só o que gostares. Sem compromisso.',
-  },
-];
+const isHowItWorksOpen = ref(false);
 
 const getProductTo = (cartItem: any) => ({
   name: 'product-slug',
@@ -132,49 +104,62 @@ const buildCartMessage = () => {
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(buildCartMessage);
 
-const { user } = useAuth();
-const isAccountUser = computed(() => Boolean(user.value));
+const variantLine = (cartItem: any) => [colorLabel(cartItem.variantLabel), cartItem.sizeLabel ? `Tamanho ${cartItem.sizeLabel}` : null]
+  .filter(Boolean)
+  .join(' · ');
+
+const toast = useToast();
+
+// Удаление с отменой: снимок строки хранит всё, что нужно, чтобы вернуть вещь тем же addItem
+const removeWithUndo = async (cartItem: any) => {
+  const snapshot = { ...cartItem };
+
+  await remove(cartItem.key);
+
+  toast.add({
+    title: 'Artigo removido',
+    description: snapshot.productName,
+    color: 'neutral',
+    actions: [{
+      label: 'Anular',
+      color: 'primary',
+      variant: 'soft',
+      onClick: () => {
+        addToCart(
+          { id: snapshot.productId, slug: snapshot.slug, title: snapshot.productName, images: snapshot.image ? [{ url: snapshot.image }] : [] },
+          { id: snapshot.variantId, color: snapshot.variantLabel, price: snapshot.price },
+          { id: snapshot.sizeId, size: snapshot.sizeLabel, stock: snapshot.stock },
+          snapshot.qty,
+        );
+      },
+    }],
+  });
+};
+
+const { total: totalWithCoupon, watchCart: watchCartCoupon } = useCheckoutCoupon();
+
+watchCartCoupon();
 </script>
 
 <template>
   <UPage>
-    <UPageBody class="mx-auto max-w-6xl sm:px-6 lg:px-8">
-      <section class="overflow-hidden mb-2 sm:mb-2 rounded-3xl border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-fuchsia-50 p-5 shadow-sm sm:p-8">
-        <UBadge
-          color="primary"
-          variant="soft"
-          class="mb-4"
-        >
-          Entrega gratuita
-        </UBadge>
-
-        <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-          A tua seleção para experimentar
+    <UPageBody
+      :ui="{ base: 'space-y-0' }"
+      class="mx-auto max-w-6xl sm:px-6 lg:px-8"
+    >
+      <div>
+        <h1 class="text-2xl font-black tracking-tight text-highlighted sm:text-4xl">
+          O teu carrinho
         </h1>
 
-        <p class="mt-4 text-base leading-7 text-muted sm:text-lg">
-          Estas peças ainda não estão compradas. É a tua escolha para experimentar primeiro.
+        <p class="mt-1 text-sm text-muted sm:text-base">
+          Experimenta primeiro. Paga só o que levares.
         </p>
-
-        <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-toned">
-          <div
-            v-for="trustBadge in trustBadges"
-            :key="trustBadge.title"
-            class="flex items-center gap-2"
-          >
-            <UIcon
-              :name="trustBadge.icon"
-              class="size-4 text-primary"
-            />
-
-            <span v-text="trustBadge.title" />
-          </div>
-        </div>
-      </section>
+      </div>
 
       <section
         v-if="!cartItems.length"
-        class="mt-5 sm:mt-6"
+        class="mt-5"
       >
         <UCard>
           <div class="flex flex-col items-center py-10 text-center">
@@ -206,7 +191,7 @@ const isAccountUser = computed(() => Boolean(user.value));
       </section>
 
       <template v-else>
-        <div class="mt-5 grid gap-5 sm:mt-6 lg:grid-cols-[1fr_360px] lg:items-start">
+        <div class="mt-5 grid gap-5 lg:grid-cols-[1fr_360px] lg:items-start">
           <section class="space-y-3">
             <UCard
               v-for="cartItem in cartItems"
@@ -234,31 +219,28 @@ const isAccountUser = computed(() => Boolean(user.value));
                     {{ cartItem.productName }}
                   </NuxtLink>
 
-                  <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted sm:text-sm">
-                    <span class="inline-flex items-center gap-1.5">
-                      Cor:
-                      <ColorSwatch
-                        v-if="cartItem.variantLabel"
-                        :color="cartItem.variantLabel"
-                        :size="14"
-                      />
-                      {{ colorLabel(cartItem.variantLabel) || '—' }}
-                    </span>
+                  <div class="mt-2 flex items-center gap-1.5 text-xs text-muted sm:text-sm">
+                    <ColorSwatch
+                      v-if="cartItem.variantLabel"
+                      :color="cartItem.variantLabel"
+                      :size="14"
+                    />
 
-                    <span>Tamanho: {{ cartItem.sizeLabel || '—' }}</span>
+                    <span v-text="variantLine(cartItem) || '—'" />
                   </div>
 
-                  <div class="mt-2 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div class="mt-3 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <div class="mb-1 text-xs font-medium text-muted">
-                        Qtd.
-                      </div>
-
-                      <div class="flex items-center gap-2">
+                      <div
+                        class="flex items-center gap-2"
+                        role="group"
+                        aria-label="Quantidade"
+                      >
                         <UButton
                           :disabled="cartItem.qty <= 1"
                           size="lg"
                           variant="outline"
+                          aria-label="Diminuir quantidade"
                           @click="decrement(cartItem.key)"
                         >
                           −
@@ -274,6 +256,7 @@ const isAccountUser = computed(() => Boolean(user.value));
                           :disabled="isAtStockLimit(cartItem)"
                           size="lg"
                           variant="outline"
+                          aria-label="Aumentar quantidade"
                           @click="increment(cartItem.key)"
                         >
                           +
@@ -284,7 +267,7 @@ const isAccountUser = computed(() => Boolean(user.value));
                         v-if="isAtStockLimit(cartItem)"
                         class="mt-1 text-xs text-amber-600"
                       >
-                        {{ cartItem.stock === 1 ? 'Só resta 1 unidade' : `Só restam ${cartItem.stock} unidades` }}
+                        {{ cartItem.stock === 1 ? 'Última unidade disponível' : `Só restam ${cartItem.stock} unidades` }}
                       </p>
                     </div>
 
@@ -299,7 +282,7 @@ const isAccountUser = computed(() => Boolean(user.value));
                         size="xs"
                         color="neutral"
                         class="mt-0 shrink-0 px-0 text-muted hover:text-red-600 sm:mt-1"
-                        @click="remove(cartItem.key)"
+                        @click="removeWithUndo(cartItem)"
                       >
                         Remover
                       </UButton>
@@ -312,59 +295,40 @@ const isAccountUser = computed(() => Boolean(user.value));
 
           <aside>
             <div class="sticky top-24 space-y-4">
-              <!-- На мобиле резюме скрыто, но код корзины нужен — его диктуют в WhatsApp -->
-              <div
-                v-if="cartPublicCode"
-                class="rounded-xl border border-primary/15 bg-primary/5 px-3 py-2 text-xs text-muted lg:hidden"
-              >
-                <span>Código do carrinho:</span>
-
-                <span
-                  class="ml-1 font-bold text-highlighted"
-                  v-text="cartPublicCode"
-                />
-              </div>
-
               <UCard class="border-primary/20 bg-primary/5 hidden lg:block">
                 <h2 class="text-lg font-black text-highlighted">
-                  Resumo da escolha
+                  Resumo do pedido
                 </h2>
 
                 <div class="mt-4 space-y-3">
-                  <div class="flex justify-between text-sm text-muted">
-                    <span v-text="`${totalCount} item(ns)`" />
-
-                    <span v-text="totalCount" />
-                  </div>
-
-                  <div class="flex justify-between gap-4 border-t border-primary/10 pt-3">
-                    <span class="text-sm font-semibold text-highlighted">
-                      Total se levar tudo
-                    </span>
+                  <div class="flex justify-between text-sm">
+                    <span
+                      class="text-muted"
+                      v-text="`Artigos (${totalCount})`"
+                    />
 
                     <span
-                      class="text-lg font-black text-primary"
+                      class="text-highlighted"
                       v-text="formatPrice(totalKz)"
                     />
                   </div>
 
-                  <p class="text-xs leading-5 text-muted">
-                    {{ isAccountUser
-                      ? 'Confirma o pedido em segundos — já temos o teu número. Se preferires, envia pelo WhatsApp.'
-                      : 'Faz o pedido no site em menos de um minuto, sem pagamento online. Se preferires, envia a escolha pelo WhatsApp.' }}
-                  </p>
+                  <CheckoutCouponLine redirectTo="/cart" />
 
-                  <div
-                    v-if="cartPublicCode"
-                    class="rounded-xl border border-primary/15 bg-white/80 px-3 py-2 text-xs text-muted"
-                  >
-                    <span>Código do carrinho:</span>
+                  <div class="flex justify-between gap-4 border-t border-primary/10 pt-3">
+                    <span class="text-sm font-semibold text-highlighted">
+                      Total se levares tudo
+                    </span>
 
                     <span
-                      class="ml-1 font-bold text-highlighted"
-                      v-text="cartPublicCode"
+                      class="text-lg font-black text-primary"
+                      v-text="formatPrice(totalWithCoupon)"
                     />
                   </div>
+
+                  <p class="text-xs leading-5 text-muted">
+                    No próximo passo, escolhes entrega ou recolha.
+                  </p>
 
                   <UAlert
                     v-if="cartError"
@@ -395,53 +359,49 @@ const isAccountUser = computed(() => Boolean(user.value));
                   class="mt-5 w-full justify-center"
                   @click="openCheckout"
                 >
-                  {{ isAccountUser ? 'Confirmar pedido' : 'Fazer o pedido' }}
+                  Continuar para o pedido
                 </UButton>
+
+                <p class="mt-2 text-center text-xs text-muted">
+                  Sem pagamento agora
+                </p>
 
                 <UButton
                   :to="whatsappHref"
                   :disabled="!cartItems.length"
-                  size="lg"
-                  color="success"
-                  variant="soft"
+                  variant="link"
+                  color="neutral"
+                  size="sm"
                   icon="i-simple-icons-whatsapp"
                   class="mt-2 w-full justify-center"
                   target="_blank"
                   @click="trackCheckoutIntent"
                 >
-                  Enviar no WhatsApp
+                  Prefiro enviar pelo WhatsApp
                 </UButton>
               </UCard>
 
-              <UCard>
-                <h2 class="text-base font-bold text-highlighted">
-                  O que acontece depois?
-                </h2>
+              <UCard :ui="{ body: 'py-4 sm:py-4' }">
+                <button
+                  type="button"
+                  class="flex w-full items-center justify-between gap-3 text-left text-sm font-semibold text-highlighted"
+                  :aria-expanded="isHowItWorksOpen"
+                  @click="isHowItWorksOpen = !isHowItWorksOpen"
+                >
+                  Como funciona a prova?
 
-                <div class="mt-4 space-y-3">
-                  <div
-                    v-for="(nextStep, stepIndex) in nextSteps"
-                    :key="nextStep.title"
-                    class="flex gap-3"
-                  >
-                    <div
-                      class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white"
-                      v-text="stepIndex + 1"
-                    />
+                  <UIcon
+                    :name="isHowItWorksOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                    class="size-4 shrink-0 text-muted"
+                  />
+                </button>
 
-                    <div>
-                      <div
-                        class="text-sm font-semibold text-highlighted"
-                        v-text="nextStep.title"
-                      />
-
-                      <div
-                        class="text-sm leading-6 text-muted"
-                        v-text="nextStep.description"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <p
+                  v-if="isHowItWorksOpen"
+                  class="mt-2 text-sm leading-6 text-muted"
+                >
+                  Experimenta em casa ou no showroom e paga apenas pelas peças que decidires levar.
+                </p>
               </UCard>
             </div>
           </aside>
@@ -452,24 +412,24 @@ const isAccountUser = computed(() => Boolean(user.value));
             <div class="mb-2 flex items-center justify-between gap-3">
               <div>
                 <div class="text-xs text-muted">
-                  Total se levar tudo
+                  Total se levares tudo
                 </div>
 
                 <div
                   class="text-lg font-black text-primary"
-                  v-text="formatPrice(totalKz)"
+                  v-text="formatPrice(totalWithCoupon)"
                 />
               </div>
 
               <div
                 class="text-right text-xs leading-5 text-muted"
-                v-text="`${totalCount} item(ns)`"
+                v-text="`Artigos (${totalCount})`"
               />
             </div>
 
-            <p class="mb-2 text-xs leading-5 text-muted">
-              Pedido no site em menos de um minuto, sem pagamento online. WhatsApp também funciona.
-            </p>
+            <div class="mb-2">
+              <CheckoutCouponLine redirectTo="/cart" />
+            </div>
 
             <UButton
               :disabled="!cartItems.length"
@@ -479,21 +439,25 @@ const isAccountUser = computed(() => Boolean(user.value));
               class="w-full justify-center"
               @click="openCheckout"
             >
-              {{ isAccountUser ? 'Confirmar pedido' : 'Fazer o pedido' }}
+              Continuar para o pedido
             </UButton>
+
+            <p class="mt-1 text-center text-xs text-muted">
+              Sem pagamento agora
+            </p>
 
             <UButton
               :to="whatsappHref"
               :disabled="!cartItems.length"
-              size="md"
-              color="success"
-              variant="soft"
+              variant="link"
+              color="neutral"
+              size="sm"
               icon="i-simple-icons-whatsapp"
               class="mt-1 w-full justify-center"
               target="_blank"
               @click="trackCheckoutIntent"
             >
-              Enviar no WhatsApp
+              Prefiro enviar pelo WhatsApp
             </UButton>
           </div>
         </div>
