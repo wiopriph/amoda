@@ -18,7 +18,7 @@ faq:
   - q: "Quanto custa um vestido para batizado em Luanda?"
     a: "O preço depende da loja, do tecido e do modelo. Este guia propõe orçamentos de procura entre 10 000 e 35 000 kz para as cinco ideias, sem garantir que os modelos fotografados estejam à venda nesses valores. Confirme o preço e a disponibilidade no catálogo."
   - q: "Preciso pagar antes de experimentar?"
-    a: "Na Amoda não. Escolhe online, confirma no WhatsApp, experimenta na entrega ou no ponto combinado e paga só o que decidir levar. Confirme o custo da entrega para a sua localização."
+    a: "Na Amoda não. Escolhe online, confirma no WhatsApp, experimenta na entrega ou no showroom e paga só o que decidir levar. Confirme o custo da entrega para a sua localização."
 draft: true
 ---
 
@@ -114,7 +114,7 @@ Veja os vestidos e confirme com a equipa os modelos e tamanhos disponíveis para
 
 ## Experimente antes de pagar
 
-Comprar perto da cerimónia deixa pouca margem para resolver um tamanho errado. Na Amoda, escolhe online, confirma os detalhes no WhatsApp, experimenta na entrega ou num dos [pontos de levantamento](/pickup-points) e paga apenas o que decidir levar.
+Comprar perto da cerimónia deixa pouca margem para resolver um tamanho errado. Na Amoda, escolhe online, confirma os detalhes no WhatsApp, experimenta na entrega ou no [showroom](/pickup-points) e paga apenas o que decidir levar.
 
 O pagamento pode ser feito em dinheiro ou TPA. Confirme as opções para o seu pedido, a disponibilidade, o prazo e o custo da [entrega](/delivery). Faça a escolha com antecedência para ter tempo de experimentar com calma.
 

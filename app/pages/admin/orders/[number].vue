@@ -143,7 +143,7 @@ const whatsappMessageByStatus: Record<OrderStatus, (context: {
   CONFIRMED: ({ name, orderNumber, pickupName, total }) =>
     `Olá ${name}! A sua encomenda nº ${orderNumber} foi confirmada. Total: ${total}. Vamos preparar e avisar quando estiver pronta para levantamento em ${pickupName}. — Amoda`,
   DELIVERED: ({ name, orderNumber, pickupName, pickupAddress, pickupPhone }) =>
-    `Olá ${name}! A sua encomenda nº ${orderNumber} está pronta para levantamento em ${pickupName}. Endereço: ${pickupAddress}. Contacto do ponto: ${pickupPhone}. Obrigado! — Amoda`,
+    `Olá ${name}! A sua encomenda nº ${orderNumber} está pronta para levantamento em ${pickupName}. Endereço: ${pickupAddress}. Contacto do showroom: ${pickupPhone}. Obrigado! — Amoda`,
   CANCELLED: ({ name, orderNumber }) =>
     `Olá ${name}. A sua encomenda nº ${orderNumber} foi cancelada. Se quiser, podemos ajudar a criar uma nova encomenda. — Amoda`,
 };

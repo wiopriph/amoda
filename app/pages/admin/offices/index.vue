@@ -9,7 +9,7 @@ definePageMeta({
 });
 
 const title = 'Pontos';
-const description = 'Gerir pontos de levantamento';
+const description = 'Gerir showroom e pontos de levantamento';
 
 useHead({
   title,

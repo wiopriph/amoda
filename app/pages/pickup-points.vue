@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ name: 'pickup-points' });
 
-const title = 'Pontos de experimentação da Amoda em Luanda | Horários e mapas';
-const description = 'Encontre pontos de experimentação da Amoda em Luanda: veja endereço, horário, contacto e localização para provar antes de pagar.';
+const title = 'Showroom da Amoda em Luanda | Horário e mapa';
+const description = 'Visite o showroom da Amoda em Luanda: veja endereço, horário, contacto e localização para provar antes de pagar.';
 
 useHead({
   title,
@@ -159,7 +159,7 @@ const pickupPoints = computed(() => (officesResponse.value?.items ?? []).map(toP
 const firstPickupPoint = computed(() => pickupPoints.value[0] ?? null);
 
 const { makeWhatsappHref } = useWhatsappLink();
-const whatsappHref = makeWhatsappHref(() => 'Olá! Quero ajuda com os pontos de experimentação da Amoda.');
+const whatsappHref = makeWhatsappHref(() => 'Olá! Quero ajuda com o showroom da Amoda.');
 </script>
 
 <template>
@@ -178,7 +178,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero ajuda com os pontos de 
         </UBadge>
 
         <h1 class="text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-          Pontos de experimentação
+          Showroom
         </h1>
 
         <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
@@ -192,7 +192,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero ajuda com os pontos de 
         variant="soft"
         color="error"
         icon="i-lucide-alert-triangle"
-        title="Erro ao carregar os pontos."
+        title="Erro ao carregar o showroom."
       />
 
       <UAlert
@@ -200,7 +200,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero ajuda com os pontos de 
         class="mt-5 sm:mt-6"
         variant="soft"
         icon="i-lucide-map-pin"
-        title="Ainda não há pontos disponíveis."
+        title="Ainda não há showroom disponível."
       />
 
       <section
@@ -309,7 +309,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero ajuda com os pontos de 
           variant="soft"
           icon="i-simple-icons-whatsapp"
           title="Precisa de ajuda?"
-          description="Fale connosco no WhatsApp para escolher o melhor ponto ou tirar dúvidas antes de visitar."
+          description="Fale connosco no WhatsApp para tirar dúvidas antes de visitar o showroom."
         >
           <template #actions>
             <UButton

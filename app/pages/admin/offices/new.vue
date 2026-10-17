@@ -6,7 +6,7 @@ definePageMeta({
 });
 
 const title = 'Novo ponto';
-const description = 'Criar ponto de levantamento';
+const description = 'Criar showroom ou ponto de levantamento';
 
 useHead({
   title,

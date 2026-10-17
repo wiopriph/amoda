@@ -14,7 +14,7 @@ const footerLinks = [
     to: { name: 'blog' },
   },
   {
-    label: 'Pontos de levantamento',
+    label: 'Showroom',
     to: { name: 'pickup-points' },
   },
   {

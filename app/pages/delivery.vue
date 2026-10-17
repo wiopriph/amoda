@@ -26,8 +26,8 @@ const faqEntries = [
     answer: 'Não é obrigatório. Pode continuar só com o número de telefone. Entrando com o código recebido por SMS, acompanha o estado do pedido na sua conta e usa os cupões de desconto disponíveis.',
   },
   {
-    question: 'Onde vejo os pontos?',
-    answer: 'Na página de pontos de experimentação, com endereço, horário e contactos.',
+    question: 'Onde fica o showroom?',
+    answer: 'Na página do showroom encontra o endereço, o horário e os contactos.',
   },
 ];
 
@@ -197,7 +197,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
             icon="i-lucide-map-pin"
             class="justify-center"
           >
-            Ver pontos de experimentação
+            Ver o showroom
           </UButton>
 
           <UButton
@@ -305,7 +305,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
               </h2>
 
               <p class="mt-1 text-sm leading-6 text-muted">
-                Veja os pontos disponíveis, endereço, horário e contactos.
+                Veja o endereço, o horário e os contactos do showroom.
               </p>
             </div>
 
@@ -315,7 +315,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
               size="lg"
               class="w-full justify-center sm:w-auto"
             >
-              Ver pontos de experimentação
+              Ver o showroom
             </UButton>
           </div>
         </UCard>
@@ -383,7 +383,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
           variant="soft"
           icon="i-simple-icons-whatsapp"
           title="Quer falar com a Amoda?"
-          description="Envie uma mensagem no WhatsApp para tirar dúvidas sobre escolhas, tamanhos e pontos de experimentação."
+          description="Envie uma mensagem no WhatsApp para tirar dúvidas sobre escolhas, tamanhos e o showroom."
         >
           <template #actions>
             <UButton

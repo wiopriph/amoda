@@ -19,7 +19,7 @@ faq:
   - q: "Quanto devo gastar num vestido de convidada?"
     a: "Este guia organiza ideias em três faixas de orçamento: até 20 mil, de 20 a 35 mil e de 35 a 60 mil kz. São referências para planear a compra, não preços dos modelos fotografados. Confirme os preços actuais no catálogo e reserve uma parte para acessórios e entrega."
   - q: "Preciso pagar o vestido antes de experimentar?"
-    a: "Na Amoda não. Escolhe online, recebe em casa ou num ponto de levantamento, experimenta com calma e só paga se gostar. Consulte as condições e o custo da entrega para a sua localização."
+    a: "Na Amoda não. Escolhe online, recebe em casa ou no showroom, experimenta com calma e só paga se gostar. Consulte as condições e o custo da entrega para a sua localização."
   - q: "E se o casamento for anunciado em cima da hora?"
     a: "Fale connosco no WhatsApp com o dia do evento: confirmamos o que há no seu tamanho e combinamos a entrega ou o levantamento, conforme a disponibilidade."
 draft: true
@@ -107,7 +107,7 @@ Veja o que temos agora no seu tamanho:
 
 O vestido novo sem experimentar é o erro número um — o tamanho da etiqueta varia de marca para marca, e descobrir isso no dia da festa deixa pouca margem para resolver. Os outros: sapato novo estreado no próprio dia, tecido que amassa na primeira hora, e deixar a compra para a véspera.
 
-É por isso que na Amoda o processo é ao contrário: escolhe o vestido no site, recebe em casa ou levanta num [ponto de levantamento](/pickup-points), experimenta com calma e só paga o que ficar bem. Se não servir, não leva. Confirme as condições e o custo da entrega para a sua localização.
+É por isso que na Amoda o processo é ao contrário: escolhe o vestido no site, recebe em casa ou levanta no [showroom](/pickup-points), experimenta com calma e só paga o que ficar bem. Se não servir, não leva. Confirme as condições e o custo da entrega para a sua localização.
 
 Ficou com dúvidas sobre o tamanho ou quer ajuda para escolher entre dois modelos? Fale connosco:
 

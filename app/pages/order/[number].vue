@@ -58,7 +58,7 @@ const normalizePhoneNumber = (phone?: string | null) => phone?.replace(/[^\d+]/g
 
 
 const title = `Reserva #${orderNumber} | Amoda`;
-const description = `Detalhes da sua reserva #${orderNumber}: contacto, ponto de experimentação e itens reservados. Sem pagamento online.`;
+const description = `Detalhes da sua reserva #${orderNumber}: contacto, showroom e itens reservados. Sem pagamento online.`;
 
 useHead({
   title,
@@ -155,7 +155,7 @@ useHead({
           <div class="space-y-5">
             <UCard>
               <h2 class="text-lg font-black text-highlighted">
-                Ponto para experimentar
+                Onde experimentar
               </h2>
 
               <template v-if="pickupOffice">
@@ -204,7 +204,7 @@ useHead({
                 v-else
                 class="mt-3 text-sm italic text-muted"
               >
-                O ponto não foi selecionado.
+                O local ainda não foi definido - combinamos no WhatsApp.
               </p>
             </UCard>
 

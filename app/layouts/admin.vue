@@ -31,7 +31,7 @@ const MENU_LIST = [
     to: { name: 'admin-brands' },
   },
   {
-    label: 'Pontos de levantamento',
+    label: 'Showroom e pontos',
     icon: 'i-lucide-store',
     to: { name: 'admin-offices' },
   },

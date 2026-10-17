@@ -8,7 +8,7 @@ definePageMeta({
 const route = useRoute();
 const officeId = computed(() => Number(route.params.id));
 const title = computed(() => `Editar ponto #${officeId.value}`);
-const description = 'Atualizar ponto de levantamento';
+const description = 'Atualizar showroom ou ponto de levantamento';
 
 type OfficeResponse = {
   id: number

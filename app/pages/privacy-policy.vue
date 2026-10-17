@@ -5,7 +5,7 @@ import { COMPANY_ADDRESS } from '~/constants/contacts';
 definePageMeta({ name: 'privacy-policy' });
 
 const title = 'Política de Privacidade da Amoda | Dados de escolhas e WhatsApp';
-const description = 'Veja como a Amoda usa dados pessoais para escolhas online, confirmação pelo WhatsApp, pontos de experimentação e apoio ao cliente.';
+const description = 'Veja como a Amoda usa dados pessoais para escolhas online, confirmação pelo WhatsApp, showroom e apoio ao cliente.';
 
 useHead(() => ({
   title,

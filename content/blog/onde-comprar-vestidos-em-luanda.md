@@ -16,7 +16,7 @@ faq:
   - q: "Onde encontro vestidos baratos em Luanda?"
     a: "Compare mercados, lojas de bairro, promoções nos centros comerciais e lojas online. Para saber qual compensa, some o custo do transporte ou da entrega e confirme se pode experimentar e trocar."
   - q: "Posso experimentar o vestido antes de pagar?"
-    a: "Na Amoda sim: escolhe online, combina a entrega ou o ponto de levantamento, experimenta e paga apenas as peças que decidir levar. A equipa confirma a disponibilidade pelo WhatsApp."
+    a: "Na Amoda sim: escolhe online, combina a entrega ou o levantamento no showroom, experimenta e paga apenas as peças que decidir levar. A equipa confirma a disponibilidade pelo WhatsApp."
   - q: "Como pago se comprar online?"
     a: "Na Amoda não há pagamento adiantado no site. Paga depois de experimentar, em dinheiro ou TPA. Confirme com a equipa as opções disponíveis para o seu pedido e o custo da entrega."
 draft: false
@@ -55,7 +55,7 @@ Antes de ir, pergunte pelos modelos e tamanhos disponíveis. O stock, a possibil
 
 ## Comprar online com entrega em Luanda
 
-Na [Amoda](/), pode escolher os vestidos no site e enviar o pedido sem pagamento adiantado. A equipa confirma pelo WhatsApp os modelos, os tamanhos disponíveis e os detalhes da entrega ou da recolha num [ponto de levantamento](/pickup-points). Depois, experimenta e paga apenas as peças que decidir levar — em dinheiro ou TPA.
+Na [Amoda](/), pode escolher os vestidos no site e enviar o pedido sem pagamento adiantado. A equipa confirma pelo WhatsApp os modelos, os tamanhos disponíveis e os detalhes da entrega ou da recolha no [showroom](/pickup-points). Depois, experimenta e paga apenas as peças que decidir levar — em dinheiro ou TPA.
 
 Ao [criar a sua conta](/entrar), pode acompanhar os pedidos, guardar os seus favoritos e consultar os cupões disponíveis. Se tiver dúvidas sobre um modelo ou tamanho, fale connosco pelo WhatsApp.
 
