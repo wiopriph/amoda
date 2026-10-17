@@ -55,7 +55,7 @@ Para usar um cupão disponível, entre na sua conta com o número de telefone. D
 Falta indicar o contacto e escolher onde prefere experimentar:
 
 - **O contacto.** Entre com o código recebido por SMS para acompanhar o estado do pedido e usar os cupões disponíveis. Também pode continuar sem conta, indicando o seu número de telefone.
-- **Onde experimentar.** Escolha o showroom em Luanda, onde a prova é gratuita, ou a entrega ao domicílio. Se optar pelo showroom, enviamos o pedido para lá e combinamos consigo a prova.
+- **Onde experimentar.** Escolha o showroom em Luanda, onde a prova é gratuita, ou a [entrega ao domicílio](/delivery). Se optar pelo showroom, enviamos o pedido para lá e combinamos consigo a prova.
 
 Depois, toque em **Enviar pedido**. Não precisa de introduzir dados de cartão nem enviar um comprovativo de pagamento.
 

@@ -2,7 +2,7 @@
 definePageMeta({ name: 'delivery' });
 
 const title = 'Como comprar roupa online na Amoda | Experimente antes de pagar';
-const description = 'Veja como comprar moda feminina online em Luanda na Amoda: escolha sem pagar, confirme no WhatsApp, experimente e pague só pelo que gostar.';
+const description = 'Veja como comprar moda feminina online em Luanda na Amoda: envie o pedido no site sem pagar, experimente em casa ou no showroom e pague só pelo que gostar.';
 
 const faqEntries = [
   {
@@ -20,6 +20,10 @@ const faqEntries = [
   {
     question: 'Como sei quando posso experimentar?',
     answer: 'A nossa equipa entra em contacto pelo WhatsApp para confirmar os detalhes.',
+  },
+  {
+    question: 'Preciso de criar conta para fazer o pedido?',
+    answer: 'Não é obrigatório. Pode continuar só com o número de telefone. Entrando com o código recebido por SMS, acompanha o estado do pedido na sua conta e usa os cupões de desconto disponíveis.',
   },
   {
     question: 'Onde vejo os pontos?',
@@ -42,7 +46,7 @@ useHead(() => ({
   script: [
     {
       type: 'application/ld+json',
-      children: JSON.stringify({
+      innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
         mainEntity: faqEntries.map((faqEntry) => ({
@@ -81,23 +85,23 @@ const valueCards = [
 const purchaseSteps = [
   {
     title: 'Escolha as peças',
-    description: 'Veja os produtos no site e adicione ao pedido as peças que quer experimentar.',
+    description: 'Veja os produtos no site e adicione ao carrinho as peças que quer experimentar.',
   },
   {
-    title: 'Confirme a escolha',
-    description: 'Envie o pedido com seu nome e WhatsApp. Não precisa pagar online.',
+    title: 'Envie o pedido no site',
+    description: 'Leva menos de um minuto: indique o número de telefone e escolha onde experimentar — no showroom em Luanda (grátis) ou com entrega ao domicílio. Não precisa pagar online.',
   },
   {
     title: 'Nós confirmamos',
-    description: 'A nossa equipa fala consigo no WhatsApp para confirmar a escolha e orientar o próximo passo.',
+    description: 'A nossa equipa fala consigo no WhatsApp para confirmar a disponibilidade, o horário e, na entrega, o custo até à sua morada.',
   },
   {
     title: 'Experimente',
-    description: 'Receba ou vá ao ponto combinado para ver as peças ao vivo e experimentar.',
+    description: 'Em casa, com o estafeta à espera, ou no showroom, com calma em frente ao espelho.',
   },
   {
     title: 'Pague só o que levar',
-    description: 'Gostou? Leva e paga. Não gostou? Sem problema, não precisa levar.',
+    description: 'Gostou? Leva e paga em dinheiro, transferência ou TPA. Não gostou? Sem problema, não precisa levar.',
   },
 ];
 
@@ -123,6 +127,11 @@ const infoCards = [
     description: 'Veja tamanho, cor, tecido e estado da peça antes de finalizar a compra.',
   },
   {
+    icon: 'i-lucide-ticket',
+    title: 'Conta e cupões',
+    description: 'Entre com o seu número ao fazer o pedido para acompanhar o estado na sua conta e usar os cupões de desconto disponíveis.',
+  },
+  {
     icon: 'i-lucide-refresh-ccw',
     title: 'Trocas e devoluções',
     description: 'Depois de comprar, trocas e devoluções seguem a nossa política oficial.',
@@ -136,6 +145,7 @@ const accordionItems = faqEntries.map((faqEntry) => ({
 
 const pickupPointsTo = { name: 'pickup-points' } as const;
 const returnPolicyTo = { name: 'return-policy' } as const;
+const blogGuideTo = '/blog/como-funciona-experimenta-antes-de-pagar';
 
 const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre como experimentar antes de pagar.');
@@ -175,8 +185,8 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
         </h1>
 
         <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-          Na Amoda você escolhe as peças pelo site, recebe a confirmação no WhatsApp e experimenta antes de decidir.
-          Pague apenas pelo que gostar.
+          Na Amoda você escolhe as peças pelo site, envia o pedido em menos de um minuto e experimenta antes de decidir —
+          em casa ou no nosso showroom em Luanda. Pague apenas pelo que gostar.
         </p>
 
         <div class="mt-6 grid gap-3 sm:flex sm:flex-wrap">
@@ -272,6 +282,17 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
               </div>
             </div>
           </div>
+
+          <p class="mt-5 text-sm leading-6 text-muted">
+            Quer ver cada passo com imagens do site?
+
+            <NuxtLink
+              :to="blogGuideTo"
+              class="font-semibold text-primary underline-offset-2 hover:underline"
+            >
+              Veja o guia passo a passo no blog
+            </NuxtLink>.
+          </p>
         </UCard>
       </section>
 
