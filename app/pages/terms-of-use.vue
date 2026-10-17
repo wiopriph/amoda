@@ -37,11 +37,11 @@ const sections = [
   {
     icon: 'i-lucide-shopping-cart',
     title: 'Como funciona',
-    text: 'Você pode navegar, escolher produtos e enviar a sua escolha sem criar conta.',
+    text: 'Você pode navegar, escolher produtos e enviar a sua escolha sem criar conta. Se preferir, entre com o seu número de telefone para acompanhar os pedidos e usar cupões.',
     items: [
       'Adicionar produtos ao carrinho',
       'Fazer pedido sem pagar',
-      'Escolher ponto de levantamento',
+      'Escolher showroom ou entrega ao domicílio',
     ],
   },
   {
@@ -70,6 +70,7 @@ const sections = [
     items: [
       'Atualização de preços',
       'Cancelamento em caso de erro',
+      'Cupões têm condições e validade próprias',
     ],
   },
   {

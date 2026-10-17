@@ -50,19 +50,20 @@ const sections = [
     items: [
       'Nome',
       'Número de telefone / WhatsApp',
-      'Itens escolhidos e ponto de experimentação',
+      'Itens escolhidos e forma de receber (showroom ou entrega)',
+      'Se criar conta: o código de entrada enviado por SMS, o histórico de pedidos, os favoritos e os cupões',
     ],
   },
   {
     icon: 'i-lucide-message-circle',
     title: 'Como usamos os dados',
-    text: 'Usamos os seus dados para confirmar a escolha, preparar os itens, falar consigo no WhatsApp e prestar apoio ao cliente.',
+    text: 'Usamos os seus dados para confirmar a escolha, preparar os itens, falar consigo no WhatsApp, gerir a sua conta (se a criar) e prestar apoio ao cliente.',
     items: [],
   },
   {
     icon: 'i-lucide-share-2',
     title: 'Partilha de dados',
-    text: 'Não vendemos os seus dados. Só partilhamos informações quando for necessário para cumprir o pedido ou quando a lei exigir.',
+    text: 'Não vendemos os seus dados. Só partilhamos informações quando for necessário para cumprir o pedido ou quando a lei exigir. Para enviar o código de entrada usamos um fornecedor técnico de SMS.',
     items: [],
   },
   {

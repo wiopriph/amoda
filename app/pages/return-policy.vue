@@ -83,7 +83,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda com troca ou
         </h1>
 
         <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-          Na Amoda, você pode experimentar antes de pagar. Se não gostar no ponto, não leva e não paga.
+          Na Amoda, você pode experimentar antes de pagar. Se não gostar na prova — em casa ou no showroom — não leva e não paga.
         </p>
 
         <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-toned">
