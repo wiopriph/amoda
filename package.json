@@ -3,7 +3,7 @@
   "type": "module",
   "private": true,
   "engines": {
-    "node": ">=22.12.0 <23"
+    "node": ">=24.0.0 <25"
   },
   "scripts": {
     "build": "NODE_OPTIONS=--max-old-space-size=4096 nuxt build",
@@ -15,29 +15,29 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@nuxt/content": "3.16.0",
-    "@nuxt/image": "1.11.0",
-    "@nuxt/ui": "4.7.1",
-    "@nuxtjs/sitemap": "7.6.0",
-    "@nuxtjs/supabase": "1.6.2",
+    "@nuxt/content": "3.16.2",
+    "@nuxt/image": "2.1.0",
+    "@nuxt/ui": "4.12.0",
+    "@nuxtjs/sitemap": "9.1.0",
+    "@nuxtjs/supabase": "2.1.0",
     "better-sqlite3": "12.11.1",
     "heic-convert": "2.1.0",
-    "maska": "3.2.0",
-    "nuxt": "4.4.5",
-    "sharp": "0.34.5",
+    "maska": "3.2.2",
+    "nuxt": "4.6.2",
+    "sharp": "0.35.5",
     "typescript": "5.9.3",
-    "vue": "3.5.34",
-    "vue-router": "4.6.4"
+    "vue": "3.5.44",
+    "vue-router": "5.4.0"
   },
   "devDependencies": {
     "@iconify-json/heroicons": "1.2.3",
-    "@iconify-json/lucide": "1.2.103",
+    "@iconify-json/lucide": "1.2.146",
     "@iconify-json/simple-icons": "1.2.100",
     "@wiopriph/eslint-config": "github:wiopriph/nuxt4-eslint-config"
   },
   "optionalDependencies": {
-    "@oxc-parser/binding-darwin-arm64": "0.128.0",
-    "@oxc-parser/binding-darwin-x64": "0.128.0",
-    "@oxc-parser/binding-linux-x64-gnu": "0.128.0"
+    "@oxc-parser/binding-darwin-arm64": "0.153.0",
+    "@oxc-parser/binding-darwin-x64": "0.153.0",
+    "@oxc-parser/binding-linux-x64-gnu": "0.153.0"
   }
 }
