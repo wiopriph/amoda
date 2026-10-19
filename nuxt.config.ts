@@ -123,7 +123,7 @@ export default defineNuxtConfig({
       ziettRemitterId: process.env.ZIETT_REMITTER_ID,
     },
     supabase: {
-      serviceKey: process.env.NUXT_SUPABASE_SERVICE_KEY,
+      secretKey: process.env.NUXT_SUPABASE_SECRET_KEY,
     },
     public: {
       // Cloudflare Turnstile на форме «enviar código»; пусто — без капчи

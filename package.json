@@ -33,7 +33,7 @@
     "@iconify-json/heroicons": "1.2.3",
     "@iconify-json/lucide": "1.2.146",
     "@iconify-json/simple-icons": "1.2.100",
-    "@wiopriph/eslint-config": "github:wiopriph/nuxt4-eslint-config"
+    "@wiopriph/eslint-config": "github:wiopriph/nuxt4-eslint-config#80d7405d6462d6c2d46bb412610b878564f69060"
   },
   "optionalDependencies": {
     "@oxc-parser/binding-darwin-arm64": "0.153.0",
