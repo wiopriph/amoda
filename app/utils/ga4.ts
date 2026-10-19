@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import type { Ga4Item } from '~/composables/useAnalyticsEvent';
 
 

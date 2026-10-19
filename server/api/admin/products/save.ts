@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { normalizeManualProductBadges } from '~~/app/utils/productBadges';
 import { assertAdmin } from '~~/server/utils/assertAdmin';

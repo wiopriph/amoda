@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export async function sendTelegramMessage(chatId: number | string, text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
 

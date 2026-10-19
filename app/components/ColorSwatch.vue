@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { BASE_COLOR_MAP } from '#shared/constants/colors';
 
+
 const props = withDefaults(defineProps<{
   color?: string | null
   size?: number
   selected?: boolean
 }>(), {
+  color: null,
   size: 24,
   selected: false,
 });

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { serverSupabaseClient } from '#supabase/server';
 import { withAutoBadges } from '~~/app/utils/productBadges';
 import type { CatalogBreadcrumb as Breadcrumb, CatalogCategory as Category, CatalogListResponse } from '#shared/types/catalog';

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { BASE_COLORS } from '#shared/constants/colors';
 
+
 type VariantForm = {
   id?: number | string | null
   product_id?: number | string | null
@@ -67,9 +68,9 @@ const closeModal = () => emit('update:open', false);
           <USelectMenu
             v-model="variantForm.color"
             :items="colorItems"
-            value-key="value"
+            valueKey="value"
             placeholder="Selecionar cor..."
-            :search-input="{ placeholder: 'Pesquisar cor...' }"
+            :searchInput="{ placeholder: 'Pesquisar cor...' }"
             class="w-full"
           >
             <template #leading>

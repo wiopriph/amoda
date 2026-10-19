@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable camelcase */
 import type { ProductBadge } from '~/utils/productBadges';
 
 

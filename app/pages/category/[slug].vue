@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable camelcase */
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { makeGa4Item } from '~/utils/ga4';
 import { sanitizeHtml } from '~/utils/sanitizeHtml';

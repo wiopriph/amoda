@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable camelcase */
 definePageMeta({
   name: 'admin-categories',
   layout: 'admin',
