@@ -37,7 +37,7 @@ const sections = [
   {
     icon: 'i-lucide-shopping-cart',
     title: 'Como funciona',
-    text: 'Você pode navegar, escolher produtos e enviar a sua escolha sem criar conta. Se preferir, entre com o seu número de telefone para acompanhar os pedidos e usar cupões.',
+    text: 'Podes navegar, escolher produtos e enviar a tua escolha sem criar conta. Se preferires, entra com o teu número de telefone para acompanhar os pedidos e usar cupões.',
     items: [
       'Adicionar produtos ao carrinho',
       'Fazer pedido sem pagar',
@@ -46,11 +46,11 @@ const sections = [
   },
   {
     icon: 'i-lucide-user',
-    title: 'Seu compromisso',
-    text: 'Você deve fornecer dados corretos para que possamos processar o pedido.',
+    title: 'O teu compromisso',
+    text: 'Deves fornecer dados corretos para que possamos processar o pedido.',
     items: [
       'Nome e telefone válidos',
-      'Usar seus próprios dados',
+      'Usar os teus próprios dados',
       'Responder quando contactarmos',
     ],
   },
@@ -76,7 +76,7 @@ const sections = [
   {
     icon: 'i-lucide-shield',
     title: 'Uso da plataforma',
-    text: 'Use a Amoda de forma normal e legal.',
+    text: 'Usa a Amoda de forma normal e legal.',
     items: [
       'Não usar para fraude',
       'Não tentar hackear',
@@ -132,7 +132,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Tenho uma dúvida sobre os te
           </h2>
 
           <p class="mt-3 text-muted">
-            Você usa a Amoda para escolher roupas, selecionar sem pagar e experimentar antes de decidir. Nós usamos seus dados apenas para processar o pedido e falar com você.
+            Usas a Amoda para escolher roupas, selecionar sem pagar e experimentar antes de decidir. Nós usamos os teus dados apenas para processar o pedido e falar contigo.
           </p>
         </UCard>
       </section>
@@ -181,7 +181,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Tenho uma dúvida sobre os te
           variant="soft"
           icon="i-simple-icons-whatsapp"
           title="Dúvidas?"
-          description="Fale connosco no WhatsApp se algo não estiver claro."
+          description="Fala connosco no WhatsApp se algo não estiver claro."
         >
           <template #actions>
             <UButton

@@ -182,7 +182,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero ajuda com o showroom da
         </h1>
 
         <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-          Escolha um ponto, veja o horário e abra a localização no mapa.
+          Escolhe um ponto, vê o horário e abre a localização no mapa.
         </p>
       </section>
 
@@ -308,8 +308,8 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero ajuda com o showroom da
           color="success"
           variant="soft"
           icon="i-simple-icons-whatsapp"
-          title="Precisa de ajuda?"
-          description="Fale connosco no WhatsApp para tirar dúvidas antes de visitar o showroom."
+          title="Precisas de ajuda?"
+          description="Fala connosco no WhatsApp para tirar dúvidas antes de visitar o showroom."
         >
           <template #actions>
             <UButton

@@ -290,7 +290,7 @@ const mobileCtaLabel = computed(() => {
     return 'Escolher';
   }
 
-  return hasSelectableSizes.value ? 'Escolha o tamanho' : 'Esgotado';
+  return hasSelectableSizes.value ? 'Escolhe o tamanho' : 'Esgotado';
 });
 
 function onMobileCtaClick() {
@@ -445,7 +445,7 @@ const deliveryWhatsappHref = makeWhatsappHref(() => `Olá! Quero saber o custo e
 // Единственный пункт примерки — для блока «Entrega e levantamento»
 const mainOffice = computed(() => officesResponse.value?.items?.[0] || null);
 
-const shareText = computed(() => productName.value ? `Veja ${productName.value} na Amoda` : 'Veja este produto na Amoda');
+const shareText = computed(() => productName.value ? `Vê ${productName.value} na Amoda` : 'Vê este produto na Amoda');
 
 const encodedProductUrl = computed(() => encodeURIComponent(productUrl.value));
 const encodedShareText = computed(() => encodeURIComponent(shareText.value));
@@ -498,7 +498,7 @@ const title = computed(() => `${product.value?.title || ''} | Amoda`);
 const description = computed(() => {
   const price = unitPrice.value > 0 ? ` por ${formatPrice(unitPrice.value)}` : '';
 
-  return `${productName.value}${price} na Amoda • Entrega em Luanda • Experimente antes de pagar e leve só se gostar.`;
+  return `${productName.value}${price} na Amoda • Entrega em Luanda • Experimenta antes de pagar e leva só se gostares.`;
 });
 const seoImage = computed(() => galleryImages.value?.[0]?.url || fallbackImage);
 
@@ -1007,7 +1007,7 @@ useHead(() => ({
                   class="w-full justify-center"
                   @click="addProductToCart"
                 >
-                  {{ selectedSizeId ? "Escolher" : "Escolha um tamanho" }}
+                  {{ selectedSizeId ? "Escolher" : "Escolhe um tamanho" }}
                 </UButton>
               </div>
             </div>
@@ -1190,7 +1190,7 @@ useHead(() => ({
         class="mt-10"
       >
         <h2 class="text-2xl font-black tracking-tight text-highlighted">
-          Você também pode gostar
+          Também podes gostar
         </h2>
 
         <UBlogPosts

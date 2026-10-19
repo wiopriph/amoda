@@ -96,7 +96,7 @@ const { makeWhatsappHref } = useWhatsappLink();
 const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda para escolher peças na Amoda.');
 
 const title = 'Todos os Produtos | Roupa Feminina em Luanda — Amoda';
-const description = 'Veja todas as peças da Amoda em Luanda: vestidos, blusas, conjuntos e mais. Escolha online, experimente primeiro e pague só o que gostar.';
+const description = 'Vê todas as peças da Amoda em Luanda: vestidos, blusas, conjuntos e mais. Escolhe online, experimenta primeiro e paga só o que gostar.';
 
 // Пагинация self-canonical (как в категориях), фильтры отброшены
 const canonicalUrl = computed(() => {
@@ -136,7 +136,7 @@ useHead(() => ({
         </h1>
 
         <p class="mt-3 text-sm leading-6 text-muted sm:text-base">
-          Todas as peças disponíveis para experimentar. Escolha sem pagar agora e leve só o que gostar.
+          Todas as peças disponíveis para experimentar. Escolhe sem pagar agora e leva só o que gostares.
         </p>
 
         <CategoryPills

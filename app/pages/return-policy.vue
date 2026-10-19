@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ name: 'return-policy' });
 
-const title = 'Trocas e devoluções na Amoda | Experimente antes de pagar';
-const description = 'Conheça a política de trocas e devoluções da Amoda em Luanda. Experimente antes de pagar, leve só o que gostar e veja as regras após a compra.';
+const title = 'Trocas e devoluções na Amoda | Experimenta antes de pagar';
+const description = 'Conhece a política de trocas e devoluções da Amoda em Luanda. Experimenta antes de pagar, leva só o que gostares e vê as regras após a compra.';
 
 useHead(() => ({
   title,
@@ -21,11 +21,11 @@ useHead(() => ({
 const highlights = [
   {
     icon: 'i-lucide-shirt',
-    title: 'Experimente primeiro',
+    title: 'Experimenta primeiro',
   },
   {
     icon: 'i-lucide-wallet',
-    title: 'Pague só o que levar',
+    title: 'Paga só o que levar',
   },
   {
     icon: 'i-lucide-refresh-ccw',
@@ -37,7 +37,7 @@ const rules = [
   {
     icon: 'i-lucide-calendar-days',
     title: 'Prazo de 7 dias',
-    text: 'Depois de levar a peça, você pode pedir troca ou devolução em até 7 dias.',
+    text: 'Depois de levares a peça, podes pedir troca ou devolução em até 7 dias.',
   },
   {
     icon: 'i-lucide-tags',
@@ -57,7 +57,7 @@ const rules = [
   {
     icon: 'i-lucide-alert-circle',
     title: 'Produto errado ou com defeito',
-    text: 'Se receber algo errado ou com defeito, contacte-nos em até 24 horas após o levantamento e envie fotos.',
+    text: 'Se receberes algo errado ou com defeito, contacta-nos em até 24 horas após o levantamento e envia fotos.',
   },
 ];
 
@@ -83,7 +83,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda com troca ou
         </h1>
 
         <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-          Na Amoda, você pode experimentar antes de pagar. Se não gostar na prova — em casa ou no showroom — não leva e não paga.
+          Na Amoda, podes experimentar antes de pagar. Se não gostares na prova — em casa ou no showroom — não levas e não pagas.
         </p>
 
         <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-toned">
@@ -109,7 +109,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda com troca ou
           </h2>
 
           <p class="mt-3 text-sm leading-7 text-muted sm:text-base">
-            Antes de pagar, você pode ver, tocar e experimentar as peças. Se não servir, não ficar bem ou não gostar, basta recusar no local.
+            Antes de pagar, podes ver, tocar e experimentar as peças. Se não servir, não ficar bem ou não gostares, basta recusar no local.
           </p>
         </UCard>
       </section>
@@ -154,7 +154,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda com troca ou
           </h2>
 
           <p class="mt-3 text-sm leading-7 text-muted sm:text-base">
-            Entre em contacto e informe o número da escolha. A nossa equipa vai orientar os próximos passos.
+            Entra em contacto e informa o número da escolha. A nossa equipa vai orientar os próximos passos.
           </p>
         </UCard>
       </section>
@@ -164,8 +164,8 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda com troca ou
           color="success"
           variant="soft"
           icon="i-simple-icons-whatsapp"
-          title="Precisa de ajuda?"
-          description="Fale connosco no WhatsApp. Vamos orientar sobre troca, devolução ou qualquer dúvida."
+          title="Precisas de ajuda?"
+          description="Fala connosco no WhatsApp. Vamos orientar sobre troca, devolução ou qualquer dúvida."
         >
           <template #actions>
             <UButton

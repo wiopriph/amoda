@@ -5,7 +5,7 @@ import { COMPANY_ADDRESS } from '~/constants/contacts';
 definePageMeta({ name: 'privacy-policy' });
 
 const title = 'Política de Privacidade da Amoda | Dados de escolhas e WhatsApp';
-const description = 'Veja como a Amoda usa dados pessoais para escolhas online, confirmação pelo WhatsApp, showroom e apoio ao cliente.';
+const description = 'Vê como a Amoda usa dados pessoais para escolhas online, confirmação pelo WhatsApp, showroom e apoio ao cliente.';
 
 useHead(() => ({
   title,
@@ -46,24 +46,24 @@ const sections = [
   {
     icon: 'i-lucide-database',
     title: 'Dados que recolhemos',
-    text: 'Não pedimos dados desnecessários. No checkout, recolhemos apenas o necessário para processar a sua escolha.',
+    text: 'Não pedimos dados desnecessários. No checkout, recolhemos apenas o necessário para processar a tua escolha.',
     items: [
       'Nome',
       'Número de telefone / WhatsApp',
       'Itens escolhidos e forma de receber (showroom ou entrega)',
-      'Se criar conta: o código de entrada enviado por SMS, o histórico de pedidos, os favoritos e os cupões',
+      'Se criares conta: o código de entrada enviado por SMS, o histórico de pedidos, os favoritos e os cupões',
     ],
   },
   {
     icon: 'i-lucide-message-circle',
     title: 'Como usamos os dados',
-    text: 'Usamos os seus dados para confirmar a escolha, preparar os itens, falar consigo no WhatsApp, gerir a sua conta (se a criar) e prestar apoio ao cliente.',
+    text: 'Usamos os teus dados para confirmar a escolha, preparar as peças, falar contigo no WhatsApp, gerir a tua conta (se a criares) e prestar apoio ao cliente.',
     items: [],
   },
   {
     icon: 'i-lucide-share-2',
     title: 'Partilha de dados',
-    text: 'Não vendemos os seus dados. Só partilhamos informações quando for necessário para cumprir o pedido ou quando a lei exigir. Para enviar o código de entrada usamos um fornecedor técnico de SMS.',
+    text: 'Não vendemos os teus dados. Só partilhamos informações quando for necessário para cumprir o pedido ou quando a lei exigir. Para enviar o código de entrada usamos um fornecedor técnico de SMS.',
     items: [],
   },
   {
@@ -75,19 +75,19 @@ const sections = [
   {
     icon: 'i-lucide-lock',
     title: 'Segurança',
-    text: 'Aplicamos medidas razoáveis para proteger os seus dados contra acesso não autorizado, perda ou alteração.',
+    text: 'Aplicamos medidas razoáveis para proteger os teus dados contra acesso não autorizado, perda ou alteração.',
     items: [],
   },
   {
     icon: 'i-lucide-user-check',
-    title: 'Os seus direitos',
-    text: 'Você pode pedir informação, correção ou eliminação dos seus dados, quando aplicável. Para isso, fale connosco no WhatsApp.',
+    title: 'Os teus direitos',
+    text: 'Podes pedir informação, correção ou eliminação dos teus dados, quando aplicável. Para isso, fala connosco no WhatsApp.',
     items: [],
   },
   {
     icon: 'i-lucide-scan-face',
     title: 'Menores',
-    text: 'A Amoda não é destinada a menores. Se acredita que recebemos dados de um menor, contacte-nos para resolvermos.',
+    text: 'A Amoda não é destinada a menores. Se acreditas que recebemos dados de um menor, contacta-nos para resolvermos.',
     items: [],
   },
   {
@@ -126,7 +126,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda com privacid
         </h1>
 
         <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-          A Amoda usa apenas os dados necessários para receber a sua escolha, falar consigo no WhatsApp e preparar os seus itens.
+          A Amoda usa apenas os dados necessários para receber a tua escolha, falar contigo no WhatsApp e preparar as tuas peças.
         </p>
 
         <p class="mt-3 text-sm text-muted">
@@ -156,7 +156,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda com privacid
           </h2>
 
           <p class="mt-3 text-sm leading-7 text-muted sm:text-base">
-            Você não precisa criar conta para usar a Amoda. Quando confirma uma escolha, pedimos apenas o seu nome e WhatsApp para confirmar o pedido e combinar a experimentação.
+            Não precisas de criar conta para usar a Amoda. Quando confirmas uma escolha, pedimos apenas o teu nome e WhatsApp para confirmar o pedido e combinar a experimentação.
           </p>
         </UCard>
       </section>
@@ -210,8 +210,8 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Preciso de ajuda com privacid
           color="success"
           variant="soft"
           icon="i-simple-icons-whatsapp"
-          title="Precisa de ajuda com privacidade?"
-          description="Fale connosco no WhatsApp se quiser perguntar algo sobre os seus dados pessoais."
+          title="Precisas de ajuda com privacidade?"
+          description="Fala connosco no WhatsApp se quiseres perguntar algo sobre os teus dados pessoais."
         >
           <template #actions>
             <UButton

@@ -7,7 +7,7 @@ import type { CatalogProductCard } from '#shared/types/catalog';
 definePageMeta({ name: 'index' });
 
 const title = 'Amoda - Moda feminina em Luanda ao alcance de todos';
-const description = 'Escolha moda feminina online em Luanda, selecione sem pagar, experimente com calma e leve apenas as peças que combinam consigo.';
+const description = 'Escolhe moda feminina online em Luanda, seleciona sem pagar, experimenta com calma e leva só as peças que combinam contigo.';
 
 useHead({
   title,

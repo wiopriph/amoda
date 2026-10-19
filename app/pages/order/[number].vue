@@ -41,9 +41,9 @@ const pickupMapUrl = computed(() => {
 const guestContact = computed(() => order.value?.guestContact || null);
 
 const nextSteps = [
-  'Preparamos os seus itens.',
+  'Preparamos as tuas peças.',
   'Entramos em contacto no WhatsApp.',
-  'Você experimenta e decide com calma.',
+  'Experimentas e decides com calma.',
 ];
 
 const { user } = useAuth();
@@ -277,7 +277,7 @@ useHead({
                 </div>
 
                 <p class="mt-2 text-xs leading-5 text-muted">
-                  Você ainda não pagou nada. O valor é apenas uma referência. Pague apenas depois de experimentar e só pelo que decidir levar.
+                  Ainda não pagaste nada. O valor é só uma referência. Pagas depois de experimentar e só pelo que decidires levar.
                 </p>
               </div>
             </UCard>

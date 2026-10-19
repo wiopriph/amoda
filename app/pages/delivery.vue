@@ -1,21 +1,21 @@
 <script setup lang="ts">
 definePageMeta({ name: 'delivery' });
 
-const title = 'Como comprar roupa online na Amoda | Experimente antes de pagar';
-const description = 'Veja como comprar moda feminina online em Luanda na Amoda: envie o pedido no site sem pagar, experimente em casa ou no showroom e pague só pelo que gostar.';
+const title = 'Como comprar roupa online na Amoda | Experimenta antes de pagar';
+const description = 'Vê como comprar moda feminina online em Luanda na Amoda: envias o pedido no site sem pagar, experimentas em casa ou no showroom e pagas só pelo que gostar.';
 
 const faqEntries = [
   {
     question: 'Preciso pagar antes?',
-    answer: 'Não. Você escolhe online e paga apenas se gostar da peça depois de experimentar.',
+    answer: 'Não. Escolhes online e pagas apenas se gostares da peça depois de experimentar.',
   },
   {
     question: 'Posso escolher várias peças?',
-    answer: 'Sim. Você pode escolher várias peças e levar apenas as que gostar.',
+    answer: 'Sim. Podes escolher várias peças e levar apenas as que gostares.',
   },
   {
     question: 'E se nada servir?',
-    answer: 'Tudo bem. Se nada servir ou agradar, você não precisa comprar.',
+    answer: 'Tudo bem. Se nada servir ou agradar, não precisas de comprar.',
   },
   {
     question: 'Como sei quando posso experimentar?',
@@ -23,11 +23,11 @@ const faqEntries = [
   },
   {
     question: 'Preciso de criar conta para fazer o pedido?',
-    answer: 'Não é obrigatório. Pode continuar só com o número de telefone. Entrando com o código recebido por SMS, acompanha o estado do pedido na sua conta e usa os cupões de desconto disponíveis.',
+    answer: 'Não é obrigatório. Podes continuar só com o número de telefone. Entrando com o código recebido por SMS, acompanhas o estado do pedido na tua conta e usas os cupões de desconto disponíveis.',
   },
   {
     question: 'Onde fica o showroom?',
-    answer: 'Na página do showroom encontra o endereço, o horário e os contactos.',
+    answer: 'Na página do showroom encontras o endereço, o horário e os contactos.',
   },
 ];
 
@@ -62,46 +62,46 @@ useHead(() => ({
 const valueCards = [
   {
     icon: 'i-lucide-shirt',
-    title: 'Você prova primeiro',
-    description: 'Veja o tamanho, o tecido e como a peça fica em você antes de decidir.',
+    title: 'Provas primeiro',
+    description: 'Vês o tamanho, o tecido e como a peça te fica antes de decidir.',
   },
   {
     icon: 'i-lucide-wallet',
     title: 'Paga só o que gostar',
-    description: 'Se uma peça não servir ou não agradar, você simplesmente não leva.',
+    description: 'Se uma peça não servir ou não agradar, simplesmente não a levas.',
   },
   {
     icon: 'i-lucide-shield-check',
     title: 'Sem risco desnecessário',
-    description: 'Nada de pagar online por uma peça que você ainda não viu ao vivo.',
+    description: 'Nada de pagar online por uma peça que ainda não viste ao vivo.',
   },
   {
     icon: 'i-simple-icons-whatsapp',
     title: 'Ajuda no WhatsApp',
-    description: 'Se tiver dúvidas sobre tamanho, ponto ou escolha, fale connosco pelo WhatsApp.',
+    description: 'Se tiveres dúvidas sobre tamanho, ponto ou escolha, fala connosco pelo WhatsApp.',
   },
 ];
 
 const purchaseSteps = [
   {
-    title: 'Escolha as peças',
-    description: 'Veja os produtos no site e adicione ao carrinho as peças que quer experimentar.',
+    title: 'Escolhe as peças',
+    description: 'Vê os produtos no site e adiciona ao carrinho as peças que queres experimentar.',
   },
   {
-    title: 'Envie o pedido no site',
-    description: 'Leva menos de um minuto: indique o número de telefone e escolha onde experimentar — no showroom em Luanda (grátis) ou com entrega ao domicílio. Não precisa pagar online.',
+    title: 'Envia o pedido no site',
+    description: 'Leva menos de um minuto: indicas o número de telefone e escolhes onde experimentar — no showroom em Luanda (grátis) ou com entrega ao domicílio. Não precisas de pagar online.',
   },
   {
     title: 'Nós confirmamos',
-    description: 'A nossa equipa fala consigo no WhatsApp para confirmar a disponibilidade, o horário e, na entrega, o custo até à sua morada.',
+    description: 'A nossa equipa fala contigo no WhatsApp para confirmar a disponibilidade, o horário e, na entrega, o custo até à tua morada.',
   },
   {
-    title: 'Experimente',
+    title: 'Experimenta',
     description: 'Em casa, com o estafeta à espera, ou no showroom, com calma em frente ao espelho.',
   },
   {
-    title: 'Pague só o que levar',
-    description: 'Gostou? Leva e paga em dinheiro, transferência ou TPA. Não gostou? Sem problema, não precisa levar.',
+    title: 'Paga só o que levar',
+    description: 'Gostaste? Levas e pagas em dinheiro, transferência ou TPA. Não gostaste? Sem problema, não precisas de levar.',
   },
 ];
 
@@ -109,7 +109,7 @@ const infoCards = [
   {
     icon: 'i-lucide-shopping-bag',
     title: 'A escolha não é compra obrigatória',
-    description: 'Selecionar significa que você quer experimentar. Você só paga se decidir levar.',
+    description: 'Selecionar significa que queres experimentar. Só pagas se decidires levar.',
   },
   {
     icon: 'i-simple-icons-whatsapp',
@@ -119,17 +119,17 @@ const infoCards = [
   {
     icon: 'i-lucide-clock',
     title: 'Produtos ficam separados por tempo limitado',
-    description: 'Informamos no WhatsApp até quando a sua escolha estará disponível.',
+    description: 'Informamos no WhatsApp até quando a tua escolha estará disponível.',
   },
   {
     icon: 'i-lucide-search-check',
-    title: 'Confira tudo antes de pagar',
-    description: 'Veja tamanho, cor, tecido e estado da peça antes de finalizar a compra.',
+    title: 'Confere tudo antes de pagar',
+    description: 'Vê tamanho, cor, tecido e estado da peça antes de finalizar a compra.',
   },
   {
     icon: 'i-lucide-ticket',
     title: 'Conta e cupões',
-    description: 'Entre com o seu número ao fazer o pedido para acompanhar o estado na sua conta e usar os cupões de desconto disponíveis.',
+    description: 'Entra com o teu número ao fazer o pedido para acompanhar o estado na tua conta e usar os cupões de desconto disponíveis.',
   },
   {
     icon: 'i-lucide-refresh-ccw',
@@ -169,7 +169,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
             color="primary"
             variant="soft"
           >
-            Experimente antes
+            Experimenta antes
           </UBadge>
 
           <UBadge
@@ -181,12 +181,12 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
         </div>
 
         <h1 class="mt-5 text-3xl font-black tracking-tight text-highlighted sm:text-5xl">
-          Escolha online. Experimente antes de pagar.
+          Escolhe online. Experimenta antes de pagar.
         </h1>
 
         <p class="mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-          Na Amoda você escolhe as peças pelo site, envia o pedido em menos de um minuto e experimenta antes de decidir —
-          em casa ou no nosso showroom em Luanda. Pague apenas pelo que gostar.
+          Na Amoda escolhes as peças pelo site, envias o pedido em menos de um minuto e experimentas antes de decidir —
+          em casa ou no nosso showroom em Luanda. Pagas apenas pelo que gostares.
         </p>
 
         <div class="mt-6 grid gap-3 sm:flex sm:flex-wrap">
@@ -221,7 +221,7 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
             </h2>
 
             <p class="mt-2 text-sm leading-6 text-muted sm:text-base">
-              Sabemos que roupa pode ficar diferente no corpo. Por isso você não precisa pagar antes de experimentar.
+              Sabemos que roupa pode ficar diferente no corpo. Por isso não precisas de pagar antes de experimentar.
             </p>
           </div>
 
@@ -284,13 +284,13 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
           </div>
 
           <p class="mt-5 text-sm leading-6 text-muted">
-            Quer ver cada passo com imagens do site?
+            Queres ver cada passo com imagens do site?
 
             <NuxtLink
               :to="blogGuideTo"
               class="font-semibold text-primary underline-offset-2 hover:underline"
             >
-              Veja o guia passo a passo no blog
+              Vê o guia passo a passo no blog
             </NuxtLink>.
           </p>
         </UCard>
@@ -301,11 +301,11 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
           <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 class="text-lg font-bold text-highlighted">
-                Quer ver onde experimentar?
+                Queres ver onde experimentar?
               </h2>
 
               <p class="mt-1 text-sm leading-6 text-muted">
-                Veja o endereço, o horário e os contactos do showroom.
+                Vê o endereço, o horário e os contactos do showroom.
               </p>
             </div>
 
@@ -382,8 +382,8 @@ const whatsappHref = makeWhatsappHref(() => 'Olá! Quero falar com a Amoda sobre
           color="success"
           variant="soft"
           icon="i-simple-icons-whatsapp"
-          title="Quer falar com a Amoda?"
-          description="Envie uma mensagem no WhatsApp para tirar dúvidas sobre escolhas, tamanhos e o showroom."
+          title="Queres falar com a Amoda?"
+          description="Envia uma mensagem no WhatsApp para tirar dúvidas sobre escolhas, tamanhos e o showroom."
         >
           <template #actions>
             <UButton

@@ -52,7 +52,7 @@ const getPaginationTo = (pageNumber: number) => ({
 });
 
 const title = 'Blog de moda feminina em Luanda | Amoda';
-const description = 'Guias de moda da Amoda: o que vestir em Luanda, como combinar peças e escolher o look certo. Escolha online, experimente primeiro e pague só o que gostar.';
+const description = 'Guias de moda da Amoda: o que vestir em Luanda, como combinar peças e escolher o look certo. Escolhe online, experimenta primeiro e paga só o que gostar.';
 
 const canonicalUrl = computed(() => {
   const path = router.resolve({

@@ -11,7 +11,7 @@ import {
 definePageMeta({ name: 'contacts' });
 
 const title = 'Contactos da Amoda | WhatsApp, escolhas e pontos em Luanda';
-const description = 'Fale com a Amoda pelo WhatsApp para escolhas, tamanhos e o showroom em Luanda. Veja também TikTok, Facebook, email e endereço.';
+const description = 'Fala com a Amoda pelo WhatsApp para escolhas, tamanhos e o showroom em Luanda. Vê também TikTok, Facebook, email e endereço.';
 
 useHead(() => ({
   title,
@@ -50,7 +50,7 @@ const waLink = makeWhatsappHref(() => 'Olá! Preciso de ajuda com uma escolha na
         </h1>
 
         <p class="mt-4 max-w-2xl text-base text-muted sm:text-lg">
-          Fale connosco para confirmar escolhas, tirar dúvidas ou combinar a visita ao showroom.
+          Fala connosco para confirmar escolhas, tirar dúvidas ou combinar a visita ao showroom.
         </p>
 
         <div class="mt-6 grid gap-3 sm:flex sm:flex-wrap">
@@ -110,7 +110,7 @@ const waLink = makeWhatsappHref(() => 'Olá! Preciso de ajuda com uma escolha na
             </div>
 
             <p class="text-sm text-muted">
-              Veja looks, novidades e inspirações da Amoda.
+              Vê looks, novidades e inspirações da Amoda.
             </p>
 
             <UButton

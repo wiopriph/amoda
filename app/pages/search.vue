@@ -8,7 +8,7 @@ import { pricePresetToQuery } from '#shared/constants/priceFilters';
 definePageMeta({ name: 'search' });
 
 const title = 'Pesquisar produtos | Amoda';
-const description = 'Pesquise roupa feminina na Amoda em Luanda. Escolha online, experimente primeiro e pague só o que gostar.';
+const description = 'Pesquisa roupa feminina na Amoda em Luanda. Escolhe online, experimenta primeiro e paga só o que gostar.';
 
 useHead({
   title,
@@ -190,11 +190,11 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Estou à procura de: ${submit
             </div>
 
             <h2 class="mt-4 text-xl font-bold text-highlighted">
-              O que procura hoje?
+              O que procuras hoje?
             </h2>
 
             <p class="mt-2 max-w-sm text-sm leading-6 text-muted">
-              Digite o nome da peça — vestido, biquíni, conjunto — e veja o que temos para si.
+              Escreve o nome da peça — vestido, biquíni, conjunto — e vê o que temos para ti.
             </p>
           </div>
         </UCard>
