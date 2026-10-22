@@ -93,7 +93,8 @@ const whatsappHref = makeWhatsappHref(() => `Olá! Li o artigo «${article.value
 const title = computed(() => `${article.value!.title} | Amoda`);
 const description = computed(() => article.value!.description || '');
 const canonicalUrl = computed(() => new URL(articlePath.value, 'https://amoda.ao').href);
-const ogImage = new URL(BLOG_OG_IMAGE, 'https://amoda.ao').href;
+// Обложка статьи в превью шаринга; общая заставка — только если обложки нет
+const ogImage = computed(() => new URL(article.value?.cover || BLOG_OG_IMAGE, 'https://amoda.ao').href);
 
 const articleSchema = computed(() => ({
   '@context': 'https://schema.org',
@@ -101,7 +102,7 @@ const articleSchema = computed(() => ({
   headline: article.value!.title,
   description: description.value,
   mainEntityOfPage: canonicalUrl.value,
-  image: ogImage,
+  image: ogImage.value,
   datePublished: new Date(article.value!.publishedAt).toISOString(),
   dateModified: new Date(article.value!.updatedAt).toISOString(),
   author: {
@@ -147,13 +148,13 @@ useHead(() => ({
     { property: 'og:url', content: canonicalUrl.value },
     { property: 'og:title', content: title.value },
     { property: 'og:description', content: description.value },
-    { property: 'og:image', content: ogImage },
+    { property: 'og:image', content: ogImage.value },
     { property: 'article:published_time', content: new Date(article.value!.publishedAt).toISOString() },
     { property: 'article:modified_time', content: new Date(article.value!.updatedAt).toISOString() },
     { property: 'article:author', content: BLOG_AUTHOR.name },
     { name: 'twitter:title', content: title.value },
     { name: 'twitter:description', content: description.value },
-    { name: 'twitter:image', content: ogImage },
+    { name: 'twitter:image', content: ogImage.value },
   ],
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
