@@ -3,8 +3,8 @@ title: "O que vestir num casamento em Luanda: guia para convidadas"
 description: "Guia para convidadas em Luanda: regras, comprimento certo e 6 ideias de look por orçamento. Descubra a selecção Amoda e experimente antes de pagar."
 cluster: "B"
 targetQuery: "o que vestir casamento convidada"
-publishedAt: 2026-09-17
-updatedAt: 2026-09-27
+publishedAt: 2026-10-22
+updatedAt: 2026-10-22
 cover: "/blog-assets/o-que-vestir-casamento-luanda-convidada/cover.webp"
 author: manuel
 categories:
@@ -22,7 +22,7 @@ faq:
     a: "Na Amoda não. Escolhe online, recebe em casa ou no showroom, experimenta com calma e só paga se gostar. Consulte as condições e o custo da entrega para a sua localização."
   - q: "E se o casamento for anunciado em cima da hora?"
     a: "Fale connosco no WhatsApp com o dia do evento: confirmamos o que há no seu tamanho e combinamos a entrega ou o levantamento, conforme a disponibilidade."
-draft: true
+draft: false
 ---
 
 Recebeu o convite e já começou aquela pergunta na cabeça: o que vestir? A resposta curta: um vestido que respeite duas regras — evitar o branco, salvo indicação dos noivos, e não competir com a noiva — no comprimento certo para o tipo de cerimónia. O resto é escolher o look que combina consigo e com o seu orçamento.
