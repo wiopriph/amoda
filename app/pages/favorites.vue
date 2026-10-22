@@ -52,40 +52,24 @@ const favoriteCards = computed(() => items.value.map(item => ({
       <p class="mt-2 text-sm leading-6 text-muted sm:text-base">
         Guarda o que gostares e volta quando quiseres — sem compromisso.
       </p>
-    </section>
 
-    <!-- Гостевое избранное живёт в localStorage и теряется при смене аппарата -->
-    <div
-      v-if="!user && !isEmpty"
-      class="rounded-2xl border border-primary/15 bg-primary/5 p-4"
-    >
-      <div class="flex items-start gap-3">
-        <UIcon
-          name="i-heroicons-heart"
-          class="mt-0.5 size-5 shrink-0 text-primary"
-        />
-
-        <div class="min-w-0 text-sm leading-6">
-          <div class="font-semibold text-highlighted">
-            Guardados só neste aparelho
-          </div>
-
-          <div class="text-muted">
-            Entra com o teu número para não perderes os favoritos se trocares de telefone.
-          </div>
-        </div>
-      </div>
-
-      <UButton
-        :to="{ name: 'entrar', query: { redirected_from: '/favorites' } }"
-        color="primary"
-        variant="soft"
-        size="sm"
-        class="mt-3 w-full justify-center sm:w-auto"
+      <!-- Гостевое избранное живёт в localStorage и теряется при смене аппарата -->
+      <p
+        v-if="!user && !isEmpty"
+        class="mt-3 text-sm leading-6 text-muted"
       >
-        Entrar com SMS
-      </UButton>
-    </div>
+        Guardados só neste aparelho.
+
+        <NuxtLink
+          :to="{ name: 'entrar', query: { redirected_from: '/favorites' } }"
+          class="font-semibold text-primary underline-offset-2 hover:underline"
+        >
+          Entra com o teu número
+        </NuxtLink>
+
+        para não os perderes se trocares de telefone.
+      </p>
+    </section>
 
     <UEmpty
       v-if="isEmpty"
