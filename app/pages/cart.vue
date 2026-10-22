@@ -315,7 +315,10 @@ watchCartCoupon();
                     />
                   </div>
 
-                  <CheckoutCouponLine redirectTo="/cart" />
+                  <CheckoutCouponLine
+                    redirectTo="/cart"
+                    :total="totalKz"
+                  />
 
                   <div class="flex justify-between gap-4 border-t border-primary/10 pt-3">
                     <span class="text-sm font-semibold text-highlighted">
@@ -430,7 +433,10 @@ watchCartCoupon();
             </div>
 
             <div class="mb-2">
-              <CheckoutCouponLine redirectTo="/cart" />
+              <CheckoutCouponLine
+                redirectTo="/cart"
+                :total="totalKz"
+              />
             </div>
 
             <UButton

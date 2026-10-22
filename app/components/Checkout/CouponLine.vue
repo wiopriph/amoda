@@ -6,9 +6,12 @@ import { couponLabel, type CouponSummary } from '#shared/constants/coupons';
 const props = withDefaults(defineProps<{
   redirectTo?: string
   allowCode?: boolean
+  // Сумма корзины: с ней стимул гостю показывает экономию в kz, а не абстрактный процент
+  total?: number
 }>(), {
   redirectTo: '/checkout',
   allowCode: false,
+  total: 0,
 });
 
 const { user } = useAuth();
@@ -33,9 +36,27 @@ const apply = async () => {
   }
 };
 
-const welcomeText = computed(() => (welcome.value ?
-  `Tens ${couponLabel(welcome.value)} de desconto no primeiro pedido.` :
-  'Tens um cupão de boas-vindas à tua espera.'));
+const welcomeSavings = computed(() => {
+  if (!welcome.value || !props.total) {
+    return 0;
+  }
+
+  return welcome.value.discountType === 'percent' ?
+    Math.floor(props.total * welcome.value.value / 100) :
+    Math.min(welcome.value.value, props.total);
+});
+
+const welcomeText = computed(() => {
+  if (!welcome.value) {
+    return 'Tens um cupão de boas-vindas à tua espera.';
+  }
+
+  if (welcomeSavings.value > 0) {
+    return `Tens ${couponLabel(welcome.value)} no primeiro pedido — poupas ${formatPrice(welcomeSavings.value)}.`;
+  }
+
+  return `Tens ${couponLabel(welcome.value)} de desconto no primeiro pedido.`;
+});
 </script>
 
 <template>

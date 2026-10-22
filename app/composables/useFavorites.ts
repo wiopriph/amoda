@@ -65,6 +65,23 @@ const toItem = (product: FavoriteProduct, addedAt: number): FavoriteItem => ({
 
 const fromServer = (row: ServerFavorite) => toItem(row, new Date(row.addedAt).getTime() || Date.now());
 
+const LOGIN_HINT_KEY = 'amoda:favorites-login-hint';
+
+// Один раз за всю жизнь гостя: избранное в localStorage теряется при смене аппарата
+const shouldShowLoginHint = () => {
+  try {
+    if (window.localStorage.getItem(LOGIN_HINT_KEY)) {
+      return false;
+    }
+
+    window.localStorage.setItem(LOGIN_HINT_KEY, '1');
+
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Гость: localStorage. Вошедшая клиентка: сервер (таблица favorites), локальное сливается при входе.
 export function useFavorites() {
   const itemsState = useState<FavoriteItem[]>('favorites:items', () => []);
@@ -170,6 +187,15 @@ export function useFavorites() {
     }
 
     if (!isServerMode.value) {
+      if (import.meta.client && shouldShowLoginHint()) {
+        toast.add({
+          title: 'Guardado nos favoritos',
+          description: 'Entra com o teu número para não os perderes se trocares de aparelho.',
+          icon: 'i-heroicons-heart',
+          color: 'primary',
+        });
+      }
+
       return;
     }
 

@@ -677,6 +677,7 @@ const submitCheckout = async () => {
             <CheckoutCouponLine
               redirectTo="/checkout"
               allowCode
+              :total="totalKz"
             />
           </div>
 

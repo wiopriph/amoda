@@ -5,6 +5,7 @@ import { getProductBadgeDotClass, getProductBadgeLabel } from '~/utils/productBa
 import { makeGa4Item } from '~/utils/ga4';
 import { CURRENCY } from '~/constants/currency';
 import { colorLabel } from '#shared/constants/colors';
+import { couponLabel, type CouponSummary } from '#shared/constants/coupons';
 
 
 definePageMeta({ name: 'product-slug' });
@@ -445,6 +446,15 @@ const deliveryWhatsappHref = makeWhatsappHref(() => `Olá! Quero saber o custo e
 // Единственный пункт примерки — для блока «Entrega e levantamento»
 const mainOffice = computed(() => officesResponse.value?.items?.[0] || null);
 
+// Тихая подсказка гостю под ценой: welcome-купон ждёт после входа (ключ общий с CouponLine)
+const { user } = useAuth();
+const { data: welcomeCoupon } = await useFetch<CouponSummary | null>('/api/coupons/welcome', {
+  key: 'coupon-welcome',
+  server: false,
+  immediate: !user.value,
+  default: () => null,
+});
+
 const shareText = computed(() => productName.value ? `Vê ${productName.value} na Amoda` : 'Vê este produto na Amoda');
 
 const encodedProductUrl = computed(() => encodeURIComponent(productUrl.value));
@@ -785,8 +795,21 @@ useHead(() => ({
               />
             </div>
 
+            <NuxtLink
+              v-if="isProductAvailable && !user && welcomeCoupon"
+              :to="{ name: 'entrar', query: { redirected_from: route.fullPath } }"
+              class="mt-1.5 inline-flex items-center gap-1.5 text-xs text-muted transition hover:text-primary"
+            >
+              <UIcon
+                name="i-lucide-ticket"
+                class="size-3.5 text-primary"
+              />
+
+              <span>−{{ couponLabel(welcomeCoupon) }} no primeiro pedido com conta</span>
+            </NuxtLink>
+
             <div
-              v-else
+              v-if="!isProductAvailable"
               class="mt-4 inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-bold text-toned"
             >
               <UIcon
