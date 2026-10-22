@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui';
+import { couponLabel, type CouponSummary } from '#shared/constants/coupons';
 
 
 type NavCategory = {
@@ -35,13 +36,77 @@ const { count: favoritesCount } = useFavorites();
 
 const { user } = useAuth();
 const accountRoute = computed(() => (user.value ? { name: 'conta' } : { name: 'entrar' }));
+
+// Полоска над хедером: гостю бренд-фраза чередуется с welcome-купоном
+const { data: welcomeCoupon } = await useFetch<CouponSummary | null>('/api/coupons/welcome', {
+  key: 'coupon-welcome',
+  server: false,
+  immediate: !user.value,
+  default: () => null,
+});
+
+const BANNER_ROTATE_MS = 5000;
+const bannerIndex = ref(0);
+
+const showCouponBanner = computed(() => !user.value && Boolean(welcomeCoupon.value) && bannerIndex.value % 2 === 1);
+
+if (import.meta.client) {
+  let bannerTimer: ReturnType<typeof setInterval> | null = null;
+
+  const syncTimer = () => {
+    if (!user.value && welcomeCoupon.value && !bannerTimer) {
+      bannerTimer = setInterval(() => {
+        bannerIndex.value += 1;
+      }, BANNER_ROTATE_MS);
+    }
+
+    if ((user.value || !welcomeCoupon.value) && bannerTimer) {
+      clearInterval(bannerTimer);
+      bannerTimer = null;
+      bannerIndex.value = 0;
+    }
+  };
+
+  watch([user, welcomeCoupon], syncTimer, { immediate: true });
+
+  onUnmounted(() => {
+    if (bannerTimer) {
+      clearInterval(bannerTimer);
+    }
+  });
+}
 </script>
 
 <template>
   <div class="sticky top-0 z-50">
     <!-- h-7 is part of --app-header-offset in main.css — keep them in sync -->
-    <div class="flex h-7 items-center justify-center overflow-hidden whitespace-nowrap bg-primary px-4 text-xs font-semibold text-white">
-      Experimenta antes de pagar · Paga só o que gostar
+    <div class="relative h-7 overflow-hidden bg-primary text-xs font-semibold text-white">
+      <Transition
+        name="banner"
+        mode="out-in"
+      >
+        <NuxtLink
+          v-if="showCouponBanner"
+          key="coupon"
+          :to="{ name: 'entrar' }"
+          class="flex h-7 items-center justify-center gap-1.5 whitespace-nowrap px-4"
+        >
+          <UIcon
+            name="i-lucide-ticket"
+            class="size-3.5"
+          />
+
+          <span>−{{ couponLabel(welcomeCoupon!) }} no primeiro pedido · Entra com o teu número</span>
+        </NuxtLink>
+
+        <div
+          v-else
+          key="brand"
+          class="flex h-7 items-center justify-center whitespace-nowrap px-4"
+        >
+          Experimenta antes de pagar · Paga só o que gostar
+        </div>
+      </Transition>
     </div>
 
     <UHeader
@@ -228,3 +293,15 @@ const accountRoute = computed(() => (user.value ? { name: 'conta' } : { name: 'e
     </UHeader>
   </div>
 </template>
+
+<style scoped>
+.banner-enter-active,
+.banner-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.banner-enter-from,
+.banner-leave-to {
+  opacity: 0;
+}
+</style>
