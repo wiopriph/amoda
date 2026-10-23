@@ -1,24 +1,10 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { assertAdmin } from '~~/server/utils/assertAdmin';
 import { randomUUID } from 'node:crypto';
-import sharp from 'sharp';
-import { createError } from 'h3';
+import { assertUploadedWebp } from '~~/server/utils/uploads';
 
 
 const BUCKET = 'categories';
-const SIZE = 400;
-
-async function processCategoryImage(buffer: Buffer): Promise<Buffer> {
-  try {
-    return await sharp(buffer)
-      .rotate()
-      .resize({ width: SIZE, height: SIZE, fit: 'cover', position: 'centre' })
-      .toFormat('webp', { quality: 82 })
-      .toBuffer();
-  } catch {
-    throw createError({ statusCode: 500, statusMessage: 'Error processing image' });
-  }
-}
 
 export default defineEventHandler(async (event) => {
   await assertAdmin(event);
@@ -57,12 +43,14 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const processed = await processCategoryImage(file.data as Buffer);
+  // Квадрат 400x400 webp готовит браузер админки (prepareCategoryImage)
+  assertUploadedWebp(file, 500 * 1024);
+
   const path = `${categoryId}/${randomUUID()}.webp`;
 
   const { error: upErr } = await client
     .storage.from(BUCKET)
-    .upload(path, processed, {
+    .upload(path, file.data, {
       contentType: 'image/webp',
       cacheControl: '31536000',
       upsert: false,

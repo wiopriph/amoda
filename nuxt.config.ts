@@ -57,6 +57,12 @@ export default defineNuxtConfig({
     enabled: process.env.NODE_ENV !== 'production',
   },
 
+  // Без IPX: ресайз происходит в браузере админки при загрузке (sharp не живет на Workers),
+  // NuxtImg остается обычным <img>
+  image: {
+    provider: 'none',
+  },
+
   features: {
     inlineStyles: true,
   },
@@ -93,13 +99,6 @@ export default defineNuxtConfig({
           'X-Frame-Options': 'SAMEORIGIN',
           'Referrer-Policy': 'strict-origin-when-cross-origin',
           'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-        },
-      },
-
-      // Cache-Control для NuxtImg
-      '/_ipx/**': {
-        headers: {
-          'Cache-Control': 'public, max-age=31536000, immutable',
         },
       },
     },

@@ -2,6 +2,7 @@
 import { useAnalyticsEvent } from '~/composables/useAnalyticsEvent';
 import { formatPrice } from '~/utils/formatPrice';
 import { makeGa4Item } from '~/utils/ga4';
+import { smallImageUrl } from '~/utils/productImages';
 import { colorLabel } from '#shared/constants/colors';
 
 
@@ -203,7 +204,7 @@ watchCartCoupon();
                   class="shrink-0"
                 >
                   <NuxtImg
-                    :src="cartItem.image || '/placeholder.webp'"
+                    :src="smallImageUrl(cartItem.image) || '/placeholder.webp'"
                     :alt="cartItem.productName"
                     width="96"
                     height="120"

@@ -2,6 +2,7 @@
 import type { FavoriteProduct } from '~/composables/useFavorites';
 import { formatPrice } from '~/utils/formatPrice';
 import { getProductBadgeDotClass, getProductBadgeLabel } from '~/utils/productBadges';
+import { smallImageUrl } from '~/utils/productImages';
 
 
 // Минимум, который умеют отдавать все источники карточек:
@@ -27,7 +28,7 @@ defineEmits<{
   >
     <div class="relative aspect-[4/5] overflow-hidden bg-gray-50">
       <NuxtImg
-        :src="product.image || '/placeholder.webp'"
+        :src="smallImageUrl(product.image) || '/placeholder.webp'"
         :alt="product.title"
         loading="lazy"
         class="h-full w-full object-cover transition duration-300 group-hover:scale-105"

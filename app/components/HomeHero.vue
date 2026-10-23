@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatPrice } from '~/utils/formatPrice';
+import { smallImageUrl } from '~/utils/productImages';
 import { TIKTOK_LINK } from '~/constants/contacts';
 import type { CatalogProductCard } from '#shared/types/catalog';
 
@@ -137,7 +138,7 @@ function onFanCardClick(slotIndex: number, event: MouseEvent) {
         >
           <div class="relative aspect-[4/5] overflow-hidden bg-gray-50">
             <img
-              :src="fanSlot.product.image || '/placeholder.webp'"
+              :src="smallImageUrl(fanSlot.product.image) || '/placeholder.webp'"
               :alt="fanSlot.product.title"
               fetchpriority="high"
               class="h-full w-full object-cover"

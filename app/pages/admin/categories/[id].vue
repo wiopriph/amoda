@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { prepareCategoryImage } from '~/utils/clientImage';
+
+
 definePageMeta({
   name: 'admin-categories-edit',
   layout: 'admin',
@@ -128,10 +131,13 @@ const uploadImage = async (clearFiles?: () => void) => {
   isUploadingImage.value = true;
 
   try {
+    // Квадрат 400x400 webp жмётся в браузере, сервер принимает только готовый файл
+    const squareImage = await prepareCategoryImage(file);
+
     const formData = new FormData();
 
     formData.append('category_id', String(category.value.id));
-    formData.append('file', file);
+    formData.append('file', squareImage, 'category.webp');
 
     await $fetch('/api/admin/categories/upload', { method: 'POST', body: formData });
 

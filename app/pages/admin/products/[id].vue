@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProductBadge } from '~/utils/productBadges';
 import { formatPrice } from '~/utils/formatPrice';
+import { prepareProductImage } from '~/utils/clientImage';
 
 
 definePageMeta({
@@ -308,8 +309,12 @@ const uploadPendingImagesForVariant = async (variantId: number, clearFiles?: () 
     uploadForm.append('product_id', String(product.value.id));
     uploadForm.append('variant_id', String(variantId));
 
+    // Сжатие в браузере: мастер + превью на каждое фото, сервер принимает только готовый webp
     for (const imageFile of imageFiles) {
-      uploadForm.append('files', imageFile);
+      const { full, small } = await prepareProductImage(imageFile);
+
+      uploadForm.append('files', full, 'image_m.webp');
+      uploadForm.append('smalls', small, 'image_s.webp');
     }
 
     await $fetch('/api/admin/products/upload', {

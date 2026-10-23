@@ -2,7 +2,7 @@
 import { serverSupabaseServiceRole } from '#supabase/server';
 import { assertAdmin } from '~~/server/utils/assertAdmin';
 import { randomUUID } from 'node:crypto';
-import { processImageBuffer } from '~~/server/utils/images';
+import { assertUploadedWebp } from '~~/server/utils/uploads';
 
 
 export default defineEventHandler(async (event) => {
@@ -17,38 +17,58 @@ export default defineEventHandler(async (event) => {
 
   const variantIdRaw = form.find(p => p.name === 'variant_id')?.data?.toString();
   const variantId = Number(variantIdRaw);
+
+  // Ресайз и конвертация в webp происходят в браузере админки (app/utils/clientImage.ts):
+  // files — мастера для галереи, smalls — превью 480px для карточек, попарно по индексу
   const files = form.filter(p => p.name === 'files' && p.filename);
+  const smalls = form.filter(p => p.name === 'smalls' && p.filename);
 
   if (!variantId || !Number.isFinite(variantId) || !files.length) {
     throw createError({ statusCode: 400, statusMessage: 'Missing fields or files' });
   }
 
+  if (smalls.length !== files.length) {
+    throw createError({ statusCode: 400, statusMessage: 'Each image needs a small preview' });
+  }
+
   const uploaded: string[] = [];
 
-  for (const f of files) {
-    if (!f.data) continue;
+  for (const [index, file] of files.entries()) {
+    const small = smalls[index];
 
-    const processed = await processImageBuffer(f.data as Buffer, {
-      width: 1920,
-      height: 1080,
-    });
+    assertUploadedWebp(file, 3 * 1024 * 1024);
+    assertUploadedWebp(small, 800 * 1024);
 
-    const fileName = `${randomUUID()}.webp`;
-    const path = `products/${variantId}/${fileName}`;
+    const base = randomUUID();
+    const fullPath = `products/${variantId}/${base}_m.webp`;
+    const smallPath = `products/${variantId}/${base}_s.webp`;
 
-    const { error: upErr } = await client
+    const { error: fullErr } = await client
       .storage.from('products')
-      .upload(path, processed, {
+      .upload(fullPath, file.data, {
         contentType: 'image/webp',
         cacheControl: '31536000',
         upsert: false,
       });
 
-    if (upErr) {
-      throw createError({ statusCode: 500, statusMessage: upErr.message });
+    if (fullErr) {
+      throw createError({ statusCode: 500, statusMessage: fullErr.message });
     }
 
-    const { data: pub } = client.storage.from('products').getPublicUrl(path);
+    const { error: smallErr } = await client
+      .storage.from('products')
+      .upload(smallPath, small.data, {
+        contentType: 'image/webp',
+        cacheControl: '31536000',
+        upsert: false,
+      });
+
+    if (smallErr) {
+      await client.storage.from('products').remove([fullPath]);
+      throw createError({ statusCode: 500, statusMessage: smallErr.message });
+    }
+
+    const { data: pub } = client.storage.from('products').getPublicUrl(fullPath);
 
     uploaded.push(pub.publicUrl);
   }
