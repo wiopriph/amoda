@@ -12,8 +12,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "build:cf": "NODE_OPTIONS=--max-old-space-size=4096 NITRO_PRESET=cloudflare_module nuxt build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@nuxt/content": "3.16.2",

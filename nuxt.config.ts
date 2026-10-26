@@ -92,13 +92,14 @@ export default defineNuxtConfig({
     '~/components',
   ],
 
-  // Без sourcemap сервера: с ними сборка Nitro не помещалась в 2 ГБ кучи на Render (heap out of memory)
   sourcemap: {
     server: false,
     client: false,
   },
 
   nitro: {
+    preset: 'cloudflare_module',
+
     routeRules: {
       '/**': {
         headers: {
