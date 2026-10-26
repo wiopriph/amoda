@@ -57,6 +57,14 @@ export default defineNuxtConfig({
     enabled: process.env.NODE_ENV !== 'production',
   },
 
+  // Блог: локально и на node Content работает со встроенным node:sqlite (без better-sqlite3);
+  // при сборке под Cloudflare модуль сам переключает базу на D1 с биндингом DB
+  content: {
+    experimental: {
+      nativeSqlite: true,
+    },
+  },
+
   // Без IPX: ресайз происходит в браузере админки при загрузке (sharp не живет на Workers),
   // NuxtImg остается обычным <img>
   image: {

@@ -1,0 +1,33 @@
+{
+  // Воркер amoda: nitro-сборка cloudflare_module (npm run build:cf)
+  "name": "amoda",
+  "main": ".output/server/index.mjs",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "assets": {
+    "directory": ".output/public",
+    "binding": "ASSETS"
+  },
+
+  // База блога (@nuxt/content). database_id появится после: npx wrangler d1 create amoda-content
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "amoda-content",
+      "database_id": "REPLACE_AFTER_D1_CREATE"
+    }
+  ],
+
+  "observability": {
+    "enabled": true
+  }
+
+  // Секреты (не хранятся в этом файле, задаются один раз):
+  //   npx wrangler secret put SUPABASE_KEY
+  //   npx wrangler secret put NUXT_SUPABASE_SECRET_KEY
+  //   npx wrangler secret put SUPABASE_SMS_HOOK_SECRET
+  //   npx wrangler secret put TELEGRAM_BOT_TOKEN
+  //   npx wrangler secret put MOYSKLAD_TOKEN
+  //   ... остальное из .env по списку
+}
