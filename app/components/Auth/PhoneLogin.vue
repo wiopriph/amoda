@@ -82,7 +82,13 @@ const requestCode = async () => {
   }
 };
 
+const isVerifying = ref(false);
+
 const confirmCode = async () => {
+  if (isVerifying.value) {
+    return;
+  }
+
   codeError.value = null;
 
   const token = code.value.replace(/\D/g, '');
@@ -93,18 +99,18 @@ const confirmCode = async () => {
     return;
   }
 
-  const signedInUser = await verifyPhoneOtp(phone.value, token);
+  isVerifying.value = true;
 
-  if (signedInUser) {
-    emit('success', signedInUser);
+  try {
+    const signedInUser = await verifyPhoneOtp(phone.value, token);
+
+    if (signedInUser) {
+      emit('success', signedInUser);
+    }
+  } finally {
+    isVerifying.value = false;
   }
 };
-
-watch(code, (value) => {
-  if (value.replace(/\D/g, '').length === 6 && !isLoading.value) {
-    confirmCode();
-  }
-});
 
 const changePhone = () => {
   step.value = 'phone';
