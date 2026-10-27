@@ -52,7 +52,7 @@ const openViewer = (index: number) => {
       Prints do nosso WhatsApp, partilhados com autorização das clientes. É assim que funciona no dia a dia.
     </p>
 
-    <div class="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:gap-4 sm:px-0 [&::-webkit-scrollbar]:hidden">
+    <div class="-mx-2 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:gap-4 sm:px-0 [&::-webkit-scrollbar]:hidden">
       <figure
         v-for="(proof, proofIndex) in proofs"
         :key="proof.image"
