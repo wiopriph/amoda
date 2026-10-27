@@ -12,6 +12,11 @@ const { turnstileSiteKey } = useRuntimeConfig().public;
 const route = useRoute();
 const toast = useToast();
 
+// Уже вошедший админ с redirected_from сразу уходит по адресу, ради которого пришел
+if (user.value && isAdmin.value && route.query.redirected_from) {
+  await navigateTo(route.query.redirected_from as string);
+}
+
 const form = reactive({ email: '', password: '' });
 const linkEmail = ref('');
 

@@ -46,9 +46,21 @@ export const useAuth = () => {
     }
   };
 
+  // Стейт пользователя заполняет слушатель модуля с задержкой; после входа ставим его сразу,
+  // иначе navigateTo запускает middleware раньше и тот отбрасывает «гостя» назад на страницу входа
+  const syncUserState = async () => {
+    const { data } = await supabase.auth.getClaims();
+
+    supaUser.value = (data?.claims as any) ?? null;
+  };
+
   // Админ: e-mail + пароль или магическая ссылка на /auth (ссылок на страницу с сайта нет)
   const signIn = async ({ email, password }: { email: string; password: string }, captchaToken?: string) => {
     const data = await run(() => supabase.auth.signInWithPassword({ email, password, options: { captchaToken } }));
+
+    if (data?.user) {
+      await syncUserState();
+    }
 
     return data?.user ?? null;
   };
@@ -80,6 +92,10 @@ export const useAuth = () => {
 
   const verifyPhoneOtp = async (phone: string, token: string) => {
     const data = await run(() => supabase.auth.verifyOtp({ phone, token, type: 'sms' }));
+
+    if (data?.user) {
+      await syncUserState();
+    }
 
     return data?.user ?? null;
   };
