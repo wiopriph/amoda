@@ -1,4 +1,5 @@
-import { onNuxtReady, useHead, useRuntimeConfig } from '#imports';
+import { useHead, useRuntimeConfig } from '#imports';
+import { deferThirdParty } from '~/utils/deferThirdParty';
 
 
 interface PublicConfig {
@@ -19,36 +20,34 @@ export default defineNuxtPlugin(() => {
     return;
   }
 
-  const gtmScript = `
-    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','${gtmId}');
-  `;
+  // dataLayer создаётся сразу: события до загрузки gtm.js копятся в очереди и
+  // обрабатываются контейнером при старте
+  const w = window as Window & { dataLayer?: unknown[] };
 
-  const gtmNoscript = `
-    <iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe>
-  `;
+  w.dataLayer = w.dataLayer || [];
 
-  onNuxtReady(() => {
-    useHead({
-      script: [
-        {
-          id: 'gtm-script',
-          innerHTML: gtmScript,
-          async: true,
-          tagPosition: 'head',
-        },
-      ],
-      noscript: [
-        {
-          id: 'gtm-noscript',
-          innerHTML: gtmNoscript,
-          tagPosition: 'bodyOpen',
-        },
-      ],
-    });
+  useHead({
+    noscript: [
+      {
+        id: 'gtm-noscript',
+        innerHTML: `<iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
+        tagPosition: 'bodyOpen',
+      },
+    ],
+  });
+
+  deferThirdParty(() => {
+    if (document.getElementById('gtm-script')) {
+      return;
+    }
+
+    w.dataLayer!.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+
+    const script = document.createElement('script');
+
+    script.id = 'gtm-script';
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(gtmId)}`;
+    document.head.appendChild(script);
   });
 });

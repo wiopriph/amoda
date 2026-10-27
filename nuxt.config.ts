@@ -204,6 +204,17 @@ export default defineNuxtConfig({
 
   ui: {
     colorMode: false,
+
+    theme: {
+      // secondary нигде не используется: без него Tailwind не генерирует его варианты
+      colors: ['primary', 'success', 'info', 'warning', 'error'],
+    },
+
+    experimental: {
+      // CSS только для компонентов, которые есть в коде (иначе в HTML инлайнится ~260 КБ стилей
+      // всех компонентов Nuxt UI, включая editor, chart, dashboard)
+      componentDetection: true,
+    },
   },
 
   vite: {

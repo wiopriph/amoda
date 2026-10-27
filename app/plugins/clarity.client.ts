@@ -1,3 +1,6 @@
+import { deferThirdParty } from '~/utils/deferThirdParty';
+
+
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
   const clarityId = config.public.clarityId;
@@ -6,20 +9,22 @@ export default defineNuxtPlugin(() => {
     return;
   }
 
-  if (document.getElementById('ms-clarity')) {
-    return;
-  }
+  deferThirdParty(() => {
+    if (document.getElementById('ms-clarity')) {
+      return;
+    }
 
-  (function(c: any, l: any, a: any, r: any, i: any, t?: any, y?: any) {
-    c[a] = c[a] || function() {
-      (c[a].q = c[a].q || []).push(arguments);
-    };
+    (function(c: any, l: any, a: any, r: any, i: any, t?: any, y?: any) {
+      c[a] = c[a] || function() {
+        (c[a].q = c[a].q || []).push(arguments);
+      };
 
-    t = l.createElement(r);
-    t.async = 1;
-    t.src = `https://www.clarity.ms/tag/${i}`;
-    t.id = 'ms-clarity';
-    y = l.getElementsByTagName(r)[0];
-    y.parentNode.insertBefore(t, y);
-  })(window, document, 'clarity', 'script', clarityId);
+      t = l.createElement(r);
+      t.async = 1;
+      t.src = `https://www.clarity.ms/tag/${i}`;
+      t.id = 'ms-clarity';
+      y = l.getElementsByTagName(r)[0];
+      y.parentNode.insertBefore(t, y);
+    })(window, document, 'clarity', 'script', clarityId);
+  });
 });

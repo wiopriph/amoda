@@ -198,9 +198,11 @@ if (import.meta.client) {
 
           <NuxtLink
             :to="{ name: 'index' }"
+            aria-label="Amoda - página inicial"
             class="font-montserrat text-[22px] font-black tracking-tight text-highlighted transition hover:opacity-70"
           >
             <svg
+              aria-hidden="true"
               class="h-6 sm:h-7 w-auto fill-current"
               width="1816"
               height="454"
