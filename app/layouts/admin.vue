@@ -44,6 +44,11 @@ const closeMenu = () => {
 };
 
 const { signOut } = useAuth();
+
+const logout = async () => {
+  await signOut();
+  await navigateTo({ name: 'auth' });
+};
 </script>
 
 <template>
@@ -137,7 +142,7 @@ const { signOut } = useAuth();
         <UButton
           variant="ghost"
           class="flex items-center gap-2"
-          @click="signOut"
+          @click="logout"
         >
           <UIcon
             name="i-lucide-log-out"

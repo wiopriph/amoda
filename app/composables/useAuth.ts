@@ -102,6 +102,9 @@ export const useAuth = () => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+
+    // Зеркально входу: не ждем слушателя модуля, иначе интерфейс еще миг «залогинен»
+    supaUser.value = null;
   };
 
   // После входа — в кабинет
