@@ -4,7 +4,7 @@ description: "Como planear o orçamento para um vestido em Luanda: valores de re
 cluster: "D"
 targetQuery: "quanto custa um vestido em luanda"
 publishedAt: 2026-09-18
-updatedAt: 2026-10-27
+updatedAt: 2026-10-28
 author: manuel
 cover: "/blog-assets/quanto-custa-um-vestido-em-luanda-2026/cover.webp"
 categories:
@@ -19,14 +19,15 @@ faq:
     a: "Varia de peça para peça. Compare mercados, lojas e opções online pedindo o preço de peças equivalentes, e inclua nas contas a deslocação, a possibilidade de provar e as condições de troca."
   - q: "Posso experimentar o vestido antes de pagar?"
     a: "Na Amoda sim: envia o pedido no site, escolhe a prova no showroom em Luanda ou a entrega ao domicílio, experimenta e paga apenas as peças que decidir levar — em dinheiro, por transferência ou TPA."
-draft: true
+draft: false
 ---
 
 Quanto custa um vestido em Luanda? A resposta honesta: depende do tipo de vestido, do tecido e do canal onde compra. Como referência, no catálogo da [Amoda](/) os vestidos ficam, em geral, entre 10 e 35 mil kz. Nos mercados, nas lojas e no Instagram, o preço só se confirma pedindo cotação, porque varia de vendedor para vendedor e de peça para peça.
 
 Neste guia propomos um orçamento de procura por tipo de vestido, comparamos os canais de compra, explicamos o que faz o preço variar e mostramos como aproveitar um orçamento de 30 mil kz.
 
-<!-- TODO parceiro: foto de abertura — vestidos no showroom com etiquetas de preço visíveis -->
+::article-image{src="/blog-assets/quanto-custa-um-vestido-em-luanda-2026/01-showroom-amoda.webp" alt="Showroom da Amoda em Luanda com vestidos em cabides e manequins" caption="No showroom da Amoda vê o tecido e o acabamento antes de decidir - e o preço está sempre na página de cada peça."}
+::
 
 ## Orçamento de procura por tipo de vestido
 
@@ -64,8 +65,6 @@ Por isso, duas peças parecidas podem ter preços muito diferentes. Antes de pag
 Com 30 mil kz dá para fazer boa figura, se comprar com método. Um exemplo de planeamento: em vez de uma única peça cara, procurar um vestido casual para o dia a dia e um segundo vestido que sirva para sair, repartindo o orçamento entre os dois.
 
 Duas regras ajudam. Evite pagar adiantado sem condições de troca claras: se o tamanho vier errado, o orçamento foi-se. E dê prioridade ao caimento sobre a marca: um vestido que assenta bem vale mais do que um caro que fica largo nos ombros.
-
-<!-- TODO parceiro: foto — dois vestidos do catálogo lado a lado (casual + para sair) que juntos caibam em cerca de 30 mil kz -->
 
 Veja o que há disponível dentro do seu orçamento:
 
