@@ -4,7 +4,7 @@ description: "Como planear o orçamento para um vestido em Luanda: valores de re
 cluster: "D"
 targetQuery: "quanto custa um vestido em luanda"
 publishedAt: 2026-09-18
-updatedAt: 2026-10-28
+updatedAt: 2026-11-04
 author: manuel
 cover: "/blog-assets/quanto-custa-um-vestido-em-luanda-2026/cover.webp"
 categories:
