@@ -4,7 +4,7 @@ description: "6 ideias de look para as festas de fim de ano em Luanda — empres
 cluster: "B"
 targetQuery: "roupa festa fim de ano"
 publishedAt: 2026-09-18
-updatedAt: 2026-10-28
+updatedAt: 2026-11-11
 author: manuel
 cover: "/blog-assets/look-festa-fim-de-ano/cover.webp"
 categories:
@@ -20,7 +20,7 @@ faq:
     a: "O preço depende da loja, do tecido e do modelo. Este guia propõe orçamentos de procura entre 12 000 e 60 000 kz; no catálogo da Amoda, os vestidos ficam, em geral, entre 10 e 35 mil kz."
   - q: "E se o vestido chegar e não servir?"
     a: "Na Amoda experimenta antes de pagar: envia o pedido no site, a equipa confirma os detalhes pelo WhatsApp, prova na entrega ou no showroom e paga apenas o que decidir levar. Em dezembro, isso evita sustos de última hora."
-draft: true
+draft: false
 ---
 
 Dezembro em Luanda é uma maratona: jantar da empresa, almoço de família, festas de amigos e o réveillon a fechar. A pergunta «o que vestir?» multiplica-se — e a resposta directa é: **brilho na medida certa para cada festa**. Paetês da cabeça aos pés no jantar da empresa é exagero; um vestido básico de todos os dias no réveillon é desperdiçar a ocasião.
